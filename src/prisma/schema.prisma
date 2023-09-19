@@ -1,0 +1,509 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// generator zod {
+//   provider = "prisma-zod-generator"
+// }
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Config {
+  id           Int    @id @default(autoincrement())
+  name         String
+  logo         String @default("")
+  phone_number String @default("")
+  email        String @default("")
+
+  password String
+  username String
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  first_name   String
+  last_name    String
+  password     String   @default("")
+  phone_number String   @unique
+  gender       Gender
+  address1     String   @default("")
+  address2     String   @default("")
+  country      String   @default("")
+  email        String   @default("")
+  status       Status   @default(Enable)
+  username     String   @unique
+  path         String[]
+  auth         Auth[]
+  brokers      Broker[]
+  traders      Trader[]
+
+  invoices Invoice[]
+  logs     Log[]
+
+  payments             Payment[]
+  employees            Employee[]
+  accounts             Account[]
+  currencies           Currency[]
+  entries_level        Entry[]
+  levels_1             Two_Digit[]
+  levels_2             Three_Digit[]
+  more_than_four_digit More_Than_Four_Digit[]
+  clients_level        Account_Entry[]
+  create_date          DateTime               @default(now())
+  modified_date        DateTime               @default(now()) @updatedAt
+  type                 UserType               @default(User)
+  permissions          UserPermission[]
+  sub_categories       SubCategory[]
+  categories           Category[]
+}
+
+model Employee {
+  id            Int       @id @default(autoincrement())
+  first_name    String
+  last_name     String
+  phone_number  String    @unique
+  gender        Gender
+  address1      String    @default("")
+  address2      String    @default("")
+  country       String    @default("")
+  email         String    @default("")
+  status        Status    @default(Enable)
+  create_date   DateTime  @default(now())
+  modified_date DateTime  @default(now()) @updatedAt
+  username      String    @unique
+  invoices      Invoice[]
+  user_id       Int
+  user          User      @relation(fields: [user_id], references: [id])
+}
+
+model Trader {
+  id            Int       @id @default(autoincrement())
+  first_name    String
+  last_name     String
+  phone_number  String    @unique
+  gender        Gender
+  address1      String    @default("")
+  address2      String    @default("")
+  country       String    @default("")
+  email         String    @default("")
+  broker_id     Int?
+  user_id       Int?
+  status        Status    @default(Enable)
+  create_date   DateTime  @default(now())
+  modified_date DateTime  @default(now()) @updatedAt
+  username      String    @unique
+  accounts      Account[]
+  broker        Broker?   @relation(fields: [broker_id], references: [id])
+  user          User?     @relation(fields: [user_id], references: [id])
+  invoices      Invoice[]
+}
+
+model Broker {
+  id            Int       @id
+  first_name    String
+  last_name     String
+  phone_number  String    @unique
+  gender        Gender
+  address1      String    @default("")
+  address2      String    @default("")
+  country       String    @default("")
+  email         String    @default("")
+  user_id       Int?
+  status        Status    @default(Enable)
+  create_date   DateTime  @default(now())
+  modified_date DateTime  @default(now()) @updatedAt
+  username      String    @unique
+  user          User?     @relation(fields: [user_id], references: [id])
+  traders       Trader[]
+  invoices      Invoice[]
+}
+
+model Log {
+  id          Int      @id @default(autoincrement())
+  create_date DateTime @default(now())
+  page        String
+  body        String?
+  query       String?
+  user_id     Int
+  user        User     @relation(fields: [user_id], references: [id])
+}
+
+model Auth {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  token       String   @unique()
+  user        User     @relation(fields: [user_id], references: [id])
+  status      Status
+  create_date DateTime @default(now())
+}
+
+model Account {
+  id            Int       @id
+  create_date   DateTime  @default(now())
+  modified_date DateTime  @default(now()) @updatedAt
+  username      String    @unique()
+  currency_id   Int
+  trader_id     Int?
+  status        Status    @default(Enable)
+  user_id       Int?
+  user          User?     @relation(fields: [user_id], references: [id])
+  trader        Trader?   @relation(fields: [trader_id], references: [id])
+  currency      Currency  @relation(fields: [currency_id], references: [id])
+  invoices      Invoice[]
+}
+
+model Invoice {
+  id              Int         @id @default(autoincrement())
+  title           String
+  description     String      @default("")
+  note            String      @default("")
+  create_date     DateTime    @default(now())
+  modified_date   DateTime    @default(now()) @updatedAt
+  amount          Float
+  discount        Float       @default(0)
+  account_id      Int?
+  user_id         Int
+  trader_id       Int?
+  client_id       Int?
+  employee_id     Int?
+  broker_id       Int?
+  currency_id     Int?
+  status          Status      @default(Enable)
+  sub_category_id Int
+  currency        Currency?   @relation(fields: [currency_id], references: [id])
+  account         Account?    @relation(fields: [account_id], references: [id])
+  broker          Broker?     @relation(fields: [broker_id], references: [id])
+  trader          Trader?     @relation(fields: [trader_id], references: [id])
+  employee        Employee?   @relation(fields: [employee_id], references: [id])
+  payments        Payment[]
+  user            User        @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  media           Media?
+  debit_credit    Boolean
+  sub_category    SubCategory @relation(fields: [sub_category_id], references: [id])
+}
+
+model Payment {
+  id            Int         @id @default(autoincrement())
+  amount        Float
+  status        Status
+  create_date   DateTime    @default(now())
+  modified_date DateTime    @default(now()) @updatedAt
+  description   String      @default("")
+  note          String      @default("")
+  user_id       Int?
+  title         String
+  type          PaymentType
+  number_id     String      @default("")
+  completed     Boolean     @default(false)
+  user          User?       @relation(fields: [user_id], references: [id])
+  media         Media?
+  invoice       Invoice     @relation(fields: [invoice_id], references: [id])
+  invoice_id    Int
+}
+
+model Media {
+  id            Int       @id @default(autoincrement())
+  title         String
+  description   String?   @default("")
+  create_date   DateTime  @default(now())
+  modified_date DateTime  @default(now()) @updatedAt
+  type          MediaType
+  path          String
+  status        Status    @default(Enable)
+  invoice_id    Int?      @unique()
+  payment_id    Int?      @unique()
+  entry_id      Int?      @unique()
+
+  invoice Invoice? @relation(fields: [invoice_id], references: [id])
+  entry   Entry?   @relation(fields: [entry_id], references: [id], onDelete: Cascade)
+
+  payment Payment? @relation(fields: [payment_id], references: [id])
+}
+
+model Currency {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  symbol   String    @unique
+  accounts Account[]
+  invoices Invoice[]
+
+  Entries       Entry[]
+  create_date   DateTime @default(now())
+  modified_date DateTime @default(now()) @updatedAt
+  user_id       Int
+  user          User     @relation(fields: [user_id], references: [id])
+}
+
+model Category {
+  id             Int           @id @default(autoincrement())
+  name           String        @unique
+  sub_categories SubCategory[]
+  create_date    DateTime      @default(now())
+  modified_date  DateTime      @default(now())
+  user_id        Int
+
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model SubCategory {
+  id            Int       @id @default(autoincrement())
+  name          String
+  category_id   Int
+  invoices      Invoice[]
+  category      Category  @relation(fields: [category_id], references: [id])
+  create_date   DateTime  @default(now())
+  modified_date DateTime  @default(now())
+  user_id       Int
+
+  user User @relation(fields: [user_id], references: [id])
+}
+
+enum SubCategoryType {
+  Credit
+  Debit
+  None
+}
+
+enum Gender {
+  Male
+  Female
+}
+
+enum MediaType {
+  Image
+  Pdf
+}
+
+enum Status {
+  Enable
+  Disable
+  Pending
+  Accepted
+  Rejected
+  Deleted
+}
+
+enum PaymentType {
+  Cash
+  Check
+  Other
+}
+
+enum UserType {
+  Admin
+  User
+}
+
+enum DebitCreditType {
+  Credit
+  Debit
+}
+
+enum DidgitType {
+  Assets
+  Liabilities
+  Owner_Equity
+  Expensive
+  Income
+  Trial_Balance
+  Balance_Sheet
+  Income_Statement
+}
+
+model Two_Digit {
+  id              Int             @id @unique
+  name            String          @unique
+  create_date     DateTime        @default(now())
+  modified_date   DateTime        @default(now()) @updatedAt
+  three_digit     Three_Digit[]
+  status          Status          @default(Enable)
+  user_id         Int?
+  user            User?           @relation(fields: [user_id], references: [id])
+  account_entries Account_Entry[]
+  sub_entries     SubEntry[]
+
+  type         DidgitType?
+  debit_credit DebitCreditType?
+}
+
+model Three_Digit {
+  id                   Int                    @id @unique @default(autoincrement())
+  name                 String                 @unique
+  create_date          DateTime               @default(now())
+  modified_date        DateTime               @default(now()) @updatedAt
+  more_than_four_digit More_Than_Four_Digit[]
+  account_entries      Account_Entry[]
+
+  two_digit_id Int
+  two_digit    Two_Digit       @relation(fields: [two_digit_id], references: [id])
+  status       Status          @default(Enable)
+  type         DidgitType
+  debit_credit DebitCreditType @default(Debit)
+
+  sub_entries SubEntry[]
+  user_id     Int?
+  user        User?      @relation(fields: [user_id], references: [id])
+}
+
+model More_Than_Four_Digit {
+  id Int @id @unique
+
+  name            String          @unique
+  create_date     DateTime        @default(now())
+  modified_date   DateTime        @default(now()) @updatedAt
+  account_entries Account_Entry[]
+  three_digit_id  Int
+  three_digit     Three_Digit     @relation(fields: [three_digit_id], references: [id])
+  status          Status          @default(Enable)
+  type            DidgitType
+  debit_credit    DebitCreditType @default(Debit)
+  sub_entries     SubEntry[]
+  user_id         Int?
+
+  user User? @relation(fields: [user_id], references: [id])
+}
+
+model Account_Entry {
+  id                      Int                   @id @unique
+  username                String                @unique
+  first_name              String
+  last_name               String
+  phone_number            String                @default("")
+  gender                  Gender
+  address1                String                @default("")
+  address2                String                @default("")
+  country                 String                @default("")
+  email                   String                @default("")
+  status                  Status                @default(Enable)
+  create_date             DateTime              @default(now())
+  modified_date           DateTime              @default(now()) @updatedAt
+  two_digit_id            Int?
+  two_digit               Two_Digit?            @relation(fields: [two_digit_id], references: [id])
+  three_digit_id          Int?
+  three_digit             Three_Digit?          @relation(fields: [three_digit_id], references: [id])
+  more_than_four_digit_id Int?
+  more_than_four_digit    More_Than_Four_Digit? @relation(fields: [more_than_four_digit_id], references: [id])
+  sub_entries             SubEntry[]
+  user_id                 Int?
+  user                    User?                 @relation(fields: [user_id], references: [id])
+  ref_entries             SubEntry[]            @relation("reference")
+}
+
+model Entry {
+  id            Int        @id @unique @default(autoincrement())
+  title         String
+  description   String
+  note          String     @default("")
+  create_date   DateTime   @default(now())
+  modified_date DateTime   @default(now()) @updatedAt
+  to_date       DateTime   @default(now())
+  status        Status     @default(Enable)
+  sub_entries   SubEntry[]
+  media         Media?
+  currency_id   Int
+  currency      Currency   @relation(fields: [currency_id], references: [id])
+  user_id       Int?
+  user          User?      @relation(fields: [user_id], references: [id])
+}
+
+model SubEntry {
+  id                      Int                   @id @default(autoincrement())
+  status                  Status                @default(Enable)
+  amount                  Float
+  account_entry_id        Int?
+  account_entry           Account_Entry?        @relation(fields: [account_entry_id], references: [id])
+  two_digit_id            Int?
+  two_digit               Two_Digit?            @relation(fields: [two_digit_id], references: [id])
+  three_digit_id          Int?
+  three_digit             Three_Digit?          @relation(fields: [three_digit_id], references: [id])
+  more_than_four_digit_id Int?
+  more_than_four_digit    More_Than_Four_Digit? @relation(fields: [more_than_four_digit_id], references: [id])
+  reference               Account_Entry?        @relation("reference", fields: [reference_id], references: [id])
+  reference_id            Int?
+  type                    EntryType             @default(Debit)
+  entry_id                Int
+  entry                   Entry                 @relation(fields: [entry_id], references: [id], onDelete: Cascade)
+}
+
+enum EntryType {
+  Debit
+  Credit
+}
+
+enum UserPermission {
+  Add_AccountEntry
+  Edit_AccountEntry
+  Delete_AccountEntry
+  View_AccountEntry
+  View_AccountEntries
+  Add_Two_Digit
+  View_Export_Entry
+  Edit_Two_Digit
+  Delete_Two_Digit
+  View_Three_Digit
+  View_Threes_Digit
+  View_Twos_Digit
+  View_More_Than_Fours_Digit
+  View_Two_Digit
+  Edit_Three_Digit
+  Delete_Three_Digit
+  Add_More_Than_Four_Digit
+  View_More_Than_Four_Digit
+  View_Levels_Digit
+  Edit_More_Than_Four_Digit
+  Delete_More_Than_Four_Digit
+  Add_Three_Digit
+  Add_Entry
+  Edit_Entry
+  Delete_Entry
+  View_Entry
+  View_Entries
+  Accounting
+  AccountingLevel
+  Trading
+  AccountEntry
+  Setting
+  View_Invoice
+  Edit_Invoice
+  Delete_Invoice
+  Add_Invoice
+  View_Invoices
+  View_Payment
+  Edit_Payment
+  Delete_Payment
+  Add_Payment
+  View_Payments
+  View_Profile
+  Edit_Profile
+  View_Users
+  View_User
+  Edit_User
+  Delete_User
+  Add_User
+  Add_Currency
+  Delete_Currency
+  Edit_Currency
+  View_Currency
+  View_Currencies
+  View_Trader
+  View_Traders
+  Edit_Trader
+  Delete_Trader
+  Add_Trader
+  View_Account
+  View_Accounts
+  Edit_Account
+  Delete_Account
+  Add_Account
+  View_Broker
+  View_Brokers
+  Edit_Broker
+  Delete_Broker
+  Add_Broker
+  View_Medias
+  Delete_Media
+  View_Log
+}
