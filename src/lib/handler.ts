@@ -21,7 +21,7 @@ export async function handlerServiceAction<T>(
     }>
   ) => Promise<T>,
   key: $Enums.UserPermission | "None",
-  pageUrl?: string
+  update?: boolean
 ) {
   const urlHeader = headers().get("url");
 
@@ -33,17 +33,19 @@ export async function handlerServiceAction<T>(
     var result = await action();
   } else {
     const auth = await checkUserPermissions(key);
+    const url = new URL(urlHeader);
+    const splitUrl = url.pathname.split("/");
+
     if (auth.status === HttpStatusCode.OK) {
       try {
         var result = await action(auth.user!);
 
-        if (pageUrl) {
-          revalidatePath(`/admin/${key}`);
-          revalidatePath(`/admin/${key}/[${key}_id]`);
-        } else {
-          revalidatePath(`/admin/${key}`);
+        if (update) {
+          const paths = generatePaths(url.pathname);
+          paths.forEach((e) =>
+            e === "/admin" ? undefined : revalidatePath(e)
+          );
         }
-
         return {
           status: HttpStatusCode.OK,
           result,
@@ -77,4 +79,18 @@ export async function handlerServiceAction<T>(
       }
     }
   }
+}
+
+function generatePaths(inputPath: string) {
+  const paths = inputPath.split("/").filter(Boolean);
+  const result = [];
+
+  let currentPath = "";
+
+  for (const path of paths) {
+    currentPath += "/" + path;
+    result.push(currentPath);
+  }
+
+  return result;
 }

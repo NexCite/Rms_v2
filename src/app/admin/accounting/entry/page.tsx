@@ -4,7 +4,7 @@ import { $Enums, Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
 import { writeFileSync } from "fs";
 import Loading from "@rms/components/ui/loading";
-import EntryDataTable from "@rms/components/table/entry-table";
+import EntryDataTable from "@rms/widgets/table/entry-table";
 export default async function Entry(props: {
   params: {};
   searchParams: {

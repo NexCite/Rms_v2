@@ -13,20 +13,15 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { CalendarIcon, ChevronDown, Loader2 } from "lucide-react";
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 
 import { Button } from "@rms/components/ui/button";
-import { Checkbox } from "@rms/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@rms/components/ui/dropdown-menu";
-import { Input } from "@rms/components/ui/input";
 import {
   Table,
   TableBody,
@@ -38,26 +33,23 @@ import {
 import { $Enums, Prisma } from "@prisma/client";
 import { FormatNumberWithFixed } from "@rms/lib/global";
 
-import { Calendar } from "../ui/calendar";
-import { format } from "date-fns";
 import { usePathname, useRouter } from "next/navigation";
 import styled from "styled-components";
-import { Check, ChevronsUpDown } from "lucide-react";
 
-import { cn } from "@rms/lib/utils";
+import SearchSelect from "../../components/ui/search-select";
+import DatePicker from "../../components/ui/date-picker";
+import Link from "next/link";
+import { DateRange } from "react-day-picker";
+import DateRangePicker from "@rms/components/ui/date-range-pciker";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@rms/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@rms/components/ui/popover";
-import SearchSelect from "../search-select";
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@rms/components/ui/dropdown-menu";
+import { deleteEntry } from "@rms/service/entry-service";
+import useAlertHook from "@rms/hooks/alert-hooks";
+import { Loader2 } from "lucide-react";
 
 type CommonEntryType = Prisma.EntryGetPayload<{
   include: {
@@ -110,14 +102,8 @@ type Props = {
 };
 
 export default function EntryDataTable(props: Props) {
-  const [open, setOpen] = React.useState({
-    two: false,
-    there: false,
-    more: false,
-    user: false,
-  });
-
   const [isPadding, setTransition] = useTransition();
+  const [isActive, setActiveTransition] = useTransition();
 
   const [search, setSearch] = useState({
     two_digit_id: props.two_digit_id,
@@ -128,10 +114,7 @@ export default function EntryDataTable(props: Props) {
     debit: props.debit,
     id: props.id,
   });
-  const [selectDate, setSelectDate] = useState<{
-    from?: Date;
-    to?: Date;
-  }>({
+  const [selectDate, setSelectDate] = useState<DateRange>({
     from: props.date[0],
     to: props.date[1],
   });
@@ -143,6 +126,7 @@ export default function EntryDataTable(props: Props) {
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
   const { replace } = useRouter();
+  const { createAlert } = useAlertHook();
 
   const pathName = usePathname();
 
@@ -168,6 +152,47 @@ export default function EntryDataTable(props: Props) {
   );
   const columns: ColumnDef<CommonEntryType>[] = useMemo(
     () => [
+      {
+        accessorKey: "action",
+        cell(originalRow) {
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <DotsHorizontalIcon />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem disabled={isActive}>Edit</DropdownMenuItem>
+                  <DropdownMenuItem>View</DropdownMenuItem>
+                  <DropdownMenuItem
+                    disabled={isActive}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      const { id, title } = originalRow.row.original;
+                      const isConfirm = confirm(
+                        `Do You sure you want to delete ${title} id:${id} `
+                      );
+                      if (isConfirm) {
+                        setActiveTransition(async () => {
+                          const result = await deleteEntry(id);
+
+                          createAlert(result);
+                        });
+                      }
+                    }}
+                  >
+                    {isActive ? <> deleteing...</> : "Delete"}
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        },
+      },
       {
         accessorKey: "id", //simple recommended way to define a column
         header: "ID",
@@ -216,17 +241,14 @@ export default function EntryDataTable(props: Props) {
                     <TableHead align="center">
                       {e.reference_id ? (
                         <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead> Reference To</TableHead>
-                              <TableHead>
-                                {e.reference?.username ?? ""}
-                              </TableHead>
-                            </TableRow>
-                          </TableHeader>
                           <TableBody>
                             <TableRow>
-                              <TableHead colSpan={2}>
+                              <TableCell>
+                                Reference To: ({e.reference_id}){" "}
+                                {e.reference?.username ?? ""}
+                              </TableCell>
+
+                              <TableCell colSpan={2}>
                                 ({e?.two_digit_id ?? ""}
                                 {e?.three_digit_id ?? ""}
                                 {e?.more_than_four_digit_id ?? ""}
@@ -235,7 +257,7 @@ export default function EntryDataTable(props: Props) {
                                 {e.three_digit?.name ?? ""}
                                 {e.more_than_four_digit?.name ?? ""}
                                 {e.account_entry?.username ?? ""}
-                              </TableHead>
+                              </TableCell>
                             </TableRow>
                           </TableBody>
                         </Table>
@@ -257,17 +279,14 @@ export default function EntryDataTable(props: Props) {
                     <TableHead align="center">
                       {e.reference_id ? (
                         <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead align="center">Reference To</TableHead>
-                              <TableHead align="center">
-                                {e.reference?.username ?? ""}
-                              </TableHead>
-                            </TableRow>
-                          </TableHeader>
                           <TableBody>
                             <TableRow>
-                              <TableCell colSpan={2} align="center">
+                              <TableCell>
+                                Reference To: ({e.reference_id}){" "}
+                                {e.reference?.username ?? ""}
+                              </TableCell>
+
+                              <TableCell colSpan={2}>
                                 ({e?.two_digit_id ?? ""}
                                 {e?.three_digit_id ?? ""}
                                 {e?.more_than_four_digit_id ?? ""}
@@ -335,70 +354,18 @@ export default function EntryDataTable(props: Props) {
   });
   return (
     <Style className="w-full ">
-      <h1>Result: {props.data.length}</h1>
+      <div className="flex justify-between items-center">
+        <h1>Result: {props.data.length}</h1>
+        <Link href={pathName + "/form"} className="">
+          <Button type="button" className="">
+            Add
+          </Button>
+        </Link>
+      </div>
       <form
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4 mb-5"
+        className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mt-4 mb-5"
         onSubmit={handleSubmit}
       >
-        <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn("id")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("id")?.setFilterValue(event.target.value)
-          }
-        />
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant={"outline"}
-              className={cn(
-                "w-[280px] justify-start text-left font-normal ",
-                !selectDate.from && "text-muted-foreground"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {selectDate.from ? (
-                format(selectDate.from, "PPP")
-              ) : (
-                <span>From Date</span>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 bg-white">
-            <Calendar
-              mode="single"
-              selected={selectDate.from}
-              onSelect={(e) => setSelectDate((prev) => ({ ...prev, from: e }))}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant={"outline"}
-              className={cn(
-                "w-[280px] justify-start text-left font-normal",
-                !selectDate.to && "text-muted-foreground"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {selectDate.to ? (
-                format(selectDate.to, "PPP")
-              ) : (
-                <span>To Date</span>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 bg-white">
-            <Calendar
-              mode="single"
-              selected={selectDate.to}
-              onSelect={(e) => setSelectDate((prev) => ({ ...prev, to: e }))}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
         <SearchSelect
           data={props.data.map((res) => ({ id: res.id, name: res.title }))}
           hit="id"
@@ -411,6 +378,12 @@ export default function EntryDataTable(props: Props) {
           }}
           default={search.id}
         />
+
+        <DateRangePicker
+          onChange={setSelectDate}
+          default={{ from: props.date[0], to: props.date[1] }}
+        />
+
         <SearchSelect
           data={props.two_digits}
           hit="two digit"
@@ -466,12 +439,15 @@ export default function EntryDataTable(props: Props) {
           default={search.account_id}
         />
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns <ChevronDown className="ml-2 h-4 w-4" />
+          <DropdownMenuTrigger asChild className="w-full">
+            <Button
+              variant="outline"
+              className="ml-auto w-full flex justify-between items-center"
+            >
+              Columns
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="w-full">
             {table
               .getAllColumns()
               .filter((column) => column.getCanHide())
@@ -491,7 +467,7 @@ export default function EntryDataTable(props: Props) {
               })}
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button type="submit" disabled={isPadding}>
+        <Button className="sm:w-full" type="submit" disabled={isPadding}>
           {isPadding ? (
             <>
               {" "}
@@ -581,35 +557,22 @@ export default function EntryDataTable(props: Props) {
 }
 const Style = styled.div`
   table {
-    > tr {
-      box-shadow: rgb(24 22 22 / 26%) 1px 1px 1px;
+    tbody,
+    thead,
+    tr,
+    td,
+    th {
+      color: black;
+      font-size: 12pt;
+
+      border: #00000013 solid 1px;
     }
+
     table {
       margin-top: 5px;
-      box-shadow: rgb(8 8 8 / 15%) 1px 1px 1px;
       thead {
-        box-shadow: rgb(8 8 8 / 15%) 1px 1px 1px 1px;
-
         tr {
-          box-shadow: rgb(8 8 8 / 15%) 1px 1px 1px;
-
           th {
-            box-shadow: rgb(8 8 8 / 15%) 1px 1px 1px;
-          }
-          td {
-            box-shadow: rgb(8 8 8 / 15%) 1px 1px 1px;
-          }
-        }
-      }
-      tbody {
-        box-shadow: rgb(8 8 8 / 15%) 1px 1px 1px;
-        tr {
-          box-shadow: rgb(8 8 8 / 15%) 1px 1px 1px;
-          td {
-            box-shadow: rgb(8 8 8 / 15%) 1px 1px 1px;
-          }
-          th {
-            box-shadow: rgb(8 8 8 / 15%) 1px 1px 1px;
           }
         }
       }

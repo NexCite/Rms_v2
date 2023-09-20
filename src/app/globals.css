@@ -54,6 +54,7 @@
     @apply border-border;
   }
   body {
+    overflow-y: hidden;
     @apply bg-background text-foreground;
   }
 }

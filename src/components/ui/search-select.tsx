@@ -4,7 +4,7 @@ import {
   PopoverTrigger,
 } from "@radix-ui/react-popover";
 import React, { useEffect, useMemo, useState } from "react";
-import { Button } from "./ui/button";
+import { Button } from "./button";
 import { Check, ChevronsUpDown, XCircle } from "lucide-react";
 import {
   Command,
@@ -12,7 +12,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
-} from "./ui/command";
+} from "./command";
 import { cn } from "@rms/lib/utils";
 type Props = {
   data: any[];
@@ -51,8 +51,8 @@ export default function SearchSelect(props: Props) {
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent>
-        <Command>
+      <PopoverContent className="shadow-md w-full">
+        <Command className="w-full">
           <CommandInput placeholder={`Search ${props.hit}`} />
           <CommandEmpty>No result.</CommandEmpty>
           <CommandGroup className="w-full p-0  max-h-[200px] overflow-y-auto">
