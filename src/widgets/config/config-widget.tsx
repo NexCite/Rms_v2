@@ -40,8 +40,7 @@ const formSchema = z.object({
 });
 export default function ConfigWidget() {
   const [isPadding, setTransition] = useTransition();
-  const { AlertComponent, createAlert } = useAlertHook();
-  const { replace } = useRouter();
+  const { createAlert } = useAlertHook();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,7 +55,7 @@ export default function ConfigWidget() {
   });
   function onSubmit(values: z.infer<typeof formSchema>) {
     setTransition(async () => {
-      const req = await createConfig(values);
+      const req = await createConfig(values as any);
 
       createAlert({ ...req, replace: "/login" });
     });
@@ -64,7 +63,6 @@ export default function ConfigWidget() {
 
   return (
     <div className="flex justify-center items-center m-7">
-      <AlertComponent />
       <Card className="w-[350px]">
         <CardHeader>
           <CardTitle>Create project</CardTitle>

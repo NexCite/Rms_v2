@@ -4,7 +4,6 @@ import { Prisma } from "@prisma/client";
 
 import { handlerServiceAction } from "@rms/lib/handler";
 import prisma from "@rms/prisma/prisma";
-import { headers } from "next/headers";
 export async function createEntry(props: Prisma.EntryCreateInput) {
   return handlerServiceAction(
     async (auth) => {

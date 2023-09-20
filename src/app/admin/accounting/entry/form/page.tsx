@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import BackButton from "@rms/components/ui/back-button";
 import prisma from "@rms/prisma/prisma";
-import EntryForm from "@rms/widgets/entry/entry-from";
+import EntryForm from "@rms/widgets/form/entry-from";
 import { notFound } from "next/navigation";
 import React from "react";
 
