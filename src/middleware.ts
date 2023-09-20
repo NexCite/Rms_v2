@@ -21,24 +21,28 @@ export async function middleware(request: NextRequest) {
       url: request.url,
     },
   });
-  const auth = request.cookies.get("rms-auth");
+  try {
+    const auth = request.cookies.get("rms-auth");
 
-  if (!auth) return NextResponse.redirect(url);
+    if (!auth) return NextResponse.redirect(url);
 
-  const checkAuth = await fetch(
-    `${process.env.NODE_ENV === "development" ? "http://" : "http://"}${
-      url.host
-    }/api/user`,
-    {
-      method: "Get",
-      headers: { Cookie: `rms-auth=${auth.value}`, url: request.url },
+    const checkAuth = await fetch(
+      `${process.env.NODE_ENV === "development" ? "http://" : "http://"}${
+        url.host
+      }/api/user`,
+      {
+        method: "Get",
+        headers: { Cookie: `rms-auth=${auth.value}`, url: request.url },
+      }
+    ).then((res) => res.json());
+    if (!checkAuth.status) {
+      return NextResponse.redirect(url);
     }
-  ).then((res) => res.json());
-  if (!checkAuth.status) {
-    return NextResponse.redirect(url);
+    console.log(checkAuth);
+    return response;
+  } catch (error) {
+    return response;
   }
-  console.log(checkAuth);
-  return response;
 }
 export const config = {
   matcher: ["/admin/:path*"],

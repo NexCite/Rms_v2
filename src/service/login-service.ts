@@ -8,8 +8,8 @@ import prisma from "@rms/prisma/prisma";
 import { cookies } from "next/headers";
 
 export async function createLogin(params: {
-  username: string;
-  password: string;
+  username?: string;
+  password?: string;
 }): Promise<ServiceActionModel<string>> {
   const user = await prisma.user.findUnique({
     where: { username: params.username },

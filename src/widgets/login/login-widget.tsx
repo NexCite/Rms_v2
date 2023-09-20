@@ -33,7 +33,7 @@ const formSchema = z.object({
 });
 export default function ConfigWidget() {
   const [isPadding, setTransition] = useTransition();
-  const { AlertComponent, createAlert } = useAlertHook();
+  const { createAlert } = useAlertHook();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,7 +51,6 @@ export default function ConfigWidget() {
 
   return (
     <div className="flex justify-center items-center m-7">
-      <AlertComponent />
       <Card className="w-[350px]">
         <CardHeader>
           <CardTitle>Create project</CardTitle>

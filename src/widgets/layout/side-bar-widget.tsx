@@ -13,7 +13,7 @@ export default function (props: Props) {
   const pathName = usePathname();
 
   return props.route?.children ? (
-    <Style>
+    <Style className=" w-full max-h-full">
       <ul style={{ overflow: "auto" }}>
         {props.route.children
           .filter((res) => !res.hide)

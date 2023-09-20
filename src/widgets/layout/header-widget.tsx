@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import React from "react";
 import styled from "styled-components";
 import SideBarWidget from "./side-bar-widget";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
 interface Props {
   route: RouteModel[];
   children: React.ReactNode;
@@ -19,7 +20,7 @@ export default function HeaderWidget(props: Props) {
 
   return (
     <SideBarStyle>
-      <nav className="shadow-sm">
+      <nav>
         <div id="logo">
           <Image
             src={`/api/media/${props.config.logo}`}
@@ -48,7 +49,9 @@ export default function HeaderWidget(props: Props) {
           route={props.route.filter((res) => pathName.startsWith(res.path))[0]}
         />
 
-        <main>{props.children}</main>
+        <main className="w-full">
+          <div className="p-3">{props.children}</div>
+        </main>
       </div>
     </SideBarStyle>
   );
@@ -61,6 +64,8 @@ const SideBarStyle = styled.div`
   width: 100%;
   height: 99dvh;
   nav {
+    box-shadow: rgb(8 8 8 / 15%) -1px 1px 0px;
+
     padding: 10px;
     /* padding: 15px 0px; */
     height: 115px;
@@ -147,8 +152,7 @@ const SideBarStyle = styled.div`
     display: flex;
   }
   main {
-    padding-top: 13px;
-    overflow: auto;
-    height: 85dvh;
+    height: 85vh;
+    overflow-y: auto;
   }
 `;
