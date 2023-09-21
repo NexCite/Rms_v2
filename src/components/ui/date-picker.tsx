@@ -11,6 +11,7 @@ type Props = {
   onChange: (e?: Date) => void;
   maxDate?: Date;
   minDate?: Date;
+  name?: string;
 };
 
 export default function DatePicker(props: Props) {
