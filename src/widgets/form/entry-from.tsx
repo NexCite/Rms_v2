@@ -9,6 +9,7 @@ import DatePicker from "@rms/components/ui/date-picker";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -20,6 +21,7 @@ import SearchSelect from "@rms/components/ui/search-select";
 import SelectMenu from "@rms/components/ui/select-menu";
 import { Textarea } from "@rms/components/ui/textarea";
 import useAlertHook from "@rms/hooks/alert-hooks";
+import { FormatNumber, FormatNumberWithFixed } from "@rms/lib/global";
 import { createEntry, updateEntry } from "@rms/service/entry-service";
 import { DeleteIcon, Loader2, PlusSquare, Text, X } from "lucide-react";
 
@@ -30,6 +32,7 @@ import React, { useCallback, useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
 import { number, z } from "zod";
+import UploadWidget from "../upload/upload-widget";
 
 interface Props {
   id?: number;
@@ -82,10 +85,10 @@ export default function EntryForm(props: Props) {
   const searchParams = useSearchParams();
   const { back } = useRouter();
   const [forms, setForms] = useState<Type>({
-    title: undefined,
-    description: undefined,
-    note: undefined,
-    currency_id: undefined,
+    title: props.entry?.title,
+    description: props.entry?.description,
+    note: props.entry?.note,
+    currency_id: props.entry?.currency_id,
     sub_entries: [],
     to_date: new Date(),
   });
@@ -158,7 +161,6 @@ export default function EntryForm(props: Props) {
   const handleSubmit = useCallback(
     (e: React.FormEvent<HTMLButtonElement>) => {
       var m: Prisma.EntryCreateInput;
-      console.log(forms.currency_id);
       m = {
         description: forms.description,
         title: forms.title,
@@ -271,6 +273,7 @@ export default function EntryForm(props: Props) {
           } else {
             const result = await createEntry(m);
             createAlert(result);
+            console.log(result.status);
             if (result.status === 200) {
               back();
             }
@@ -300,7 +303,8 @@ export default function EntryForm(props: Props) {
                 >
                   {isPadding ? (
                     <>
-                      <Loader2 /> loading...
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      loading...
                     </>
                   ) : (
                     <>{props.isEditMode ? "Update" : "Add"}</>
@@ -408,7 +412,7 @@ export default function EntryForm(props: Props) {
                     <FormField
                       rules={{ required: true }}
                       control={form.control}
-                      name="currency"
+                      name={"currency_id " as any}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Currency</FormLabel>
@@ -464,11 +468,13 @@ export default function EntryForm(props: Props) {
                   )}
                   {!props.isEditMode && (
                     <div className="grid-cols-12">
-                      {/* <UploadMediaWidget
-                  onUpload={(e) => {
-                    setMedia(e);
-                  }}
-                /> */}
+                      {
+                        <UploadWidget
+                          onSave={(e) => {
+                            setMedia({ path: e, title: e, type: "Pdf" } as any);
+                          }}
+                        />
+                      }
                     </div>
                   )}
                 </div>
@@ -508,8 +514,10 @@ export default function EntryForm(props: Props) {
                             render={() => (
                               <FormItem>
                                 <FormLabel>Amount</FormLabel>
+
                                 <Input
                                   id={`amount-${i}`}
+                                  defaultValue={1.0}
                                   type="number"
                                   onChange={(e) => {
                                     if (Number.isNaN(e.target.value)) {
@@ -527,6 +535,14 @@ export default function EntryForm(props: Props) {
                                   placeholder="amount"
                                   step=".01"
                                 />
+                                <FormDescription>
+                                  {
+                                    props.currencies.find(
+                                      (res) => forms.currency_id === res.id
+                                    )?.symbol
+                                  }{" "}
+                                  {FormatNumberWithFixed(res.amount)}
+                                </FormDescription>
                               </FormItem>
                             )}
                           />
@@ -662,7 +678,15 @@ export default function EntryForm(props: Props) {
                               <FormItem>
                                 <FormLabel>Account</FormLabel>
                                 <SearchSelect
-                                  disabled={res.reference_id ? true : false}
+                                  disabled={
+                                    res.three_digit_id
+                                      ? true
+                                      : res.two_digit_id
+                                      ? true
+                                      : res.reference_id
+                                      ? true
+                                      : false
+                                  }
                                   data={props.account_entry}
                                   hit="select account"
                                   label="Account"
@@ -706,158 +730,6 @@ export default function EntryForm(props: Props) {
                         {i !== forms.sub_entries.length - 1 && (
                           <hr className="my-5 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
                         )}
-
-                        {/* <div className="grid-cols-12" span={{ base: 12, md: 4 }}>
-                
-
-                  <div className="grid-cols-12" span={{ base: 12, md: 4 }}>
-                    <Select
-                      searchable
-                      rightSection={<IconChevronDown size="1rem" />}
-                      rightSectionWidth={30}
-                      placeholder="select Three Digit"
-                      variant="filled"
-                      label="Three Digit"
-                      value={res.three_digit_id + ""}
-                      disabled={
-                        res.two_digit_id
-                          ? true
-                          : res.more_than_four_digit_id
-                          ? true
-                          : res.account_entry_id
-                          ? true
-                          : false
-                      }
-                      size="md"
-                      onChange={(e) => {
-                        if (Number.isNaN(e) || e === "0" || e === "") {
-                          forms.sub_entries[i].three_digit_id = undefined;
-                        } else {
-                          forms.sub_entries[i].three_digit_id = +e;
-                        }
-
-                        setForms((prev) => ({
-                          ...prev,
-                          sub_entries: prev.sub_entries,
-                        }));
-                      }}
-                      data={
-                        props.three_digit?.map((res) => ({
-                          value: res.id + "",
-                          label: `(${res.id}) ${res.name}`,
-                        })) ?? []
-                      }
-                    />
-                  </div>
-                  <div className="grid-cols-12" span={{ base: 12, md: 4 }}>
-                    <Select
-                      searchable
-                      disabled={
-                        res.two_digit_id
-                          ? true
-                          : res.three_digit_id
-                          ? true
-                          : res.account_entry_id
-                          ? true
-                          : false
-                      }
-                      rightSection={<IconChevronDown size="1rem" />}
-                      rightSectionWidth={30}
-                      placeholder="selecct four and more digit"
-                      variant="filled"
-                      label="Four And More Digit"
-                      value={res.more_than_four_digit_id + ""}
-                      size="md"
-                      onChange={(e) => {
-                        if (Number.isNaN(e) || e === "0" || e === "") {
-                          forms.sub_entries[i].more_than_four_digit_id =
-                            undefined;
-                        } else {
-                          forms.sub_entries[i].more_than_four_digit_id = +e;
-                        }
-
-                        setForms((prev) => ({
-                          ...prev,
-                          sub_entries: prev.sub_entries,
-                        }));
-                      }}
-                      data={
-                        props.more_than_four_digit?.map((res) => ({
-                          value: res.id + "",
-                          group: `${res.three_digit.name} (${res.three_digit.id})`,
-                          label: `(${res.id}) ${res.name}`,
-                        })) ?? []
-                      }
-                    />
-                  </div>
-                  <div className="grid-cols-12" span={{ base: 12, md: 4 }}>
-                    <Select
-                      searchable
-                      disabled={
-                        res.two_digit_id
-                          ? true
-                          : res.three_digit_id
-                          ? true
-                          : res.more_than_four_digit_id
-                          ? true
-                          : res.reference_id
-                          ? true
-                          : false
-                      }
-                      onChange={(e) => {
-                        if (Number.isNaN(e) || e === "0" || e === "") {
-                          forms.sub_entries[i].account_entry_id = undefined;
-                        } else {
-                          forms.sub_entries[i].account_entry_id = +e;
-                        }
-
-                        setForms((prev) => ({
-                          ...prev,
-                          sub_entries: prev.sub_entries,
-                        }));
-                      }}
-                      rightSection={<IconChevronDown size="1rem" />}
-                      rightSectionWidth={30}
-                      placeholder="select account"
-                      variant="filled"
-                      label="Account"
-                      data={
-                        props.account_entry?.map((res) => ({
-                          value: res.id + "",
-                          label: `(${res.id}) ${res.username}`,
-                        })) ?? []
-                      }
-                    />
-                  </div>
-                  <div className="grid-cols-12" span={{ base: 12, md: 4 }}>
-                    <Select
-                      searchable
-                      disabled={res.account_entry_id ? true : false}
-                      onChange={(e) => {
-                        if (Number.isNaN(e) || e === "0" || e === "") {
-                          forms.sub_entries[i].reference_id = undefined;
-                        } else {
-                          forms.sub_entries[i].reference_id = +e;
-                        }
-
-                        setForms((prev) => ({
-                          ...prev,
-                          sub_entries: prev.sub_entries,
-                        }));
-                      }}
-                      rightSection={<IconChevronDown size="1rem" />}
-                      rightSectionWidth={30}
-                      placeholder="select reference account"
-                      variant="filled"
-                      label="Reference Account"
-                      data={
-                        props.account_entry?.map((res) => ({
-                          value: res.id + "",
-                          label: `(${res.id}) ${res.username}`,
-                        })) ?? []
-                      }
-                    />
-                  </div> */}
                       </div>
                     ))}
                   </>

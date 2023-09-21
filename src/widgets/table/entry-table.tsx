@@ -4,6 +4,7 @@ import React, { useCallback, useMemo, useState, useTransition } from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
+  PaginationState,
   SortingState,
   VisibilityState,
   flexRender,
@@ -37,7 +38,6 @@ import { usePathname, useRouter } from "next/navigation";
 import styled from "styled-components";
 
 import SearchSelect from "../../components/ui/search-select";
-import DatePicker from "../../components/ui/date-picker";
 import Link from "next/link";
 import { DateRange } from "react-day-picker";
 import DateRangePicker from "@rms/components/ui/date-range-pciker";
@@ -50,6 +50,7 @@ import {
 import { deleteEntry } from "@rms/service/entry-service";
 import useAlertHook from "@rms/hooks/alert-hooks";
 import { Loader2 } from "lucide-react";
+import moment from "moment";
 
 type CommonEntryType = Prisma.EntryGetPayload<{
   include: {
@@ -104,6 +105,18 @@ type Props = {
 export default function EntryDataTable(props: Props) {
   const [isPadding, setTransition] = useTransition();
   const [isActive, setActiveTransition] = useTransition();
+  const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
+  const pagination = useMemo(
+    () => ({
+      pageIndex,
+      pageSize,
+    }),
+    [pageIndex, pageSize]
+  );
 
   const [search, setSearch] = useState({
     two_digit_id: props.two_digit_id,
@@ -137,7 +150,7 @@ export default function EntryDataTable(props: Props) {
       setTransition(() => {
         replace(
           pathName +
-            `?from_date=${selectDate.from.getTime()}&to_date=${selectDate.to.getTime()}&two_digit_id=${
+            `?from_date=${selectDate.from?.getTime()}&to_date=${selectDate.to?.getTime()}&two_digit_id=${
               search.two_digit_id
             }&more_digit_id=${search.more_digit_id}&three_digit_id=${
               search.three_digit_id
@@ -155,6 +168,8 @@ export default function EntryDataTable(props: Props) {
       {
         accessorKey: "action",
         cell(originalRow) {
+          const { id, title } = originalRow.row.original;
+
           return (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -166,13 +181,32 @@ export default function EntryDataTable(props: Props) {
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                  <DropdownMenuItem disabled={isActive}>Edit</DropdownMenuItem>
-                  <DropdownMenuItem>View</DropdownMenuItem>
+                  <Link
+                    style={{ cursor: "pointer" }}
+                    href={pathName + "/form?id=" + id}
+                  >
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      disabled={isActive}
+                    >
+                      Edit
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link
+                    style={{ cursor: "pointer" }}
+                    href={pathName + "/" + id}
+                  >
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      disabled={isActive}
+                    >
+                      View
+                    </DropdownMenuItem>
+                  </Link>
                   <DropdownMenuItem
                     disabled={isActive}
                     className="cursor-pointer"
                     onClick={() => {
-                      const { id, title } = originalRow.row.original;
                       const isConfirm = confirm(
                         `Do You sure you want to delete ${title} id:${id} `
                       );
@@ -201,7 +235,7 @@ export default function EntryDataTable(props: Props) {
         accessorKey: "create_date", //simple recommended way to define a column
         header: "Date",
         accessorFn(originalRow) {
-          return originalRow?.create_date?.toLocaleDateString();
+          return moment(originalRow?.create_date).format("DD-MM-yyy hh:mm a");
         },
       },
       {
@@ -347,6 +381,8 @@ export default function EntryDataTable(props: Props) {
     onRowSelectionChange: setRowSelection,
     state: {
       sorting,
+      pagination: pagination,
+
       columnFilters,
       columnVisibility,
       rowSelection,
@@ -530,27 +566,25 @@ export default function EntryDataTable(props: Props) {
         </Table>
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {props.data.length}
-        </div>
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
-        </div>
+        <h5>
+          {pageIndex + 1} of {table.getPageCount()} page(s).
+        </h5>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          Next
+        </Button>
       </div>
     </Style>
   );

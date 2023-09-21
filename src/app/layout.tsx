@@ -3,6 +3,8 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Toaster } from "@rms/components/ui/toaster";
+import { env } from "process";
+import NextTopLoader from "nextjs-toploader";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,15 +18,21 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const v = env.vesrion;
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
+        <NextTopLoader showSpinner={false} />
+
         <ThemeProvider
           attribute="class"
           defaultTheme="ligth"
           enableSystem
           disableTransitionOnChange
         >
+          <div className="absolute bottom-0 right-5 z-20">
+            <h1>version {v}</h1>
+          </div>
           <Toaster />
           {children}
         </ThemeProvider>
