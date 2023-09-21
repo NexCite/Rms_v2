@@ -49,9 +49,10 @@ export default function EntryView(props: Props) {
   }, [props]);
   const [isPadding, setPadding] = useTransition();
   const { createAlert } = useAlertHook();
+  const pathName = usePathname();
   return (
     <Style className="card">
-      <div className="mb-10 gap-10 justify-end flex">
+      <div className="mb-10 gap-5 justify-end flex">
         <Button
           className="bg-black"
           onClick={() => {
@@ -87,14 +88,16 @@ export default function EntryView(props: Props) {
           }}
         >
           <Button className="bg-black" color="dark" disabled={isPadding}>
-            {isPadding ? (
-              <>
-                {" "}
-                <Loader2 /> loading...
-              </>
-            ) : (
-              "Edit"
-            )}
+            Edit
+          </Button>
+        </Link>
+        <Link
+          href={{
+            pathname: pathName + "/export",
+          }}
+        >
+          <Button className="bg-black" color="dark" disabled={isPadding}>
+            View
           </Button>
         </Link>
       </div>

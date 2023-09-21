@@ -25,3 +25,8 @@ export async function createConfig(
     return { status: HttpStatusCode.BAD_REQUEST };
   }
 }
+export async function getConfig() {
+  return prisma.config.findFirst({
+    select: { name: true, email: true, logo: true, phone_number: true },
+  });
+}
