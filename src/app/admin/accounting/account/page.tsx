@@ -1,6 +1,11 @@
+import { getUserInfo } from "@rms/lib/auth";
 import prisma from "@rms/prisma/prisma";
+import AccountEntryTable from "@rms/widgets/table/account-entry-table";
 
 export default async function page() {
+  const user = await getUserInfo();
+  console.log(user);
+
   const accounts = await prisma.account_Entry.findMany({
     include: {
       three_digit: true,
@@ -9,11 +14,14 @@ export default async function page() {
       two_digit: true,
     },
     orderBy: { modified_date: "desc" },
+    where: {
+      status: user.type === "Admin" ? undefined : "Enable",
+    },
   });
 
   return (
-    <div className="container">
-      <AccountTableComponent accounts={accounts} />
+    <div>
+      <AccountEntryTable accounts={accounts} />
     </div>
   );
 }

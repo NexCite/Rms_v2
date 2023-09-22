@@ -97,7 +97,7 @@ export default function EntryView(props: Props) {
           }}
         >
           <Button className="bg-black" color="dark" disabled={isPadding}>
-            View
+            Export
           </Button>
         </Link>
       </div>

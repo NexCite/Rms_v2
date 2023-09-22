@@ -31,19 +31,19 @@ const Data = [
       {
         index: 1,
         title: "Two Digit",
-        path: "/admin/accounting/view_digit/two_digit",
+        path: "/admin/accounting/digit/two",
         key: "View_Twos_Digit",
       },
       {
         index: 2,
         title: "Three Digit",
-        path: "/admin/accounting/view_digit/three_digit",
+        path: "/admin/accounting/digit/three",
         key: "View_Threes_Digit",
       },
       {
         index: 3,
         title: "More Than Four Digit",
-        path: "/admin/accounting/view_digit/more_than_four_digit",
+        path: "/admin/accounting/digit/more",
         key: "View_More_Than_Four_Digit",
       },
       {

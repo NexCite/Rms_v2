@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import BackButton from "@rms/components/ui/back-button";
+import { getUserInfo } from "@rms/lib/auth";
 import prisma from "@rms/prisma/prisma";
 import EntryView from "@rms/widgets/view/entry-view";
 import React from "react";
@@ -27,9 +28,11 @@ export default async function page(props: {
       </>
     );
   } else if (props.params.id) {
+    const user = await getUserInfo();
+
     id = +props.params.id;
     entry = await prisma.entry.findUnique({
-      where: { id },
+      where: { id, status: user.type === "Admin" ? undefined : "Enable" },
       include: {
         currency: true,
         media: true,

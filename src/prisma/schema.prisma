@@ -76,7 +76,7 @@ model Employee {
   username      String    @unique
   invoices      Invoice[]
   user_id       Int
-  user          User      @relation(fields: [user_id], references: [id])
+  user          User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model Trader {
@@ -96,8 +96,8 @@ model Trader {
   modified_date DateTime  @default(now()) @updatedAt
   username      String    @unique
   accounts      Account[]
-  broker        Broker?   @relation(fields: [broker_id], references: [id])
-  user          User?     @relation(fields: [user_id], references: [id])
+  broker        Broker?   @relation(fields: [broker_id], references: [id], onDelete: Cascade)
+  user          User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   invoices      Invoice[]
 }
 
@@ -116,7 +116,7 @@ model Broker {
   create_date   DateTime  @default(now())
   modified_date DateTime  @default(now()) @updatedAt
   username      String    @unique
-  user          User?     @relation(fields: [user_id], references: [id])
+  user          User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   traders       Trader[]
   invoices      Invoice[]
 }
@@ -128,14 +128,14 @@ model Log {
   body        String?
   query       String?
   user_id     Int
-  user        User     @relation(fields: [user_id], references: [id])
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model Auth {
   id          Int      @id @default(autoincrement())
   user_id     Int
   token       String   @unique()
-  user        User     @relation(fields: [user_id], references: [id])
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   status      Status
   create_date DateTime @default(now())
 }
@@ -149,9 +149,9 @@ model Account {
   trader_id     Int?
   status        Status    @default(Enable)
   user_id       Int?
-  user          User?     @relation(fields: [user_id], references: [id])
-  trader        Trader?   @relation(fields: [trader_id], references: [id])
-  currency      Currency  @relation(fields: [currency_id], references: [id])
+  user          User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  trader        Trader?   @relation(fields: [trader_id], references: [id], onDelete: Cascade)
+  currency      Currency  @relation(fields: [currency_id], references: [id], onDelete: Cascade)
   invoices      Invoice[]
 }
 
@@ -173,16 +173,16 @@ model Invoice {
   currency_id     Int?
   status          Status      @default(Enable)
   sub_category_id Int
-  currency        Currency?   @relation(fields: [currency_id], references: [id])
-  account         Account?    @relation(fields: [account_id], references: [id])
-  broker          Broker?     @relation(fields: [broker_id], references: [id])
-  trader          Trader?     @relation(fields: [trader_id], references: [id])
-  employee        Employee?   @relation(fields: [employee_id], references: [id])
+  currency        Currency?   @relation(fields: [currency_id], references: [id], onDelete: Cascade)
+  account         Account?    @relation(fields: [account_id], references: [id], onDelete: Cascade)
+  broker          Broker?     @relation(fields: [broker_id], references: [id], onDelete: Cascade)
+  trader          Trader?     @relation(fields: [trader_id], references: [id], onDelete: Cascade)
+  employee        Employee?   @relation(fields: [employee_id], references: [id], onDelete: Cascade)
   payments        Payment[]
   user            User        @relation(fields: [user_id], references: [id], onUpdate: NoAction)
   media           Media?
   debit_credit    Boolean
-  sub_category    SubCategory @relation(fields: [sub_category_id], references: [id])
+  sub_category    SubCategory @relation(fields: [sub_category_id], references: [id], onDelete: Cascade)
 }
 
 model Payment {
@@ -198,9 +198,9 @@ model Payment {
   type          PaymentType
   number_id     String      @default("")
   completed     Boolean     @default(false)
-  user          User?       @relation(fields: [user_id], references: [id])
+  user          User?       @relation(fields: [user_id], references: [id], onDelete: Cascade)
   media         Media?
-  invoice       Invoice     @relation(fields: [invoice_id], references: [id])
+  invoice       Invoice     @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
   invoice_id    Int
 }
 
@@ -217,10 +217,10 @@ model Media {
   payment_id    Int?      @unique()
   entry_id      Int?      @unique()
 
-  invoice Invoice? @relation(fields: [invoice_id], references: [id])
+  invoice Invoice? @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
   entry   Entry?   @relation(fields: [entry_id], references: [id], onDelete: Cascade)
 
-  payment Payment? @relation(fields: [payment_id], references: [id])
+  payment Payment? @relation(fields: [payment_id], references: [id], onDelete: Cascade)
 }
 
 model Currency {
@@ -234,7 +234,7 @@ model Currency {
   create_date   DateTime @default(now())
   modified_date DateTime @default(now()) @updatedAt
   user_id       Int
-  user          User     @relation(fields: [user_id], references: [id])
+  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model Category {
@@ -245,7 +245,7 @@ model Category {
   modified_date  DateTime      @default(now())
   user_id        Int
 
-  user User @relation(fields: [user_id], references: [id])
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model SubCategory {
@@ -253,12 +253,12 @@ model SubCategory {
   name          String
   category_id   Int
   invoices      Invoice[]
-  category      Category  @relation(fields: [category_id], references: [id])
+  category      Category  @relation(fields: [category_id], references: [id], onDelete: Cascade)
   create_date   DateTime  @default(now())
   modified_date DateTime  @default(now())
   user_id       Int
 
-  user User @relation(fields: [user_id], references: [id])
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 enum SubCategoryType {
@@ -270,6 +270,7 @@ enum SubCategoryType {
 enum Gender {
   Male
   Female
+  Other
 }
 
 enum MediaType {
@@ -321,7 +322,7 @@ model Two_Digit {
   three_digit     Three_Digit[]
   status          Status          @default(Enable)
   user_id         Int?
-  user            User?           @relation(fields: [user_id], references: [id])
+  user            User?           @relation(fields: [user_id], references: [id], onDelete: Cascade)
   account_entries Account_Entry[]
   sub_entries     SubEntry[]
 
@@ -338,14 +339,14 @@ model Three_Digit {
   account_entries      Account_Entry[]
 
   two_digit_id Int
-  two_digit    Two_Digit       @relation(fields: [two_digit_id], references: [id])
+  two_digit    Two_Digit       @relation(fields: [two_digit_id], references: [id], onDelete: Cascade)
   status       Status          @default(Enable)
   type         DidgitType
   debit_credit DebitCreditType @default(Debit)
 
   sub_entries SubEntry[]
   user_id     Int?
-  user        User?      @relation(fields: [user_id], references: [id])
+  user        User?      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model More_Than_Four_Digit {
@@ -356,14 +357,14 @@ model More_Than_Four_Digit {
   modified_date   DateTime        @default(now()) @updatedAt
   account_entries Account_Entry[]
   three_digit_id  Int
-  three_digit     Three_Digit     @relation(fields: [three_digit_id], references: [id])
+  three_digit     Three_Digit     @relation(fields: [three_digit_id], references: [id], onDelete: Cascade)
   status          Status          @default(Enable)
   type            DidgitType
   debit_credit    DebitCreditType @default(Debit)
   sub_entries     SubEntry[]
   user_id         Int?
 
-  user User? @relation(fields: [user_id], references: [id])
+  user User? @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model Account_Entry {
@@ -381,14 +382,14 @@ model Account_Entry {
   create_date             DateTime              @default(now())
   modified_date           DateTime              @default(now()) @updatedAt
   two_digit_id            Int?
-  two_digit               Two_Digit?            @relation(fields: [two_digit_id], references: [id])
+  two_digit               Two_Digit?            @relation(fields: [two_digit_id], references: [id], onDelete: Cascade)
   three_digit_id          Int?
-  three_digit             Three_Digit?          @relation(fields: [three_digit_id], references: [id])
+  three_digit             Three_Digit?          @relation(fields: [three_digit_id], references: [id], onDelete: Cascade)
   more_than_four_digit_id Int?
-  more_than_four_digit    More_Than_Four_Digit? @relation(fields: [more_than_four_digit_id], references: [id])
+  more_than_four_digit    More_Than_Four_Digit? @relation(fields: [more_than_four_digit_id], references: [id], onDelete: Cascade)
   sub_entries             SubEntry[]
   user_id                 Int?
-  user                    User?                 @relation(fields: [user_id], references: [id])
+  user                    User?                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
   ref_entries             SubEntry[]            @relation("reference")
 }
 
@@ -404,9 +405,9 @@ model Entry {
   sub_entries   SubEntry[]
   media         Media?
   currency_id   Int
-  currency      Currency   @relation(fields: [currency_id], references: [id])
+  currency      Currency   @relation(fields: [currency_id], references: [id], onDelete: Cascade)
   user_id       Int?
-  user          User?      @relation(fields: [user_id], references: [id])
+  user          User?      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model SubEntry {
@@ -414,14 +415,14 @@ model SubEntry {
   status                  Status                @default(Enable)
   amount                  Float
   account_entry_id        Int?
-  account_entry           Account_Entry?        @relation(fields: [account_entry_id], references: [id])
+  account_entry           Account_Entry?        @relation(fields: [account_entry_id], references: [id], onDelete: Cascade)
   two_digit_id            Int?
-  two_digit               Two_Digit?            @relation(fields: [two_digit_id], references: [id])
+  two_digit               Two_Digit?            @relation(fields: [two_digit_id], references: [id], onDelete: Cascade)
   three_digit_id          Int?
-  three_digit             Three_Digit?          @relation(fields: [three_digit_id], references: [id])
+  three_digit             Three_Digit?          @relation(fields: [three_digit_id], references: [id], onDelete: Cascade)
   more_than_four_digit_id Int?
-  more_than_four_digit    More_Than_Four_Digit? @relation(fields: [more_than_four_digit_id], references: [id])
-  reference               Account_Entry?        @relation("reference", fields: [reference_id], references: [id])
+  more_than_four_digit    More_Than_Four_Digit? @relation(fields: [more_than_four_digit_id], references: [id], onDelete: Cascade)
+  reference               Account_Entry?        @relation("reference", fields: [reference_id], references: [id], onDelete: Cascade)
   reference_id            Int?
   type                    EntryType             @default(Debit)
   entry_id                Int

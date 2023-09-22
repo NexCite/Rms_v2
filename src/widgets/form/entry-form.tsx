@@ -82,7 +82,6 @@ type Type = {
 
 export default function EntryForm(props: Props) {
   const [isPadding, setTransition] = useTransition();
-  const searchParams = useSearchParams();
   const { back } = useRouter();
   const [forms, setForms] = useState<Type>({
     title: props.entry?.title,

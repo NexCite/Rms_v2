@@ -1,3 +1,4 @@
+import { GlobalStyle } from "@rms/components/theme/global-style";
 import GetRoutes from "@rms/config/route-config";
 import { getUserInfo } from "@rms/lib/auth";
 import prisma from "@rms/prisma/prisma";
@@ -10,10 +11,8 @@ export default async function layout(props: { children: React.ReactNode }) {
   });
   const user = await getUserInfo();
   return (
-    <div>
-      <HeaderWidget config={config!} route={GetRoutes(user?.permissions!)}>
-        {props.children}
-      </HeaderWidget>
-    </div>
+    <HeaderWidget config={config!} route={GetRoutes(user?.permissions!)}>
+      {props.children}
+    </HeaderWidget>
   );
 }

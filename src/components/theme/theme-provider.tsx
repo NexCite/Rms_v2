@@ -3,7 +3,7 @@
 import * as React from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { type ThemeProviderProps } from "next-themes/dist/types";
-import { ServerStyleSheet, StyleSheetManager } from "styled-components";
+import styled, { ServerStyleSheet, StyleSheetManager } from "styled-components";
 import { useServerInsertedHTML } from "next/navigation";
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {

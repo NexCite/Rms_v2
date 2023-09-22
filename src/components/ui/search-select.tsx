@@ -31,7 +31,7 @@ export default function SearchSelect(props: Props) {
   return (
     <>
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild disabled={props.disabled}>
+        <PopoverTrigger asChild disabled={props.disabled} className="z-50">
           <Button
             variant="outline"
             role="combobox"
@@ -56,11 +56,11 @@ export default function SearchSelect(props: Props) {
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="shadow-md w-full">
-          <Command className="w-full">
+        <PopoverContent className="shadow-md w-full z-50 ">
+          <Command className="w-full bg-white z-50">
             <CommandInput placeholder={`Search ${props.hit}`} />
             <CommandEmpty>No result.</CommandEmpty>
-            <CommandGroup className="w-full p-0  max-h-[200px] overflow-y-auto">
+            <CommandGroup className="w-full p-0  max-h-[200px] overflow-y-auto bg-white z-50">
               {props.data.map((res) => (
                 <CommandItem
                   key={res.name}

@@ -5,6 +5,7 @@ import prisma from "@rms/prisma/prisma";
 import { writeFileSync } from "fs";
 import Loading from "@rms/components/ui/loading";
 import EntryDataTable from "@rms/widgets/table/entry-table";
+import { getUserInfo } from "@rms/lib/auth";
 export default async function Entry(props: {
   params: {};
   searchParams: {
@@ -20,6 +21,8 @@ export default async function Entry(props: {
     type?: $Enums.DidgitType;
   };
 }) {
+  const user = await getUserInfo();
+
   var debit: $Enums.EntryType | undefined = undefined,
     type: $Enums.DidgitType | undefined = undefined,
     two_digit_id: number | undefined = undefined,
@@ -107,27 +110,44 @@ export default async function Entry(props: {
               OR: [
                 {
                   two_digit_id,
+                  status: user.type === "Admin" ? undefined : "Enable",
                 },
                 {
                   three_digit: {
                     two_digit_id,
+                    status: user.type === "Admin" ? undefined : "Enable",
                   },
                 },
-                { more_than_four_digit: { three_digit: { two_digit_id } } },
+                {
+                  more_than_four_digit: {
+                    three_digit: {
+                      two_digit_id,
+                      status: user.type === "Admin" ? undefined : "Enable",
+                    },
+                  },
+                },
                 {
                   account_entry: {
                     OR: [
                       {
                         two_digit_id,
+                        status: user.type === "Admin" ? undefined : "Enable",
                       },
                       {
                         three_digit: {
+                          status: user.type === "Admin" ? undefined : "Enable",
+
                           two_digit_id,
                         },
                       },
                       {
                         more_than_four_digit: {
+                          status: user.type === "Admin" ? undefined : "Enable",
+
                           three_digit: {
+                            status:
+                              user.type === "Admin" ? undefined : "Enable",
+
                             two_digit_id,
                           },
                         },
@@ -140,16 +160,22 @@ export default async function Entry(props: {
                     OR: [
                       {
                         two_digit_id,
+                        status: user.type === "Admin" ? undefined : "Enable",
                       },
                       {
                         three_digit: {
                           two_digit_id,
+                          status: user.type === "Admin" ? undefined : "Enable",
                         },
                       },
                       {
                         more_than_four_digit: {
+                          status: user.type === "Admin" ? undefined : "Enable",
+
                           three_digit: {
                             two_digit_id,
+                            status:
+                              user.type === "Admin" ? undefined : "Enable",
                           },
                         },
                       },
@@ -159,7 +185,7 @@ export default async function Entry(props: {
               ],
             },
           },
-          status: "Enable",
+          status: user.type === "Admin" ? undefined : "Enable",
         },
         orderBy: {
           to_date: "desc",
@@ -178,7 +204,6 @@ export default async function Entry(props: {
         },
       })
       .then((res) => {
-        writeFileSync("t.json", JSON.stringify(res), "utf-8");
         return res;
       });
   } else if (three_digit_id) {
@@ -230,7 +255,7 @@ export default async function Entry(props: {
               ],
             },
           },
-          status: "Enable",
+          status: user.type === "Admin" ? undefined : "Enable",
         },
         orderBy: {
           to_date: "desc",
@@ -249,7 +274,6 @@ export default async function Entry(props: {
         },
       })
       .then((res) => {
-        writeFileSync("t.json", JSON.stringify(res), "utf-8");
         return res;
       });
   } else if (more_digit_id) {
@@ -281,7 +305,7 @@ export default async function Entry(props: {
               ],
             },
           },
-          status: "Enable",
+          status: user.type === "Admin" ? undefined : "Enable",
         },
         orderBy: {
           to_date: "desc",
@@ -300,7 +324,6 @@ export default async function Entry(props: {
         },
       })
       .then((res) => {
-        writeFileSync("t.json", JSON.stringify(res), "utf-8");
         return res;
       });
   } else {
@@ -313,7 +336,7 @@ export default async function Entry(props: {
             lte: date[1],
           },
 
-          status: "Enable",
+          status: user.type === "Admin" ? undefined : "Enable",
         },
         orderBy: {
           to_date: "desc",
@@ -332,7 +355,6 @@ export default async function Entry(props: {
         },
       })
       .then((res) => {
-        writeFileSync("t.json", JSON.stringify(res), "utf-8");
         return res;
       });
   }
@@ -350,21 +372,6 @@ export default async function Entry(props: {
 
   return (
     <div>
-      {/* <EntryTableComponent
-        data={entries}
-        date={date}
-        account_id={account_id}
-        debit={debit}
-        id={id}
-        more_digit_id={more_digit_id}
-        three_digit_id={three_digit_id}
-        two_digit_id={two_digit_id}
-        type={type}
-        accounts={accounts}
-        more_digits={more_digits}
-        three_digits={three_digits}
-        two_digits={two_digits}
-      /> */}
       <EntryDataTable
         data={entries}
         date={date}

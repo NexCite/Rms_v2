@@ -21,7 +21,10 @@ export default async function page(props: {
   });
 
   const entry = await prisma.entry.findUnique({
-    where: { id: +props.params.id, status: "Enable" },
+    where: {
+      id: +props.params.id,
+      status: user.user.type === "Admin" ? undefined : "Enable",
+    },
     include: {
       currency: true,
       sub_entries: {
