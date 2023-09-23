@@ -21,6 +21,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -50,21 +51,11 @@ type CommonNode = "two" | "three" | "more";
 export default function DigitTable(props: Props) {
   const pathName = usePathname();
   const [isActive, setActiveTransition] = useTransition();
-  const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
 
   const [globalFilter, setGlobalFilter] = useState("");
 
   const { createAlert } = useAlertHook();
-  const pagination = useMemo(
-    () => ({
-      pageIndex,
-      pageSize,
-    }),
-    [pageIndex, pageSize]
-  );
+
   const columns = useMemo<ColumnDef<any>[]>(
     () =>
       [
@@ -187,7 +178,6 @@ export default function DigitTable(props: Props) {
     getFilteredRowModel: getFilteredRowModel(),
 
     state: {
-      pagination: pagination,
       globalFilter,
     },
   });
@@ -247,6 +237,30 @@ export default function DigitTable(props: Props) {
               </TableRow>
             ))}
           </TableBody>
+          <TableFooter>
+            <div className="flex items-center justify-end space-x-2 py-4">
+              <h5>
+                {table.getState().pagination.pageIndex + 1} of{" "}
+                {table.getPageCount()} page(s).
+              </h5>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              >
+                Next
+              </Button>
+            </div>
+          </TableFooter>
         </Table>
       </div>
     </div>

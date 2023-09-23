@@ -1,3 +1,191 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
+import React, { useMemo, useRef, useState, useTransition } from "react";
+import { Prisma } from "@prisma/client";
+import {
+  ColumnDef,
+  PaginationState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import useAlertHook from "@rms/hooks/alert-hooks";
+import { Button } from "@rms/components/ui/button";
+import { Input } from "@rms/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@rms/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@rms/components/ui/dropdown-menu";
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
+import { deleteMoreDigit, deleteTwoDigit } from "@rms/service/digit-service";
+import { deleteCurrency } from "@rms/service/currency-service";
+
+type Props = {
+  currencies: Prisma.CurrencyGetPayload<{}>[];
+};
+
+export default function CurrencyTable(props: Props) {
+  const pathName = usePathname();
+  const [isActive, setActiveTransition] = useTransition();
+
+  const [globalFilter, setGlobalFilter] = useState("");
+
+  const { createAlert } = useAlertHook();
+
+  const columns = useMemo<ColumnDef<Prisma.CurrencyGetPayload<{}>>[]>(
+    () => [
+      {
+        accessorKey: "action",
+        cell(originalRow) {
+          const { id, name } = originalRow.row.original;
+
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <DotsHorizontalIcon />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <Link
+                    style={{ cursor: "pointer" }}
+                    href={pathName + "/form?id=" + id}
+                  >
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      disabled={isActive}
+                    >
+                      Edit
+                    </DropdownMenuItem>
+                  </Link>
+
+                  <DropdownMenuItem
+                    disabled={isActive}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      const isConfirm = confirm(
+                        `Do You sure you want to delete ${name} id:${id} `
+                      );
+                      if (isConfirm) {
+                        setActiveTransition(async () => {
+                          const result = await deleteCurrency(id);
+                          createAlert(result);
+                        });
+                      }
+                    }}
+                  >
+                    {isActive ? <> deleteing...</> : "Delete"}
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        },
+      },
+      { accessorKey: "id", header: "ID" },
+      { accessorKey: "name", header: "Name" },
+      { accessorKey: "symbol", header: "Symbol" },
+      {
+        accessorKey: "create_date",
+        header: "Create Date",
+        accessorFn: (e) => e.create_date.toLocaleDateString(),
+      },
+    ],
+    []
+  );
+  const table = useReactTable({
+    data: props.currencies,
+    columns: columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+
+    state: {
+      globalFilter,
+    },
+  });
+
+  return (
+    <div className="flex gap-6 flex-col">
+      <div className="flex justify-between items-center ">
+        <h1>Result: {props.currencies.length}</h1>
+        <Link href={pathName + "/form"} className="">
+          <Button type="button" className="">
+            Add
+          </Button>
+        </Link>
+      </div>
+      <div className="max-w-xs">
+        <Input
+          placeholder="search..."
+          value={globalFilter}
+          onChange={(e) => setGlobalFilter(e.target.value)}
+        />
+      </div>
+
+      {/* Using Vanilla Mantine Table component here */}
+      <div className="p-2">
+        <Table>
+          {/* Use your own markup, customize however you want using the power of Tandiv Table */}
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id} style={{ minWidth: "200px" }}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header ??
+                            header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(
+                      cell.column.columnDef.cell ?? cell.column.columnDef.cell,
+                      cell.getContext()
+                    )}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
+
 // "use client";
 // import {
 //   Button,
