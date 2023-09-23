@@ -49,7 +49,7 @@ const Data = [
       {
         index: 4,
         title: "Export Entry",
-        path: "/admin/accounting/view_export_entry",
+        path: "/admin/accounting/export_entry",
         key: "View_Export_Entry",
       },
       {

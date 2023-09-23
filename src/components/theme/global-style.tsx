@@ -3,6 +3,7 @@ import styled from "styled-components";
 
 export const GlobalStyle = styled.div`
   table {
+    margin-bottom: 5px;
     tbody,
     thead,
     tr,

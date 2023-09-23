@@ -51,57 +51,7 @@ import useAlertHook from "@rms/hooks/alert-hooks";
 import { Loader2 } from "lucide-react";
 import moment from "moment";
 
-type CommonEntryType = Prisma.EntryGetPayload<{
-  include: {
-    currency: true;
-
-    sub_entries: {
-      include: {
-        account_entry: true;
-        more_than_four_digit: true;
-        reference: true;
-        three_digit: true;
-        two_digit: true;
-      };
-    };
-  };
-}>;
-type Props = {
-  date?: [Date, Date];
-  id?: number;
-  two_digit_id?: number;
-  three_digit_id?: number;
-  more_digit_id?: number;
-  account_id?: number;
-  two_digits?: Prisma.Two_DigitGetPayload<{}>[];
-  three_digits?: Prisma.Three_DigitGetPayload<{
-    include: { two_digit: true };
-  }>[];
-  more_digits?: Prisma.More_Than_Four_DigitGetPayload<{
-    include: { three_digit: true };
-  }>[];
-  accounts?: Prisma.Account_EntryGetPayload<{}>[];
-  debit?: $Enums.EntryType;
-  type?: $Enums.DidgitType;
-
-  data: Prisma.EntryGetPayload<{
-    include: {
-      currency: true;
-
-      sub_entries: {
-        include: {
-          account_entry: true;
-          more_than_four_digit: true;
-          reference: true;
-          three_digit: true;
-          two_digit: true;
-        };
-      };
-    };
-  }>[];
-};
-
-export default function EntryDataTable(props: Props) {
+export default function ExportEntryDataTable(props: Props) {
   const [isPadding, setTransition] = useTransition();
   const [isActive, setActiveTransition] = useTransition();
 
@@ -111,6 +61,7 @@ export default function EntryDataTable(props: Props) {
     more_digit_id: props.more_digit_id,
     account_id: props.account_id,
     type: props.type,
+
     debit: props.debit,
     id: props.id,
   });
@@ -153,68 +104,6 @@ export default function EntryDataTable(props: Props) {
   const columns: ColumnDef<CommonEntryType>[] = useMemo(
     () => [
       {
-        accessorKey: "action",
-        cell(originalRow) {
-          const { id, title } = originalRow.row.original;
-
-          return (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <DotsHorizontalIcon />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <Link
-                    style={{ cursor: "pointer" }}
-                    href={pathName + "/form?id=" + id}
-                  >
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      disabled={isActive}
-                    >
-                      Edit
-                    </DropdownMenuItem>
-                  </Link>
-                  <Link
-                    style={{ cursor: "pointer" }}
-                    href={pathName + "/" + id}
-                  >
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      disabled={isActive}
-                    >
-                      View
-                    </DropdownMenuItem>
-                  </Link>
-                  <DropdownMenuItem
-                    disabled={isActive}
-                    className="cursor-pointer"
-                    onClick={() => {
-                      const isConfirm = confirm(
-                        `Do You sure you want to delete ${title} id:${id} `
-                      );
-                      if (isConfirm) {
-                        setActiveTransition(async () => {
-                          const result = await deleteEntry(id);
-
-                          createAlert(result);
-                        });
-                      }
-                    }}
-                  >
-                    {isActive ? <> deleteing...</> : "Delete"}
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          );
-        },
-      },
-      {
         accessorKey: "id", //simple recommended way to define a column
         header: "ID",
       },
@@ -222,7 +111,7 @@ export default function EntryDataTable(props: Props) {
         accessorKey: "create_date", //simple recommended way to define a column
         header: "Date",
         accessorFn(originalRow) {
-          return moment(originalRow?.create_date).format("DD-MM-yyy hh:mm a");
+          return moment(originalRow?.date).format("DD-MM-yyy hh:mm a");
         },
       },
       {
@@ -233,14 +122,12 @@ export default function EntryDataTable(props: Props) {
         accessorKey: "amount" as any, //simple recommended way to define a column
         header: "Amount",
         accessorFn(originalRow) {
-          var amounts = originalRow?.sub_entries
+          var amounts = originalRow?.subEntries
             ?.filter((res) => res.type === "Debit")
             .map((res) => res.amount);
           var amount = 0;
           amounts?.forEach((e) => (amount += e));
-          return `${originalRow?.currency?.symbol}${FormatNumberWithFixed(
-            amount
-          )}`;
+          return `${originalRow?.currency}${FormatNumberWithFixed(amount)}`;
         },
       },
       {
@@ -248,13 +135,13 @@ export default function EntryDataTable(props: Props) {
         header: "SubEntry",
         cell(originalRow) {
           var s = [];
-          originalRow?.row.original?.sub_entries
+          originalRow?.row.original.subEntries
             ?.sort((a, b) => a.type.length - b.type.length)
             .forEach((e, i) =>
               s.push(
                 <TableRow key={e.id + "" + i}>
                   <TableHead align="center">
-                    {originalRow.row.original.currency.symbol}
+                    {originalRow.row.original.currency}
                     {FormatNumberWithFixed(e.amount)}
                   </TableHead>
 
@@ -355,8 +242,126 @@ export default function EntryDataTable(props: Props) {
     []
   );
 
+  const { entries, totalCredit, totalDebit, currencies } = useMemo(() => {
+    var totalDebit: Record<string, number> = {},
+      totalCredit: Record<string, number> = {},
+      currencies: { [k: string]: boolean } = {},
+      entries: CommonEntryType[] = [];
+
+    props.data.forEach((entry) => {
+      const newEntry: CommonEntryType = {
+        amount: 0,
+        currency: entry.currency.symbol,
+        date: entry.to_date,
+        subEntries: [],
+
+        title: entry.title,
+        id: entry.id,
+      };
+
+      const { three_digit_id, account_id, two_digit_id, more_digit_id } =
+        search;
+
+      entry.sub_entries.forEach((subEntry) => {
+        var amount = 0;
+        if (account_id && !two_digit_id && !three_digit_id && !more_digit_id) {
+          if (account_id === subEntry.account_entry_id) {
+            amount = subEntry.amount;
+          }
+        }
+        if (search.two_digit_id) {
+          if (
+            subEntry.two_digit_id === two_digit_id ||
+            subEntry.three_digit?.two_digit_id === two_digit_id ||
+            subEntry.more_than_four_digit?.three_digit?.two_digit_id ===
+              two_digit_id ||
+            subEntry.account_entry?.two_digit_id === two_digit_id ||
+            subEntry.account_entry?.three_digit?.two_digit_id ===
+              two_digit_id ||
+            subEntry.account_entry?.more_than_four_digit?.three_digit
+              ?.two_digit_id === two_digit_id ||
+            subEntry.reference?.two_digit_id === two_digit_id ||
+            subEntry.reference?.three_digit?.two_digit_id === two_digit_id ||
+            subEntry.reference?.more_than_four_digit?.three_digit
+              ?.two_digit_id === two_digit_id
+          ) {
+            amount = subEntry.amount;
+          }
+        } else if (three_digit_id) {
+          if (
+            subEntry.three_digit_id === three_digit_id ||
+            subEntry.more_than_four_digit?.three_digit_id === three_digit_id ||
+            subEntry.account_entry?.three_digit_id === three_digit_id ||
+            subEntry.account_entry?.more_than_four_digit?.three_digit_id ===
+              three_digit_id ||
+            subEntry.reference?.three_digit_id === three_digit_id ||
+            subEntry.reference?.more_than_four_digit?.three_digit_id ===
+              three_digit_id
+          ) {
+            amount = subEntry.amount;
+          }
+        } else if (more_digit_id) {
+          if (
+            subEntry.more_than_four_digit_id === more_digit_id ||
+            subEntry.account_entry?.more_than_four_digit_id === more_digit_id ||
+            subEntry.reference?.more_than_four_digit_id === more_digit_id
+          ) {
+            amount = subEntry.amount;
+          }
+        }
+
+        if (amount === 0) {
+          if (subEntry.type === "Credit") {
+            if (totalCredit[entry.currency.symbol]) {
+              totalCredit[entry.currency.symbol] += subEntry.amount;
+            } else {
+              if (!currencies[entry.currency.symbol]) {
+                currencies[entry.currency.symbol] = true;
+              }
+              totalCredit[entry.currency.symbol] = subEntry.amount;
+            }
+          } else if (totalDebit[entry.currency.symbol]) {
+            totalDebit[entry.currency.symbol] += subEntry.amount;
+          } else {
+            if (!currencies[entry.currency.symbol]) {
+              currencies[entry.currency.symbol] = true;
+            }
+            totalDebit[entry.currency.symbol] = subEntry.amount;
+          }
+        } else {
+          newEntry.amount = amount;
+        }
+
+        if (
+          (two_digit_id ?? 0) !== subEntry.two_digit_id &&
+          (three_digit_id ?? 0) !== subEntry.three_digit_id &&
+          (more_digit_id ?? 0) !== more_digit_id
+        ) {
+          if (
+            account_id &&
+            !two_digit_id &&
+            !three_digit_id &&
+            !more_digit_id
+          ) {
+            if (account_id === subEntry.account_entry_id) {
+              return;
+            } else {
+              newEntry.subEntries.push(subEntry);
+
+              return;
+            }
+          }
+          newEntry.subEntries.push(subEntry);
+        }
+      });
+
+      entries.push(newEntry);
+    });
+
+    return { entries, totalDebit, totalCredit, currencies };
+  }, [props.data]);
   const table = useReactTable({
-    data: props.data,
+    data: entries,
     columns: columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -366,9 +371,10 @@ export default function EntryDataTable(props: Props) {
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+
     state: {
       sorting,
-
+      pagination: { pageSize: 999999, pageIndex: 0 },
       columnFilters,
       columnVisibility,
       rowSelection,
@@ -548,30 +554,76 @@ export default function EntryDataTable(props: Props) {
                 </TableCell>
               </TableRow>
             )}
+            <TableRow>
+              <TableHead colSpan={4} align="center">
+                Amount
+              </TableHead>
+              <TableHead>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="">
+                      <TableHead
+                        colSpan={2}
+                        align="center"
+                        className="w-full text-center"
+                      >
+                        Debit
+                      </TableHead>
+                    </TableRow>
+
+                    {Object.keys(totalDebit).map((res) => (
+                      <TableRow key={res}>
+                        <TableHead>{res}</TableHead>
+                        <TableHead key={res}>
+                          {res}
+                          {FormatNumberWithFixed(totalDebit[res])}
+                        </TableHead>
+                      </TableRow>
+                    ))}
+                  </TableHeader>
+                </Table>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="">
+                      <TableHead
+                        colSpan={2}
+                        align="center"
+                        className="w-full text-center"
+                      >
+                        Credit
+                      </TableHead>
+                    </TableRow>
+
+                    {Object.keys(totalCredit).map((res) => (
+                      <TableRow key={res}>
+                        <TableHead>{res}</TableHead>
+                        <TableHead key={res}>
+                          {res}
+                          {FormatNumberWithFixed(totalCredit[res])}
+                        </TableHead>
+                      </TableRow>
+                    ))}
+                  </TableHeader>
+                </Table>
+              </TableHead>
+            </TableRow>
+            <TableRow>
+              <TableHead colSpan={4}></TableHead>
+              <TableHead>Total</TableHead>
+            </TableRow>
+            {Object.keys(currencies).map((res) => (
+              <TableRow key={res}>
+                <TableHead colSpan={4}></TableHead>
+                <TableHead colSpan={3} align="center">
+                  {res}{" "}
+                  {FormatNumberWithFixed(
+                    (totalCredit[res] ?? 0) - (totalDebit[res] ?? 0)
+                  )}
+                </TableHead>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <h5>
-          {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}{" "}
-          page(s).
-        </h5>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
       </div>
     </Style>
   );
@@ -600,3 +652,116 @@ const Style = styled.div`
     }
   }
 `;
+type CommonEntryType = {
+  title: string;
+
+  id: number;
+  amount: number;
+  currency: string;
+  date: Date;
+  subEntries: Prisma.SubEntryGetPayload<{
+    include: {
+      account_entry: {
+        include: {
+          two_digit: true;
+          three_digit: {
+            include: { two_digit: true };
+          };
+          more_than_four_digit: {
+            include: { three_digit: { include: { two_digit: true } } };
+          };
+        };
+      };
+      more_than_four_digit: {
+        include: { three_digit: { include: { two_digit: true } } };
+      };
+      reference: {
+        include: {
+          two_digit: true;
+          three_digit: {
+            include: { two_digit: true };
+          };
+          more_than_four_digit: {
+            include: { three_digit: { include: { two_digit: true } } };
+          };
+        };
+      };
+      three_digit: { include: { two_digit: true } };
+      two_digit: true;
+    };
+  }>[];
+};
+
+type Props = {
+  date?: [Date, Date];
+  id?: number;
+  two_digit_id?: number;
+  three_digit_id?: number;
+  more_digit_id?: number;
+  account_id?: number;
+  two_digits?: Prisma.Two_DigitGetPayload<{}>[];
+  three_digits?: Prisma.Three_DigitGetPayload<{
+    include: { two_digit: true };
+  }>[];
+  more_digits?: Prisma.More_Than_Four_DigitGetPayload<{
+    include: { three_digit: true };
+  }>[];
+  accounts?: Prisma.Account_EntryGetPayload<{}>[];
+  debit?: $Enums.EntryType;
+  type?: $Enums.DidgitType;
+
+  data: Prisma.EntryGetPayload<{
+    include: {
+      currency: true;
+
+      sub_entries: {
+        include: {
+          account_entry: {
+            include: {
+              more_than_four_digit: {
+                include: {
+                  three_digit: { include: { two_digit: true } };
+                };
+              };
+
+              three_digit: {
+                include: {
+                  two_digit: true;
+                };
+              };
+              two_digit: true;
+            };
+          };
+          reference: {
+            include: {
+              more_than_four_digit: {
+                include: {
+                  three_digit: { include: { two_digit: true } };
+                };
+              };
+
+              three_digit: {
+                include: {
+                  two_digit: true;
+                };
+              };
+              two_digit: true;
+            };
+          };
+          more_than_four_digit: {
+            include: {
+              three_digit: { include: { two_digit: true } };
+            };
+          };
+
+          three_digit: {
+            include: {
+              two_digit: true;
+            };
+          };
+          two_digit: true;
+        };
+      };
+    };
+  }>[];
+};

@@ -3,10 +3,13 @@ import RouteModel from "@rms/models/RouteModel";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React from "react";
+import React, { useCallback, useRef } from "react";
 import styled from "styled-components";
 import SideBarWidget from "./side-bar-widget";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { Button } from "@rms/components/ui/button";
+import { ReloadIcon } from "@radix-ui/react-icons";
+import { ArrowDownIcon } from "lucide-react";
 interface Props {
   route: RouteModel[];
   children: React.ReactNode;
@@ -17,7 +20,15 @@ interface Props {
 }
 export default function HeaderWidget(props: Props) {
   const pathName = usePathname();
+  const scrollRef = useRef<HTMLDivElement>(null);
 
+  const scrollToBottom = useCallback(() => {
+    scrollRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+      inline: "nearest",
+    });
+  }, [scrollRef]);
   return (
     <SideBarStyle>
       <nav>
@@ -50,8 +61,18 @@ export default function HeaderWidget(props: Props) {
         />
 
         <main className="w-full">
-          <div className="p-3">{props.children}</div>
+          <div className="p-3" ref={scrollRef}>
+            {props.children}
+          </div>
         </main>
+
+        <Button
+          type="button"
+          onClick={scrollToBottom}
+          className="absolute bottom-10 right-5 opacity-70 rounded-[50%] h-[50px] w-[50px] hover:opacity-100"
+        >
+          <ArrowDownIcon />
+        </Button>
       </div>
     </SideBarStyle>
   );
