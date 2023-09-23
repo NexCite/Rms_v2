@@ -23,7 +23,7 @@ import { redirect } from "next/navigation";
 export default async function Index() {
   const config = await prisma.config.findFirst();
 
-  if (config !== null) redirect("/login");
+  if (config) redirect("/login");
 
   return <ConfigWidget />;
 }

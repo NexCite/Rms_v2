@@ -44,7 +44,7 @@ export default function UploadWidget(props: Props) {
     <div className="flex justify-center mt-8">
       <div className="w-full rounded-lg  bg-gray-50">
         <div className="bg-white">
-          {!props.isPdf ? (
+          {props.isPdf ? (
             <>
               {path ? (
                 <div>
