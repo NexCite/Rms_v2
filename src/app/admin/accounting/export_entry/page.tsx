@@ -427,6 +427,7 @@ export default async function Entry(props: {
   return (
     <div>
       <ExportEntryDataTable
+        config={config}
         data={entries}
         date={date}
         account_id={account_id}

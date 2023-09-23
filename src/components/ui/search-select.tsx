@@ -31,7 +31,7 @@ export default function SearchSelect(props: Props) {
   return (
     <>
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild disabled={props.disabled} className="z-50">
+        <PopoverTrigger asChild disabled={props.disabled}>
           <Button
             variant="outline"
             role="combobox"

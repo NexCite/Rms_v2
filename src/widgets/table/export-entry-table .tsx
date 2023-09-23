@@ -1,5 +1,11 @@
 "use client";
-import React, { useCallback, useMemo, useState, useTransition } from "react";
+import React, {
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 
 import {
   ColumnDef,
@@ -13,7 +19,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 
 import { Button } from "@rms/components/ui/button";
 import {
@@ -37,23 +42,18 @@ import { usePathname, useRouter } from "next/navigation";
 import styled from "styled-components";
 
 import SearchSelect from "../../components/ui/search-select";
-import Link from "next/link";
+
 import { DateRange } from "react-day-picker";
 import DateRangePicker from "@rms/components/ui/date-range-pciker";
-import {
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@rms/components/ui/dropdown-menu";
-import { deleteEntry } from "@rms/service/entry-service";
+
 import useAlertHook from "@rms/hooks/alert-hooks";
 import { Loader2 } from "lucide-react";
 import moment from "moment";
+import { usePDF } from "react-to-pdf";
+import Image from "next/image";
 
 export default function ExportEntryDataTable(props: Props) {
   const [isPadding, setTransition] = useTransition();
-  const [isActive, setActiveTransition] = useTransition();
 
   const [search, setSearch] = useState({
     two_digit_id: props.two_digit_id,
@@ -77,7 +77,6 @@ export default function ExportEntryDataTable(props: Props) {
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
   const { replace } = useRouter();
-  const { createAlert } = useAlertHook();
 
   const pathName = usePathname();
 
@@ -380,15 +379,25 @@ export default function ExportEntryDataTable(props: Props) {
       rowSelection,
     },
   });
+  const titleRef = useRef<HTMLHeadingElement>();
+  const { toPDF, targetRef } = usePDF();
   return (
     <Style className="w-full ">
       <div className="flex justify-between items-center">
         <h1>Result: {props.data.length}</h1>
-        <Link href={pathName + "/form"} className="">
-          <Button type="button" className="">
-            Add
-          </Button>
-        </Link>
+        <Button
+          className="bg-black"
+          color="dark"
+          onClick={() => {
+            toPDF({
+              filename: `${titleRef?.current?.textContent}.pdf`,
+              method: "save",
+              resolution: 3,
+            });
+          }}
+        >
+          Export
+        </Button>
       </div>
       <form
         className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mt-4 mb-5"
@@ -507,9 +516,78 @@ export default function ExportEntryDataTable(props: Props) {
           )}
         </Button>
       </form>
-      <div className="rounded-md border">
-        <Table>
+      <div className="rounded-md p-2" ref={targetRef}>
+        <Table className="">
           <TableHeader className="static">
+            <TableRow>
+              <TableHead colSpan={5}>
+                <div className="flex  items-center">
+                  <Image
+                    src={"/api/media/" + props.config.logo}
+                    width={60}
+                    height={60}
+                    alt="logo"
+                    style={{ borderRadius: "50%" }}
+                  />
+                  <h1 style={{ fontSize: 24, color: "black" }}>
+                    {props.config.name}
+                  </h1>
+                </div>
+              </TableHead>
+            </TableRow>
+            <TableRow>
+              <TableHead colSpan={2}>
+                To:{" "}
+                {props.two_digit_id
+                  ? `(${props.two_digit_id}) ${
+                      props.two_digits.find(
+                        (res) => res.id === search.two_digit_id
+                      ).name
+                    }`
+                  : ""}
+                {props.three_digit_id
+                  ? `(${props.three_digit_id}) ${
+                      props.three_digits.find(
+                        (res) => res.id === search.three_digit_id
+                      ).name
+                    }`
+                  : ""}
+                {props.more_digit_id
+                  ? `(${props.more_digit_id}) ${
+                      props.more_digits.find(
+                        (res) => res.id === search.more_digit_id
+                      ).name
+                    }`
+                  : ""}
+                {props.account_id
+                  ? `(${props.account_id}) ${
+                      props.accounts.find((res) => res.id === search.account_id)
+                        .username
+                    }`
+                  : ""}
+              </TableHead>
+              <TableHead>
+                Export Date: {moment().format("dddd DD-MM-yyy hh:mm a")}
+              </TableHead>
+              <TableHead>
+                From: {moment(selectDate.from).format("dddd DD-MM-yyy hh:mm a")}
+              </TableHead>
+              <TableHead>
+                To: {moment(selectDate.to).format("dddd DD-MM-yyy hh:mm a")}
+              </TableHead>
+            </TableRow>
+            <TableRow>
+              <TableHead colSpan={5} align="center">
+                <div
+                  ref={titleRef}
+                  contentEditable
+                  className="text-center text-3xl p-5"
+                >
+                  <span>Type title...</span>
+                </div>
+              </TableHead>
+            </TableRow>
+
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -634,7 +712,7 @@ const Style = styled.div`
     thead,
     tr,
     td,
-    th {
+    TableHead {
       color: black;
       font-size: 12pt;
 
@@ -645,7 +723,7 @@ const Style = styled.div`
       margin-top: 5px;
       thead {
         tr {
-          th {
+          TableHead {
           }
         }
       }
@@ -693,6 +771,10 @@ type CommonEntryType = {
 };
 
 type Props = {
+  config: {
+    logo: string;
+    name: string;
+  };
   date?: [Date, Date];
   id?: number;
   two_digit_id?: number;

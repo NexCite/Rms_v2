@@ -228,7 +228,7 @@ export default function AccountEntryTable(props: Props) {
         </div>
 
         {/* Using Vanilla Mantine Table component here */}
-        <div className="rounded-md border">
+        <div className="p-2">
           <Table>
             {/* Use your own markup, customize however you want using the power of Tandiv Table */}
             <TableHeader>

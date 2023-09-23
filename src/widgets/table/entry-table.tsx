@@ -501,7 +501,7 @@ export default function EntryDataTable(props: Props) {
           )}
         </Button>
       </form>
-      <div className="rounded-md border">
+      <div className="rounded-md p-2">
         <Table>
           <TableHeader className="static">
             {table.getHeaderGroups().map((headerGroup) => (
