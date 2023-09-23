@@ -21,6 +21,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -181,6 +182,28 @@ export default function CurrencyTable(props: Props) {
             ))}
           </TableBody>
         </Table>
+        <div className="flex items-center justify-end space-x-2 py-4">
+          <h5>
+            {table.getState().pagination.pageIndex + 1} of{" "}
+            {table.getPageCount()} page(s).
+          </h5>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );
