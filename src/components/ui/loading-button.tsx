@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 
 type Props = {
   loading?: boolean;
-  lable: string;
+  label: string;
 } & (
   | {
       type: "button";
@@ -30,7 +30,7 @@ export default function LoadingButton(props: Props) {
           loading...
         </>
       ) : (
-        <>{props.lable}</>
+        <>{props.label}</>
       )}
     </Button>
   );

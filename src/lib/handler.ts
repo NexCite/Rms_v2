@@ -52,6 +52,7 @@ export async function handlerServiceAction<T>(
           message: "Opration Successfully",
         };
       } catch (error: any) {
+        console.log(error);
         if ((error as any).meta && (error as any).message) {
           var errors: any = {};
           var msg = error.message.split(":");

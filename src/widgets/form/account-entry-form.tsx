@@ -522,7 +522,7 @@ export default function AccountEntryForm(props: {
               <CardFooter className="flex justify-end">
                 <LoadingButton
                   type="submit"
-                  lable={props.account ? "Update" : "Add"}
+                  label={props.account ? "Update" : "Add"}
                   loading={isPadding}
                 />
               </CardFooter>

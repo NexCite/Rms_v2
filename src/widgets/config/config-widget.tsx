@@ -33,7 +33,14 @@ import { useRouter } from "next/navigation";
 const formSchema = z.object({
   name: z.string().min(3),
   logo: z.string().min(3),
-  phone_number: z.string().regex(phoneRegex, "Invalid Phone Number"),
+  phone_number: z
+    .string()
+    .regex(
+      new RegExp(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/),
+      {
+        message: "Invalid phone number",
+      }
+    ),
   email: z.string().email(),
   username: z.string().min(4),
   password: z.string().min(4),
@@ -62,8 +69,8 @@ export default function ConfigWidget() {
   }
 
   return (
-    <div className="flex justify-center items-center m-7">
-      <Card className="w-[350px]">
+    <div className="flex justify-center items-center">
+      <Card className="w-[350px] overflow-y-auto mt-3  max-h-[100vh] ">
         <CardHeader>
           <CardTitle>Create project</CardTitle>
           <CardDescription>Setup for new project </CardDescription>

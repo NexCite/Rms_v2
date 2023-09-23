@@ -449,7 +449,7 @@ export default function DigitForm(props: Props) {
               <CardFooter className="flex justify-end">
                 <LoadingButton
                   type="submit"
-                  lable={props.value ? "Update" : "Add"}
+                  label={props.value ? "Update" : "Add"}
                   loading={isPadding}
                 />
               </CardFooter>
