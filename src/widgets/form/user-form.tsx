@@ -99,16 +99,6 @@ export default function UserFormComponent(props: Props) {
   const { createAlert } = useAlertHook();
 
   const handleSubmit = useCallback((values: z.infer<any>) => {
-    if (values.currency_id) {
-      values.currency_id = parseInt(values.currency_id);
-    }
-    if (values.broker_id) {
-      values.broker_id = parseInt(values.broker_id);
-    }
-    if (values.trader_id) {
-      values.trader_id = parseInt(values.trader_id);
-    }
-
     if (props.value) {
       setTransition(async () => {
         var value2 = JSON.parse(JSON.stringify(values));
@@ -151,7 +141,7 @@ export default function UserFormComponent(props: Props) {
               <CardHeader>
                 {" "}
                 <div className="flex justify-between items-center">
-                  <h1 className="font-medium text-2xl">Entry Form</h1>
+                  <h1 className="font-medium text-2xl">User Form</h1>
                 </div>
                 <hr className="my-12 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
               </CardHeader>
