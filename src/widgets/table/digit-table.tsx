@@ -1,12 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import React, { useMemo, useRef, useState, useTransition } from "react";
 import { Prisma } from "@prisma/client";
 import {
   ColumnDef,
-  PaginationState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -237,31 +236,30 @@ export default function DigitTable(props: Props) {
               </TableRow>
             ))}
           </TableBody>
-          <TableFooter>
-            <div className="flex items-center justify-end space-x-2 py-4">
-              <h5>
-                {table.getState().pagination.pageIndex + 1} of{" "}
-                {table.getPageCount()} page(s).
-              </h5>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-              >
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-              >
-                Next
-              </Button>
-            </div>
-          </TableFooter>
         </Table>
+
+        <div className="flex items-center justify-end space-x-2 py-4">
+          <h5>
+            {table.getState().pagination.pageIndex + 1} of{" "}
+            {table.getPageCount()} page(s).
+          </h5>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );

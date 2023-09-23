@@ -233,8 +233,8 @@ model Currency {
   Entries       Entry[]
   create_date   DateTime @default(now())
   modified_date DateTime @default(now()) @updatedAt
-  user_id       Int
-  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id       Int?
+  user          User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model Category {

@@ -33,6 +33,7 @@ import { useForm } from "react-hook-form";
 import styled from "styled-components";
 import { number, z } from "zod";
 import UploadWidget from "../upload/upload-widget";
+import LoadingButton from "@rms/components/ui/loading-button";
 
 interface Props {
   id?: number;
@@ -292,23 +293,11 @@ export default function EntryForm(props: Props) {
               {" "}
               <div className="flex justify-between items-center">
                 <h1 className="font-medium text-2xl">Entry Form</h1>
-
-                <Button
-                  className="bg-black w-[100px] h-[40px]"
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={isPadding}
-                  color="dark"
-                >
-                  {isPadding ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      loading...
-                    </>
-                  ) : (
-                    <>{props.isEditMode ? "Update" : "Add"}</>
-                  )}
-                </Button>
+                <LoadingButton
+                  label={props.isEditMode ? "Update" : "Add"}
+                  type="submit"
+                  loading={isPadding}
+                />
               </div>
               <hr className="my-12 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
             </CardHeader>

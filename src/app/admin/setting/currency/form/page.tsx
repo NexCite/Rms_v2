@@ -1,7 +1,7 @@
-import { Currency } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import BackButton from "@rms/components/ui/back-button";
-import SettingCurrencyFormComponent from "@rms/components/Setting/forms/SettingCurrencyFormComponent";
 import prisma from "@rms/prisma/prisma";
+import CurrencyForm from "@rms/widgets/form/currency-form";
 import React from "react";
 
 export default async function page(props: {
@@ -10,14 +10,14 @@ export default async function page(props: {
 }) {
   const id = +props.searchParams.id;
   const isEditMode = id ? true : false;
-  var value: Currency;
+  var value: Prisma.CurrencyGetPayload<{}>;
   if (isEditMode) {
     value = await prisma.currency.findUnique({ where: { id: id } });
   }
   return (
     <div>
       <BackButton />
-      <SettingCurrencyFormComponent currency={value} />
+      <CurrencyForm value={value} />
     </div>
   );
 }

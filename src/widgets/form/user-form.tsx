@@ -131,7 +131,6 @@ export default function UserFormComponent(props: Props) {
       });
     }
   }, []);
-  const ref = useRef<HTMLFormElement>();
   return (
     <>
       <Style className="card" onSubmit={form.handleSubmit(handleSubmit)}>

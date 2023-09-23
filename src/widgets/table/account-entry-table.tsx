@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import React, { useMemo, useState, useTransition } from "react";
 
 import styled from "styled-components";
@@ -230,7 +230,6 @@ export default function AccountEntryTable(props: Props) {
         {/* Using Vanilla Mantine Table component here */}
         <div className="p-2">
           <Table>
-            {/* Use your own markup, customize however you want using the power of Tandiv Table */}
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
@@ -264,6 +263,29 @@ export default function AccountEntryTable(props: Props) {
               ))}
             </TableBody>
           </Table>
+
+          <div className="flex items-center justify-end space-x-2 py-4">
+            <h5>
+              {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount()} page(s).
+            </h5>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       </div>
     </Style>
