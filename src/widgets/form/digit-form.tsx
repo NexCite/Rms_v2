@@ -86,7 +86,7 @@ export default function DigitForm(props: Props) {
     switch (props.node) {
       case "two":
         return z.object({
-          id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
+          id: z.number(),
           type: z
             .enum([
               DidgitType.Assets,
@@ -110,7 +110,7 @@ export default function DigitForm(props: Props) {
         });
       case "three":
         return z.object({
-          id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
+          id: z.number(),
           name: z
             .string()
             .min(1, { message: "Name must be at least 1  character" }),
@@ -125,14 +125,12 @@ export default function DigitForm(props: Props) {
             DidgitType.Income_Statement,
           ]),
           debit_credit: z.enum([DebitCreditType.Debit, DebitCreditType.Credit]),
-          two_digit_id: z
-            .number()
-            .or(z.string().regex(/^\d+$/).transform(Number)),
+          two_digit_id: z.number(),
         });
 
       case "more":
         return z.object({
-          id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
+          id: z.number(),
           name: z
             .string()
             .min(1, { message: "Name must be at least 1  character" }),
@@ -147,9 +145,7 @@ export default function DigitForm(props: Props) {
             DidgitType.Income_Statement,
           ]),
           debit_credit: z.enum([DebitCreditType.Debit, DebitCreditType.Credit]),
-          three_digit_id: z
-            .number()
-            .or(z.string().regex(/^\d+$/).transform(Number)),
+          three_digit_id: z.number(),
         });
     }
   }, [props.node]);

@@ -69,7 +69,7 @@ export default function AccountEntryForm(props: {
   const formSchema = useMemo(() => {
     return z
       .object({
-        id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
+        id: z.number(),
         username: z
           .string()
           .min(1, { message: "Name must be at least 1  character" }),
@@ -91,21 +91,15 @@ export default function AccountEntryForm(props: {
         two_digit_id: z
           .number()
 
-          .or(z.string().regex(/^\d+$/).transform(Number))
-
           .optional()
           .nullable(),
         three_digit_id: z
           .number()
 
-          .or(z.string().regex(/^\d+$/).transform(Number))
-
           .optional()
           .nullable(),
         more_than_four_digit_id: z
           .number()
-
-          .or(z.string().regex(/^\d+$/).transform(Number))
 
           .optional()
           .nullable(),

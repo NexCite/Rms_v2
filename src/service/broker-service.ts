@@ -1,66 +1,58 @@
-// "use server";
+"use server";
 
-// import { Broker, Prisma, Trader } from "@prisma/client";
-// import BrokerInterface from "@rms/interfaces/BrokerInterface";
-// import { handlerServiceAction } from "@rms/lib/handler";
+import { Broker, Prisma, Trader } from "@prisma/client";
+import { handlerServiceAction } from "@rms/lib/handler";
 
-// import ServiceActionModel from "@rms/models/ServiceActionModel";
-// import prisma from "@rms/prisma/prisma";
+import ServiceActionModel from "@rms/models/ServiceActionModel";
+import prisma from "@rms/prisma/prisma";
 
-// //todo: add user by token
+//todo: add user by token
 
-// export async function createBroker(
-//   params: Prisma.BrokerCreateInput
-// ): Promise<ServiceActionModel<BrokerInterface>> {
-//   return handlerServiceAction<BrokerInterface>(
-//     async (auth) => {
-//       params.user = {
-//         connect: {
-//           id: auth.user.id,
-//         },
-//       };
-//       var result = await prisma.broker.create({ data: params });
-//       return result;
-//     },
-//     "broker",
-//     true
-//   );
-// }
+export async function createBroker(
+  params: Prisma.BrokerCreateInput
+): Promise<ServiceActionModel<void>> {
+  return handlerServiceAction<void>(
+    async (auth) => {
+      await prisma.broker.create({ data: params });
+      return;
+    },
+    "Add_Broker",
+    true
+  );
+}
 
-// export async function updateBroker(
-//   id: number,
-//   params: Prisma.BrokerUpdateInput
-// ): Promise<ServiceActionModel<BrokerInterface>> {
-//   return handlerServiceAction<BrokerInterface>(
-//     async (auth) => {
-//       var result = await prisma.broker.update({
-//         where: { id },
-//         data: params,
-//       });
+export async function updateBroker(
+  id: number,
+  params: Prisma.BrokerUpdateInput
+): Promise<ServiceActionModel<Prisma.BrokerUpdateInput>> {
+  return handlerServiceAction<Prisma.BrokerUpdateInput>(
+    async (auth) => {
+      return await prisma.broker.update({
+        where: { id },
+        data: params,
+      });
+    },
+    "Edit_Broker",
+    true
+  );
+}
 
-//       return result;
-//     },
-//     "broker",
-//     true
-//   );
-// }
+export async function deleteBrokerById(
+  id: number
+): Promise<ServiceActionModel<void>> {
+  return handlerServiceAction<void>(
+    async (auth) => {
+      if (auth.type === "Admin")
+        await prisma.broker.delete({ where: { id: id } });
+      else
+        await prisma.broker.update({
+          where: { id: id },
+          data: { status: "Deleted" },
+        });
 
-// export async function deleteBrokerById(
-//   id: number
-// ): Promise<ServiceActionModel<void>> {
-//   return handlerServiceAction<void>(
-//     async (auth) => {
-//       if (auth.user.type === "Admin")
-//         await prisma.broker.delete({ where: { id: id } });
-//       else
-//         await prisma.broker.update({
-//           where: { id: id },
-//           data: { status: "Disable" },
-//         });
-
-//       return;
-//     },
-//     "broker",
-//     true
-//   );
-// }
+      return;
+    },
+    "Delete_Broker",
+    true
+  );
+}

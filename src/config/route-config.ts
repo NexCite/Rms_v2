@@ -83,19 +83,19 @@ const Data = [
       {
         index: 2,
         title: "Trader",
-        path: "/admin/trading/view_trading/trader",
+        path: "/admin/trading/accounts/trader",
         key: "View_Traders",
       },
       {
         index: 3,
         title: "Account",
-        path: "/admin/trading/view_trading/account",
+        path: "/admin/trading/accounts/account",
         key: "View_Accounts",
       },
       {
         index: 4,
         title: "Broker",
-        path: "/admin/trading/view_trading/broker",
+        path: "/admin/trading/accounts/broker",
         key: "View_Brokers",
       },
     ],
@@ -110,7 +110,7 @@ const Data = [
     children: [
       {
         index: 0,
-        title: "Currnecy",
+        title: "Currency",
         path: "/admin/setting/currency",
 
         key: "View_Currencies",
@@ -132,6 +132,18 @@ const Data = [
         title: "Profile",
         path: "/admin/trading/profile",
         key: "View_Profile",
+      },
+      {
+        index: 4,
+        title: "Category",
+        path: "/admin/setting/category/category",
+        key: "View_Categories",
+      },
+      {
+        index: 5,
+        title: "SubCategory",
+        path: "/admin/setting/category/sub_category",
+        key: "View_SubCategories",
       },
     ],
 

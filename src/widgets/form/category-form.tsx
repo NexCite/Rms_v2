@@ -1,175 +1,240 @@
-// "use client";
-// import { Button, Grid, LoadingOverlay, Select, TextInput } from "@mantine/core";
-// import { useForm, zodResolver } from "@mantine/form";
-// import { Prisma } from "@prisma/client";
-// import createNotification from "@rms/lib/notification";
-// import { useRouter } from "next/navigation";
-// import React, {
-//   useCallback,
-//   useEffect,
-//   useMemo,
-//   useRef,
-//   useTransition,
-// } from "react";
-// import styled from "styled-components";
-// import { z } from "zod";
-// import {
-//   createCategory,
-//   updateCategory,
-// } from "@rms/services/Category/CategoryService";
-// import {
-//   createSubCategory,
-//   updateSubCategory,
-// } from "@rms/services/Category/SubCategoryService";
+"use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Prisma } from "@prisma/client";
+import useAlertHook from "@rms/hooks/alert-hooks";
+import { createCategory, updateCategory } from "@rms/service/category-service";
+import { useRouter } from "next/navigation";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useTransition,
+} from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
-// type Props = {
-//   node: "category" | "sub_category";
-//   relations?: Prisma.CategoryGetPayload<{}>[];
-//   value?: Prisma.CategoryGetPayload<{}> | Prisma.SubCategoryGetPayload<{}>;
-// };
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@rms/components/ui/form";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@rms/components/ui/card";
+import { Input } from "@rms/components/ui/input";
+import LoadingButton from "@rms/components/ui/loading-button";
+import styled from "styled-components";
+import {
+  createSubCategory,
+  updateSubCategory,
+} from "@rms/service/sub-category-service";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@rms/components/ui/select";
 
-// export default function CategoryFormComponent(props: Props) {
-//   const [isPadding, setTransition] = useTransition();
-//   const { back } = useRouter();
-//   const validation = useMemo(() => {
-//     const zodObj = {
-//       name: z
-//         .string()
-//         .min(3, { message: "First Name must be at least 3 characters" }),
-//     };
+type Props = {
+  node: "category" | "sub_category";
+  relations?: Prisma.CategoryGetPayload<{}>[];
+  value?: Prisma.CategoryGetPayload<{}> | Prisma.SubCategoryGetPayload<{}>;
+};
 
-//     if (props.node === "sub_category") {
-//       zodObj["category_id"] = z
-//         .number()
-//         .or(z.string().regex(/^\d+$/).transform(Number));
-//     }
+export default function CategoryFormComponent(props: Props) {
+  const [isPadding, setTransition] = useTransition();
+  const { back } = useRouter();
+  const validation = useMemo(() => {
+    const zodObj = {
+      name: z
+        .string()
+        .min(3, { message: "First Name must be at least 3 characters" }),
+    };
 
-//     return z.object(zodObj);
-//   }, [props.node]);
-//   const { getInputProps, onSubmit, setValues, setErrors } = useForm({
-//     validate: zodResolver(validation),
-//     initialValues: {},
-//   });
-//   useEffect(() => {
-//     setValues(props.value);
-//   }, [props.value, props.node]);
-//   const handleSubmit = useCallback((values) => {
-//     if (values.category_id) {
-//       values.category_id = parseInt(values.category_id);
-//     }
+    if (props.node === "sub_category") {
+      zodObj["category_id"] = z.number();
+    }
 
-//     if (props.value) {
-//       setTransition(async () => {
-//         var value2 = JSON.parse(JSON.stringify(values));
-//         switch (props.node) {
-//           case "category": {
-//             await updateCategory(props.value.id, value2).then((res) => {
-//               createNotification(res);
-//               setErrors(res.errors);
-//               if (res.status === 200) {
-//                 back();
-//               }
-//             });
-//             break;
-//           }
-//           case "sub_category": {
-//             await updateSubCategory(props.value.id, value2).then((res) => {
-//               createNotification(res);
-//               setErrors(res.errors);
-//               if (res.status === 200) {
-//                 back();
-//               }
-//             });
-//             break;
-//           }
-//         }
-//       });
-//     } else {
-//       setTransition(async () => {
-//         var value2 = JSON.parse(JSON.stringify(values));
-//         switch (props.node) {
-//           case "category": {
-//             await createCategory(value2).then((res) => {
-//               createNotification(res);
-//               setErrors(res.errors);
-//               if (res.status === 200) {
-//                 back();
-//               }
-//             });
-//             break;
-//           }
-//           case "sub_category": {
-//             await createSubCategory(value2).then((res) => {
-//               createNotification(res);
-//               setErrors(res.errors);
-//               if (res.status === 200) {
-//                 back();
-//               }
-//             });
-//             break;
-//           }
-//         }
-//       });
-//     }
-//   }, []);
-//   const ref = useRef<HTMLFormElement>();
-//   return (
-//     <>
-//       <Style className="card" onSubmit={onSubmit(handleSubmit)} ref={ref}>
-//         <LoadingOverlay
-//           visible={isPadding}
-//           overlayBlur={2}
-//           w={ref.current?.offsetWidth}
-//           top={ref.current?.offsetTop}
-//           h={ref.current?.offsetHeight}
-//           left={ref.current?.offsetLeft}
-//         />
-//         <h3>Form {props.node === "category" ? "Category" : "SubCategory"}</h3>
-//         <Grid>
-//           <Grid.Col xs={12}>
-//             <TextInput
-//               withAsterisk
-//               variant="filled"
-//               placeholder="name"
-//               label="Name"
-//               {...getInputProps("name")}
-//             />
-//           </Grid.Col>
-//           {props.node === "sub_category" && (
-//             <Grid.Col xs={12}>
-//               <Select
-//                 searchable
-//                 {...getInputProps("broker_id")}
-//                 clearable
-//                 variant="filled"
-//                 data={
-//                   props.relations?.map((res) => ({
-//                     value: res.id.toString(),
-//                     label: `(${res.id}) ${res.name} `,
-//                   })) || []
-//                 }
-//                 label="Categories"
-//                 placeholder="select category"
-//               ></Select>
-//             </Grid.Col>
-//           )}
-//         </Grid>
-//         <Button color="dark" type="submit" mt={10}>
-//           {props.value ? "Update" : "Add"}
-//         </Button>
-//       </Style>
-//     </>
-//   );
-// }
-// const Style = styled.form`
-//   max-width: 100%;
-//   margin: auto;
-//   margin-top: 10px;
-//   text-transform: capitalize;
-//   h3 {
-//     font-weight: bold;
-//     font-size: 18pt;
-//     margin-bottom: 10px;
-//   }
-//   max-width: 450px;
-// `;
+    return z.object(zodObj);
+  }, [props.node]);
+
+  const form = useForm<z.infer<typeof validation>>({
+    resolver: zodResolver(validation),
+    defaultValues: props.value,
+  });
+  const { createAlert } = useAlertHook();
+
+  const handleSubmit = useCallback((values: z.infer<any>) => {
+    if (values.category_id) {
+      values.category_id = parseInt(values.category_id);
+    }
+
+    if (props.value) {
+      setTransition(async () => {
+        var value2 = JSON.parse(JSON.stringify(values));
+        switch (props.node) {
+          case "category": {
+            await updateCategory(props.value.id, value2).then((res) => {
+              createAlert(res);
+              Object.keys(res.errors ?? []).map((e) => {
+                form.setError(e as any, res[e]);
+              });
+              if (res.status === 200) {
+                back();
+              }
+            });
+            break;
+          }
+          case "sub_category": {
+            await updateSubCategory(props.value.id, value2).then((res) => {
+              createAlert(res);
+              Object.keys(res.errors ?? []).map((e) => {
+                form.setError(e as any, res[e]);
+              });
+              if (res.status === 200) {
+                back();
+              }
+            });
+            break;
+          }
+        }
+      });
+    } else {
+      setTransition(async () => {
+        var value2 = JSON.parse(JSON.stringify(values));
+        switch (props.node) {
+          case "category": {
+            await createCategory(value2).then((res) => {
+              createAlert(res);
+              Object.keys(res.errors ?? []).map((e) => {
+                form.setError(e as any, res[e]);
+              });
+              if (res.status === 200) {
+                back();
+              }
+            });
+            break;
+          }
+          case "sub_category": {
+            await createSubCategory(value2).then((res) => {
+              createAlert(res);
+              Object.keys(res.errors ?? []).map((e) => {
+                form.setError(e as any, res[e]);
+              });
+              if (res.status === 200) {
+                back();
+              }
+            });
+            break;
+          }
+        }
+      });
+    }
+  }, []);
+  const ref = useRef<HTMLFormElement>();
+  return (
+    <>
+      <Style className="card" onSubmit={form.handleSubmit(handleSubmit)}>
+        <Form {...form}>
+          <form className="card" autoComplete="off">
+            <Card>
+              <CardHeader>
+                {" "}
+                <div className="flex justify-between items-center">
+                  <h1 className="font-medium text-2xl">
+                    {props.node === "category" ? "Category" : "SubCategory"}{" "}
+                    Form
+                  </h1>
+                </div>
+                <hr className="my-12 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
+              </CardHeader>
+
+              <CardContent>
+                <div className="grid gap-4">
+                  <div className="grid-cols-12">
+                    <FormField
+                      rules={{ required: true }}
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Name</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="name"
+                              onChange={(e) => {}}
+                              {...field}
+                            />
+                          </FormControl>
+
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  {props.node === "sub_category" && (
+                    <div className="grid-cols-12">
+                      <FormField
+                        rules={{ required: true }}
+                        control={form.control}
+                        name={"category_id"}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Categories</FormLabel>
+                            <FormControl>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="select category" />
+                                </SelectTrigger>
+                                <SelectContent className="w-full p-0  max-h-[200px] overflow-y-auto">
+                                  {props.relations?.map((res) => (
+                                    <SelectItem
+                                      key={res.id}
+                                      value={res.id.toString()}
+                                    >
+                                      {`(${res.id}) ${res.name} `}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-end">
+                <LoadingButton
+                  type="submit"
+                  label={props.value ? "Update" : "Add"}
+                  loading={isPadding}
+                />
+              </CardFooter>
+            </Card>
+          </form>
+        </Form>
+      </Style>
+    </>
+  );
+}
+const Style = styled.form`
+  margin: auto;
+  margin-top: 5px;
+  max-width: 720px;
+`;

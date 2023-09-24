@@ -2,66 +2,59 @@
 
 import { Prisma } from "@prisma/client";
 import { handlerServiceAction } from "@rms/lib/handler";
+
 import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 
 //todo: add user by token
 
-export async function createTrader(
-  params: Prisma.TraderCreateInput
+export async function createAccount(
+  params: Prisma.AccountCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction<void>(
     async (auth) => {
-      params.broker = {
-        connect: {
-          // @ts-ignore
-          id: params.broker_id,
-        },
-      };
-
-      // @ts-ignore
-      delete params.broker_id;
-
-      await prisma.trader.create({ data: params });
+      await prisma.account.create({ data: params });
       return;
     },
-    "Add_Trader",
+    "Add_Account",
     true
   );
 }
 
-export async function updateTrader(
+export async function updateAccount(
   id: number,
-  params: Prisma.TraderUpdateInput
-): Promise<ServiceActionModel<Prisma.TraderUpdateInput>> {
-  return handlerServiceAction<Prisma.TraderUpdateInput>(
+  params: Prisma.AccountUpdateInput
+): Promise<ServiceActionModel<Prisma.AccountUpdateInput>> {
+  return handlerServiceAction<Prisma.AccountUpdateInput>(
     async (auth) => {
-      return await prisma.trader.update({
+      var result = await prisma.account.update({
         where: { id },
         data: params,
       });
+
+      return result;
     },
-    "Edit_Trader",
+    "Edit_Account",
     true
   );
 }
 
-export async function deleteTraderById(
+export async function deleteAccountById(
   id: number
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction<void>(
     async (auth) => {
       if (auth.type === "Admin")
-        await prisma.trader.delete({ where: { id: id } });
+        await prisma.account.delete({ where: { id: id } });
       else
-        await prisma.trader.update({
+        await prisma.account.update({
           where: { id: id },
           data: { status: "Deleted" },
         });
 
       return;
     },
-    "Delete_Trader",
+    "Delete_Account",
     true
   );
 }

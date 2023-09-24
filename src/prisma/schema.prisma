@@ -484,6 +484,16 @@ enum UserPermission {
   Edit_User
   Delete_User
   Add_User
+  Add_SubCategory
+  Delete_SubCategory
+  Edit_SubCategory
+  View_SubCategory
+  View_SubCategories
+  Add_Category
+  Delete_Category
+  Edit_Category
+  View_Category
+  View_Categories
   Add_Currency
   Delete_Currency
   Edit_Currency
