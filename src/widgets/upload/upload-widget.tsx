@@ -12,6 +12,7 @@ import React, { useState, useTransition } from "react";
 import ImageUploading, { ImageListType } from "react-images-uploading";
 import { FileUploader } from "react-drag-drop-files";
 import PDFUploader from "@rms/components/ui/pdf-uploader";
+import Image from "next/image";
 
 type Props = {
   path?: string;
@@ -125,10 +126,11 @@ export default function UploadWidget(props: Props) {
                       )}
                       Remove
                     </Button>
-                    <img
+                    <Image
+                      alt={imageList[0].file?.name}
                       className="mt-3"
                       src={URL.createObjectURL(imageList[0].file as any)}
-                    ></img>
+                    ></Image>
                   </div>
                 ) : (
                   <div className="flex items-center justify-center w-full">

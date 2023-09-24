@@ -46,21 +46,11 @@ type Props = {
 export default function UserTable(props: Props) {
   const pathName = usePathname();
   const [isActive, setActiveTransition] = useTransition();
-  const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
 
   const [globalFilter, setGlobalFilter] = useState("");
 
   const { createAlert } = useAlertHook();
-  const pagination = useMemo(
-    () => ({
-      pageIndex,
-      pageSize,
-    }),
-    [pageIndex, pageSize]
-  );
+
   const columns = useMemo<ColumnDef<Prisma.UserGetPayload<{}>>[]>(
     () => [
       {
@@ -168,7 +158,7 @@ export default function UserTable(props: Props) {
         accessorFn: (e) => e.modified_date.toLocaleDateString(),
       },
     ],
-    []
+    [createAlert, isActive, pathName]
   );
   const table = useReactTable({
     data: props.users,
@@ -180,7 +170,6 @@ export default function UserTable(props: Props) {
     getFilteredRowModel: getFilteredRowModel(),
 
     state: {
-      pagination: pagination,
       globalFilter,
     },
   });
@@ -241,6 +230,28 @@ export default function UserTable(props: Props) {
               ))}
             </TableBody>
           </Table>
+          <div className="flex items-center justify-end space-x-2 py-4">
+            <h5>
+              {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount()} page(s).
+            </h5>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       </div>
     </Style>

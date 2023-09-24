@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { $Enums, EntryType, Prisma, Status } from "@prisma/client";
+import { $Enums, Prisma } from "@prisma/client";
 import { Alert } from "@rms/components/ui/alert";
 import { Button } from "@rms/components/ui/button";
 import { Card, CardContent, CardHeader } from "@rms/components/ui/card";
@@ -16,22 +16,21 @@ import {
   FormMessage,
 } from "@rms/components/ui/form";
 import { Input } from "@rms/components/ui/input";
-import { Label } from "@rms/components/ui/label";
 import SearchSelect from "@rms/components/ui/search-select";
 import SelectMenu from "@rms/components/ui/select-menu";
 import { Textarea } from "@rms/components/ui/textarea";
 import useAlertHook from "@rms/hooks/alert-hooks";
-import { FormatNumber, FormatNumberWithFixed } from "@rms/lib/global";
+import { FormatNumberWithFixed } from "@rms/lib/global";
 import { createEntry, updateEntry } from "@rms/service/entry-service";
-import { DeleteIcon, Loader2, PlusSquare, Text, X } from "lucide-react";
+import { PlusSquare, X } from "lucide-react";
 
 import moment from "moment";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
-import { number, z } from "zod";
+import { z } from "zod";
 import UploadWidget from "../upload/upload-widget";
 import LoadingButton from "@rms/components/ui/loading-button";
 
@@ -279,7 +278,7 @@ export default function EntryForm(props: Props) {
         });
       }
     },
-    [props, forms]
+    [props, forms, media, formSchema, back, form, createAlert]
   );
 
   return (
@@ -292,8 +291,9 @@ export default function EntryForm(props: Props) {
               <div className="flex justify-between items-center">
                 <h1 className="font-medium text-2xl">Entry Form</h1>
                 <LoadingButton
+                  onClick={handleSubmit}
                   label={props.isEditMode ? "Update" : "Add"}
-                  type="submit"
+                  type="button"
                   loading={isPadding}
                 />
               </div>
@@ -456,6 +456,7 @@ export default function EntryForm(props: Props) {
                     <div className="grid-cols-12">
                       {
                         <UploadWidget
+                          isPdf
                           onSave={(e) => {
                             setMedia({ path: e, title: e, type: "Pdf" } as any);
                           }}

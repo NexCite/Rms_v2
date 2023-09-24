@@ -34,7 +34,6 @@ export async function handlerServiceAction<T>(
   } else {
     const auth = await checkUserPermissions(key);
     const url = new URL(urlHeader);
-    const splitUrl = url.pathname.split("/");
 
     if (auth.status === HttpStatusCode.OK) {
       try {

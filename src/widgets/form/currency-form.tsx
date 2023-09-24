@@ -1,17 +1,12 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { $Enums, DidgitType, DebitCreditType, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import useAlertHook from "@rms/hooks/alert-hooks";
-import {
-  createAccountEntry,
-  updateAccountEntry,
-} from "@rms/service/account-entry-service";
 
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -62,30 +57,32 @@ export default function CurrencyForm(props: Props) {
   });
   const { createAlert } = useAlertHook();
 
-  const handleSubmit = useCallback((values: z.infer<typeof formSchema>) => {
-    setTransition(async () => {
-      if (props.value) {
-        setTransition(async () => {
-          const result = await updateCurrency(props.value.id, values);
-          createAlert(result);
-          if (result.status === 200) back();
-          Object.keys(result.errors ?? []).map((e) => {
-            form.setError(e as any, result[e]);
+  const handleSubmit = useCallback(
+    (values: z.infer<typeof formSchema>) => {
+      setTransition(async () => {
+        if (props.value) {
+          setTransition(async () => {
+            const result = await updateCurrency(props.value.id, values);
+            createAlert(result);
+            if (result.status === 200) back();
+            Object.keys(result.errors ?? []).map((e) => {
+              form.setError(e as any, result[e]);
+            });
           });
-        });
-      } else {
-        setTransition(async () => {
-          const result = await createCurrency(values as any);
-          createAlert(result);
-          if (result.status === 200) back();
-          Object.keys(result.errors ?? []).map((e) => {
-            form.setError(e as any, result[e]);
+        } else {
+          setTransition(async () => {
+            const result = await createCurrency(values as any);
+            createAlert(result);
+            if (result.status === 200) back();
+            Object.keys(result.errors ?? []).map((e) => {
+              form.setError(e as any, result[e]);
+            });
           });
-        });
-      }
-    });
-  }, []);
-  const ref = useRef<HTMLFormElement>();
+        }
+      });
+    },
+    [back, createAlert, props.value, form]
+  );
   return (
     <>
       <Style className="card" onSubmit={form.handleSubmit(handleSubmit)}>

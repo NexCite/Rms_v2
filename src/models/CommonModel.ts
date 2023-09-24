@@ -1,9 +1,5 @@
 import { Prisma, Status } from "@prisma/client";
 
-import { TableModel } from "./TableModel";
-import FormModel from "./FormModel";
-import ServiceModel from "./ServiceModel";
-
 export type CommonKeys =
   | "broker"
   | "account"
@@ -197,22 +193,7 @@ type CommonCardData = {
   };
 };
 
-type Action = {
-  path: string;
-
-  name: string;
-};
-type CommonAppConfigReturn = {
-  table?: TableModel;
-  actions?: Action[];
-  form?: {
-    fields?: FormModel[];
-    relations?: CommonRouteKeys[];
-  };
-  validation?: any;
-  service?: ServiceModel;
-};
-export type { CommonCardData, CommonAppConfigReturn };
+export type { CommonCardData };
 
 //new
 

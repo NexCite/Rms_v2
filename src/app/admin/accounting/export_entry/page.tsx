@@ -3,7 +3,6 @@ import moment from "moment";
 import { $Enums, Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
 
-import EntryDataTable from "@rms/widgets/table/entry-table";
 import { getUserInfo } from "@rms/lib/auth";
 import ExportEntryDataTable from "@rms/widgets/table/export-entry-table ";
 type CommonInclude = {

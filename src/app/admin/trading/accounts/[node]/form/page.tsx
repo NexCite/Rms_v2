@@ -3,8 +3,6 @@ import BackButton from "@rms/components/ui/back-button";
 import prisma from "@rms/prisma/prisma";
 import TradingForm from "@rms/widgets/form/trading-form";
 
-import React from "react";
-
 export default async function page(props: {
   params: { node: "broker" | "trader" | "account" };
   searchParams: { id?: string };

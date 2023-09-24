@@ -149,7 +149,7 @@ export default function EntryDataTable(props: Props) {
         );
       });
     },
-    [search, selectDate]
+    [search, selectDate, pathName, replace]
   );
   const columns: ColumnDef<CommonEntryType>[] = useMemo(
     () => [
@@ -359,7 +359,7 @@ export default function EntryDataTable(props: Props) {
         },
       },
     ],
-    []
+    [createAlert, isActive, pathName]
   );
 
   const table = useReactTable({

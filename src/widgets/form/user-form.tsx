@@ -91,46 +91,49 @@ export default function UserFormComponent(props: Props) {
       email: z.string().optional().nullable(),
       permissions: z.array(z.enum(Object.keys($Enums.UserPermission) as any)),
     });
-  }, []);
+  }, [props.value]);
   const form = useForm<z.infer<typeof validation>>({
     resolver: zodResolver(validation),
     defaultValues: props.value,
   });
   const { createAlert } = useAlertHook();
 
-  const handleSubmit = useCallback((values: z.infer<any>) => {
-    if (props.value) {
-      setTransition(async () => {
-        var value2 = JSON.parse(JSON.stringify(values));
+  const handleSubmit = useCallback(
+    (values: z.infer<any>) => {
+      if (props.value) {
+        setTransition(async () => {
+          var value2 = JSON.parse(JSON.stringify(values));
 
-        await updateUser(props.value.id, value2).then((res) => {
-          createAlert(res);
-          Object.keys(res.errors ?? []).map((e) => {
-            form.setError(e as any, res[e]);
+          await updateUser(props.value.id, value2).then((res) => {
+            createAlert(res);
+            Object.keys(res.errors ?? []).map((e) => {
+              form.setError(e as any, res[e]);
+            });
+
+            if (res.status === 200) {
+              back();
+            }
           });
-
-          if (res.status === 200) {
-            back();
-          }
         });
-      });
-    } else {
-      setTransition(async () => {
-        var value2 = JSON.parse(JSON.stringify(values));
+      } else {
+        setTransition(async () => {
+          var value2 = JSON.parse(JSON.stringify(values));
 
-        await createUser(value2).then((res) => {
-          createAlert(res);
-          Object.keys(res.errors ?? []).map((e) => {
-            form.setError(e as any, res[e]);
+          await createUser(value2).then((res) => {
+            createAlert(res);
+            Object.keys(res.errors ?? []).map((e) => {
+              form.setError(e as any, res[e]);
+            });
+
+            if (res.status === 200) {
+              back();
+            }
           });
-
-          if (res.status === 200) {
-            back();
-          }
         });
-      });
-    }
-  }, []);
+      }
+    },
+    [back, createAlert, form, props.value]
+  );
   return (
     <>
       <Style className="card" onSubmit={form.handleSubmit(handleSubmit)}>

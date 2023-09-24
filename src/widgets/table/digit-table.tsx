@@ -185,7 +185,7 @@ export default function DigitTable(props: Props) {
             accessorFn: (p) => p.modified_date?.toLocaleDateString(),
           },
         ] as any),
-    []
+    [createAlert, props.node, isActive, pathName]
   );
   const table = useReactTable({
     data: props.value[props.node],

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React from "react";
 import { usePathname } from "next/navigation";
 import styled from "styled-components";
 
@@ -9,7 +9,7 @@ import RouteModel from "@rms/models/RouteModel";
 interface Props {
   route: RouteModel;
 }
-export default function (props: Props) {
+export default function SideBar(props: Props) {
   const pathName = usePathname();
 
   return props.route?.children ? (

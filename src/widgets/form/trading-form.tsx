@@ -34,7 +34,7 @@ import {
   updateAccount,
 } from "@rms/service/trading-account-service";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useMemo, useRef, useTransition } from "react";
+import React, { useCallback, useMemo, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
 import { z } from "zod";
@@ -106,100 +106,102 @@ export default function TradingForm(props: Props) {
   });
   const { createAlert } = useAlertHook();
 
-  const handleSubmit = useCallback((values: z.infer<any>) => {
-    if (props.value) {
-      setTransition(async () => {
-        var value2 = JSON.parse(JSON.stringify(values));
-        switch (props.node) {
-          case "broker": {
-            await updateBroker(props.value.id, value2).then((res) => {
-              createAlert(res);
-              Object.keys(res.errors ?? []).map((e) => {
-                form.setError(e as any, res[e]);
-              });
+  const handleSubmit = useCallback(
+    (values: z.infer<any>) => {
+      if (props.value) {
+        setTransition(async () => {
+          var value2 = JSON.parse(JSON.stringify(values));
+          switch (props.node) {
+            case "broker": {
+              await updateBroker(props.value.id, value2).then((res) => {
+                createAlert(res);
+                Object.keys(res.errors ?? []).map((e) => {
+                  form.setError(e as any, res[e]);
+                });
 
-              if (res.status === 200) {
-                back();
-              }
-            });
-            break;
-          }
-          case "account": {
-            await updateAccount(props.value.id, value2).then((res) => {
-              createAlert(res);
-              Object.keys(res.errors ?? []).map((e) => {
-                form.setError(e as any, res[e]);
+                if (res.status === 200) {
+                  back();
+                }
               });
+              break;
+            }
+            case "account": {
+              await updateAccount(props.value.id, value2).then((res) => {
+                createAlert(res);
+                Object.keys(res.errors ?? []).map((e) => {
+                  form.setError(e as any, res[e]);
+                });
 
-              if (res.status === 200) {
-                back();
-              }
-            });
-            break;
-          }
-          case "trader": {
-            await updateTrader(props.value.id, value2).then((res) => {
-              createAlert(res);
-              Object.keys(res.errors ?? []).map((e) => {
-                form.setError(e as any, res[e]);
+                if (res.status === 200) {
+                  back();
+                }
               });
+              break;
+            }
+            case "trader": {
+              await updateTrader(props.value.id, value2).then((res) => {
+                createAlert(res);
+                Object.keys(res.errors ?? []).map((e) => {
+                  form.setError(e as any, res[e]);
+                });
 
-              if (res.status === 200) {
-                back();
-              }
-            });
-            break;
-          }
-        }
-      });
-    } else {
-      setTransition(async () => {
-        var value2 = JSON.parse(JSON.stringify(values));
-        switch (props.node) {
-          case "broker": {
-            await createBroker(value2).then((res) => {
-              createAlert(res);
-              Object.keys(res.errors ?? []).map((e) => {
-                form.setError(e as any, res[e]);
+                if (res.status === 200) {
+                  back();
+                }
               });
-
-              if (res.status === 200) {
-                back();
-              }
-            });
-            break;
+              break;
+            }
           }
-          case "account": {
-            await createAccount(value2).then((res) => {
-              createAlert(res);
-              Object.keys(res.errors ?? []).map((e) => {
-                form.setError(e as any, res[e]);
+        });
+      } else {
+        setTransition(async () => {
+          var value2 = JSON.parse(JSON.stringify(values));
+          switch (props.node) {
+            case "broker": {
+              await createBroker(value2).then((res) => {
+                createAlert(res);
+                Object.keys(res.errors ?? []).map((e) => {
+                  form.setError(e as any, res[e]);
+                });
+
+                if (res.status === 200) {
+                  back();
+                }
               });
+              break;
+            }
+            case "account": {
+              await createAccount(value2).then((res) => {
+                createAlert(res);
+                Object.keys(res.errors ?? []).map((e) => {
+                  form.setError(e as any, res[e]);
+                });
 
-              if (res.status === 200) {
-                back();
-              }
-            });
-            break;
-          }
-          case "trader": {
-            await createTrader(value2).then((res) => {
-              createAlert(res);
-              Object.keys(res.errors ?? []).map((e) => {
-                form.setError(e as any, res[e]);
+                if (res.status === 200) {
+                  back();
+                }
               });
+              break;
+            }
+            case "trader": {
+              await createTrader(value2).then((res) => {
+                createAlert(res);
+                Object.keys(res.errors ?? []).map((e) => {
+                  form.setError(e as any, res[e]);
+                });
 
-              if (res.status === 200) {
-                back();
-              }
-            });
-            break;
+                if (res.status === 200) {
+                  back();
+                }
+              });
+              break;
+            }
           }
-        }
-      });
-    }
-  }, []);
-  const ref = useRef<HTMLFormElement>();
+        });
+      }
+    },
+    [form, back, props.node, props.value, createAlert]
+  );
   return (
     <>
       <Style className="card" onSubmit={form.handleSubmit(handleSubmit)}>

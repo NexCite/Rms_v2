@@ -195,7 +195,7 @@ export default function AccountEntryTable(props: Props) {
         accessorFn: (e) => e.modified_date.toLocaleDateString(),
       },
     ],
-    []
+    [createAlert, isActive, pathName]
   );
   const table = useReactTable({
     data: props.accounts,

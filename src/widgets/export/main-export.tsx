@@ -128,7 +128,7 @@ function Tab2(props: Props) {
       }
     });
     return props.entry.currency.symbol + FormatNumberWithFixed(a);
-  }, []);
+  }, [props.entry.sub_entries, props.entry.currency.symbol]);
   return (
     <Style2 className="font-mono">
       <div className={"bg-center flex items-center"}>
@@ -197,7 +197,7 @@ function Tab3(props: Props) {
       }
     });
     return props.entry.currency.symbol + FormatNumberWithFixed(a);
-  }, []);
+  }, [props.entry.currency.symbol, props.entry.sub_entries]);
   return (
     <Style2 className="font-mono">
       <div className={"bg-center flex items-center"}>
@@ -267,7 +267,7 @@ function Tab1(props: Props) {
       }
     });
     return props.entry.currency.symbol + FormatNumberWithFixed(a);
-  }, []);
+  }, [props.entry.currency.symbol, props.entry.sub_entries]);
   return (
     <Style1 className="font-mono">
       <div id="pdf">

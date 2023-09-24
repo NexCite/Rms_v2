@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { $Enums, DidgitType, DebitCreditType, Prisma } from "@prisma/client";
+import { $Enums, Prisma } from "@prisma/client";
 import useAlertHook from "@rms/hooks/alert-hooks";
 import {
   createAccountEntry,
@@ -11,7 +11,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -25,18 +24,11 @@ import {
   CardHeader,
 } from "@rms/components/ui/card";
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useTransition,
-} from "react";
+import React, { useCallback, useMemo, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
 import { z } from "zod";
-import { Button } from "@rms/components/ui/button";
-import { Loader2 } from "lucide-react";
+
 import { Input } from "@rms/components/ui/input";
 import SearchSelect from "@rms/components/ui/search-select";
 import {
@@ -130,105 +122,107 @@ export default function AccountEntryForm(props: {
   });
   const { createAlert } = useAlertHook();
 
-  const handleSubmit = useCallback((values: z.infer<typeof formSchema>) => {
-    setTransition(async () => {
-      if (props.account) {
-        await updateAccountEntry({
-          where: {
-            id: props.account.id,
-          },
-          data: {
-            username: values.username,
-            first_name: values.first_name,
-            last_name: values.last_name,
-            gender: values.gender,
-            phone_number: values.phone_number,
-            address1: values.address_1,
-            address2: values.address_2,
-            country: values.country,
-            email: values.email,
-            id: values.id,
+  const handleSubmit = useCallback(
+    (values: z.infer<typeof formSchema>) => {
+      setTransition(async () => {
+        if (props.account) {
+          await updateAccountEntry({
+            where: {
+              id: props.account.id,
+            },
+            data: {
+              username: values.username,
+              first_name: values.first_name,
+              last_name: values.last_name,
+              gender: values.gender,
+              phone_number: values.phone_number,
+              address1: values.address_1,
+              address2: values.address_2,
+              country: values.country,
+              email: values.email,
+              id: values.id,
 
-            three_digit: values.three_digit_id
-              ? {
-                  connect: {
-                    id: +values.three_digit_id,
-                  },
-                }
-              : undefined,
-            two_digit: values.two_digit_id
-              ? {
-                  connect: {
-                    id: +values.two_digit_id,
-                  },
-                }
-              : undefined,
-            more_than_four_digit: values.more_than_four_digit_id
-              ? {
-                  connect: {
-                    id: +values.more_than_four_digit_id,
-                  },
-                }
-              : undefined,
-          },
-        } as any).then((res) => {
-          createAlert(res);
-          Object.keys(res.errors ?? []).map((e) => {
-            form.setError(e as any, res[e]);
-          });
+              three_digit: values.three_digit_id
+                ? {
+                    connect: {
+                      id: +values.three_digit_id,
+                    },
+                  }
+                : undefined,
+              two_digit: values.two_digit_id
+                ? {
+                    connect: {
+                      id: +values.two_digit_id,
+                    },
+                  }
+                : undefined,
+              more_than_four_digit: values.more_than_four_digit_id
+                ? {
+                    connect: {
+                      id: +values.more_than_four_digit_id,
+                    },
+                  }
+                : undefined,
+            },
+          } as any).then((res) => {
+            createAlert(res);
+            Object.keys(res.errors ?? []).map((e) => {
+              form.setError(e as any, res[e]);
+            });
 
-          if (res.status === 200) {
-            back();
-          }
-        });
-      } else {
-        await createAccountEntry({
-          data: {
-            username: values.username,
-            first_name: values.first_name,
-            last_name: values.last_name,
-            gender: values.gender,
-            phone_number: values.phone_number,
-            address1: values.address_1,
-            address2: values.address_2,
-            country: values.country,
-            email: values.email,
-            id: values.id,
-            two_digit: values.two_digit_id
-              ? {
-                  connect: {
-                    id: +values.two_digit_id,
-                  },
-                }
-              : undefined,
-            three_digit: values.three_digit_id
-              ? {
-                  connect: {
-                    id: +values.three_digit_id,
-                  },
-                }
-              : undefined,
-            more_than_four_digit: values.more_than_four_digit_id
-              ? {
-                  connect: {
-                    id: +values.more_than_four_digit_id,
-                  },
-                }
-              : undefined,
-          },
-        }).then((res) => {
-          createAlert(res);
-          Object.keys(res.errors ?? []).map((e) => {
-            form.setError(e as any, res[e]);
+            if (res.status === 200) {
+              back();
+            }
           });
-          if (res.status === 200) {
-            back();
-          }
-        });
-      }
-    });
-  }, []);
-  const ref = useRef<HTMLFormElement>();
+        } else {
+          await createAccountEntry({
+            data: {
+              username: values.username,
+              first_name: values.first_name,
+              last_name: values.last_name,
+              gender: values.gender,
+              phone_number: values.phone_number,
+              address1: values.address_1,
+              address2: values.address_2,
+              country: values.country,
+              email: values.email,
+              id: values.id,
+              two_digit: values.two_digit_id
+                ? {
+                    connect: {
+                      id: +values.two_digit_id,
+                    },
+                  }
+                : undefined,
+              three_digit: values.three_digit_id
+                ? {
+                    connect: {
+                      id: +values.three_digit_id,
+                    },
+                  }
+                : undefined,
+              more_than_four_digit: values.more_than_four_digit_id
+                ? {
+                    connect: {
+                      id: +values.more_than_four_digit_id,
+                    },
+                  }
+                : undefined,
+            },
+          }).then((res) => {
+            createAlert(res);
+            Object.keys(res.errors ?? []).map((e) => {
+              form.setError(e as any, res[e]);
+            });
+            if (res.status === 200) {
+              back();
+            }
+          });
+        }
+      });
+    },
+    [back, createAlert, props.account, form]
+  );
   return (
     <>
       <Style className="card" onSubmit={form.handleSubmit(handleSubmit)}>

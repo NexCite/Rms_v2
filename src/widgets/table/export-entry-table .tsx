@@ -98,7 +98,7 @@ export default function ExportEntryDataTable(props: Props) {
         );
       });
     },
-    [search, selectDate]
+    [search, selectDate, pathName, replace]
   );
   const columns: ColumnDef<CommonEntryType>[] = useMemo(
     () => [
@@ -358,7 +358,7 @@ export default function ExportEntryDataTable(props: Props) {
     });
 
     return { entries, totalDebit, totalCredit, currencies };
-  }, [props.data]);
+  }, [props.data, search]);
   const table = useReactTable({
     data: entries,
     columns: columns,

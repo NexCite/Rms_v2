@@ -4,20 +4,13 @@ import { Prisma } from "@prisma/client";
 import useAlertHook from "@rms/hooks/alert-hooks";
 import { createCategory, updateCategory } from "@rms/service/category-service";
 import { useRouter } from "next/navigation";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useTransition,
-} from "react";
+import React, { useCallback, useMemo, useRef, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -36,13 +29,7 @@ import {
   createSubCategory,
   updateSubCategory,
 } from "@rms/service/sub-category-service";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@rms/components/ui/select";
+
 import SearchSelect from "@rms/components/ui/search-select";
 
 type Props = {
@@ -74,74 +61,72 @@ export default function CategoryForm(props: Props) {
   });
   const { createAlert } = useAlertHook();
 
-  const handleSubmit = useCallback((values: z.infer<any>) => {
-    if (values.category_id) {
-      values.category_id = parseInt(values.category_id);
-    }
-
-    if (props.value) {
-      setTransition(async () => {
-        var value2 = JSON.parse(JSON.stringify(values));
-        switch (props.node) {
-          case "category": {
-            await updateCategory(props.value.id, value2).then((res) => {
-              createAlert(res);
-              Object.keys(res.errors ?? []).map((e) => {
-                form.setError(e as any, res[e]);
+  const handleSubmit = useCallback(
+    (values: z.infer<any>) => {
+      if (props.value) {
+        setTransition(async () => {
+          var value2 = JSON.parse(JSON.stringify(values));
+          switch (props.node) {
+            case "category": {
+              await updateCategory(props.value.id, value2).then((res) => {
+                createAlert(res);
+                Object.keys(res.errors ?? []).map((e) => {
+                  form.setError(e as any, res[e]);
+                });
+                if (res.status === 200) {
+                  back();
+                }
               });
-              if (res.status === 200) {
-                back();
-              }
-            });
-            break;
-          }
-          case "sub_category": {
-            await updateSubCategory(props.value.id, value2).then((res) => {
-              createAlert(res);
-              Object.keys(res.errors ?? []).map((e) => {
-                form.setError(e as any, res[e]);
+              break;
+            }
+            case "sub_category": {
+              await updateSubCategory(props.value.id, value2).then((res) => {
+                createAlert(res);
+                Object.keys(res.errors ?? []).map((e) => {
+                  form.setError(e as any, res[e]);
+                });
+                if (res.status === 200) {
+                  back();
+                }
               });
-              if (res.status === 200) {
-                back();
-              }
-            });
-            break;
+              break;
+            }
           }
-        }
-      });
-    } else {
-      setTransition(async () => {
-        var value2 = JSON.parse(JSON.stringify(values));
-        switch (props.node) {
-          case "category": {
-            await createCategory(value2).then((res) => {
-              createAlert(res);
-              Object.keys(res.errors ?? []).map((e) => {
-                form.setError(e as any, res[e]);
+        });
+      } else {
+        setTransition(async () => {
+          var value2 = JSON.parse(JSON.stringify(values));
+          switch (props.node) {
+            case "category": {
+              await createCategory(value2).then((res) => {
+                createAlert(res);
+                Object.keys(res.errors ?? []).map((e) => {
+                  form.setError(e as any, res[e]);
+                });
+                if (res.status === 200) {
+                  back();
+                }
               });
-              if (res.status === 200) {
-                back();
-              }
-            });
-            break;
-          }
-          case "sub_category": {
-            await createSubCategory(value2).then((res) => {
-              createAlert(res);
-              Object.keys(res.errors ?? []).map((e) => {
-                form.setError(e as any, res[e]);
+              break;
+            }
+            case "sub_category": {
+              await createSubCategory(value2).then((res) => {
+                createAlert(res);
+                Object.keys(res.errors ?? []).map((e) => {
+                  form.setError(e as any, res[e]);
+                });
+                if (res.status === 200) {
+                  back();
+                }
               });
-              if (res.status === 200) {
-                back();
-              }
-            });
-            break;
+              break;
+            }
           }
-        }
-      });
-    }
-  }, []);
-  const ref = useRef<HTMLFormElement>();
+        });
+      }
+    },
+    [back, createAlert, props.node, props.value, form]
+  );
   return (
     <>
       <Style className="card" onSubmit={form.handleSubmit(handleSubmit)}>

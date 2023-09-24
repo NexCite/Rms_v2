@@ -13,18 +13,22 @@ type Props = {
 export default function useAlertHook() {
   const { replace } = useRouter();
 
-  const createAlert = useCallback((props: Props) => {
-    toast({
-      title: props?.status === 200 ? "Operation Successful" : "Operation Error",
-      variant: props?.status === 200 ? "default" : "destructive",
-      description: props.message,
-      type: "foreground",
-    });
+  const createAlert = useCallback(
+    (props: Props) => {
+      toast({
+        title:
+          props?.status === 200 ? "Operation Successful" : "Operation Error",
+        variant: props?.status === 200 ? "default" : "destructive",
+        description: props.message,
+        type: "foreground",
+      });
 
-    if (props.replace) {
-      replace(props.replace);
-    }
-  }, []);
+      if (props.replace) {
+        replace(props.replace);
+      }
+    },
+    [replace]
+  );
 
   return {
     createAlert,

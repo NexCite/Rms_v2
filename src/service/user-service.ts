@@ -1,6 +1,6 @@
 "use server";
 
-import { Prisma, User, UserPermission } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { handlerServiceAction } from "@rms/lib/handler";
 
 import { hashPassword } from "@rms/lib/hash";

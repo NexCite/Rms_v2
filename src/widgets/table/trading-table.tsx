@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useMemo, useRef, useState, useTransition } from "react";
+import React, { useMemo, useState, useTransition } from "react";
 import { Prisma } from "@prisma/client";
 import {
   ColumnDef,
@@ -203,7 +203,7 @@ export default function TradingTable(props: Props) {
             accessorFn: (e) => e.modified_date.toLocaleDateString(),
           },
         ] as any) as any,
-    []
+    [createAlert, props.node, isActive, pathName]
   );
   const table = useReactTable({
     data: props.data,
@@ -218,8 +218,6 @@ export default function TradingTable(props: Props) {
       globalFilter,
     },
   });
-
-  const ref = useRef<HTMLDivElement>();
 
   return (
     <div className="flex gap-6 flex-col">

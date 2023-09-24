@@ -134,7 +134,7 @@ export default function CategoryTable(props: Props) {
         accessorFn: (e) => e.modified_date.toLocaleDateString(),
       },
     ],
-    []
+    [createAlert, props.node, isActive, pathName]
   );
   const table = useReactTable({
     data: props.data,

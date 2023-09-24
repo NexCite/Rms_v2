@@ -2,8 +2,7 @@ import React from "react";
 import moment from "moment";
 import { $Enums, Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
-import { writeFileSync } from "fs";
-import Loading from "@rms/components/ui/loading";
+
 import EntryDataTable from "@rms/widgets/table/entry-table";
 import { getUserInfo } from "@rms/lib/auth";
 export default async function Entry(props: {

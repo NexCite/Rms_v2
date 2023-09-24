@@ -117,7 +117,7 @@ export default function CurrencyTable(props: Props) {
         accessorFn: (e) => e.create_date.toLocaleDateString(),
       },
     ],
-    []
+    [createAlert, isActive, pathName]
   );
   const table = useReactTable({
     data: props.currencies,

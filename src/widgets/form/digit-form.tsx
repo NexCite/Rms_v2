@@ -3,15 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { $Enums, DidgitType, DebitCreditType, Prisma } from "@prisma/client";
 import useAlertHook from "@rms/hooks/alert-hooks";
-import {
-  createAccountEntry,
-  updateAccountEntry,
-} from "@rms/service/account-entry-service";
 
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -156,122 +151,124 @@ export default function DigitForm(props: Props) {
   });
   const { createAlert } = useAlertHook();
 
-  const handleSubmit = useCallback((values: z.infer<typeof formSchema>) => {
-    setTransition(async () => {
-      if (props.value) {
-        setTransition(async () => {
-          switch (props.node) {
-            case "three":
-              var value2 = JSON.parse(
-                JSON.stringify(values)
-              ) as Prisma.Three_DigitUncheckedUpdateInput;
-              value2.two_digit_id = +(value2.two_digit_id + "");
-              await updateThreeDigit(props.value.id, value2).then((res) => {
-                createAlert(res);
-                Object.keys(res.errors ?? []).map((e) => {
-                  form.setError(e as any, res[e]);
+  const handleSubmit = useCallback(
+    (values: z.infer<typeof formSchema>) => {
+      setTransition(async () => {
+        if (props.value) {
+          setTransition(async () => {
+            switch (props.node) {
+              case "three":
+                var value2 = JSON.parse(
+                  JSON.stringify(values)
+                ) as Prisma.Three_DigitUncheckedUpdateInput;
+                value2.two_digit_id = +(value2.two_digit_id + "");
+                await updateThreeDigit(props.value.id, value2).then((res) => {
+                  createAlert(res);
+                  Object.keys(res.errors ?? []).map((e) => {
+                    form.setError(e as any, res[e]);
+                  });
+                  if (res.status === 200) {
+                    back();
+                  }
                 });
-                if (res.status === 200) {
-                  back();
-                }
-              });
-              break;
-            case "two":
-              var value1 = JSON.parse(
-                JSON.stringify(values)
-              ) as Prisma.Two_DigitUncheckedUpdateInput;
+                break;
+              case "two":
+                var value1 = JSON.parse(
+                  JSON.stringify(values)
+                ) as Prisma.Two_DigitUncheckedUpdateInput;
 
-              await updateTwoDigit(props.value.id, value1).then((res) => {
-                createAlert(res);
-                Object.keys(res.errors ?? []).map((e) => {
-                  form.setError(e as any, res[e]);
+                await updateTwoDigit(props.value.id, value1).then((res) => {
+                  createAlert(res);
+                  Object.keys(res.errors ?? []).map((e) => {
+                    form.setError(e as any, res[e]);
+                  });
+                  if (res.status === 200) {
+                    back();
+                  }
                 });
-                if (res.status === 200) {
-                  back();
-                }
-              });
 
-              break;
-            case "more":
-              var value3 = JSON.parse(
-                JSON.stringify(values)
-              ) as Prisma.More_Than_Four_DigitUncheckedUpdateInput;
-              value3.three_digit_id = +(value3.three_digit_id + "");
+                break;
+              case "more":
+                var value3 = JSON.parse(
+                  JSON.stringify(values)
+                ) as Prisma.More_Than_Four_DigitUncheckedUpdateInput;
+                value3.three_digit_id = +(value3.three_digit_id + "");
 
-              await updateMoreDigit(props.value.id, value3).then((res) => {
-                createAlert(res);
-                Object.keys(res.errors ?? []).map((e) => {
-                  form.setError(e as any, res[e]);
+                await updateMoreDigit(props.value.id, value3).then((res) => {
+                  createAlert(res);
+                  Object.keys(res.errors ?? []).map((e) => {
+                    form.setError(e as any, res[e]);
+                  });
+                  if (res.status === 200) {
+                    back();
+                  }
                 });
-                if (res.status === 200) {
-                  back();
-                }
-              });
 
-              break;
-            default:
-              break;
-          }
-        });
-      } else {
-        setTransition(async () => {
-          switch (props.node) {
-            case "three":
-              var value2 = JSON.parse(
-                JSON.stringify(values)
-              ) as Prisma.Three_DigitUncheckedCreateInput;
-              value2.two_digit_id = +(value2.two_digit_id + "");
-              await createThreeDigit(value2).then((res) => {
-                createAlert(res);
-                Object.keys(res.errors ?? []).map((e) => {
-                  form.setError(e as any, res[e]);
+                break;
+              default:
+                break;
+            }
+          });
+        } else {
+          setTransition(async () => {
+            switch (props.node) {
+              case "three":
+                var value2 = JSON.parse(
+                  JSON.stringify(values)
+                ) as Prisma.Three_DigitUncheckedCreateInput;
+                value2.two_digit_id = +(value2.two_digit_id + "");
+                await createThreeDigit(value2).then((res) => {
+                  createAlert(res);
+                  Object.keys(res.errors ?? []).map((e) => {
+                    form.setError(e as any, res[e]);
+                  });
+                  if (res.status === 200) {
+                    back();
+                  }
                 });
-                if (res.status === 200) {
-                  back();
-                }
-              });
-              break;
-            case "two":
-              var value1 = JSON.parse(
-                JSON.stringify(values)
-              ) as Prisma.Two_DigitUncheckedCreateInput;
+                break;
+              case "two":
+                var value1 = JSON.parse(
+                  JSON.stringify(values)
+                ) as Prisma.Two_DigitUncheckedCreateInput;
 
-              await createTwoDigit(value1).then((res) => {
-                createAlert(res);
-                Object.keys(res.errors ?? []).map((e) => {
-                  form.setError(e as any, res[e]);
+                await createTwoDigit(value1).then((res) => {
+                  createAlert(res);
+                  Object.keys(res.errors ?? []).map((e) => {
+                    form.setError(e as any, res[e]);
+                  });
+                  if (res.status === 200) {
+                    back();
+                  }
                 });
-                if (res.status === 200) {
-                  back();
-                }
-              });
 
-              break;
-            case "more":
-              var value3 = JSON.parse(
-                JSON.stringify(values)
-              ) as Prisma.More_Than_Four_DigitUncheckedCreateInput;
-              value3.three_digit_id = +(value3.three_digit_id + "");
+                break;
+              case "more":
+                var value3 = JSON.parse(
+                  JSON.stringify(values)
+                ) as Prisma.More_Than_Four_DigitUncheckedCreateInput;
+                value3.three_digit_id = +(value3.three_digit_id + "");
 
-              await createMoreDigit(value3).then((res) => {
-                createAlert(res);
-                Object.keys(res.errors ?? []).map((e) => {
-                  form.setError(e as any, res[e]);
+                await createMoreDigit(value3).then((res) => {
+                  createAlert(res);
+                  Object.keys(res.errors ?? []).map((e) => {
+                    form.setError(e as any, res[e]);
+                  });
+                  if (res.status === 200) {
+                    back();
+                  }
                 });
-                if (res.status === 200) {
-                  back();
-                }
-              });
 
-              break;
-            default:
-              break;
-          }
-        });
-      }
-    });
-  }, []);
-  const ref = useRef<HTMLFormElement>();
+                break;
+              default:
+                break;
+            }
+          });
+        }
+      });
+    },
+    [back, createAlert, props.node, props.value, form]
+  );
   return (
     <>
       <Style className="card" onSubmit={form.handleSubmit(handleSubmit)}>
