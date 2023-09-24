@@ -42,9 +42,7 @@ export async function handlerServiceAction<T>(
 
         if (update) {
           const paths = generatePaths(url.pathname);
-          paths.forEach((e) =>
-            e === "/admin" ? undefined : revalidatePath(e)
-          );
+          paths.forEach((e) => revalidatePath(e));
         }
         return {
           status: HttpStatusCode.OK,
