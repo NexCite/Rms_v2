@@ -43,6 +43,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rms/components/ui/select";
+import SearchSelect from "@rms/components/ui/search-select";
 
 type Props = {
   node: "category" | "sub_category";
@@ -186,29 +187,18 @@ export default function CategoryForm(props: Props) {
                       <FormField
                         rules={{ required: true }}
                         control={form.control}
-                        name={"category_id"}
+                        name={"category_id" as any}
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Categories</FormLabel>
                             <FormControl>
-                              <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="select category" />
-                                </SelectTrigger>
-                                <SelectContent className="w-full p-0  max-h-[200px] overflow-y-auto">
-                                  {props.relations?.map((res) => (
-                                    <SelectItem
-                                      key={res.id}
-                                      value={res.id.toString()}
-                                    >
-                                      {`(${res.id}) ${res.name} `}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                              <SearchSelect
+                                data={props.relations}
+                                hit="select categories"
+                                label="categories"
+                                onChange={(e) => field.onChange(e)}
+                                default={field.value}
+                              />
                             </FormControl>
 
                             <FormMessage />
