@@ -203,7 +203,6 @@ export default function EntryForm(props: Props) {
           : undefined,
       };
       const result = formSchema.safeParse(m);
-      console.log(m);
       form.clearErrors([
         "currency",
         "description",
@@ -273,7 +272,6 @@ export default function EntryForm(props: Props) {
           } else {
             const result = await createEntry(m);
             createAlert(result);
-            console.log(result.status);
             if (result.status === 200) {
               back();
             }
@@ -473,7 +471,7 @@ export default function EntryForm(props: Props) {
                     </div>
                     <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-5 mb-4" />
                     {forms?.sub_entries?.map((res, i) => (
-                      <div className="mb-5 ">
+                      <div className="mb-5 " key={i}>
                         <div className="flex justify-between items-center">
                           <h1>SubEntry: {i + 1}</h1>
                           <Button

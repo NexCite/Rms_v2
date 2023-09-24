@@ -50,6 +50,7 @@ import { deleteEntry } from "@rms/service/entry-service";
 import useAlertHook from "@rms/hooks/alert-hooks";
 import { Loader2 } from "lucide-react";
 import moment from "moment";
+import Authorized from "@rms/components/ui/authorized";
 
 type CommonEntryType = Prisma.EntryGetPayload<{
   include: {
@@ -168,46 +169,52 @@ export default function EntryDataTable(props: Props) {
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                  <Link
-                    style={{ cursor: "pointer" }}
-                    href={pathName + "/form?id=" + id}
-                  >
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      disabled={isActive}
+                  <Authorized permission="Edit_Entry">
+                    <Link
+                      style={{ cursor: "pointer" }}
+                      href={pathName + "/form?id=" + id}
                     >
-                      Edit
-                    </DropdownMenuItem>
-                  </Link>
-                  <Link
-                    style={{ cursor: "pointer" }}
-                    href={pathName + "/" + id}
-                  >
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      disabled={isActive}
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        disabled={isActive}
+                      >
+                        Edit
+                      </DropdownMenuItem>
+                    </Link>
+                  </Authorized>
+                  <Authorized permission="View_Entry">
+                    <Link
+                      style={{ cursor: "pointer" }}
+                      href={pathName + "/" + id}
                     >
-                      View
-                    </DropdownMenuItem>
-                  </Link>
-                  <DropdownMenuItem
-                    disabled={isActive}
-                    className="cursor-pointer"
-                    onClick={() => {
-                      const isConfirm = confirm(
-                        `Do You sure you want to delete ${title} id:${id} `
-                      );
-                      if (isConfirm) {
-                        setActiveTransition(async () => {
-                          const result = await deleteEntry(id);
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        disabled={isActive}
+                      >
+                        View
+                      </DropdownMenuItem>
+                    </Link>
+                  </Authorized>
+                  <Authorized permission="Delete_Entry">
+                    <DropdownMenuItem
+                      disabled={isActive}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        const isConfirm = confirm(
+                          `Do You sure you want to delete ${title} id:${id} `
+                        );
+                        if (isConfirm) {
+                          setActiveTransition(async () => {
+                            const result = await deleteEntry(id);
 
-                          createAlert(result);
-                        });
-                      }
-                    }}
-                  >
-                    {isActive ? <> deleteing...</> : "Delete"}
-                  </DropdownMenuItem>
+                            createAlert(result);
+                          });
+                        }
+                      }}
+                    >
+                      {isActive ? <> deleteing...</> : "Delete"}
+                    </DropdownMenuItem>
+                  </Authorized>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -378,11 +385,13 @@ export default function EntryDataTable(props: Props) {
     <Style className="w-full ">
       <div className="flex justify-between items-center">
         <h1>Result: {props.data.length}</h1>
-        <Link href={pathName + "/form"} className="">
-          <Button type="button" className="">
-            Add
-          </Button>
-        </Link>
+        <Authorized permission="Add_Entry">
+          <Link href={pathName + "/form"} className="">
+            <Button type="button" className="">
+              Add
+            </Button>
+          </Link>
+        </Authorized>
       </div>
       <form
         className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mt-4 mb-5"

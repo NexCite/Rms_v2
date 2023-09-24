@@ -4,7 +4,6 @@ import AccountEntryTable from "@rms/widgets/table/account-entry-table";
 
 export default async function page() {
   const user = await getUserInfo();
-  console.log(user);
 
   const accounts = await prisma.account_Entry.findMany({
     include: {

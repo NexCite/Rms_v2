@@ -36,6 +36,7 @@ import {
 } from "@rms/components/ui/dropdown-menu";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { deleteMoreDigit, deleteTwoDigit } from "@rms/service/digit-service";
+import Authorized from "@rms/components/ui/authorized";
 
 type Props = {
   node: CommonNode;
@@ -74,41 +75,60 @@ export default function DigitTable(props: Props) {
                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
-                    <Link
-                      style={{ cursor: "pointer" }}
-                      href={pathName + "/form?id=" + id}
+                    <Authorized
+                      permission={
+                        props.node === "two"
+                          ? "Edit_Two_Digit"
+                          : props.node === "three"
+                          ? "Edit_Three_Digit"
+                          : "Edit_More_Than_Four_Digit"
+                      }
+                    >
+                      <Link
+                        style={{ cursor: "pointer" }}
+                        href={pathName + "/form?id=" + id}
+                      >
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          disabled={isActive}
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </Link>
+                    </Authorized>
+                    <Authorized
+                      permission={
+                        props.node === "two"
+                          ? "Delete_Two_Digit"
+                          : props.node === "three"
+                          ? "Delete_Three_Digit"
+                          : "Delete_More_Than_Four_Digit"
+                      }
                     >
                       <DropdownMenuItem
-                        className="cursor-pointer"
                         disabled={isActive}
+                        className="cursor-pointer"
+                        onClick={() => {
+                          const isConfirm = confirm(
+                            `Do You sure you want to delete ${username} id:${id} `
+                          );
+                          if (isConfirm) {
+                            setActiveTransition(async () => {
+                              const result =
+                                props.node === "two"
+                                  ? await deleteTwoDigit(id)
+                                  : props.node === "three"
+                                  ? await deleteTwoDigit(id)
+                                  : await deleteMoreDigit(id);
+
+                              createAlert(result);
+                            });
+                          }
+                        }}
                       >
-                        Edit
+                        {isActive ? <> deleteing...</> : "Delete"}
                       </DropdownMenuItem>
-                    </Link>
-
-                    <DropdownMenuItem
-                      disabled={isActive}
-                      className="cursor-pointer"
-                      onClick={() => {
-                        const isConfirm = confirm(
-                          `Do You sure you want to delete ${username} id:${id} `
-                        );
-                        if (isConfirm) {
-                          setActiveTransition(async () => {
-                            const result =
-                              props.node === "two"
-                                ? await deleteTwoDigit(id)
-                                : props.node === "three"
-                                ? await deleteTwoDigit(id)
-                                : await deleteMoreDigit(id);
-
-                            createAlert(result);
-                          });
-                        }
-                      }}
-                    >
-                      {isActive ? <> deleteing...</> : "Delete"}
-                    </DropdownMenuItem>
+                    </Authorized>
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -187,11 +207,21 @@ export default function DigitTable(props: Props) {
     <div className="flex gap-6 flex-col">
       <div className="flex justify-between items-center ">
         <h1>Result: {props.value[props.node].length}</h1>
-        <Link href={pathName + "/form"} className="">
-          <Button type="button" className="">
-            Add
-          </Button>
-        </Link>
+        <Authorized
+          permission={
+            props.node === "two"
+              ? "Add_Two_Digit"
+              : props.node === "three"
+              ? "Add_Three_Digit"
+              : "Add_More_Than_Four_Digit"
+          }
+        >
+          <Link href={pathName + "/form"} className="">
+            <Button type="button" className="">
+              Add
+            </Button>
+          </Link>
+        </Authorized>
       </div>
       <div className="max-w-xs">
         <Input
