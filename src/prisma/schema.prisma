@@ -243,9 +243,9 @@ model Category {
   sub_categories SubCategory[]
   create_date    DateTime      @default(now())
   modified_date  DateTime      @default(now())
-  user_id        Int
+  user_id        Int?
 
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model SubCategory {
@@ -256,9 +256,9 @@ model SubCategory {
   category      Category  @relation(fields: [category_id], references: [id], onDelete: Cascade)
   create_date   DateTime  @default(now())
   modified_date DateTime  @default(now())
-  user_id       Int
+  user_id       Int?
 
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 enum SubCategoryType {
