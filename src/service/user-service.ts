@@ -30,7 +30,6 @@ export async function updateUser(
 ): Promise<ServiceActionModel<Prisma.UserUpdateInput>> {
   return handlerServiceAction(
     async (auth) => {
-      console.log(params);
       if (params.password) {
         params.password = hashPassword(params.password.toString());
       }

@@ -1,12 +1,10 @@
 "use client";
 import React, { useTransition } from "react";
 
-import { Button } from "@rms/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@rms/components/ui/card";
@@ -15,7 +13,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -24,15 +21,15 @@ import {
 import { Input } from "@rms/components/ui/input";
 import { useForm } from "react-hook-form";
 import z from "zod";
-import { phoneRegex } from "@rms/lib/common";
 import UploadWidget from "../upload/upload-widget";
 import { createConfig } from "@rms/service/config-service";
 import useAlertHook from "@rms/hooks/alert-hooks";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import LoadingButton from "@rms/components/ui/loading-button";
 const formSchema = z.object({
   name: z.string().min(3),
   logo: z.string().min(3),
+  first_name: z.string().min(3),
+  last_name: z.string().min(3),
   phone_number: z
     .string()
     .regex(
@@ -51,14 +48,6 @@ export default function ConfigWidget() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      username: "",
-      password: "",
-      logo: "",
-      email: "",
-      name: "",
-      phone_number: "",
-    },
   });
   function onSubmit(values: z.infer<typeof formSchema>) {
     setTransition(async () => {
@@ -90,6 +79,34 @@ export default function ConfigWidget() {
                     <FormLabel>App Name</FormLabel>
                     <FormControl>
                       <Input placeholder="app name" {...field} />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="first_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>First Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="first name" {...field} />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="last_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="last name" {...field} />
                     </FormControl>
 
                     <FormMessage />
@@ -178,16 +195,11 @@ export default function ConfigWidget() {
               />
 
               <div className="flex justify-end">
-                <Button disabled={isPadding} type="submit">
-                  {isPadding ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      loading...
-                    </>
-                  ) : (
-                    "Create"
-                  )}
-                </Button>
+                <LoadingButton
+                  type="submit"
+                  label="Create"
+                  loading={isPadding}
+                />
               </div>
             </form>
           </Form>

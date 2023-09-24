@@ -1,4 +1,5 @@
 "use server";
+import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
@@ -35,13 +36,16 @@ export async function middleware(request: NextRequest) {
         headers: { Cookie: `rms-auth=${auth.value}`, url: request.url },
       }
     ).then((res) => res.json());
-    if (!checkAuth.status) {
+    if (!checkAuth.data) {
       return NextResponse.redirect(url);
     }
-    console.log(checkAuth);
+
+    response.cookies.set("rms-permissions", JSON.stringify(checkAuth.data));
+
     return response;
   } catch (error) {
-    return response;
+    console.log(error);
+    return NextResponse.redirect(url);
   }
 }
 export const config = {

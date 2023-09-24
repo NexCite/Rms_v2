@@ -7,7 +7,7 @@ import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 
 export async function createConfig(
-  params: Prisma.ConfigCreateInput
+  params: Prisma.ConfigCreateInput & { first_name: string; last_name: string }
 ): Promise<ServiceActionModel<HttpStatusCode>> {
   params.password = hashPassword(params.password);
 
@@ -19,11 +19,20 @@ export async function createConfig(
     };
   }
 
-  const result = await prisma.config.create({ data: params });
+  const result = await prisma.config.create({
+    data: {
+      name: params.name,
+      password: params.password,
+      username: params.username,
+      email: params.email,
+      logo: params.logo,
+      phone_number: params.phone_number,
+    },
+  });
   await prisma.user.create({
     data: {
-      first_name: "admin",
-      last_name: "admin",
+      first_name: params.first_name,
+      last_name: params.last_name,
       gender: "Male",
       phone_number: params.phone_number,
       username: params.username,

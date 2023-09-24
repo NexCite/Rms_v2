@@ -49,6 +49,7 @@ import { rankItem, compareItems } from "@tanstack/match-sorter-utils";
 import { Input } from "@rms/components/ui/input";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { deleteAccountEntry } from "@rms/service/account-entry-service";
+import Authorized from "@rms/components/ui/authorized";
 
 type Props = {
   accounts: CommonAccountType[];
@@ -90,36 +91,39 @@ export default function AccountEntryTable(props: Props) {
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                  <Link
-                    style={{ cursor: "pointer" }}
-                    href={pathName + "/form?id=" + id}
-                  >
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      disabled={isActive}
+                  <Authorized permission="Edit_AccountEntry">
+                    <Link
+                      style={{ cursor: "pointer" }}
+                      href={pathName + "/form?id=" + id}
                     >
-                      Edit
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        disabled={isActive}
+                      >
+                        Edit
+                      </DropdownMenuItem>
+                    </Link>
+                  </Authorized>
+                  <Authorized permission="Delete_AccountEntry">
+                    <DropdownMenuItem
+                      disabled={isActive}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        const isConfirm = confirm(
+                          `Do You sure you want to delete ${username} id:${id} `
+                        );
+                        if (isConfirm) {
+                          setActiveTransition(async () => {
+                            const result = await deleteAccountEntry(id);
+
+                            createAlert(result);
+                          });
+                        }
+                      }}
+                    >
+                      {isActive ? <> deleteing...</> : "Delete"}
                     </DropdownMenuItem>
-                  </Link>
-
-                  <DropdownMenuItem
-                    disabled={isActive}
-                    className="cursor-pointer"
-                    onClick={() => {
-                      const isConfirm = confirm(
-                        `Do You sure you want to delete ${username} id:${id} `
-                      );
-                      if (isConfirm) {
-                        setActiveTransition(async () => {
-                          const result = await deleteAccountEntry(id);
-
-                          createAlert(result);
-                        });
-                      }
-                    }}
-                  >
-                    {isActive ? <> deleteing...</> : "Delete"}
-                  </DropdownMenuItem>
+                  </Authorized>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -213,11 +217,13 @@ export default function AccountEntryTable(props: Props) {
       <div className="flex gap-6 flex-col">
         <div className="flex justify-between items-center ">
           <h1>Result: {props.accounts.length}</h1>
-          <Link href={pathName + "/form"} className="">
-            <Button type="button" className="">
-              Add
-            </Button>
-          </Link>
+          <Authorized permission="Add_AccountEntry">
+            <Link href={pathName + "/form"} className="">
+              <Button type="button" className="">
+                Add
+              </Button>
+            </Link>
+          </Authorized>
         </div>
         <div className="max-w-xs">
           <Input

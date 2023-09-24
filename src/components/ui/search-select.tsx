@@ -61,9 +61,9 @@ export default function SearchSelect(props: Props) {
             <CommandInput placeholder={`Search ${props.hit}`} />
             <CommandEmpty>No result.</CommandEmpty>
             <CommandGroup className="w-full p-0  max-h-[200px] overflow-y-auto bg-white z-50">
-              {props.data.map((res) => (
+              {props.data.map((res, i) => (
                 <CommandItem
-                  key={res.name}
+                  key={i}
                   onSelect={(currentValue) => {
                     var ress = value === res.id ? undefined : res.id;
                     setValue(ress);

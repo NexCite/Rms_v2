@@ -134,7 +134,6 @@ export default function AccountEntryForm(props: {
     resolver: zodResolver(formSchema),
     defaultValues: props.account,
   });
-  console.log(form.formState.errors);
   const { createAlert } = useAlertHook();
 
   const handleSubmit = useCallback((values: z.infer<typeof formSchema>) => {

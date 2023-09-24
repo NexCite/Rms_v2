@@ -80,7 +80,7 @@ export async function checkUserPermissions(
 }
 
 export async function GetUserRoute(middleware?: boolean): Promise<
-  | boolean
+  | $Enums.UserPermission[]
   | {
       id: number;
       username: string;
@@ -92,14 +92,14 @@ export async function GetUserRoute(middleware?: boolean): Promise<
 
   if (middleware) {
     if (!token) {
-      return false;
+      return undefined;
     }
 
     if (!token.value) {
-      return false;
+      return undefined;
     }
     if (!verifyToken(token.value)) {
-      return false;
+      return undefined;
     }
 
     const auth = await prisma.auth.findMany({
@@ -110,13 +110,13 @@ export async function GetUserRoute(middleware?: boolean): Promise<
         },
       },
     });
-    if (auth.length === 0) return false;
+    if (auth.length === 0) return undefined;
 
     const routes = GetRoutes(auth[0].user.permissions);
     const url = new URL(headers().get("url") ?? "");
-    if (RouteSkip.includes(url.pathname)) return true;
+    if (RouteSkip.includes(url.pathname)) return auth[0].user.permissions;
 
-    if (routes.length === 0) return false;
+    if (routes.length === 0) return undefined;
     const pathRotues: string[] = [];
     routes.map((res) => {
       pathRotues.push(res.path);
@@ -124,8 +124,8 @@ export async function GetUserRoute(middleware?: boolean): Promise<
     });
 
     if (pathRotues.filter((res) => url.pathname.startsWith(res)).length === 0)
-      return false;
-    return true;
+      return undefined;
+    return auth[0].user.permissions;
   }
 
   if (!token) {
