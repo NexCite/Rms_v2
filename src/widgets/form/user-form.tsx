@@ -401,14 +401,7 @@ export default function UserFormComponent(props: Props) {
   );
 }
 const Style = styled.div`
-  max-width: 100%;
   margin: auto;
-  margin-top: 10px;
-  text-transform: capitalize;
-  h3 {
-    font-weight: bold;
-    font-size: 18pt;
-    margin-bottom: 10px;
-  }
-  max-width: 450px;
+  margin-top: 5px;
+  max-width: 720px;
 `;

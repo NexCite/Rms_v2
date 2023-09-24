@@ -52,7 +52,7 @@ type Props = {
     | Prisma.TraderGetPayload<{}>;
 };
 
-export default function TradingAccountFormComponent(props: Props) {
+export default function TradingForm(props: Props) {
   const [isPadding, setTransition] = useTransition();
   const { back } = useRouter();
   const validation = useMemo(() => {

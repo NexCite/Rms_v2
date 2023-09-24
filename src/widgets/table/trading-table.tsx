@@ -52,7 +52,7 @@ type Props =
       data: Prisma.BrokerGetPayload<{}>[];
     };
 
-export default function TradingAccountTable(props: Props) {
+export default function TradingTable(props: Props) {
   const pathName = usePathname();
   const [isActive, setActiveTransition] = useTransition();
 
@@ -122,7 +122,7 @@ export default function TradingAccountTable(props: Props) {
                         }
                       }}
                     >
-                      {isActive ? <> deleteing...</> : "Delete"}
+                      {isActive ? <> deleting...</> : "Delete"}
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                 </DropdownMenuContent>

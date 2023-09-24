@@ -126,7 +126,7 @@ export default function DigitTable(props: Props) {
                           }
                         }}
                       >
-                        {isActive ? <> deleteing...</> : "Delete"}
+                        {isActive ? <> deleting...</> : "Delete"}
                       </DropdownMenuItem>
                     </Authorized>
                   </DropdownMenuGroup>

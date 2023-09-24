@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import BackButton from "@rms/components/ui/back-button";
 import prisma from "@rms/prisma/prisma";
-import TradingAccountFormComponent from "@rms/widgets/form/trading-account-form";
+import TradingForm from "@rms/widgets/form/trading-form";
 
 import React from "react";
 
@@ -72,7 +72,7 @@ export default async function page(props: {
   return (
     <>
       <BackButton />
-      <TradingAccountFormComponent
+      <TradingForm
         relations={relation as any}
         value={value as any}
         node={props.params.node}

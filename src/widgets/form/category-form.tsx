@@ -50,7 +50,7 @@ type Props = {
   value?: Prisma.CategoryGetPayload<{}> | Prisma.SubCategoryGetPayload<{}>;
 };
 
-export default function CategoryFormComponent(props: Props) {
+export default function CategoryForm(props: Props) {
   const [isPadding, setTransition] = useTransition();
   const { back } = useRouter();
   const validation = useMemo(() => {
@@ -233,7 +233,7 @@ export default function CategoryFormComponent(props: Props) {
     </>
   );
 }
-const Style = styled.form`
+const Style = styled.div`
   margin: auto;
   margin-top: 5px;
   max-width: 720px;

@@ -1,48 +1,49 @@
-// import { Prisma } from "@prisma/client";
-// import BackButton from "@rms/components/ui/back-button";
-// import prisma from "@rms/prisma/prisma";
-// import React from "react";
+import { Prisma } from "@prisma/client";
+import BackButton from "@rms/components/ui/back-button";
+import prisma from "@rms/prisma/prisma";
+import CategoryForm from "@rms/widgets/form/category-form";
+import React from "react";
 
-// export default async function page(props: {
-//   params: { node: "category" | "sub_category" };
-//   searchParams: { id?: string };
-// }) {
-//   const id = +props.searchParams.id;
-//   const isEditMode = id ? true : false;
-//   var value: Prisma.CategoryGetPayload<{}> | Prisma.SubCategoryGetPayload<{}>;
+export default async function page(props: {
+  params: { node: "category" | "sub_category" };
+  searchParams: { id?: string };
+}) {
+  const id = +props.searchParams.id;
+  const isEditMode = id ? true : false;
+  var value: Prisma.CategoryGetPayload<{}> | Prisma.SubCategoryGetPayload<{}>;
 
-//   var relation: Prisma.CategoryGetPayload<{}>[];
+  var relation: Prisma.CategoryGetPayload<{}>[];
 
-//   switch (props.params.node) {
-//     case "sub_category":
-//       if (isEditMode) {
-//         value = await prisma.subCategory.findUnique({ where: { id: id } });
-//       }
+  switch (props.params.node) {
+    case "sub_category":
+      if (isEditMode) {
+        value = await prisma.subCategory.findUnique({ where: { id: id } });
+      }
 
-//       relation = await prisma.category.findMany();
+      relation = await prisma.category.findMany();
 
-//       break;
+      break;
 
-//     case "category":
-//       if (isEditMode) {
-//         value = await prisma.category.findUnique({
-//           where: { id },
-//         });
-//       }
+    case "category":
+      if (isEditMode) {
+        value = await prisma.category.findUnique({
+          where: { id },
+        });
+      }
 
-//       break;
-//     default:
-//       break;
-//   }
+      break;
+    default:
+      break;
+  }
 
-//   return (
-//     <>
-//       <BackButton />
-//       <CategoryFormComponent
-//         relations={relation}
-//         value={value}
-//         node={props.params.node}
-//       />
-//     </>
-//   );
-// }
+  return (
+    <>
+      <BackButton />
+      <CategoryForm
+        relations={relation}
+        value={value}
+        node={props.params.node}
+      />
+    </>
+  );
+}

@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
+import CategoryTable from "@rms/widgets/table/category-table";
 
 export default async function page(props: {
   params: { node: "category" | "sub_category" };
@@ -21,7 +22,7 @@ export default async function page(props: {
 
   return (
     <div>
-      {/* <CategoryTableComponent data={value as any} node={props.params.node} /> */}
+      <CategoryTable data={value as any} node={props.params.node} />
     </div>
   );
 }

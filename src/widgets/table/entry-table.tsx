@@ -212,7 +212,7 @@ export default function EntryDataTable(props: Props) {
                         }
                       }}
                     >
-                      {isActive ? <> deleteing...</> : "Delete"}
+                      {isActive ? <> deleting...</> : "Delete"}
                     </DropdownMenuItem>
                   </Authorized>
                 </DropdownMenuGroup>

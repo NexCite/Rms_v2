@@ -36,18 +36,20 @@ import {
 } from "@rms/components/ui/dropdown-menu";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { deleteMoreDigit, deleteTwoDigit } from "@rms/service/digit-service";
+import { deleteCategoryById } from "@rms/service/category-service";
+import { deleteSubCategoryById } from "@rms/service/sub-category-service";
 
-type Props = {
-  node: CommonNode;
-  value: {
-    two: Prisma.Two_DigitGetPayload<{}>[];
-    three: Prisma.Three_DigitGetPayload<{}>[];
-    more: Prisma.More_Than_Four_DigitGetPayload<{}>[];
-  };
-};
-type CommonNode = "two" | "three" | "more";
+type Props =
+  | {
+      node: "category";
+      data: Prisma.CategoryGetPayload<{}>[];
+    }
+  | {
+      node: "sub_category";
+      data: Prisma.SubCategoryGetPayload<{}>[];
+    };
 
-export default function DigitTable(props: Props) {
+export default function CategoryTable(props: Props) {
   const pathName = usePathname();
   const [isActive, setActiveTransition] = useTransition();
 
@@ -56,119 +58,86 @@ export default function DigitTable(props: Props) {
   const { createAlert } = useAlertHook();
 
   const columns = useMemo<ColumnDef<any>[]>(
-    () =>
-      [
-        {
-          accessorKey: "action",
-          cell(originalRow) {
-            const { id, username } = originalRow.row.original;
+    () => [
+      {
+        accessorKey: "action",
+        cell(originalRow) {
+          const { id, name } = originalRow.row.original;
 
-            return (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-8 w-8 p-0">
-                    <DotsHorizontalIcon />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
-                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    <Link
-                      style={{ cursor: "pointer" }}
-                      href={pathName + "/form?id=" + id}
-                    >
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        disabled={isActive}
-                      >
-                        Edit
-                      </DropdownMenuItem>
-                    </Link>
-
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <DotsHorizontalIcon />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <Link
+                    style={{ cursor: "pointer" }}
+                    href={pathName + "/form?id=" + id}
+                  >
                     <DropdownMenuItem
-                      disabled={isActive}
                       className="cursor-pointer"
-                      onClick={() => {
-                        const isConfirm = confirm(
-                          `Do You sure you want to delete ${username} id:${id} `
-                        );
-                        if (isConfirm) {
-                          setActiveTransition(async () => {
-                            const result =
-                              props.node === "two"
-                                ? await deleteTwoDigit(id)
-                                : props.node === "three"
-                                ? await deleteTwoDigit(id)
-                                : await deleteMoreDigit(id);
-
-                            createAlert(result);
-                          });
-                        }
-                      }}
+                      disabled={isActive}
                     >
-                      {isActive ? <> deleteing...</> : "Delete"}
+                      Edit
                     </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            );
-          },
-        },
-        {
-          accessorKey: "id", //simple recommended way to define a column
-          header: "Id",
-          id: "id",
-        },
+                  </Link>
 
-        {
-          accessorKey: "name", //simple recommended way to define a column
-          header: "Name",
-        },
-        {
-          accessorKey: "type", //simple recommended way to define a column
-          header: "Type",
-        },
-        {
-          accessorKey: "debit_credit", //simple recommended way to define a column
-          header: "Debit/Credit",
-        },
-      ]
-        .concat(
-          props.node !== "two"
-            ? ([
-                {
-                  accessorKey: props.node === "three" ? "two" : "three", //simple recommended way to define a column
-                  header: props.node === "three" ? "Two Digit" : "Three Digit",
-                  accessorFn: (p) =>
-                    `(${p.two_digit?.id ?? ""}${p.three_digit?.id ?? ""}) ${
-                      p.two_digit?.name ?? ""
-                    }${p.three_digit?.name ?? ""}  `,
-                },
-              ] as any)
-            : []
-        )
-        .concat([
-          {
-            accessorKey: "create_date", //simple recommended way to define a column
-            header: "Create Date",
-            columnDefType: "data",
-            id: "create_date",
-            accessorFn: (p) => p.create_date?.toLocaleDateString(),
-          },
+                  <DropdownMenuItem
+                    disabled={isActive}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      const isConfirm = confirm(
+                        `Do You sure you want to delete ${name} id:${id} `
+                      );
+                      if (isConfirm) {
+                        setActiveTransition(async () => {
+                          const result =
+                            props.node === "category"
+                              ? await deleteCategoryById(id)
+                              : await deleteSubCategoryById(id);
 
-          {
-            accessorKey: "modified_date", //simple recommended way to define a column
-            header: "Modified Date",
-            columnDefType: "data",
-            id: "modified_date",
-            accessorFn: (p) => p.modified_date?.toLocaleDateString(),
-          },
-        ] as any),
+                          createAlert(result);
+                        });
+                      }
+                    }}
+                  >
+                    {isActive ? <> deleting...</> : "Delete"}
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        },
+      },
+      {
+        accessorKey: "id", //simple recommended way to define a column
+        header: "ID",
+      },
+      {
+        accessorKey: "name", //simple recommended way to define a column
+        header: "Name",
+      },
+      {
+        accessorKey: "create_date", //simple recommended way to define a column
+        header: "Create Date",
+        accessorFn: (e) => e.create_date.toLocaleDateString(),
+      },
+
+      {
+        accessorKey: "modified_date", //simple recommended way to define a column
+        header: "Modified Date",
+        accessorFn: (e) => e.modified_date.toLocaleDateString(),
+      },
+    ],
     []
   );
   const table = useReactTable({
-    data: props.value[props.node],
+    data: props.data,
     columns: columns,
 
     getCoreRowModel: getCoreRowModel(),
@@ -186,7 +155,7 @@ export default function DigitTable(props: Props) {
   return (
     <div className="flex gap-6 flex-col">
       <div className="flex justify-between items-center ">
-        <h1>Result: {props.value[props.node].length}</h1>
+        <h1>Result: {props.data.length}</h1>
         <Link href={pathName + "/form"} className="">
           <Button type="button" className="">
             Add

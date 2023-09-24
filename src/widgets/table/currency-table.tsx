@@ -99,7 +99,7 @@ export default function CurrencyTable(props: Props) {
                         }
                       }}
                     >
-                      {isActive ? <> deleteing...</> : "Delete"}
+                      {isActive ? <> deleting...</> : "Delete"}
                     </DropdownMenuItem>
                   </Authorized>
                 </DropdownMenuGroup>

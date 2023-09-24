@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
-import TradingAccountTable from "@rms/widgets/table/trading-account-table";
+import TradingTable from "@rms/widgets/table/trading-table";
 
 export default async function page(props: {
   params: { node: "broker" | "trader" | "account" };
@@ -54,7 +54,7 @@ export default async function page(props: {
 
   return (
     <div>
-      <TradingAccountTable data={value as any} node={props.params.node} />
+      <TradingTable data={value as any} node={props.params.node} />
     </div>
   );
 }

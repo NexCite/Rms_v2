@@ -43,7 +43,7 @@ type Props = {
   users: Prisma.UserGetPayload<{}>[];
 };
 
-export default function UserTableComponent(props: Props) {
+export default function UserTable(props: Props) {
   const pathName = usePathname();
   const [isActive, setActiveTransition] = useTransition();
   const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
@@ -107,7 +107,7 @@ export default function UserTableComponent(props: Props) {
                       }
                     }}
                   >
-                    {isActive ? <> deleteing...</> : "Delete"}
+                    {isActive ? <> deleting...</> : "Delete"}
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>

@@ -121,7 +121,7 @@ export default function AccountEntryTable(props: Props) {
                         }
                       }}
                     >
-                      {isActive ? <> deleteing...</> : "Delete"}
+                      {isActive ? <> deleting...</> : "Delete"}
                     </DropdownMenuItem>
                   </Authorized>
                 </DropdownMenuGroup>
