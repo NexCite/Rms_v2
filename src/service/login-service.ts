@@ -20,15 +20,7 @@ export async function createLogin(params: {
     if (isPasswordOk) {
       var token = generateToken(user.username);
       cookies().set("rms-auth", token);
-      var auth = await prisma.auth.findMany({
-        where: { user_id: user.id, status: "Enable" },
-      });
-      if (auth.length > 0) {
-        await prisma.auth.updateMany({
-          where: { status: "Enable", user_id: user.id },
-          data: { status: "Disable" },
-        });
-      }
+
       await prisma.auth.create({
         data: { token: token, user_id: user.id, status: "Enable" },
       });

@@ -92,7 +92,7 @@ export default function DigitTable(props: Props) {
                           className="cursor-pointer"
                           disabled={isActive}
                         >
-                          Delete
+                          Edit
                         </DropdownMenuItem>
                       </Link>
                     </Authorized>

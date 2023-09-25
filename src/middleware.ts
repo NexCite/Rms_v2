@@ -1,5 +1,4 @@
 "use server";
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
@@ -34,6 +33,8 @@ export async function middleware(request: NextRequest) {
       {
         method: "Get",
         headers: { Cookie: `rms-auth=${auth.value}`, url: request.url },
+        next: { revalidate: 1 },
+        cache: "no-store",
       }
     ).then((res) => res.json());
     if (!checkAuth.data) {

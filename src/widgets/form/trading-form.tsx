@@ -89,7 +89,7 @@ export default function TradingForm(props: Props) {
       }
       case "account": {
         return z.object({
-          id: z.number(),
+          id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
           username: z
             .string()
             .min(3, { message: "Username must be at least 3 characters" }),
@@ -450,13 +450,13 @@ export default function TradingForm(props: Props) {
                           name={"trader_id"}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Traders</FormLabel>
+                              <FormLabel>Trader</FormLabel>
                               <FormControl>
                                 <SearchSelect
                                   hit="search traders"
                                   label="Traders"
                                   default={field.value as number}
-                                  data={props.relations[props.node]}
+                                  data={props.relations.traders}
                                   onChange={(e) => {
                                     field.onChange(e);
                                   }}
@@ -476,13 +476,13 @@ export default function TradingForm(props: Props) {
                           name={"currency_id"}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Traders</FormLabel>
+                              <FormLabel>Currency</FormLabel>
                               <FormControl>
                                 <SearchSelect
                                   hit="search currencies"
                                   label="Currencies"
                                   default={field.value as number}
-                                  data={props.relations[props.node]}
+                                  data={props.relations["currencies"]}
                                   onChange={(e) => {
                                     field.onChange(e);
                                   }}

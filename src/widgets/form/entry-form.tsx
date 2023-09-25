@@ -98,14 +98,20 @@ export default function EntryForm(props: Props) {
         description: z.string().min(3),
         note: z.string().optional(),
         currency: z.object({
-          connect: z.object({ id: z.number() }),
+          connect: z.object({
+            id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
+          }),
         }),
       })
     : z.object({
         title: z.string().min(3),
         description: z.string().min(3),
         note: z.string().optional(),
-        currency: z.object({ connect: z.object({ id: z.number() }) }),
+        currency: z.object({
+          connect: z.object({
+            id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
+          }),
+        }),
         sub_entries: z.object({
           createMany: z.object({
             data: z

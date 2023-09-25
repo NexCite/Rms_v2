@@ -8,7 +8,6 @@ import {
   Typography,
   List,
   ListItem,
-  ListItemPrefix,
   Accordion,
   AccordionHeader,
   AccordionBody,
@@ -36,15 +35,15 @@ export function Sidebar(props: Props) {
   const [open, setOpen] = React.useState(
     props.routers.find((res) => pathName.startsWith(res.path))?.index ?? -1
   );
-
+  console.log(props.routers);
   return (
     <Card className="h-full w-full p-3">
       <div className="flex flex-col items-center">
         <Image
           src={`/api/media/${props.config.logo}`}
           alt={props.config.name}
-          width={100}
-          height={100}
+          width={80}
+          height={80}
           className="rounded-full"
         />
       </div>
@@ -164,6 +163,8 @@ export function Sidebar(props: Props) {
     </Card>
   );
 }
+
+export const dynamic = "force-dynamic";
 
 // export default function SideBar(props: Props) {
 //   const pathName = usePathname();

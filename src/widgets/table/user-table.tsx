@@ -202,6 +202,15 @@ export default function UserTable(props: Props) {
                     No results.
                   </TableCell>
                 </TableRow>
+              ) : table.getRowModel().rows.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
               ) : (
                 table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
