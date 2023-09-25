@@ -309,9 +309,6 @@ enum DidgitType {
   Owner_Equity
   Expensive
   Income
-  Trial_Balance
-  Balance_Sheet
-  Income_Statement
 }
 
 model Two_Digit {

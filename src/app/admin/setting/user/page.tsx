@@ -10,6 +10,9 @@ export default async function page(props: {
     where: {
       status: "Enable",
     },
+    orderBy: {
+      id: "desc",
+    },
   });
 
   return (

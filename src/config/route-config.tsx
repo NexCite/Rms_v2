@@ -83,7 +83,7 @@ const Data = [
         hide: true,
       },
     ],
-    key: "AccountingLevel",
+    key: "Accounting",
     path: "/admin/accounting",
   },
   {

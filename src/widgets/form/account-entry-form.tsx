@@ -61,7 +61,7 @@ export default function AccountEntryForm(props: {
   const formSchema = useMemo(() => {
     return z
       .object({
-        id: z.number(),
+        id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
         username: z
           .string()
           .min(1, { message: "Name must be at least 1  character" }),
@@ -268,7 +268,7 @@ export default function AccountEntryForm(props: {
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Username</FormLabel>
+                          <FormLabel>References</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="username"

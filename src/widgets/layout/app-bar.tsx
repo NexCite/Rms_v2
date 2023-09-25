@@ -1,6 +1,6 @@
 "use client";
 import React, { useMemo } from "react";
-import { Sidebar } from "./side-bar-widget";
+import { Sidebar } from "./side-bar";
 import RouteModel from "@rms/models/RouteModel";
 import { usePathname } from "next/navigation";
 import LoadingButton from "@rms/components/ui/loading-button";
@@ -21,17 +21,15 @@ export default function AppBar(props: Props) {
       res.children.find((res) => path.startsWith(res.path))
     );
 
-    if (f.length === 0) {
-      return undefined;
-    }
-    var { title, children } = f[0];
+    var { title, children } = f[0] ?? { title: "", children: [] };
     var permission: $Enums.UserPermission;
     children.forEach((res) => {
       if (path === res.path) {
         permission = res.addKey;
       }
     });
-
+    permission = permission ?? ("" as any);
+    title = title ?? "";
     return { title, permission };
   }, [path, props.routes]);
 
@@ -47,8 +45,8 @@ export default function AppBar(props: Props) {
         </div>
       </aside>
 
-      <div className="  dark:border-gray-700  p-5 sm:ml-64 flex gap-8 flex-col ">
-        <div className="flex justify-between items-center">
+      <div className="  dark:border-gray-700  p-5 sm:ml-64 flex flex-col ">
+        <div className="flex justify-between items-center rounded-lg border dark:border-gray-700  mb-10  p-3">
           <h1 className="text-3xl">{title}</h1>
 
           <Authorized permission={permission}>

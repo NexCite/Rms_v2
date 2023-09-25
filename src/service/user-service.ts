@@ -38,6 +38,7 @@ export async function updateUser(
           params.type = "User";
         }
       }
+      console.log(id);
 
       return await prisma.user.update({ data: params, where: { id } });
     },

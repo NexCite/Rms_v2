@@ -136,7 +136,7 @@ export default function AccountEntryTable(props: Props) {
       },
       {
         accessorKey: "username", //simple recommended way to define a column
-        header: "UserName",
+        header: "References",
       },
       {
         accessorKey: "first_name", //simple recommended way to define a column
@@ -218,12 +218,42 @@ export default function AccountEntryTable(props: Props) {
         <div className="flex justify-between items-center ">
           <h1>Result: {props.accounts.length}</h1>
         </div>
-        <div className="max-w-xs">
+        <div className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mt-4 mb-5">
           <Input
+            className="w-[250px]"
             placeholder="search..."
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
           />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild className="w-full">
+              <Button
+                variant="outline"
+                className="ml-auto w-full flex justify-between items-center"
+              >
+                Columns
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-full">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Using Vanilla Mantine Table component here */}
@@ -247,19 +277,30 @@ export default function AccountEntryTable(props: Props) {
               ))}
             </TableHeader>
             <TableBody>
-              {table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell ??
-                          cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+              {table.getRowModel().rows.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell ??
+                            cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
 

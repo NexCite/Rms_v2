@@ -41,8 +41,7 @@ import {
   SelectTrigger,
 } from "@rms/components/ui/select";
 import { SelectValue } from "@radix-ui/react-select";
-import Countries from "@rms/lib/country";
-import { Alert, AlertTitle } from "@rms/components/ui/alert";
+
 import LoadingButton from "@rms/components/ui/loading-button";
 import {
   createMoreDigit,
@@ -81,7 +80,7 @@ export default function DigitForm(props: Props) {
     switch (props.node) {
       case "two":
         return z.object({
-          id: z.number(),
+          id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
           type: z
             .enum([
               DidgitType.Assets,
@@ -89,9 +88,6 @@ export default function DigitForm(props: Props) {
               DidgitType.Owner_Equity,
               DidgitType.Expensive,
               DidgitType.Income,
-              DidgitType.Trial_Balance,
-              DidgitType.Balance_Sheet,
-              DidgitType.Income_Statement,
             ])
             .optional()
             .nullable(),
@@ -105,7 +101,7 @@ export default function DigitForm(props: Props) {
         });
       case "three":
         return z.object({
-          id: z.number(),
+          id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
           name: z
             .string()
             .min(1, { message: "Name must be at least 1  character" }),
@@ -115,17 +111,16 @@ export default function DigitForm(props: Props) {
             DidgitType.Owner_Equity,
             DidgitType.Expensive,
             DidgitType.Income,
-            DidgitType.Trial_Balance,
-            DidgitType.Balance_Sheet,
-            DidgitType.Income_Statement,
           ]),
           debit_credit: z.enum([DebitCreditType.Debit, DebitCreditType.Credit]),
-          two_digit_id: z.number(),
+          two_digit_id: z
+            .number()
+            .or(z.string().regex(/^\d+$/).transform(Number)),
         });
 
       case "more":
         return z.object({
-          id: z.number(),
+          id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
           name: z
             .string()
             .min(1, { message: "Name must be at least 1  character" }),
@@ -135,12 +130,11 @@ export default function DigitForm(props: Props) {
             DidgitType.Owner_Equity,
             DidgitType.Expensive,
             DidgitType.Income,
-            DidgitType.Trial_Balance,
-            DidgitType.Balance_Sheet,
-            DidgitType.Income_Statement,
           ]),
           debit_credit: z.enum([DebitCreditType.Debit, DebitCreditType.Credit]),
-          three_digit_id: z.number(),
+          three_digit_id: z
+            .number()
+            .or(z.string().regex(/^\d+$/).transform(Number)),
         });
     }
   }, [props.node]);
@@ -297,7 +291,15 @@ export default function DigitForm(props: Props) {
                             <Input
                               type="number"
                               placeholder="id"
-                              onChange={(e) => {}}
+                              onChange={(e) => {
+                                field.onChange(
+                                  parseInt(
+                                    Number.isNaN(e)
+                                      ? 0
+                                      : (parseInt(e as any) as any)
+                                  )
+                                );
+                              }}
                               {...field}
                             />
                           </FormControl>

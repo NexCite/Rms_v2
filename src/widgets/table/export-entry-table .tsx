@@ -228,8 +228,8 @@ export default function ExportEntryDataTable(props: Props) {
               <TableHeader>
                 <TableRow>
                   <TableHead align="center">Amount</TableHead>
-                  <TableHead align="center">Debit</TableHead>
                   <TableHead align="center">Credit</TableHead>
+                  <TableHead align="center">Debit</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>{s}</TableBody>
@@ -645,7 +645,7 @@ export default function ExportEntryDataTable(props: Props) {
                         align="center"
                         className="w-full text-center"
                       >
-                        Debit
+                        Credit
                       </TableHead>
                     </TableRow>
 
@@ -668,7 +668,7 @@ export default function ExportEntryDataTable(props: Props) {
                         align="center"
                         className="w-full text-center"
                       >
-                        Credit
+                        Debit
                       </TableHead>
                     </TableRow>
 
@@ -695,7 +695,7 @@ export default function ExportEntryDataTable(props: Props) {
                 <TableHead colSpan={3} align="center">
                   {res}{" "}
                   {FormatNumberWithFixed(
-                    (totalCredit[res] ?? 0) - (totalDebit[res] ?? 0)
+                    Math.abs((totalCredit[res] ?? 0) - (totalDebit[res] ?? 0))
                   )}
                 </TableHead>
               </TableRow>

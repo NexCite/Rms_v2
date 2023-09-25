@@ -27,7 +27,6 @@ type Props = {
   };
 };
 export function Sidebar(props: Props) {
-  const [openAlert, setOpenAlert] = React.useState(true);
   const pathName = usePathname();
 
   const handleOpen = (value) => {
@@ -64,15 +63,15 @@ export function Sidebar(props: Props) {
                   <ChevronDownIcon
                     strokeWidth={2.5}
                     className={`mx-auto h-4 w-4 transition-transform ${
-                      open === i ? "rotate-180" : ""
+                      open === res.index ? "rotate-180" : ""
                     }`}
                   />
                 }
               >
-                <ListItem className="p-0" selected={open === i}>
+                <ListItem className="p-0" selected={open === res.index}>
                   <div>{res.icon}</div>
                   <AccordionHeader
-                    onClick={() => handleOpen(i)}
+                    onClick={() => handleOpen(res.index)}
                     className="border-b-0 p-3 "
                   >
                     <Typography
@@ -92,16 +91,10 @@ export function Sidebar(props: Props) {
                           <ListItem
                             className={
                               pathName === res.path
-                                ? "dark:bg-white dark:text-black bg-black text-white "
-                                : ""
+                                ? "dark:bg-white dark:text-black bg-black text-white"
+                                : "hover:text-white hover:bg-black"
                             }
                           >
-                            <ListItemPrefix>
-                              <ChevronRightIcon
-                                strokeWidth={3}
-                                className="h-3 w-5"
-                              />
-                            </ListItemPrefix>
                             {res.title}
                           </ListItem>
                         </Link>
@@ -126,12 +119,12 @@ export function Sidebar(props: Props) {
                   <ChevronDownIcon
                     strokeWidth={2.5}
                     className={`mx-auto h-4 w-4 transition-transform ${
-                      open === i ? "rotate-180" : ""
+                      open === res.index ? "rotate-180" : ""
                     }`}
                   />
                 }
               >
-                <ListItem className="p-0" selected={open === i}>
+                <ListItem className="p-0" selected={open === res.index}>
                   <div>{res.icon}</div>
                   <AccordionHeader
                     onClick={() => handleOpen(res.index)}
@@ -154,16 +147,10 @@ export function Sidebar(props: Props) {
                           <ListItem
                             className={
                               pathName === res.path
-                                ? "dark:bg-white dark:text-black bg-black text-white "
-                                : ""
+                                ? "dark:bg-white dark:text-black bg-black text-white"
+                                : "hover:text-white hover:bg-black"
                             }
                           >
-                            <ListItemPrefix>
-                              <ChevronRightIcon
-                                strokeWidth={3}
-                                className="h-3 w-5"
-                              />
-                            </ListItemPrefix>
                             {res.title}
                           </ListItem>
                         </Link>
