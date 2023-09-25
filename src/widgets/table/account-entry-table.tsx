@@ -217,13 +217,6 @@ export default function AccountEntryTable(props: Props) {
       <div className="flex gap-6 flex-col">
         <div className="flex justify-between items-center ">
           <h1>Result: {props.accounts.length}</h1>
-          <Authorized permission="Add_AccountEntry">
-            <Link href={pathName + "/form"} className="">
-              <Button type="button" className="">
-                Add
-              </Button>
-            </Link>
-          </Authorized>
         </div>
         <div className="max-w-xs">
           <Input

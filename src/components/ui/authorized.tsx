@@ -9,6 +9,7 @@ type Props = {
 import { useCookies } from "react-cookie";
 
 export default function Authorized(props: Props) {
+  console.log(props);
   const [cookies] = useCookies(["rms-permissions"]);
 
   return cookies["rms-permissions"]?.includes(props.permission) ? (

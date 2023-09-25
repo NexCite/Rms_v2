@@ -138,7 +138,7 @@ export default function EntryDataTable(props: Props) {
       setTransition(() => {
         replace(
           pathName +
-            `?from_date=${selectDate.from?.getTime()}&to_date=${selectDate.to?.getTime()}&two_digit_id=${
+            `?from_date=${selectDate?.from?.getTime()}&to_date=${selectDate?.to?.getTime()}&two_digit_id=${
               search.two_digit_id
             }&more_digit_id=${search.more_digit_id}&three_digit_id=${
               search.three_digit_id
@@ -385,13 +385,6 @@ export default function EntryDataTable(props: Props) {
     <Style className="w-full ">
       <div className="flex justify-between items-center">
         <h1>Result: {props.data.length}</h1>
-        <Authorized permission="Add_Entry">
-          <Link href={pathName + "/form"} className="">
-            <Button type="button" className="">
-              Add
-            </Button>
-          </Link>
-        </Authorized>
       </div>
       <form
         className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mt-4 mb-5"

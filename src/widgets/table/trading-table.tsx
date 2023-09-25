@@ -223,11 +223,6 @@ export default function TradingTable(props: Props) {
     <div className="flex gap-6 flex-col">
       <div className="flex justify-between items-center ">
         <h1>Result: {props.data.length}</h1>
-        <Link href={pathName + "/form"} className="">
-          <Button type="button" className="">
-            Add
-          </Button>
-        </Link>
       </div>
       <div className="max-w-xs">
         <Input

@@ -2,6 +2,7 @@
 import React from "react";
 import { Button } from "./button";
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
 
 type Props = {
   loading?: boolean;
@@ -14,9 +15,24 @@ type Props = {
   | {
       type: "submit";
     }
+  | {
+      type: "link";
+      link: string;
+    }
 );
 export default function LoadingButton(props: Props) {
-  return (
+  return props.type === "link" ? (
+    <Link href={props.link}>
+      <Button
+        className="bg-black w-[100px] h-[40px]"
+        disabled={props.loading}
+        color="dark"
+      >
+        {" "}
+        {props.label}
+      </Button>
+    </Link>
+  ) : (
     <Button
       className="bg-black w-[100px] h-[40px]"
       type={props.type}

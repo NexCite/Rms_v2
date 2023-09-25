@@ -7,6 +7,7 @@ import { env } from "process";
 import NextTopLoader from "nextjs-toploader";
 import { GlobalStyle } from "@rms/components/theme/global-style";
 import prisma from "@rms/prisma/prisma";
+import { ThemeProvider as P } from "@material-tailwind/react";
 
 const inter = Inter({ subsets: ["latin"] });
 
