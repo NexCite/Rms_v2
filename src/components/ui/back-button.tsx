@@ -13,7 +13,12 @@ export default function BackButton(props: Props) {
   const { back } = useRouter();
   return (
     <Style>
-      <Button onClick={() => back()} variant="outline" size="icon">
+      <Button
+        onClick={() => back()}
+        className="w-10 h-10 "
+        variant="outline"
+        size="icon"
+      >
         <ChevronLeft className="h-4 w-4" />
       </Button>
     </Style>

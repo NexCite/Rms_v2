@@ -1,12 +1,12 @@
 "use client";
 import React from "react";
-import { Button } from "./button";
 import { Loader2 } from "lucide-react";
-import Link from "next/link";
+import { Button } from "@material-tailwind/react";
 
 type Props = {
   loading?: boolean;
   label: string;
+  icon?: any;
 } & (
   | {
       type: "button";
@@ -15,29 +15,13 @@ type Props = {
   | {
       type: "submit";
     }
-  | {
-      type: "link";
-      link: string;
-    }
 );
 export default function LoadingButton(props: Props) {
-  return props.type === "link" ? (
-    <Link href={props.link}>
-      <Button
-        className="bg-black w-[100px] h-[40px]"
-        disabled={props.loading}
-        color="dark"
-      >
-        {" "}
-        {props.label}
-      </Button>
-    </Link>
-  ) : (
+  return (
     <Button
       className="bg-black w-[100px] h-[40px]"
       type={props.type}
       disabled={props.loading}
-      color="dark"
       onClick={props.type === "button" ? props.onClick : undefined}
     >
       {props.loading ? (
@@ -46,7 +30,7 @@ export default function LoadingButton(props: Props) {
           loading...
         </>
       ) : (
-        <>{props.label}</>
+        props.label
       )}
     </Button>
   );

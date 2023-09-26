@@ -56,7 +56,6 @@ export default function MainExport(props: Props) {
       <Tabs defaultValue="1">
         <div id="export-pdf">
           <div id="action">
-            <BackButton />
             <Button className="bg-black" color="dark" onClick={handlePdf}>
               Export
             </Button>

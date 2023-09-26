@@ -58,6 +58,7 @@ export default function TradingForm(props: Props) {
   const validation = useMemo(() => {
     switch (props.node) {
       case "trader":
+
       case "broker": {
         return z.object({
           first_name: z
@@ -84,7 +85,10 @@ export default function TradingForm(props: Props) {
           address2: z.string().optional().nullable(),
           country: z.string(),
           email: z.string().optional().nullable(),
-          [props.node === "trader" ? "broker_id" : "id"]: z.number(),
+          [props.node === "trader" ? "broker_id" : "id"]: z
+            .number()
+            .or(z.string().regex(/^\d+$/).transform(Number))
+            .optional(),
         });
       }
       case "account": {

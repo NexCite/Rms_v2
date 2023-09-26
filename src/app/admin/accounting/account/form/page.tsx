@@ -44,7 +44,6 @@ export default async function page(props: {
 
   return (
     <>
-      <BackButton />
       <AccountEntryForm
         account={value}
         three_digit={three_digit}

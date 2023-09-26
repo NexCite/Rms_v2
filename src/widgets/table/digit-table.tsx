@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useMemo, useRef, useState, useTransition } from "react";
 import { Prisma } from "@prisma/client";
 import {
@@ -55,6 +55,7 @@ export default function DigitTable(props: Props) {
   const [globalFilter, setGlobalFilter] = useState("");
 
   const { createAlert } = useAlertHook();
+  const { push } = useRouter();
 
   const columns = useMemo<ColumnDef<any>[]>(
     () =>
@@ -84,17 +85,13 @@ export default function DigitTable(props: Props) {
                           : "Edit_More_Than_Four_Digit"
                       }
                     >
-                      <Link
-                        style={{ cursor: "pointer" }}
-                        href={pathName + "/form?id=" + id}
+                      <DropdownMenuItem
+                        onClick={() => push(pathName + "/form?id=" + id)}
+                        className="cursor-pointer"
+                        disabled={isActive}
                       >
-                        <DropdownMenuItem
-                          className="cursor-pointer"
-                          disabled={isActive}
-                        >
-                          Edit
-                        </DropdownMenuItem>
-                      </Link>
+                        Edit
+                      </DropdownMenuItem>
                     </Authorized>
                     <Authorized
                       permission={

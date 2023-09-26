@@ -38,7 +38,6 @@ export default async function page(props: {
 
   return (
     <>
-      <BackButton />
       <CategoryForm
         relations={relation}
         value={value}

@@ -69,7 +69,6 @@ export default async function page(props: {
 
   return (
     <>
-      <BackButton />
       <DigitForm
         node={props.params.node}
         value={value as any}

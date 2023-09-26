@@ -26,14 +26,12 @@ export default function Layout(props: Props) {
   }, [scrollRef]);
 
   return (
-    <ThemeProvider>
-      <AppBar routes={props.route} config={props.config}>
-        <main className="w-full">
-          <div className="p-3" ref={scrollRef}>
-            {props.children}
-          </div>
-        </main>
-      </AppBar>
-    </ThemeProvider>
+    <AppBar routes={props.route} config={props.config}>
+      <main className="w-full">
+        <div className="p-3" ref={scrollRef}>
+          {props.children}
+        </div>
+      </main>
+    </AppBar>
   );
 }

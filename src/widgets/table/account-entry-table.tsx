@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useMemo, useState, useTransition } from "react";
 
 import styled from "styled-components";
@@ -73,6 +73,7 @@ export default function AccountEntryTable(props: Props) {
     }),
     [pageIndex, pageSize]
   );
+  const { push } = useRouter();
   const columns = useMemo<ColumnDef<CommonAccountType>[]>(
     () => [
       {
@@ -92,17 +93,13 @@ export default function AccountEntryTable(props: Props) {
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <Authorized permission="Edit_AccountEntry">
-                    <Link
-                      style={{ cursor: "pointer" }}
-                      href={pathName + "/form?id=" + id}
+                    <DropdownMenuItem
+                      onClick={() => push(pathName + "/form?id=" + id)}
+                      className="cursor-pointer"
+                      disabled={isActive}
                     >
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        disabled={isActive}
-                      >
-                        Edit
-                      </DropdownMenuItem>
-                    </Link>
+                      Edit
+                    </DropdownMenuItem>
                   </Authorized>
                   <Authorized permission="Delete_AccountEntry">
                     <DropdownMenuItem

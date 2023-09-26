@@ -11,10 +11,9 @@ import {
   Accordion,
   AccordionHeader,
   AccordionBody,
-  Alert,
 } from "@material-tailwind/react";
-import { ChevronDownIcon, ChevronRightIcon } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { ChevronDownIcon } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -27,6 +26,7 @@ type Props = {
 };
 export function Sidebar(props: Props) {
   const pathName = usePathname();
+  const { push } = useRouter();
 
   const handleOpen = (value) => {
     setOpen(open === value ? -1 : value);
@@ -35,10 +35,9 @@ export function Sidebar(props: Props) {
   const [open, setOpen] = React.useState(
     props.routers.find((res) => pathName.startsWith(res.path))?.index ?? -1
   );
-  console.log(props.routers);
   return (
     <Card className="h-full w-full p-3">
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col ">
         <Image
           src={`/api/media/${props.config.logo}`}
           alt={props.config.name}
@@ -51,10 +50,8 @@ export function Sidebar(props: Props) {
       <List>
         {props.routers
           .filter((res) => !res.end)
-          .map((res, i) =>
-            res.children.length === 0 ? (
-              <></>
-            ) : (
+          .map((res) =>
+            res.children.length === 0 ? undefined : (
               <Accordion
                 key={res.title}
                 open={open === res.index}
@@ -67,7 +64,7 @@ export function Sidebar(props: Props) {
                   />
                 }
               >
-                <ListItem className="p-0" selected={open === res.index}>
+                <ListItem className="p-1" selected={open === res.index}>
                   <div>{res.icon}</div>
                   <AccordionHeader
                     onClick={() => handleOpen(res.index)}
@@ -86,17 +83,17 @@ export function Sidebar(props: Props) {
                     {res.children
                       .filter((res) => !res.hide)
                       .map((res) => (
-                        <Link as={res.path} href={res.path} key={i}>
-                          <ListItem
-                            className={
-                              pathName === res.path
-                                ? "dark:bg-white dark:text-black bg-black text-white"
-                                : "hover:text-white hover:bg-black"
-                            }
-                          >
-                            {res.title}
-                          </ListItem>
-                        </Link>
+                        <ListItem
+                          key={res.title}
+                          onClick={() => push(res.path)}
+                          className={
+                            pathName === res.path
+                              ? "dark:bg-white dark:text-black bg-black text-white  rounded-xl"
+                              : ""
+                          }
+                        >
+                          {res.title}
+                        </ListItem>
                       ))}
                   </List>
                 </AccordionBody>
@@ -108,9 +105,7 @@ export function Sidebar(props: Props) {
         {props.routers
           .filter((res) => res.end)
           .map((res, i) =>
-            res.children.length === 0 ? (
-              <></>
-            ) : (
+            res.children.length === 0 ? undefined : (
               <Accordion
                 key={res.title}
                 open={open === res.index}
@@ -123,7 +118,7 @@ export function Sidebar(props: Props) {
                   />
                 }
               >
-                <ListItem className="p-0" selected={open === res.index}>
+                <ListItem className="p-1" selected={open === res.index}>
                   <div>{res.icon}</div>
                   <AccordionHeader
                     onClick={() => handleOpen(res.index)}
@@ -142,17 +137,17 @@ export function Sidebar(props: Props) {
                     {res.children
                       .filter((res) => !res.hide)
                       .map((res) => (
-                        <Link as={res.path} href={res.path} key={i}>
-                          <ListItem
-                            className={
-                              pathName === res.path
-                                ? "dark:bg-white dark:text-black bg-black text-white"
-                                : "hover:text-white hover:bg-black"
-                            }
-                          >
-                            {res.title}
-                          </ListItem>
-                        </Link>
+                        <ListItem
+                          key={res.title}
+                          onClick={() => push(res.path)}
+                          className={
+                            pathName === res.path
+                              ? "dark:bg-white dark:text-black bg-black text-white  rounded-xl"
+                              : ""
+                          }
+                        >
+                          {res.title}
+                        </ListItem>
                       ))}
                   </List>
                 </AccordionBody>

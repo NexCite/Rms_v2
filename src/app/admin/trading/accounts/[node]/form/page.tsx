@@ -69,7 +69,6 @@ export default async function page(props: {
 
   return (
     <>
-      <BackButton />
       <TradingForm
         relations={relation}
         value={value as any}

@@ -1,11 +1,13 @@
 "use client";
-import React, { useMemo } from "react";
+import React, { Suspense, useMemo } from "react";
 import { Sidebar } from "./side-bar";
 import RouteModel from "@rms/models/RouteModel";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import LoadingButton from "@rms/components/ui/loading-button";
 import Authorized from "@rms/components/ui/authorized";
 import { $Enums } from "@prisma/client";
+import BackButton from "../ui/back-button";
+import { Button } from "@material-tailwind/react";
 type Props = {
   children: React.ReactNode;
   routes: RouteModel[];
@@ -17,22 +19,36 @@ type Props = {
 export default function AppBar(props: Props) {
   var path = usePathname();
   const { subRouteTitle, permission } = useMemo(() => {
-    const f = props.routes.filter((res) =>
+    const routes = props.routes.find((res) =>
       res.children.find((res) => path.startsWith(res.path))
     );
 
-    var { children } = f[0] ?? { children: [] };
     var permission: $Enums.UserPermission;
     var subRouteTitle = undefined;
-    children.forEach((res) => {
-      if (path === res.path) {
-        permission = res.addKey;
-        subRouteTitle = res.title;
-      }
-    });
+    if (path.includes("/form")) {
+      permission = routes?.key;
+      subRouteTitle = routes?.title;
+    } else {
+      routes?.children?.forEach((res) => {
+        if (path.startsWith(res.path)) {
+          permission = res.addKey;
+          subRouteTitle = res.title;
+        }
+      });
+    }
 
     return { subRouteTitle, permission };
-  }, [props.routes]);
+  }, [props.routes, path]);
+  const canGoBack = useMemo(() => {
+    const splitPath = path.split("/");
+    return (
+      path !== "/admin" &&
+      (splitPath.length > 5 ||
+        path.includes("form") ||
+        Number.isInteger(parseInt(splitPath[splitPath.length - 1])))
+    );
+  }, [path]);
+  const { push } = useRouter();
 
   return (
     <>
@@ -49,13 +65,17 @@ export default function AppBar(props: Props) {
       <div className="    sm:ml-64 flex flex-col ">
         {subRouteTitle && (
           <div className="flex justify-between items-center  border dark:border-gray-700  mb-10  p-3">
-            <h1 className="text-3xl">{subRouteTitle}</h1>
-
-            <Authorized permission={permission}>
-              <LoadingButton type="link" label="Add" link={path + "/form"} />
-            </Authorized>
+            <div className="flex items-center gap-4">
+              {canGoBack && <BackButton />}
+              <h1 className="text-3xl">{subRouteTitle}</h1>
+            </div>
+            {!path.includes("/form") && (
+              <Button type="button" onClick={() => push(path + "/form")}>
+                Add
+              </Button>
+            )}
           </div>
-        )}{" "}
+        )}
         {subRouteTitle && (
           <div className=" m-5 dark:border-gray-700  border overflow-y-auto h-[97vh] rounded-lg">
             <div className="p-4   rounded-lg dark:border-gray-700  mb-10">

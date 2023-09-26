@@ -84,8 +84,6 @@ export default async function page(props: {
 
   return (
     <div>
-      <BackButton />
-
       <EntryForm
         id={id}
         isEditMode={id ? true : false}

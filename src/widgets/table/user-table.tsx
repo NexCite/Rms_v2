@@ -38,6 +38,7 @@ import {
 import { Input } from "@rms/components/ui/input";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { deleteUserById } from "@rms/service/user-service";
+import { useRouter } from "next/router";
 
 type Props = {
   users: Prisma.UserGetPayload<{}>[];
@@ -50,7 +51,7 @@ export default function UserTable(props: Props) {
   const [globalFilter, setGlobalFilter] = useState("");
 
   const { createAlert } = useAlertHook();
-
+  const { push } = useRouter();
   const columns = useMemo<ColumnDef<Prisma.UserGetPayload<{}>>[]>(
     () => [
       {
@@ -69,17 +70,13 @@ export default function UserTable(props: Props) {
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                  <Link
-                    style={{ cursor: "pointer" }}
-                    href={pathName + "/form?id=" + id}
+                  <DropdownMenuItem
+                    onClick={() => push(pathName + "/form?id=" + id)}
+                    className="cursor-pointer"
+                    disabled={isActive}
                   >
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      disabled={isActive}
-                    >
-                      Edit
-                    </DropdownMenuItem>
-                  </Link>
+                    Edit
+                  </DropdownMenuItem>
 
                   <DropdownMenuItem
                     disabled={isActive}

@@ -54,7 +54,6 @@ export default async function page(props: {
 
   return (
     <>
-      <BackButton />
       <UserFormComponent value={value} />
     </>
   );

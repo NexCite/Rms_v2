@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useMemo, useState, useTransition } from "react";
 import { Prisma } from "@prisma/client";
 import {
@@ -59,6 +59,7 @@ export default function TradingTable(props: Props) {
   const [globalFilter, setGlobalFilter] = useState("");
 
   const { createAlert } = useAlertHook();
+  const { push } = useRouter();
 
   const columns = useMemo<ColumnDef<any>[]>(
     () =>
@@ -79,17 +80,13 @@ export default function TradingTable(props: Props) {
                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
-                    <Link
-                      style={{ cursor: "pointer" }}
-                      href={pathName + "/form?id=" + id}
+                    <DropdownMenuItem
+                      onClick={() => push(pathName + "/form?id=" + id)}
+                      className="cursor-pointer"
+                      disabled={isActive}
                     >
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        disabled={isActive}
-                      >
-                        Edit
-                      </DropdownMenuItem>
-                    </Link>
+                      Edit
+                    </DropdownMenuItem>
 
                     <DropdownMenuItem
                       disabled={isActive}

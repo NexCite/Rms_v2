@@ -16,7 +16,6 @@ export default async function page(props: {
   }
   return (
     <div>
-      <BackButton />
       <CurrencyForm value={value} />
     </div>
   );

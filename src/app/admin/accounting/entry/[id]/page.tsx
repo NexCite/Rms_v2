@@ -50,7 +50,6 @@ export default async function page(props: {
   }
   return (
     <div>
-      <BackButton />
       <EntryView entry={entry as any} />
     </div>
   );

@@ -51,6 +51,7 @@ export default function CurrencyTable(props: Props) {
   const [globalFilter, setGlobalFilter] = useState("");
 
   const { createAlert } = useAlertHook();
+  const { push } = useRouter();
 
   const columns = useMemo<ColumnDef<Prisma.CurrencyGetPayload<{}>>[]>(
     () => [
@@ -71,17 +72,13 @@ export default function CurrencyTable(props: Props) {
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <Authorized permission="Edit_Currency">
-                    <Link
-                      style={{ cursor: "pointer" }}
-                      href={pathName + "/form?id=" + id}
+                    <DropdownMenuItem
+                      onClick={() => push(pathName + "/form?id=" + id)}
+                      className="cursor-pointer"
+                      disabled={isActive}
                     >
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        disabled={isActive}
-                      >
-                        Edit
-                      </DropdownMenuItem>
-                    </Link>
+                      Edit
+                    </DropdownMenuItem>
                   </Authorized>
                   <Authorized permission="Delete_Currency">
                     <DropdownMenuItem

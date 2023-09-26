@@ -126,7 +126,7 @@ export default function EntryDataTable(props: Props) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-  const { replace } = useRouter();
+  const { replace, push } = useRouter();
   const { createAlert } = useAlertHook();
 
   const pathName = usePathname();
@@ -170,30 +170,22 @@ export default function EntryDataTable(props: Props) {
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <Authorized permission="Edit_Entry">
-                    <Link
-                      style={{ cursor: "pointer" }}
-                      href={pathName + "/form?id=" + id}
+                    <DropdownMenuItem
+                      onClick={() => push(pathName + "/form?id=" + id)}
+                      className="cursor-pointer"
+                      disabled={isActive}
                     >
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        disabled={isActive}
-                      >
-                        Edit
-                      </DropdownMenuItem>
-                    </Link>
+                      Edit
+                    </DropdownMenuItem>
                   </Authorized>
                   <Authorized permission="View_Entry">
-                    <Link
-                      style={{ cursor: "pointer" }}
-                      href={pathName + "/" + id}
+                    <DropdownMenuItem
+                      onClick={() => push(pathName + "/" + id)}
+                      className="cursor-pointer"
+                      disabled={isActive}
                     >
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        disabled={isActive}
-                      >
-                        View
-                      </DropdownMenuItem>
-                    </Link>
+                      View
+                    </DropdownMenuItem>
                   </Authorized>
                   <Authorized permission="Delete_Entry">
                     <DropdownMenuItem
@@ -381,6 +373,7 @@ export default function EntryDataTable(props: Props) {
       rowSelection,
     },
   });
+
   return (
     <Style className="w-full ">
       <div className="flex justify-between items-center">
@@ -503,14 +496,17 @@ export default function EntryDataTable(props: Props) {
           )}
         </Button>
       </form>
-      <div className="rounded-md p-2">
+      <div className="w-full min-w-max table-auto text-left">
         <Table>
-          <TableHeader className="static">
+          <TableHeader className="">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead
+                      key={header.id}
+                      className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(

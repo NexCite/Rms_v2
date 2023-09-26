@@ -38,6 +38,8 @@ type Props = {
 };
 
 export default function EntryView(props: Props) {
+  const { push } = useRouter();
+
   const amount = useMemo(() => {
     var a = 0;
     props.entry.sub_entries.forEach((e) => {
@@ -79,27 +81,24 @@ export default function EntryView(props: Props) {
             "Delete"
           )}
         </Button>
-        <Link
-          href={{
-            pathname: "/admin/accounting/entry/form",
-            query: {
-              id: props.entry.id,
-            },
-          }}
+
+        <Button
+          onClick={() => push(pathName + "/form?id=" + props.entry.id)}
+          className="bg-black"
+          color="dark"
+          disabled={isPadding}
         >
-          <Button className="bg-black" color="dark" disabled={isPadding}>
-            Edit
-          </Button>
-        </Link>
-        <Link
-          href={{
-            pathname: pathName + "/export",
-          }}
+          Edit
+        </Button>
+
+        <Button
+          onClick={() => push(pathName + "/export")}
+          className="bg-black"
+          color="dark"
+          disabled={isPadding}
         >
-          <Button className="bg-black" color="dark" disabled={isPadding}>
-            Export
-          </Button>
-        </Link>
+          Export
+        </Button>
       </div>
       <Table>
         <TableHeader>
