@@ -63,7 +63,7 @@ export default function AppBar(props: Props) {
 
       <div className="    sm:ml-64 flex flex-col ">
         {subRouteTitle && (
-          <div className="flex justify-between items-center  border dark:border-gray-700  mb-10  p-3">
+          <div className="flex justify-between items-center  border dark:border-gray-700 p-3">
             <div className="flex items-center gap-4">
               {canGoBack && <BackButton />}
               <h1 className="text-3xl">{subRouteTitle}</h1>
