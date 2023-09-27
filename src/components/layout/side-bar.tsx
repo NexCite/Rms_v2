@@ -26,7 +26,7 @@ type Props = {
 };
 export function Sidebar(props: Props) {
   const pathName = usePathname();
-  const { push } = useRouter();
+  const { push, replace } = useRouter();
 
   const handleOpen = (value) => {
     setOpen(open === value ? -1 : value);
@@ -154,6 +154,8 @@ export function Sidebar(props: Props) {
               </Accordion>
             )
           )}
+
+        <ListItem onClick={() => replace("/logout")}>Logout</ListItem>
       </List>
     </Card>
   );
