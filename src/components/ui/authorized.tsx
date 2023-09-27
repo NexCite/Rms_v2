@@ -13,7 +13,7 @@ export default function Authorized(props: Props) {
   const [show, setShow] = useState(true);
   useEffect(() => {
     setShow(cookies["rms-permissions"]?.includes(props.permission));
-  }, [cookies]);
+  }, [cookies, props.permission]);
 
   return show ? <>{props.children}</> : <>loading...</>;
 }

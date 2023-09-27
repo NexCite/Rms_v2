@@ -19,7 +19,7 @@ export default function useAlertHook() {
         title:
           props?.status === 200 ? "Operation Successful" : "Operation Error",
         variant: props?.status === 200 ? "default" : "destructive",
-        description: props.message,
+        description: props?.message,
         type: "foreground",
       });
 
