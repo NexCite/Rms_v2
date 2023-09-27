@@ -79,7 +79,7 @@ export default function AppBar(props: Props) {
           </div>
         )}
         {subRouteTitle && (
-          <div className=" m-5 dark:border-gray-700  border overflow-y-auto h-[97vh] rounded-lg">
+          <div className=" m-2 dark:border-gray-700  border overflow-y-auto h-[97vh] rounded-lg">
             <div className="p-4   rounded-lg dark:border-gray-700  mb-10">
               {props.children}
             </div>
