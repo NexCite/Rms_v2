@@ -5,7 +5,6 @@ export function hashPassword(password: string) {
     .pbkdf2Sync(password, process.env["HASHKEY"], 100000, 64, "sha512")
     .toString("hex");
 }
-console.log(hashPassword("ja365272"));
 
 export function checkPassword(password: string, hashPassword: string) {
   const hashToCheck = crypto
