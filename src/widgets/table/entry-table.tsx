@@ -351,7 +351,7 @@ export default function EntryDataTable(props: Props) {
         },
       },
     ],
-    [createAlert, isActive, pathName]
+    [createAlert, isActive, pathName, push]
   );
 
   const table = useReactTable({

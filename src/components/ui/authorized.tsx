@@ -1,6 +1,6 @@
 "use client";
 import { $Enums } from "@prisma/client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 
 type Props = {
@@ -10,10 +10,10 @@ type Props = {
 
 export default function Authorized(props: Props) {
   const [cookies] = useCookies(["rms-permissions"]);
+  const [show, setShow] = useState(true);
+  useEffect(() => {
+    setShow(cookies["rms-permissions"]?.includes(props.permission));
+  }, [cookies]);
 
-  return cookies["rms-permissions"]?.includes(props.permission) ? (
-    <div>{props.children}</div>
-  ) : (
-    <></>
-  );
+  return show ? <>{props.children}</> : <>loading...</>;
 }

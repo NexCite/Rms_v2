@@ -19,7 +19,7 @@ type Props = {
 export default function LoadingButton(props: Props) {
   return (
     <Button
-      className="bg-black w-[100px] h-[40px]"
+      className="bg-black h-[40px]"
       type={props.type}
       disabled={props.loading}
       onClick={props.type === "button" ? props.onClick : undefined}

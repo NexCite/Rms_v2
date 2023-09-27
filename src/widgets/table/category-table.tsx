@@ -38,6 +38,7 @@ import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { deleteMoreDigit, deleteTwoDigit } from "@rms/service/digit-service";
 import { deleteCategoryById } from "@rms/service/category-service";
 import { deleteSubCategoryById } from "@rms/service/sub-category-service";
+import Authorized from "@rms/components/ui/authorized";
 
 type Props =
   | {
@@ -76,35 +77,40 @@ export default function CategoryTable(props: Props) {
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                  <DropdownMenuItem
-                    onClick={() => push(pathName + "/form?id=" + id)}
-                    className="cursor-pointer"
-                    disabled={isActive}
-                  >
-                    Edit
-                  </DropdownMenuItem>
+                  <Authorized permission="Edit_Category">
+                    <DropdownMenuItem
+                      onClick={() => push(pathName + "/form?id=" + id)}
+                      className="cursor-pointer"
+                      disabled={isActive}
+                    >
+                      Edit
+                    </DropdownMenuItem>
+                  </Authorized>
 
-                  <DropdownMenuItem
-                    disabled={isActive}
-                    className="cursor-pointer"
-                    onClick={() => {
-                      const isConfirm = confirm(
-                        `Do You sure you want to delete ${name} id:${id} `
-                      );
-                      if (isConfirm) {
-                        setActiveTransition(async () => {
-                          const result =
-                            props.node === "category"
-                              ? await deleteCategoryById(id)
-                              : await deleteSubCategoryById(id);
+                  <Authorized permission="Delete_Category">
+                    {" "}
+                    <DropdownMenuItem
+                      disabled={isActive}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        const isConfirm = confirm(
+                          `Do You sure you want to delete ${name} id:${id} `
+                        );
+                        if (isConfirm) {
+                          setActiveTransition(async () => {
+                            const result =
+                              props.node === "category"
+                                ? await deleteCategoryById(id)
+                                : await deleteSubCategoryById(id);
 
-                          createAlert(result);
-                        });
-                      }
-                    }}
-                  >
-                    {isActive ? <> deleting...</> : "Delete"}
-                  </DropdownMenuItem>
+                            createAlert(result);
+                          });
+                        }
+                      }}
+                    >
+                      {isActive ? <> deleting...</> : "Delete"}
+                    </DropdownMenuItem>
+                  </Authorized>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -131,7 +137,7 @@ export default function CategoryTable(props: Props) {
         accessorFn: (e) => e.modified_date.toLocaleDateString(),
       },
     ],
-    [createAlert, props.node, isActive, pathName]
+    [createAlert, props.node, isActive, pathName, push]
   );
   const table = useReactTable({
     data: props.data,

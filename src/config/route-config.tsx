@@ -216,8 +216,8 @@ export default function GetRoutes(permissions: $Enums.UserPermission[]) {
   ] as RouteModel[];
 
   var result = Data.filter((res) => {
-    if (permissions.includes(res.key)) {
-      res.children = res.children?.filter((r) => permissions.includes(r.key));
+    if (permissions?.includes(res.key)) {
+      res.children = res.children?.filter((r) => permissions?.includes(r.key));
       return res;
     }
   });

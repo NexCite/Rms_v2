@@ -37,6 +37,7 @@ import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { deleteBrokerById } from "@rms/service/broker-service";
 import { deleteTraderById } from "@rms/service/trader-service";
 import { deleteAccountById } from "@rms/service/trading-account-service";
+import Authorized from "@rms/components/ui/authorized";
 
 type Props =
   | {
@@ -80,47 +81,50 @@ export default function TradingTable(props: Props) {
                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
-                    <DropdownMenuItem
-                      onClick={() => push(pathName + "/form?id=" + id)}
-                      className="cursor-pointer"
-                      disabled={isActive}
-                    >
-                      Edit
-                    </DropdownMenuItem>
+                    <Authorized permission="Edit_Trader">
+                      <DropdownMenuItem
+                        onClick={() => push(pathName + "/form?id=" + id)}
+                        className="cursor-pointer"
+                        disabled={isActive}
+                      >
+                        Edit
+                      </DropdownMenuItem>
+                    </Authorized>
+                    <Authorized permission="Delete_Trader">
+                      <DropdownMenuItem
+                        disabled={isActive}
+                        className="cursor-pointer"
+                        onClick={() => {
+                          const isConfirm = confirm(
+                            `Do You sure you want to delete ${username} id:${id} `
+                          );
+                          if (isConfirm) {
+                            setActiveTransition(async () => {
+                              var result;
 
-                    <DropdownMenuItem
-                      disabled={isActive}
-                      className="cursor-pointer"
-                      onClick={() => {
-                        const isConfirm = confirm(
-                          `Do You sure you want to delete ${username} id:${id} `
-                        );
-                        if (isConfirm) {
-                          setActiveTransition(async () => {
-                            var result;
+                              switch (props.node) {
+                                case "broker": {
+                                  result = await deleteBrokerById(id);
+                                  break;
+                                }
+                                case "trader": {
+                                  result = await deleteTraderById(id);
+                                  break;
+                                }
+                                case "account": {
+                                  result = await deleteAccountById(id);
+                                  break;
+                                }
+                              }
 
-                            switch (props.node) {
-                              case "broker": {
-                                result = await deleteBrokerById(id);
-                                break;
-                              }
-                              case "trader": {
-                                result = await deleteTraderById(id);
-                                break;
-                              }
-                              case "account": {
-                                result = await deleteAccountById(id);
-                                break;
-                              }
-                            }
-
-                            createAlert(result);
-                          });
-                        }
-                      }}
-                    >
-                      {isActive ? <> deleting...</> : "Delete"}
-                    </DropdownMenuItem>
+                              createAlert(result);
+                            });
+                          }
+                        }}
+                      >
+                        {isActive ? <> deleting...</> : "Delete"}
+                      </DropdownMenuItem>
+                    </Authorized>
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -200,7 +204,7 @@ export default function TradingTable(props: Props) {
             accessorFn: (e) => e.modified_date.toLocaleDateString(),
           },
         ] as any) as any,
-    [createAlert, props.node, isActive, pathName]
+    [createAlert, props.node, isActive, pathName, push]
   );
   const table = useReactTable({
     data: props.data,

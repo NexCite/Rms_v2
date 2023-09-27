@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useMemo, useState, useTransition } from "react";
 
@@ -8,7 +7,6 @@ import styled from "styled-components";
 import { Prisma } from "@prisma/client";
 import {
   ColumnDef,
-  PaginationState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -38,7 +36,8 @@ import {
 import { Input } from "@rms/components/ui/input";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { deleteUserById } from "@rms/service/user-service";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
+import Authorized from "@rms/components/ui/authorized";
 
 type Props = {
   users: Prisma.UserGetPayload<{}>[];
@@ -70,32 +69,35 @@ export default function UserTable(props: Props) {
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                  <DropdownMenuItem
-                    onClick={() => push(pathName + "/form?id=" + id)}
-                    className="cursor-pointer"
-                    disabled={isActive}
-                  >
-                    Edit
-                  </DropdownMenuItem>
+                  <Authorized permission="Edit_User">
+                    <DropdownMenuItem
+                      onClick={() => push(pathName + "/form?id=" + id)}
+                      className="cursor-pointer"
+                      disabled={isActive}
+                    >
+                      Edit
+                    </DropdownMenuItem>
+                  </Authorized>
+                  <Authorized permission="Delete_User">
+                    <DropdownMenuItem
+                      disabled={isActive}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        const isConfirm = confirm(
+                          `Do You sure you want to delete ${username} id:${id} `
+                        );
+                        if (isConfirm) {
+                          setActiveTransition(async () => {
+                            const result = await deleteUserById(id);
 
-                  <DropdownMenuItem
-                    disabled={isActive}
-                    className="cursor-pointer"
-                    onClick={() => {
-                      const isConfirm = confirm(
-                        `Do You sure you want to delete ${username} id:${id} `
-                      );
-                      if (isConfirm) {
-                        setActiveTransition(async () => {
-                          const result = await deleteUserById(id);
-
-                          createAlert(result);
-                        });
-                      }
-                    }}
-                  >
-                    {isActive ? <> deleting...</> : "Delete"}
-                  </DropdownMenuItem>
+                            createAlert(result);
+                          });
+                        }
+                      }}
+                    >
+                      {isActive ? <> deleting...</> : "Delete"}
+                    </DropdownMenuItem>
+                  </Authorized>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -155,7 +157,7 @@ export default function UserTable(props: Props) {
         accessorFn: (e) => e.modified_date.toLocaleDateString(),
       },
     ],
-    [createAlert, isActive, pathName]
+    [createAlert, isActive, pathName, push]
   );
   const table = useReactTable({
     data: props.users,

@@ -71,7 +71,7 @@ export async function checkUserPermissions(
   if (!userInfo) {
     return { status: HttpStatusCode.UNAUTHORIZED };
   }
-  return userInfo.permissions.includes(permission)
+  return userInfo.permissions?.includes(permission)
     ? {
         status: HttpStatusCode.OK,
         user: userInfo,
@@ -114,7 +114,7 @@ export async function GetUserRoute(middleware?: boolean): Promise<
 
     const routes = GetRoutes(auth[0].user.permissions);
     const url = new URL(headers().get("url") ?? "");
-    if (RouteSkip.includes(url.pathname)) return auth[0].user.permissions;
+    if (RouteSkip?.includes(url.pathname)) return auth[0].user.permissions;
 
     if (routes.length === 0) return undefined;
     const pathRotues: string[] = [];

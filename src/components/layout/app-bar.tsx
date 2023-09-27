@@ -3,7 +3,6 @@ import React, { Suspense, useMemo } from "react";
 import { Sidebar } from "./side-bar";
 import RouteModel from "@rms/models/RouteModel";
 import { usePathname, useRouter } from "next/navigation";
-import LoadingButton from "@rms/components/ui/loading-button";
 import Authorized from "@rms/components/ui/authorized";
 import { $Enums } from "@prisma/client";
 import BackButton from "../ui/back-button";
@@ -69,10 +68,13 @@ export default function AppBar(props: Props) {
               {canGoBack && <BackButton />}
               <h1 className="text-3xl">{subRouteTitle}</h1>
             </div>
-            {!path.includes("/form") && (
-              <Button type="button" onClick={() => push(path + "/form")}>
-                Add
-              </Button>
+
+            {!path.includes("form") && (
+              <Authorized permission={permission}>
+                <Button type="button" onClick={() => push(path + "/form")}>
+                  Add
+                </Button>
+              </Authorized>
             )}
           </div>
         )}

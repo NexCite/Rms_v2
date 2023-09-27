@@ -95,7 +95,7 @@ function MultiSelect({
                 key={option.value}
                 onSelect={() => {
                   onChange(
-                    selected.includes(option.value)
+                    selected?.includes(option.value)
                       ? selected.filter((item) => item !== option.value)
                       : [...selected, option.value]
                   );
@@ -105,7 +105,7 @@ function MultiSelect({
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    selected.includes(option.value)
+                    selected?.includes(option.value)
                       ? "opacity-100"
                       : "opacity-0"
                   )}
