@@ -1,6 +1,7 @@
 "use server";
 
 import { Prisma } from "@prisma/client";
+import { getUserInfo } from "@rms/lib/auth";
 import { handlerServiceAction } from "@rms/lib/handler";
 
 import { hashPassword } from "@rms/lib/hash";
@@ -22,6 +23,16 @@ export async function createUser(
     "Add_User",
     true
   );
+}
+
+export async function getUserStatus(): Promise<"Enable" | undefined> {
+  const user = await getUserInfo();
+  return user.type === "Admin" ? undefined : "Enable";
+}
+
+export async function getUserType() {
+  const user = await getUserInfo();
+  return user.type;
 }
 
 export async function updateUser(

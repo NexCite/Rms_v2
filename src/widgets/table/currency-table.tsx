@@ -105,7 +105,28 @@ export default function CurrencyTable(props: Props) {
           );
         },
       },
-      { accessorKey: "id", header: "ID" },
+
+      {
+        header: "Status",
+        accessorKey: "status",
+      },
+
+      {
+        accessorKey: "id", //simple recommended way to define a column
+        header: "ID",
+        cell: ({ row: { original } }) => (
+          <div
+            className={`text-center rounded-sm ${
+              original.create_date.toLocaleTimeString() !==
+              original.modified_date.toLocaleTimeString()
+                ? "bg-yellow-400"
+                : ""
+            }`}
+          >
+            {original.id}
+          </div>
+        ),
+      },
       { accessorKey: "name", header: "Name" },
       { accessorKey: "symbol", header: "Symbol" },
       {

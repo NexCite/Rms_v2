@@ -105,7 +105,7 @@ export default function CurrencyForm(props: Props) {
                       control={form.control}
                       name="name"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Name</FormLabel>
                           <FormControl>
                             <Input
@@ -126,7 +126,7 @@ export default function CurrencyForm(props: Props) {
                       control={form.control}
                       name="symbol"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Symbol</FormLabel>
                           <FormControl>
                             <Input

@@ -1,17 +1,14 @@
 import { Prisma } from "@prisma/client";
 import BackButton from "@rms/components/ui/back-button";
-import { getUserInfo } from "@rms/lib/auth";
 import prisma from "@rms/prisma/prisma";
+import { getUserStatus } from "@rms/service/user-service";
 import EntryForm from "@rms/widgets/form/entry-form";
-import { notFound } from "next/navigation";
 import React from "react";
 
 export default async function page(props: {
   params: {};
   searchParams: { id: string };
 }) {
-  const user = await getUserInfo();
-
   var id: number, entry: Prisma.EntryGetPayload<{ include: { media: true } }>;
 
   if (props.searchParams.id && !Number.isInteger(+props.searchParams.id)) {
@@ -25,7 +22,7 @@ export default async function page(props: {
   } else if (props.searchParams.id) {
     id = +props.searchParams.id;
     entry = await prisma.entry.findUnique({
-      where: { id: id, status: user.type === "Admin" ? undefined : "Enable" },
+      where: { id: id },
       include: {
         media: true,
       },
@@ -42,8 +39,8 @@ export default async function page(props: {
 
   const three_digit = await prisma.three_Digit.findMany({
     where: {
-      status: user.type === "Admin" ? undefined : "Enable",
-      two_digit: { status: user.type === "Admin" ? undefined : "Enable" },
+      status: await getUserStatus(),
+      two_digit: { status: await getUserStatus() },
     },
     select: {
       two_digit: { select: { name: true, id: true } },
@@ -54,8 +51,8 @@ export default async function page(props: {
   });
   const more_than_four_digit = await prisma.more_Than_Four_Digit.findMany({
     where: {
-      status: user.type === "Admin" ? undefined : "Enable",
-      three_digit: { status: user.type === "Admin" ? undefined : "Enable" },
+      status: await getUserStatus(),
+      three_digit: { status: await getUserStatus() },
     },
     select: {
       three_digit: { select: { name: true, id: true } },
@@ -65,12 +62,12 @@ export default async function page(props: {
     orderBy: { modified_date: "desc" },
   });
   const two_digits = await prisma.two_Digit.findMany({
-    where: { status: user.type === "Admin" ? undefined : "Enable" },
+    where: { status: await getUserStatus() },
 
     orderBy: { modified_date: "desc" },
   });
   const account_entry = await prisma.account_Entry.findMany({
-    where: { status: user.type === "Admin" ? undefined : "Enable" },
+    where: { status: await getUserStatus() },
     select: {
       username: true,
 

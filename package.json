@@ -2,6 +2,9 @@
   "name": "rms",
   "version": "0.1.0",
   "private": true,
+  "bin": {
+    "start": "./cli.js"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

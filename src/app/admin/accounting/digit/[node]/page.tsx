@@ -1,6 +1,8 @@
 import { Prisma } from "@prisma/client";
 import BackButton from "@rms/components/ui/back-button";
+import { getUserInfo } from "@rms/lib/auth";
 import prisma from "@rms/prisma/prisma";
+import { getUserStatus } from "@rms/service/user-service";
 import DigitTable from "@rms/widgets/table/digit-table";
 import React from "react";
 
@@ -32,21 +34,18 @@ export default async function page(props: {
   switch (props.params.node) {
     case "two":
       two = await prisma.two_Digit.findMany({
-        where: { status: "Enable" },
         orderBy: { modified_date: "desc" },
       });
       break;
 
     case "three":
       three = await prisma.three_Digit.findMany({
-        where: { status: "Enable" },
         include: { two_digit: true },
         orderBy: { modified_date: "desc" },
       });
       break;
     case "more":
       more = await prisma.more_Than_Four_Digit.findMany({
-        where: { status: "Enable" },
         include: { three_digit: true },
         orderBy: { modified_date: "desc" },
       });

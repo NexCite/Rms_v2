@@ -10,11 +10,15 @@ export default async function page(props: {
 
   switch (props.params.node) {
     case "category":
-      value = await prisma.category.findMany({});
+      value = await prisma.category.findMany({
+        orderBy: { modified_date: "desc" },
+      });
       break;
 
     case "sub_category":
-      value = await prisma.subCategory.findMany({});
+      value = await prisma.subCategory.findMany({
+        orderBy: { modified_date: "desc" },
+      });
       break;
     default:
       break;

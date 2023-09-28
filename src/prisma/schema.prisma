@@ -224,17 +224,17 @@ model Media {
 }
 
 model Currency {
-  id       Int       @id @default(autoincrement())
-  name     String    @unique
-  symbol   String    @unique
-  accounts Account[]
-  invoices Invoice[]
-
+  id            Int       @id @default(autoincrement())
+  name          String    @unique
+  symbol        String    @unique
+  accounts      Account[]
+  invoices      Invoice[]
+  status        Status?   @default(Enable)
   Entries       Entry[]
-  create_date   DateTime @default(now())
-  modified_date DateTime @default(now()) @updatedAt
+  create_date   DateTime  @default(now())
+  modified_date DateTime  @default(now()) @updatedAt
   user_id       Int?
-  user          User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user          User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model Category {
@@ -242,10 +242,10 @@ model Category {
   name           String        @unique
   sub_categories SubCategory[]
   create_date    DateTime      @default(now())
-  modified_date  DateTime      @default(now())
+  modified_date  DateTime      @default(now()) @updatedAt
   user_id        Int?
-
-  user User? @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  status         Status?       @default(Enable)
+  user           User?         @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model SubCategory {
@@ -255,8 +255,9 @@ model SubCategory {
   invoices      Invoice[]
   category      Category  @relation(fields: [category_id], references: [id], onDelete: Cascade)
   create_date   DateTime  @default(now())
-  modified_date DateTime  @default(now())
+  modified_date DateTime  @default(now()) @updatedAt
   user_id       Int?
+  status        Status?   @default(Enable)
 
   user User? @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }

@@ -74,6 +74,13 @@
   border-radius: 5px;
 }
 
+.required label {
+}
+.required label:after {
+  color: #e32;
+  content: " *";
+  display: inline;
+}
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: #101010;

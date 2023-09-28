@@ -34,10 +34,17 @@ import {
 import { SelectValue } from "@radix-ui/react-select";
 import Countries from "@rms/lib/country";
 import LoadingButton from "@rms/components/ui/loading-button";
-import { Alert, AlertTitle } from "@rms/components/ui/alert";
 import { MultiSelect } from "@rms/components/ui/multi-select";
 
 type Props = {
+  user?: {
+    username: string;
+    id: number;
+    first_name: string;
+    last_name: string;
+    permissions: $Enums.UserPermission[];
+    type: $Enums.UserType;
+  };
   value?: Prisma.UserGetPayload<{
     select: {
       username: true;
@@ -90,6 +97,13 @@ export default function UserFormComponent(props: Props) {
       country: z.string(),
       email: z.string().optional().nullable(),
       permissions: z.array(z.enum(Object.keys($Enums.UserPermission) as any)),
+      status: z
+        .enum([
+          $Enums.Status.Enable,
+          $Enums.Status.Disable,
+          $Enums.Status.Deleted,
+        ])
+        .optional(),
     });
   }, [props.value]);
   const form = useForm<z.infer<typeof validation>>({
@@ -156,7 +170,7 @@ export default function UserFormComponent(props: Props) {
                       control={form.control}
                       name="username"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Username</FormLabel>
                           <FormControl>
                             <Input
@@ -177,7 +191,7 @@ export default function UserFormComponent(props: Props) {
                       control={form.control}
                       name="password"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Password</FormLabel>
                           <FormControl>
                             <Input
@@ -199,7 +213,7 @@ export default function UserFormComponent(props: Props) {
                       control={form.control}
                       name="first_name"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>First Name</FormLabel>
                           <FormControl>
                             <Input placeholder="first name" {...field} />
@@ -216,7 +230,7 @@ export default function UserFormComponent(props: Props) {
                       control={form.control}
                       name="last_name"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Last Name</FormLabel>
                           <FormControl>
                             <Input placeholder="last name" {...field} />
@@ -233,7 +247,7 @@ export default function UserFormComponent(props: Props) {
                       control={form.control}
                       name="phone_number"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Phone Number</FormLabel>
                           <FormControl>
                             <Input placeholder="phone number" {...field} />
@@ -249,7 +263,7 @@ export default function UserFormComponent(props: Props) {
                       control={form.control}
                       name={"gender"}
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Gender</FormLabel>
                           <FormControl>
                             <Select
@@ -295,13 +309,15 @@ export default function UserFormComponent(props: Props) {
                       )}
                     />
                   </div>
+
                   <div className="grid-cols-12">
                     <FormField
                       control={form.control}
+                      disabled={props.user.type === "User"}
                       name="permissions"
                       render={(value) => {
                         return (
-                          <FormItem>
+                          <FormItem className="required">
                             <FormLabel>Permissions</FormLabel>
                             <FormControl>
                               <MultiSelect
@@ -322,9 +338,9 @@ export default function UserFormComponent(props: Props) {
                       }}
                     />
                   </div>
+
                   <div className="grid-cols-12">
                     <FormField
-                      rules={{ required: true }}
                       control={form.control}
                       name={"country"}
                       render={({ field }) => (

@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
 import React from "react";
 import { getUserInfo } from "@rms/lib/auth";
+import { getUserStatus } from "@rms/service/user-service";
 
 export default async function page(props: {
   params: { node: "user" };
@@ -26,15 +27,14 @@ export default async function page(props: {
       id: true;
     };
   }>;
+  const user = await getUserInfo();
 
   if (isEditMode) {
-    const user = await getUserInfo();
-
     value = await prisma.user.findUnique({
       where: {
         id,
         status: user.type === "Admin" ? undefined : "Enable",
-        type: user.type === "Admin" ? undefined : "User",
+        type: user.type === "User" ? "User" : undefined,
       },
       select: {
         username: true,
@@ -54,7 +54,7 @@ export default async function page(props: {
 
   return (
     <>
-      <UserFormComponent value={value} />
+      <UserFormComponent value={value} user={user} />
     </>
   );
 }

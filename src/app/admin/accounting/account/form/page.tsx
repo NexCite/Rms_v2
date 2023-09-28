@@ -1,7 +1,9 @@
 import { Prisma } from "@prisma/client";
 import BackButton from "@rms/components/ui/back-button";
+import { getUserInfo } from "@rms/lib/auth";
 
 import prisma from "@rms/prisma/prisma";
+import { getUserStatus } from "@rms/service/user-service";
 import AccountEntryForm from "@rms/widgets/form/account-entry-form";
 
 import React from "react";
@@ -30,15 +32,15 @@ export default async function page(props: {
     });
   }
   const two_digit = await prisma.two_Digit.findMany({
-    where: { status: "Enable" },
+    where: { status: await getUserStatus() },
     include: { three_digit: true },
   });
   const three_digit = await prisma.three_Digit.findMany({
-    where: { status: "Enable" },
+    where: { status: await getUserStatus() },
     include: { two_digit: true },
   });
   const more_digit = await prisma.more_Than_Four_Digit.findMany({
-    where: { status: "Enable" },
+    where: { status: await getUserStatus() },
     include: { three_digit: true },
   });
 

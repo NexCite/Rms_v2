@@ -1,6 +1,7 @@
 import { checkUserPermissions } from "@rms/lib/auth";
 import prisma from "@rms/prisma/prisma";
 import { getConfig } from "@rms/service/config-service";
+import { getUserStatus } from "@rms/service/user-service";
 import MainExport from "@rms/widgets/export/main-export";
 import { notFound } from "next/navigation";
 import React from "react";
@@ -23,7 +24,7 @@ export default async function page(props: {
   const entry = await prisma.entry.findUnique({
     where: {
       id: +props.params.id,
-      status: user.user.type === "Admin" ? undefined : "Enable",
+      status: await getUserStatus(),
     },
     include: {
       currency: true,

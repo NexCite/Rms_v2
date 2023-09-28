@@ -3,6 +3,7 @@ import BackButton from "@rms/components/ui/back-button";
 import { getUserInfo } from "@rms/lib/auth";
 
 import prisma from "@rms/prisma/prisma";
+import { getUserStatus } from "@rms/service/user-service";
 import AccountEntryForm from "@rms/widgets/form/account-entry-form";
 import DigitForm from "@rms/widgets/form/digit-form";
 
@@ -22,12 +23,11 @@ export default async function page(props: {
   var relation:
     | Prisma.Two_DigitGetPayload<{}>[]
     | Prisma.Three_DigitGetPayload<{}>[];
-  const user = await getUserInfo();
   switch (props.params.node) {
     case "two":
       if (isEditMode) {
         value = await prisma.two_Digit.findFirst({
-          where: { id, status: user.type === "Admin" ? undefined : "Enable" },
+          where: { id, status: await getUserStatus() },
         });
       }
 
@@ -36,27 +36,27 @@ export default async function page(props: {
     case "three":
       if (isEditMode) {
         value = await prisma.three_Digit.findFirst({
-          where: { id, status: user.type === "Admin" ? undefined : "Enable" },
+          where: { id, status: await getUserStatus() },
           include: {
             more_than_four_digit: true,
           },
         });
       }
       relation = await prisma.two_Digit.findMany({
-        where: { status: user.type === "Admin" ? undefined : "Enable" },
+        where: { status: await getUserStatus() },
       });
       break;
     case "more":
       if (isEditMode) {
         value = await prisma.more_Than_Four_Digit.findFirst({
-          where: { id, status: user.type === "Admin" ? undefined : "Enable" },
+          where: { id, status: await getUserStatus() },
           include: {
             three_digit: true,
           },
         });
       }
       relation = await prisma.three_Digit.findMany({
-        where: { status: user.type === "Admin" ? undefined : "Enable" },
+        where: { status: await getUserStatus() },
         include: {
           two_digit: true,
         },

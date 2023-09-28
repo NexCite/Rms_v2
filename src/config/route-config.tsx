@@ -37,7 +37,7 @@ export default function GetRoutes(permissions: $Enums.UserPermission[]) {
           title: "Account",
           path: "/admin/accounting/account",
           key: "View_AccountEntries",
-          addKey: "Add_Account",
+          addKey: "Add_AccountEntry",
         },
         {
           index: 1,

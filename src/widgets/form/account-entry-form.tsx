@@ -245,7 +245,7 @@ export default function AccountEntryForm(props: {
                       control={form.control}
                       name="id"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>ID</FormLabel>
                           <FormControl>
                             <Input
@@ -267,7 +267,7 @@ export default function AccountEntryForm(props: {
                       control={form.control}
                       name="username"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>References</FormLabel>
                           <FormControl>
                             <Input
@@ -288,7 +288,7 @@ export default function AccountEntryForm(props: {
                       control={form.control}
                       name="first_name"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>First Name</FormLabel>
                           <FormControl>
                             <Input placeholder="first name" {...field} />
@@ -305,7 +305,7 @@ export default function AccountEntryForm(props: {
                       control={form.control}
                       name="last_name"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Last Name</FormLabel>
                           <FormControl>
                             <Input placeholder="last name" {...field} />
@@ -339,7 +339,7 @@ export default function AccountEntryForm(props: {
                       control={form.control}
                       name="phone_number"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="">
                           <FormLabel>Phone Number</FormLabel>
                           <FormControl>
                             <Input placeholder="phone number" {...field} />
@@ -355,7 +355,7 @@ export default function AccountEntryForm(props: {
                       control={form.control}
                       name={"country"}
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Country</FormLabel>
                           <FormControl>
                             <Select
@@ -386,7 +386,7 @@ export default function AccountEntryForm(props: {
                       control={form.control}
                       name={"gender"}
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Gender</FormLabel>
                           <FormControl>
                             <Select
@@ -420,7 +420,7 @@ export default function AccountEntryForm(props: {
                       control={form.control}
                       name="two_digit_id"
                       render={(renderValue) => (
-                        <FormItem>
+                        <FormItem className="">
                           <FormLabel>Two Digit</FormLabel>
                           <SearchSelect
                             default={renderValue.field.value}
@@ -447,7 +447,7 @@ export default function AccountEntryForm(props: {
                       control={form.control}
                       name="three_digit_id"
                       render={(renderValue) => (
-                        <FormItem>
+                        <FormItem className="">
                           <FormLabel>Three Digit</FormLabel>
                           <SearchSelect
                             default={renderValue.field.value}
@@ -474,7 +474,7 @@ export default function AccountEntryForm(props: {
                       name="more_than_four_digit_id"
                       control={form.control}
                       render={(renderValue) => (
-                        <FormItem>
+                        <FormItem className="">
                           <FormLabel>More Digit</FormLabel>
                           <SearchSelect
                             default={renderValue.field.value}

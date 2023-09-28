@@ -5,6 +5,7 @@ import { CommonRouteKeys } from "@rms/models/CommonModel";
 import HttpStatusCode from "@rms/models/HttpStatusCode";
 import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
+import { revalidatePath } from "next/cache";
 
 export async function createConfig(
   params: Prisma.ConfigCreateInput & { first_name: string; last_name: string }
@@ -50,6 +51,7 @@ export async function createConfig(
   });
 
   if (result) {
+    revalidatePath("/");
     return { status: HttpStatusCode.OK };
   } else {
     return { status: HttpStatusCode.BAD_REQUEST };

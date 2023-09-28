@@ -285,7 +285,7 @@ export default function DigitForm(props: Props) {
                       control={form.control}
                       name="id"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>ID</FormLabel>
                           <FormControl>
                             <Input
@@ -315,7 +315,7 @@ export default function DigitForm(props: Props) {
                       control={form.control}
                       name="name"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Name</FormLabel>
                           <FormControl>
                             <Input
@@ -337,7 +337,9 @@ export default function DigitForm(props: Props) {
                       control={form.control}
                       name={"type"}
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem
+                          className={props.node !== "two" ? "required" : ""}
+                        >
                           <FormLabel>Type</FormLabel>
                           <FormControl>
                             <Select
@@ -368,7 +370,9 @@ export default function DigitForm(props: Props) {
                       control={form.control}
                       name={"debit_credit"}
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem
+                          className={props.node !== "two" ? "required" : ""}
+                        >
                           <FormLabel>Debit/Credit</FormLabel>
                           <FormControl>
                             <Select
@@ -401,7 +405,7 @@ export default function DigitForm(props: Props) {
                         control={form.control}
                         name="two_digit_id"
                         render={(renderValue) => (
-                          <FormItem>
+                          <FormItem className="required">
                             <FormLabel>Two Digit</FormLabel>
                             <SearchSelect
                               default={renderValue.field.value}
@@ -423,7 +427,7 @@ export default function DigitForm(props: Props) {
                         control={form.control}
                         name="three_digit_id"
                         render={(renderValue) => (
-                          <FormItem>
+                          <FormItem className="required">
                             <FormLabel>Three Digit</FormLabel>
                             <SearchSelect
                               default={renderValue.field.value}

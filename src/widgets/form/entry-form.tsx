@@ -325,7 +325,7 @@ export default function EntryForm(props: Props) {
                       control={form.control}
                       name="title"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Title</FormLabel>
                           <FormControl
                             onChange={(e) => {
@@ -358,7 +358,7 @@ export default function EntryForm(props: Props) {
                       control={form.control}
                       name="description"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Description</FormLabel>
                           <FormControl
                             onChange={(e) => {
@@ -406,7 +406,7 @@ export default function EntryForm(props: Props) {
                       control={form.control}
                       name={"currency_id " as any}
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Currency</FormLabel>
                           <FormControl>
                             <SearchSelect
@@ -505,7 +505,7 @@ export default function EntryForm(props: Props) {
                           <FormField
                             name="amount"
                             render={() => (
-                              <FormItem>
+                              <FormItem className="required">
                                 <FormLabel>Amount</FormLabel>
 
                                 <Input
@@ -544,7 +544,7 @@ export default function EntryForm(props: Props) {
                             <FormField
                               name="type"
                               render={() => (
-                                <FormItem>
+                                <FormItem className="required">
                                   <FormLabel>Type</FormLabel>
                                   <SelectMenu
                                     default={

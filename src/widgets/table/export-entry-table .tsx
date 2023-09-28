@@ -87,7 +87,7 @@ export default function ExportEntryDataTable(props: Props) {
       setTransition(() => {
         replace(
           pathName +
-            `?from_date=${selectDate.from?.getTime()}&to_date=${selectDate.to?.getTime()}&two_digit_id=${
+            `?from_date=${selectDate?.from?.getTime()}&to_date=${selectDate?.to?.getTime()}&two_digit_id=${
               search.two_digit_id
             }&more_digit_id=${search.more_digit_id}&three_digit_id=${
               search.three_digit_id

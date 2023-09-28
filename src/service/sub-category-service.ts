@@ -40,7 +40,14 @@ export async function deleteSubCategoryById(
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
     async (auth) => {
-      await prisma.subCategory.delete({ where: { id } });
+      if (auth.type === "Admin") {
+        await prisma.subCategory.delete({ where: { id } });
+      } else {
+        await prisma.subCategory.update({
+          where: { id },
+          data: { status: "Deleted" },
+        });
+      }
       return;
     },
     "Delete_SubCategory",

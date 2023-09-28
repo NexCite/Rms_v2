@@ -3,8 +3,8 @@ import moment from "moment";
 import { $Enums, Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
 
-import { getUserInfo } from "@rms/lib/auth";
 import ExportEntryDataTable from "@rms/widgets/table/export-entry-table ";
+import { getUserStatus } from "@rms/service/user-service";
 type CommonInclude = {
   currency: true;
 
@@ -124,8 +124,6 @@ export default async function Entry(props: {
     type?: $Enums.DidgitType;
   };
 }) {
-  const user = await getUserInfo();
-
   var debit: $Enums.EntryType | undefined = undefined,
     type: $Enums.DidgitType | undefined = undefined,
     two_digit_id: number | undefined = undefined,
@@ -169,18 +167,18 @@ export default async function Entry(props: {
       .toDate(),
   ];
   const two_digits = await prisma.two_Digit.findMany({
-      where: { status: "Enable" },
+      where: { status: await getUserStatus() },
     }),
     three_digits = await prisma.three_Digit.findMany({
-      where: { status: "Enable" },
+      where: { status: await getUserStatus() },
       include: { two_digit: true },
     }),
     more_digits = await prisma.more_Than_Four_Digit.findMany({
-      where: { status: "Enable" },
+      where: { status: await getUserStatus() },
       include: { three_digit: true },
     }),
     accounts = await prisma.account_Entry.findMany({
-      where: { status: "Enable" },
+      where: { status: await getUserStatus() },
     });
 
   var entries: Prisma.EntryGetPayload<{
@@ -201,19 +199,19 @@ export default async function Entry(props: {
               OR: [
                 {
                   two_digit_id,
-                  status: user.type === "Admin" ? undefined : "Enable",
+                  status: await getUserStatus(),
                 },
                 {
                   three_digit: {
                     two_digit_id,
-                    status: user.type === "Admin" ? undefined : "Enable",
+                    status: await getUserStatus(),
                   },
                 },
                 {
                   more_than_four_digit: {
                     three_digit: {
                       two_digit_id,
-                      status: user.type === "Admin" ? undefined : "Enable",
+                      status: await getUserStatus(),
                     },
                   },
                 },
@@ -222,22 +220,21 @@ export default async function Entry(props: {
                     OR: [
                       {
                         two_digit_id,
-                        status: user.type === "Admin" ? undefined : "Enable",
+                        status: await getUserStatus(),
                       },
                       {
                         three_digit: {
-                          status: user.type === "Admin" ? undefined : "Enable",
+                          status: await getUserStatus(),
 
                           two_digit_id,
                         },
                       },
                       {
                         more_than_four_digit: {
-                          status: user.type === "Admin" ? undefined : "Enable",
+                          status: await getUserStatus(),
 
                           three_digit: {
-                            status:
-                              user.type === "Admin" ? undefined : "Enable",
+                            status: await getUserStatus(),
 
                             two_digit_id,
                           },
@@ -251,22 +248,21 @@ export default async function Entry(props: {
                     OR: [
                       {
                         two_digit_id,
-                        status: user.type === "Admin" ? undefined : "Enable",
+                        status: await getUserStatus(),
                       },
                       {
                         three_digit: {
                           two_digit_id,
-                          status: user.type === "Admin" ? undefined : "Enable",
+                          status: await getUserStatus(),
                         },
                       },
                       {
                         more_than_four_digit: {
-                          status: user.type === "Admin" ? undefined : "Enable",
+                          status: await getUserStatus(),
 
                           three_digit: {
                             two_digit_id,
-                            status:
-                              user.type === "Admin" ? undefined : "Enable",
+                            status: await getUserStatus(),
                           },
                         },
                       },
@@ -276,7 +272,7 @@ export default async function Entry(props: {
               ],
             },
           },
-          status: user.type === "Admin" ? undefined : "Enable",
+          status: await getUserStatus(),
         },
         orderBy: {
           to_date: "desc",
@@ -335,7 +331,7 @@ export default async function Entry(props: {
               ],
             },
           },
-          status: user.type === "Admin" ? undefined : "Enable",
+          status: await getUserStatus(),
         },
         orderBy: {
           to_date: "desc",
@@ -374,7 +370,7 @@ export default async function Entry(props: {
               ],
             },
           },
-          status: user.type === "Admin" ? undefined : "Enable",
+          status: await getUserStatus(),
         },
         orderBy: {
           to_date: "desc",
@@ -394,7 +390,7 @@ export default async function Entry(props: {
             lte: date[1],
           },
 
-          status: user.type === "Admin" ? undefined : "Enable",
+          status: await getUserStatus(),
         },
         orderBy: {
           to_date: "desc",

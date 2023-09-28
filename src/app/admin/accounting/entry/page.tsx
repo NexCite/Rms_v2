@@ -5,6 +5,7 @@ import prisma from "@rms/prisma/prisma";
 
 import EntryDataTable from "@rms/widgets/table/entry-table";
 import { getUserInfo } from "@rms/lib/auth";
+import { getUserStatus } from "@rms/service/user-service";
 export default async function Entry(props: {
   params: {};
   searchParams: {
@@ -20,8 +21,6 @@ export default async function Entry(props: {
     type?: $Enums.DidgitType;
   };
 }) {
-  const user = await getUserInfo();
-
   var debit: $Enums.EntryType | undefined = undefined,
     type: $Enums.DidgitType | undefined = undefined,
     two_digit_id: number | undefined = undefined,
@@ -65,18 +64,18 @@ export default async function Entry(props: {
       .toDate(),
   ];
   const two_digits = await prisma.two_Digit.findMany({
-      where: { status: "Enable" },
+      where: {},
     }),
     three_digits = await prisma.three_Digit.findMany({
-      where: { status: "Enable" },
+      where: {},
       include: { two_digit: true },
     }),
     more_digits = await prisma.more_Than_Four_Digit.findMany({
-      where: { status: "Enable" },
+      where: {},
       include: { three_digit: true },
     }),
     accounts = await prisma.account_Entry.findMany({
-      where: { status: "Enable" },
+      where: {},
     });
 
   var entries: Prisma.EntryGetPayload<{
@@ -109,19 +108,16 @@ export default async function Entry(props: {
               OR: [
                 {
                   two_digit_id,
-                  status: user.type === "Admin" ? undefined : "Enable",
                 },
                 {
                   three_digit: {
                     two_digit_id,
-                    status: user.type === "Admin" ? undefined : "Enable",
                   },
                 },
                 {
                   more_than_four_digit: {
                     three_digit: {
                       two_digit_id,
-                      status: user.type === "Admin" ? undefined : "Enable",
                     },
                   },
                 },
@@ -130,23 +126,15 @@ export default async function Entry(props: {
                     OR: [
                       {
                         two_digit_id,
-                        status: user.type === "Admin" ? undefined : "Enable",
                       },
                       {
                         three_digit: {
-                          status: user.type === "Admin" ? undefined : "Enable",
-
                           two_digit_id,
                         },
                       },
                       {
                         more_than_four_digit: {
-                          status: user.type === "Admin" ? undefined : "Enable",
-
                           three_digit: {
-                            status:
-                              user.type === "Admin" ? undefined : "Enable",
-
                             two_digit_id,
                           },
                         },
@@ -159,22 +147,16 @@ export default async function Entry(props: {
                     OR: [
                       {
                         two_digit_id,
-                        status: user.type === "Admin" ? undefined : "Enable",
                       },
                       {
                         three_digit: {
                           two_digit_id,
-                          status: user.type === "Admin" ? undefined : "Enable",
                         },
                       },
                       {
                         more_than_four_digit: {
-                          status: user.type === "Admin" ? undefined : "Enable",
-
                           three_digit: {
                             two_digit_id,
-                            status:
-                              user.type === "Admin" ? undefined : "Enable",
                           },
                         },
                       },
@@ -184,7 +166,6 @@ export default async function Entry(props: {
               ],
             },
           },
-          status: user.type === "Admin" ? undefined : "Enable",
         },
         orderBy: {
           to_date: "desc",
@@ -254,7 +235,6 @@ export default async function Entry(props: {
               ],
             },
           },
-          status: user.type === "Admin" ? undefined : "Enable",
         },
         orderBy: {
           to_date: "desc",
@@ -304,7 +284,6 @@ export default async function Entry(props: {
               ],
             },
           },
-          status: user.type === "Admin" ? undefined : "Enable",
         },
         orderBy: {
           to_date: "desc",
@@ -334,8 +313,6 @@ export default async function Entry(props: {
             gte: date[0],
             lte: date[1],
           },
-
-          status: user.type === "Admin" ? undefined : "Enable",
         },
         orderBy: {
           to_date: "desc",

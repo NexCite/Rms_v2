@@ -1,6 +1,7 @@
 import UserTableComponent from "@rms/widgets/table/user-table";
 import { Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
+import { getUserStatus } from "@rms/service/user-service";
 
 export default async function page(props: {
   params: { node: "user" };
@@ -8,7 +9,7 @@ export default async function page(props: {
 }) {
   var value: Prisma.UserGetPayload<{}>[] = await prisma.user.findMany({
     where: {
-      status: "Enable",
+      status: await getUserStatus(),
     },
     orderBy: {
       id: "desc",

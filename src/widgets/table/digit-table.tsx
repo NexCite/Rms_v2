@@ -132,10 +132,29 @@ export default function DigitTable(props: Props) {
             );
           },
         },
+
+        {
+          header: "Status",
+          accessorKey: "status",
+        },
+
         {
           accessorKey: "id", //simple recommended way to define a column
-          header: "Id",
-          id: "id",
+          header: "ID",
+          cell: ({ row: { original } }) => (
+            <div
+              className={`text-center rounded-sm ${
+                original.status === "Deleted"
+                  ? "bg-red-500"
+                  : original.create_date.toLocaleTimeString() !==
+                    original.modified_date.toLocaleTimeString()
+                  ? "bg-yellow-400"
+                  : ""
+              }`}
+            >
+              {original.id}
+            </div>
+          ),
         },
 
         {
