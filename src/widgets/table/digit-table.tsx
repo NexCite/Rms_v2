@@ -139,7 +139,7 @@ export default function DigitTable(props: Props) {
         },
 
         {
-          accessorKey: "id", //simple recommended way to define a column
+          accessorKey: "id",
           header: "ID",
           cell: ({ row: { original } }) => (
             <div
@@ -158,15 +158,15 @@ export default function DigitTable(props: Props) {
         },
 
         {
-          accessorKey: "name", //simple recommended way to define a column
+          accessorKey: "name",
           header: "Name",
         },
         {
-          accessorKey: "type", //simple recommended way to define a column
+          accessorKey: "type",
           header: "Type",
         },
         {
-          accessorKey: "debit_credit", //simple recommended way to define a column
+          accessorKey: "debit_credit",
           header: "Debit/Credit",
         },
       ]
@@ -174,7 +174,7 @@ export default function DigitTable(props: Props) {
           props.node !== "two"
             ? ([
                 {
-                  accessorKey: props.node === "three" ? "two" : "three", //simple recommended way to define a column
+                  accessorKey: props.node === "three" ? "two" : "three",
                   header: props.node === "three" ? "Two Digit" : "Three Digit",
                   accessorFn: (p) =>
                     `(${p.two_digit?.id ?? ""}${p.three_digit?.id ?? ""}) ${
@@ -186,7 +186,7 @@ export default function DigitTable(props: Props) {
         )
         .concat([
           {
-            accessorKey: "create_date", //simple recommended way to define a column
+            accessorKey: "create_date",
             header: "Create Date",
             columnDefType: "data",
             id: "create_date",
@@ -194,7 +194,7 @@ export default function DigitTable(props: Props) {
           },
 
           {
-            accessorKey: "modified_date", //simple recommended way to define a column
+            accessorKey: "modified_date",
             header: "Modified Date",
             columnDefType: "data",
             id: "modified_date",

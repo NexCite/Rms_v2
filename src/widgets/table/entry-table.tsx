@@ -219,7 +219,7 @@ export default function EntryDataTable(props: Props) {
       },
 
       {
-        accessorKey: "id", //simple recommended way to define a column
+        accessorKey: "id",
         header: "ID",
         cell: ({ row: { original } }) => (
           <div
@@ -237,18 +237,18 @@ export default function EntryDataTable(props: Props) {
         ),
       },
       {
-        accessorKey: "create_date", //simple recommended way to define a column
+        accessorKey: "create_date",
         header: "Date",
         accessorFn(originalRow) {
           return moment(originalRow?.create_date).format("DD-MM-yyy hh:mm a");
         },
       },
       {
-        accessorKey: "title", //simple recommended way to define a column
+        accessorKey: "title",
         header: "Title",
       },
       {
-        accessorKey: "amount" as any, //simple recommended way to define a column
+        accessorKey: "amount" as any,
         header: "Amount",
         accessorFn(originalRow) {
           var amounts = originalRow?.sub_entries

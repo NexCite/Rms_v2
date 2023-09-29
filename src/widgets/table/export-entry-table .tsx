@@ -103,22 +103,22 @@ export default function ExportEntryDataTable(props: Props) {
   const columns: ColumnDef<CommonEntryType>[] = useMemo(
     () => [
       {
-        accessorKey: "id", //simple recommended way to define a column
+        accessorKey: "id",
         header: "ID",
       },
       {
-        accessorKey: "create_date", //simple recommended way to define a column
+        accessorKey: "create_date",
         header: "Date",
         accessorFn(originalRow) {
           return moment(originalRow?.date).format("DD-MM-yyy hh:mm a");
         },
       },
       {
-        accessorKey: "title", //simple recommended way to define a column
+        accessorKey: "title",
         header: "Title",
       },
       {
-        accessorKey: "amount" as any, //simple recommended way to define a column
+        accessorKey: "amount" as any,
         header: "Amount",
         accessorFn(originalRow) {
           var amounts = originalRow?.subEntries

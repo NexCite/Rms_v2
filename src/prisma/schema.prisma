@@ -61,22 +61,21 @@ model User {
 }
 
 model Employee {
-  id            Int       @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   first_name    String
   last_name     String
-  phone_number  String    @unique
+  phone_number  String   @unique
   gender        Gender
-  address1      String    @default("")
-  address2      String    @default("")
-  country       String    @default("")
-  email         String    @default("")
-  status        Status    @default(Enable)
-  create_date   DateTime  @default(now())
-  modified_date DateTime  @default(now()) @updatedAt
-  username      String    @unique
-  invoices      Invoice[]
+  address1      String   @default("")
+  address2      String   @default("")
+  country       String   @default("")
+  email         String   @default("")
+  status        Status   @default(Enable)
+  create_date   DateTime @default(now())
+  modified_date DateTime @default(now()) @updatedAt
+  username      String   @unique
   user_id       Int
-  user          User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model Trader {
@@ -98,7 +97,6 @@ model Trader {
   accounts      Account[]
   broker        Broker?   @relation(fields: [broker_id], references: [id], onDelete: Cascade)
   user          User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  invoices      Invoice[]
 }
 
 model Broker {
@@ -156,33 +154,28 @@ model Account {
 }
 
 model Invoice {
-  id              Int         @id @default(autoincrement())
+  id              Int             @id @default(autoincrement())
   title           String
-  description     String      @default("")
-  note            String      @default("")
-  create_date     DateTime    @default(now())
-  modified_date   DateTime    @default(now()) @updatedAt
+  description     String          @default("")
+  note            String          @default("")
+  create_date     DateTime        @default(now())
+  modified_date   DateTime        @default(now()) @updatedAt
   amount          Float
-  discount        Float       @default(0)
+  discount        Float           @default(0)
   account_id      Int?
   user_id         Int
-  trader_id       Int?
-  client_id       Int?
-  employee_id     Int?
   broker_id       Int?
   currency_id     Int?
-  status          Status      @default(Enable)
+  status          Status          @default(Enable)
   sub_category_id Int
-  currency        Currency?   @relation(fields: [currency_id], references: [id], onDelete: Cascade)
-  account         Account?    @relation(fields: [account_id], references: [id], onDelete: Cascade)
-  broker          Broker?     @relation(fields: [broker_id], references: [id], onDelete: Cascade)
-  trader          Trader?     @relation(fields: [trader_id], references: [id], onDelete: Cascade)
-  employee        Employee?   @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+  currency        Currency?       @relation(fields: [currency_id], references: [id], onDelete: Cascade)
+  account         Account?        @relation(fields: [account_id], references: [id], onDelete: Cascade)
+  broker          Broker?         @relation(fields: [broker_id], references: [id], onDelete: Cascade)
   payments        Payment[]
-  user            User        @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  user            User            @relation(fields: [user_id], references: [id], onUpdate: NoAction)
   media           Media?
-  debit_credit    Boolean
-  sub_category    SubCategory @relation(fields: [sub_category_id], references: [id], onDelete: Cascade)
+  debit_credit    DebitCreditType @default(Debit)
+  sub_category    SubCategory     @relation(fields: [sub_category_id], references: [id], onDelete: Cascade)
 }
 
 model Payment {

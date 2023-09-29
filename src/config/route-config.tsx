@@ -106,15 +106,14 @@ export default function GetRoutes(permissions: $Enums.UserPermission[]) {
         {
           index: 0,
           title: "Invoice",
-          path: "/admin/trading/view_trading/invoice",
-          addKey: "Add_Invoice",
-
+          path: "/admin/trading/invoice",
           key: "View_Invoices",
+          addKey: "Add_Invoice",
         },
         {
           index: 1,
           title: "Payment",
-          path: "/admin/trading/view_trading/payment",
+          path: "/admin/trading/payment",
           key: "View_Payments",
           addKey: "Add_Payment",
         },

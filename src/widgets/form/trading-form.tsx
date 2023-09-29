@@ -58,7 +58,6 @@ export default function TradingForm(props: Props) {
   const validation = useMemo(() => {
     switch (props.node) {
       case "trader":
-
       case "broker": {
         return z.object({
           first_name: z
@@ -216,12 +215,12 @@ export default function TradingForm(props: Props) {
                 {" "}
                 <div className="flex justify-between items-center">
                   <h1 className="font-medium text-2xl">
-                    Form{" "}
                     {props.node === "broker"
                       ? "Broker"
                       : props.node === "account"
                       ? "Account"
-                      : "Trader"}
+                      : "Trader"}{" "}
+                    Form
                   </h1>
                 </div>
                 <hr className="my-12 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
