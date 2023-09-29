@@ -9,11 +9,13 @@ import prisma from "@rms/prisma/prisma";
 //todo: add user by token
 
 export async function createAccount(
-  params: Prisma.AccountCreateInput
+  props: Prisma.AccountCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction<void>(
     async (auth) => {
-      await prisma.account.create({ data: params });
+      props.user = { connect: { id: auth.id } };
+
+      await prisma.account.create({ data: props });
       return;
     },
     "Add_Account",
@@ -23,13 +25,15 @@ export async function createAccount(
 
 export async function updateAccount(
   id: number,
-  params: Prisma.AccountUpdateInput
+  props: Prisma.AccountUpdateInput
 ): Promise<ServiceActionModel<Prisma.AccountUpdateInput>> {
   return handlerServiceAction<Prisma.AccountUpdateInput>(
     async (auth) => {
+      props.user = { connect: { id: auth.id } };
+
       var result = await prisma.account.update({
         where: { id },
-        data: params,
+        data: props,
       });
 
       return result;
@@ -49,7 +53,7 @@ export async function deleteAccountById(
       else
         await prisma.account.update({
           where: { id: id },
-          data: { status: "Deleted" },
+          data: { status: "Deleted", user_id: auth.id },
         });
 
       return;

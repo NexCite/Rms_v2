@@ -9,11 +9,13 @@ import prisma from "@rms/prisma/prisma";
 //todo: add user by token
 
 export async function createBroker(
-  params: Prisma.BrokerCreateInput
+  props: Prisma.BrokerCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction<void>(
     async (auth) => {
-      await prisma.broker.create({ data: params });
+      props.user = { connect: { id: auth.id } };
+
+      await prisma.broker.create({ data: props });
       return;
     },
     "Add_Broker",
@@ -23,13 +25,15 @@ export async function createBroker(
 
 export async function updateBroker(
   id: number,
-  params: Prisma.BrokerUpdateInput
+  props: Prisma.BrokerUpdateInput
 ): Promise<ServiceActionModel<Prisma.BrokerUpdateInput>> {
   return handlerServiceAction<Prisma.BrokerUpdateInput>(
     async (auth) => {
+      props.user = { connect: { id: auth.id } };
+
       return await prisma.broker.update({
         where: { id },
-        data: params,
+        data: props,
       });
     },
     "Edit_Broker",
@@ -47,7 +51,7 @@ export async function deleteBrokerById(
       else
         await prisma.broker.update({
           where: { id: id },
-          data: { status: "Deleted" },
+          data: { status: "Deleted", user_id: auth.id },
         });
 
       return;

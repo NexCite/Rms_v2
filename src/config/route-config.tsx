@@ -184,7 +184,7 @@ export default function GetRoutes(permissions: $Enums.UserPermission[]) {
         },
         {
           index: 2,
-          title: "Log",
+          title: "Logs",
           path: "/admin/setting/log",
           key: "View_Log",
         },

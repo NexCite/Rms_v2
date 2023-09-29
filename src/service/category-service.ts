@@ -6,11 +6,13 @@ import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 
 export async function createCategory(
-  params: Prisma.CategoryCreateInput
+  props: Prisma.CategoryCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
     async (auth) => {
-      await prisma.category.create({ data: params });
+      props.user = { connect: { id: auth.id } };
+
+      await prisma.category.create({ data: props });
       return;
     },
     "Add_Category",
@@ -20,13 +22,15 @@ export async function createCategory(
 
 export async function updateCategory(
   id: number,
-  params: Prisma.CategoryUpdateInput
+  props: Prisma.CategoryUpdateInput
 ): Promise<ServiceActionModel<Prisma.CategoryUpdateInput>> {
   return handlerServiceAction(
     async (auth) => {
+      props.user = { connect: { id: auth.id } };
+
       return await prisma.category.update({
         where: { id },
-        data: params,
+        data: props,
       });
     },
     "Edit_Category",
@@ -44,7 +48,7 @@ export async function deleteCategoryById(
       } else {
         await prisma.category.update({
           where: { id },
-          data: { status: "Deleted" },
+          data: { status: "Deleted", user_id: auth.id },
         });
       }
 

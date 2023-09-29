@@ -8,6 +8,8 @@ export async function createCurrency(props: Prisma.CurrencyCreateInput) {
   return handlerServiceAction(
     async (auth) => {
       props.user = { connect: { id: auth.id } };
+
+      props.user = { connect: { id: auth.id } };
       await prisma.currency.create({ data: props });
     },
     "Add_Currency",
@@ -21,6 +23,8 @@ export async function updateCurrency(
 ) {
   return handlerServiceAction(
     async (auth) => {
+      props.user = { connect: { id: auth.id } };
+
       props.user = { connect: { id: auth.id } };
       await prisma.currency.update({ where: { id: id }, data: props });
     },
@@ -39,7 +43,7 @@ export async function deleteCurrency(id: number) {
       } else
         return await prisma.entry.update({
           where: { id: id },
-          data: { status: "Deleted" },
+          data: { status: "Deleted", user_id: auth.id },
         });
     },
     "Delete_Currency",

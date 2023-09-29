@@ -7,6 +7,8 @@ import prisma from "@rms/prisma/prisma";
 export async function createEntry(props: Prisma.EntryCreateInput) {
   return handlerServiceAction(
     async (auth) => {
+      props.user = { connect: { id: auth.id } };
+
       await prisma.entry.create({ data: props });
       return;
     },
@@ -18,6 +20,8 @@ export async function createEntry(props: Prisma.EntryCreateInput) {
 export async function updateEntry(id: number, props: Prisma.EntryUpdateInput) {
   return handlerServiceAction(
     async (auth) => {
+      props.user = { connect: { id: auth.id } };
+
       await prisma.entry.update({ data: props, where: { id: id } });
       return;
     },
@@ -35,7 +39,7 @@ export async function deleteEntry(id: number) {
       } else
         return await prisma.entry.update({
           where: { id: id },
-          data: { status: "Deleted" },
+          data: { status: "Deleted", user_id: id },
         });
 
       return;

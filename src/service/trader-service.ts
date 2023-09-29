@@ -8,21 +8,23 @@ import prisma from "@rms/prisma/prisma";
 //todo: add user by token
 
 export async function createTrader(
-  params: Prisma.TraderCreateInput
+  props: Prisma.TraderCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction<void>(
     async (auth) => {
-      params.broker = {
+      props.user = { connect: { id: auth.id } };
+
+      props.broker = {
         connect: {
           // @ts-ignore
-          id: params.broker_id,
+          id: props.broker_id,
         },
       };
 
       // @ts-ignore
-      delete params.broker_id;
+      delete props.broker_id;
 
-      await prisma.trader.create({ data: params });
+      await prisma.trader.create({ data: props });
       return;
     },
     "Add_Trader",
@@ -32,13 +34,15 @@ export async function createTrader(
 
 export async function updateTrader(
   id: number,
-  params: Prisma.TraderUpdateInput
+  props: Prisma.TraderUpdateInput
 ): Promise<ServiceActionModel<Prisma.TraderUpdateInput>> {
   return handlerServiceAction<Prisma.TraderUpdateInput>(
     async (auth) => {
+      props.user = { connect: { id: auth.id } };
+
       return await prisma.trader.update({
         where: { id },
-        data: params,
+        data: props,
       });
     },
     "Edit_Trader",
@@ -56,7 +60,7 @@ export async function deleteTraderById(
       else
         await prisma.trader.update({
           where: { id: id },
-          data: { status: "Deleted" },
+          data: { status: "Deleted", user_id: id },
         });
 
       return;

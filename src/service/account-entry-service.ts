@@ -8,6 +8,8 @@ export async function createAccountEntry(
 ) {
   return handlerServiceAction(
     async (auth) => {
+      props.data.user_id = auth.id;
+
       await prisma.account_Entry.create(props);
       return;
     },
@@ -21,6 +23,8 @@ export async function updateAccountEntry(
 ) {
   return handlerServiceAction(
     async (auth) => {
+      props.data.user_id = auth.id;
+
       return await prisma.account_Entry.update(props);
     },
     "Edit_AccountEntry",
@@ -35,7 +39,7 @@ export async function deleteAccountEntry(id: number) {
       } else {
         await prisma.account_Entry.update({
           where: { id: id },
-          data: { status: "Deleted" },
+          data: { status: "Deleted", user_id: auth.id },
         });
       }
 
