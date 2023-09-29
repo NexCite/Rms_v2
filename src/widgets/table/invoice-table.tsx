@@ -35,15 +35,15 @@ import {
 } from "@rms/components/ui/dropdown-menu";
 import { Input } from "@rms/components/ui/input";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
-import { deleteUserById } from "@rms/service/user-service";
 import { useRouter } from "next/navigation";
 import Authorized from "@rms/components/ui/authorized";
+import { deleteInvoiceById } from "@rms/service/invoice-service";
 
 type Props = {
-  users: Prisma.UserGetPayload<{}>[];
+  invoices: Prisma.InvoiceGetPayload<{}>[];
 };
 
-export default function UserTable(props: Props) {
+export default function InvoiceTable(props: Props) {
   const pathName = usePathname();
   const [isActive, setActiveTransition] = useTransition();
 
@@ -51,12 +51,12 @@ export default function UserTable(props: Props) {
 
   const { createAlert } = useAlertHook();
   const { push } = useRouter();
-  const columns = useMemo<ColumnDef<Prisma.UserGetPayload<{}>>[]>(
+  const columns = useMemo<ColumnDef<Prisma.InvoiceGetPayload<{}>>[]>(
     () => [
       {
         accessorKey: "action",
         cell(originalRow) {
-          const { id, username } = originalRow.row.original;
+          const { id } = originalRow.row.original;
 
           return (
             <DropdownMenu>
@@ -69,7 +69,7 @@ export default function UserTable(props: Props) {
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                  <Authorized permission="Edit_User">
+                  <Authorized permission="Edit_Invoice">
                     <DropdownMenuItem
                       onClick={() => push(pathName + "/form?id=" + id)}
                       className="cursor-pointer"
@@ -78,17 +78,17 @@ export default function UserTable(props: Props) {
                       Edit
                     </DropdownMenuItem>
                   </Authorized>
-                  <Authorized permission="Delete_User">
+                  <Authorized permission="Delete_Invoice">
                     <DropdownMenuItem
                       disabled={isActive}
                       className="cursor-pointer"
                       onClick={() => {
                         const isConfirm = confirm(
-                          `Do You sure you want to delete ${username} id:${id} `
+                          `Do You sure you want to delete ${id} id:${id} `
                         );
                         if (isConfirm) {
                           setActiveTransition(async () => {
-                            const result = await deleteUserById(id);
+                            const result = await deleteInvoiceById(id);
 
                             createAlert(result);
                           });
@@ -104,83 +104,39 @@ export default function UserTable(props: Props) {
           );
         },
       },
-
-      {
-        header: "Status",
-        accessorKey: "status",
-      },
-
       {
         accessorKey: "id",
         header: "ID",
-        cell: ({ row: { original } }) => (
-          <div
-            className={`text-center rounded-sm ${
-              original.status === "Deleted"
-                ? "bg-red-500"
-                : original.create_date.toLocaleTimeString() !==
-                  original.modified_date.toLocaleTimeString()
-                ? "bg-yellow-400"
-                : ""
-            }`}
-          >
-            {original.id}
-          </div>
-        ),
       },
       {
-        accessorKey: "username",
-        header: "UserName",
+        accessorKey: "title",
+        header: "Title",
       },
       {
-        accessorKey: "first_name",
-        header: "First Name",
+        accessorKey: "debit_credit",
+        header: "Type",
       },
       {
-        accessorKey: "last_name",
-        header: "Last Name",
-      },
-
-      {
-        accessorKey: "phone_number",
-        header: "Phone number",
+        accessorKey: "amount",
+        header: "Amount",
       },
       {
-        accessorKey: "email",
-        header: "Email",
-      },
-      {
-        accessorKey: "gender",
-        header: "Gender",
-      },
-      {
-        accessorKey: "country",
-        header: "Country",
-      },
-      {
-        accessorKey: "address1",
-        header: "Address 1",
-      },
-      {
-        accessorKey: "address2",
-        header: "Address 2",
+        accessorKey: "discount",
+        header: "Discount",
       },
       {
         accessorKey: "create_date",
         header: "Create Date",
-        accessorFn: (e) => e.create_date.toLocaleDateString(),
       },
-
       {
         accessorKey: "modified_date",
         header: "Modified Date",
-        accessorFn: (e) => e.modified_date.toLocaleDateString(),
       },
     ],
     [createAlert, isActive, pathName, push]
   );
   const table = useReactTable({
-    data: props.users,
+    data: props.invoices,
     columns: columns,
 
     getCoreRowModel: getCoreRowModel(),
@@ -197,7 +153,7 @@ export default function UserTable(props: Props) {
     <Style>
       <div className="flex gap-6 flex-col">
         <div className="flex justify-between items-center ">
-          <h1>Result: {props.users.length}</h1>
+          <h1>Result: {props.invoices.length}</h1>
         </div>
         <div className="max-w-xs">
           <Input

@@ -138,7 +138,7 @@ export default function TradingTable(props: Props) {
         },
 
         {
-          accessorKey: "id", //simple recommended way to define a column
+          accessorKey: "id",
           header: "ID",
           cell: ({ row: { original } }) => (
             <div
@@ -156,7 +156,7 @@ export default function TradingTable(props: Props) {
           ),
         },
         {
-          accessorKey: "username", //simple recommended way to define a column
+          accessorKey: "username",
           header: "UserName",
         },
       ]
@@ -164,35 +164,35 @@ export default function TradingTable(props: Props) {
           props.node !== "account"
             ? [
                 {
-                  accessorKey: "first_name", //simple recommended way to define a column
+                  accessorKey: "first_name",
                   header: "First Name",
                 },
                 {
-                  accessorKey: "last_name", //simple recommended way to define a column
+                  accessorKey: "last_name",
                   header: "Last Name",
                 },
                 {
-                  accessorKey: "phone_number", //simple recommended way to define a column
+                  accessorKey: "phone_number",
                   header: "Phone number",
                 },
                 {
-                  accessorKey: "email", //simple recommended way to define a column
+                  accessorKey: "email",
                   header: "Email",
                 },
                 {
-                  accessorKey: "gender", //simple recommended way to define a column
+                  accessorKey: "gender",
                   header: "Gender",
                 },
                 {
-                  accessorKey: "country", //simple recommended way to define a column
+                  accessorKey: "country",
                   header: "Country",
                 },
                 {
-                  accessorKey: "address1", //simple recommended way to define a column
+                  accessorKey: "address1",
                   header: "Address 1",
                 },
                 {
-                  accessorKey: "address2", //simple recommended way to define a column
+                  accessorKey: "address2",
                   header: "Address 2",
                 },
               ]
@@ -213,13 +213,13 @@ export default function TradingTable(props: Props) {
         )
         .concat([
           {
-            accessorKey: "create_date", //simple recommended way to define a column
+            accessorKey: "create_date",
             header: "Create Date",
             accessorFn: (e) => e.create_date.toLocaleDateString(),
           },
 
           {
-            accessorKey: "modified_date", //simple recommended way to define a column
+            accessorKey: "modified_date",
             header: "Modified Date",
             accessorFn: (e) => e.modified_date.toLocaleDateString(),
           },

@@ -92,7 +92,7 @@ export default function CurrencyForm(props: Props) {
               <CardHeader>
                 {" "}
                 <div className="flex justify-between items-center">
-                  <h1 className="font-medium text-2xl">Entry Form</h1>
+                  <h1 className="font-medium text-2xl">Currency Form</h1>
                 </div>
                 <hr className="my-12 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
               </CardHeader>

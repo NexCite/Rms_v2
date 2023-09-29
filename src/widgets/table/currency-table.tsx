@@ -112,7 +112,7 @@ export default function CurrencyTable(props: Props) {
       },
 
       {
-        accessorKey: "id", //simple recommended way to define a column
+        accessorKey: "id",
         header: "ID",
         cell: ({ row: { original } }) => (
           <div
@@ -275,26 +275,26 @@ export default function CurrencyTable(props: Props) {
 //   const columns = useMemo<MRT_ColumnDef<Prisma.CurrencyGetPayload<{}>>[]>(
 //     () => [
 //       {
-//         accessorKey: "id", //simple recommended way to define a column
+//         accessorKey: "id",
 //         header: "ID",
 //       },
 //       {
-//         accessorKey: "name", //simple recommended way to define a column
+//         accessorKey: "name",
 //         header: "Name",
 //       },
 //       {
-//         accessorKey: "symbol", //simple recommended way to define a column
+//         accessorKey: "symbol",
 //         header: "Symbol",
 //       },
 
 //       {
-//         accessorKey: "create_date", //simple recommended way to define a column
+//         accessorKey: "create_date",
 //         header: "Create Date",
 //         accessorFn: (e) => e.create_date.toLocaleDateString(),
 //       },
 
 //       {
-//         accessorKey: "modified_date", //simple recommended way to define a column
+//         accessorKey: "modified_date",
 //         header: "Modified Date",
 //         accessorFn: (e) => e.modified_date.toLocaleDateString(),
 //       },

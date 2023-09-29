@@ -43,7 +43,7 @@ export function Sidebar(props: Props) {
           alt={props.config.name}
           width={80}
           height={80}
-          className="rounded-full"
+          className="rounded-full w-12 h-12 mb-1"
         />
       </div>
       <hr className="divide-x-0" />
