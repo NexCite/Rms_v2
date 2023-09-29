@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { checkUserPermissions } from "./auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
+import { createLog } from "@rms/service/log-service";
 
 export async function handlerServiceAction<T>(
   action: (
@@ -39,6 +40,19 @@ export async function handlerServiceAction<T>(
     if (auth.status === HttpStatusCode.OK) {
       try {
         var result = await action(auth.user!);
+        await createLog({
+          id: auth.user.id,
+          action: key.includes("Add")
+            ? "Add"
+            : key.includes("Edit")
+            ? "Edit"
+            : key.includes("Delete")
+            ? "Delete"
+            : "View",
+          page: url,
+          user_id: auth.user.id,
+          body: JSON.stringify(result),
+        });
 
         if (update) {
           const paths = generatePaths(url.pathname);
@@ -50,6 +64,21 @@ export async function handlerServiceAction<T>(
           message: "Opration Successfully",
         };
       } catch (error: any) {
+        createLog({
+          id: auth.user.id,
+          action: key.includes("Add")
+            ? "Add"
+            : key.includes("Edit")
+            ? "Edit"
+            : key.includes("Delete")
+            ? "Delete"
+            : "View",
+          page: url,
+          user_id: auth.user.id,
+          body: JSON.stringify({}),
+          error: JSON.stringify(error),
+        });
+
         console.log(error);
         if ((error as any).meta && (error as any).message) {
           var errors: any = {};

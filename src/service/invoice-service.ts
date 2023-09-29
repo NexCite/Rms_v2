@@ -10,48 +10,11 @@ import prisma from "@rms/prisma/prisma";
 import { cookies } from "next/headers";
 
 export async function createInvoice(
-  params: Prisma.InvoiceCreateInput
+  params: Prisma.InvoiceUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
     async (auth) => {
-      params.user = { connect: { id: auth.id } };
-
-      params.sub_category = {
-        connect: {
-          // @ts-ignore
-          id: params.sub_category_id,
-        },
-      };
-
-      params.broker = {
-        connect: {
-          // @ts-ignore
-          id: params.broker_id,
-        },
-      };
-
-      params.account = {
-        connect: {
-          // @ts-ignore
-          id: params.account_id,
-        },
-      };
-
-      params.currency = {
-        connect: {
-          // @ts-ignore
-          id: params.currency_id,
-        },
-      };
-
-      // @ts-ignore
-      delete params.broker_id;
-      // @ts-ignore
-      delete params.account_id;
-      // @ts-ignore
-      delete params.sub_category_id;
-      // @ts-ignore
-      delete params.currency_id;
+      params.user_id = auth.id;
 
       await prisma.invoice.create({ data: params });
       return;

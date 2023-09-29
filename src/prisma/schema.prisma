@@ -122,11 +122,19 @@ model Broker {
 model Log {
   id          Int      @id @default(autoincrement())
   create_date DateTime @default(now())
-  page        String
-  body        String?
-  query       String?
+  page        Json
+  action      Action
+  body        Json?
   user_id     Int
+  error       String?
   user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+enum Action {
+  Add
+  Edit
+  Delete
+  View
 }
 
 model Auth {

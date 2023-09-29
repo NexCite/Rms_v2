@@ -17,6 +17,7 @@ import {
   Tooltip,
   Input,
 } from "@material-tailwind/react";
+import { Prisma } from "@prisma/client";
 
 const TABLE_HEAD = ["Transaction", "Amount", "Date", "Status", "Account", ""];
 
@@ -73,7 +74,10 @@ const TABLE_ROWS = [
   },
 ];
 
-export function LogTable() {
+type Props = {
+  data: Prisma.LogGetPayload<{ include: { user: true } }>[];
+};
+export function LogTable(props: Props) {
   return (
     <Card className="h-full w-full">
       <CardHeader floated={false} shadow={false} className="rounded-none">
