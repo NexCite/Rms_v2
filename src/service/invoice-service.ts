@@ -1,13 +1,10 @@
 "use server";
 
-import { Prisma } from "@prisma/client";
+import { $Enums, Prisma } from "@prisma/client";
 import { handlerServiceAction } from "@rms/lib/handler";
-
-import { hashPassword } from "@rms/lib/hash";
-
+import { getMediaType } from "@rms/lib/media";
 import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
-import { cookies } from "next/headers";
 
 export async function createInvoice(
   props: Prisma.InvoiceUncheckedCreateInput
@@ -16,7 +13,8 @@ export async function createInvoice(
     async (auth) => {
       props.user_id = auth.id;
 
-      await prisma.invoice.create({ data: props });
+      const result = await prisma.invoice.create({ data: props });
+
       return;
     },
     "Add_Invoice",
@@ -27,12 +25,39 @@ export async function createInvoice(
 
 export async function updateInvoice(
   id: number,
-  props: Prisma.InvoiceUpdateInput
-): Promise<ServiceActionModel<Prisma.InvoiceUpdateInput>> {
+  props: Prisma.InvoiceUncheckedUpdateInput
+) {
   return handlerServiceAction(
     async (auth) => {
-      return await prisma.invoice.update({ data: props, where: { id } });
+      props.user_id = auth.id;
+
+      var invoice = await prisma.invoice.findFirst({
+        where: { id },
+
+        include: {
+          payments: { select: { amount: true } },
+        },
+      });
+
+      var sum = 0;
+
+      invoice.payments.forEach((e) => {
+        sum += e.amount;
+      });
+      if (+props.amount - sum < 0) {
+        throw new Prisma.PrismaClientKnownRequestError(
+          "Amount  must be  greater then payment amounts",
+          { clientVersion: "1", code: "", meta: { target: ["amount"] } }
+        );
+      }
+
+      await prisma.invoice.update({
+        where: { id: invoice.id },
+        data: props,
+      });
+      return;
     },
+
     "Edit_Invoice",
     true,
     props

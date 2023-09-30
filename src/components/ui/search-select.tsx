@@ -40,14 +40,16 @@ export default function SearchSelect(props: Props) {
           >
             {value
               ? (() => {
-                  var data = props.data.find((res) => value === res.id);
+                  var data = props.data.find((res) => value === res.id)!;
 
-                  if (data?.symbol) {
-                    return `${data?.symbol}`;
-                  } else if (data?.name) {
+                  if (data.symbol) {
+                    return `${data.symbol}`;
+                  } else if (data.name) {
                     return `${data.id} ${data.name}`;
-                  } else if (data?.username) {
-                    return `${data?.id} ${data?.username}`;
+                  } else if (data.username) {
+                    return `${data.id} ${data.username}`;
+                  } else if (data.title) {
+                    return `(${data.id}) ${data.title}`;
                   } else {
                     return undefined;
                   }
@@ -78,7 +80,10 @@ export default function SearchSelect(props: Props) {
                     )}
                   />
                   {res.symbol ? "" : res.id + " "}
-                  {res.symbol ?? res.name ?? res.username}
+                  {res.symbol ??
+                    res.name ??
+                    res.username ??
+                    res.title?.substring(0, 10)}
                 </CommandItem>
               ))}
             </CommandGroup>

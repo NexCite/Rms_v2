@@ -15,14 +15,14 @@ export default async function layout(props: { children: React.ReactNode }) {
   const urlHeader = headers().get("url");
   const url = new URL(urlHeader);
 
-  if (!url.pathname.includes("/log")) {
-    await createLog({
-      action: "View",
-      page: url.toString(),
-      user_id: user.id,
-      body: JSON.stringify({}),
-    });
-  }
+  console.log(Date.now(), url.pathname);
+  await createLog({
+    action: "View",
+    page: url.toString(),
+    user_id: user.id,
+    body: JSON.stringify({}),
+  });
+
   return (
     <Layout config={config!} route={GetRoutes(user?.permissions!)}>
       {props.children}

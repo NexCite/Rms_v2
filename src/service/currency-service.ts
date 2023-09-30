@@ -4,12 +4,11 @@ import { Prisma } from "@prisma/client";
 import { handlerServiceAction } from "@rms/lib/handler";
 import prisma from "@rms/prisma/prisma";
 
-export async function createCurrency(props: Prisma.CurrencyCreateInput) {
+export async function createCurrency(
+  props: Prisma.CurrencyUncheckedCreateInput
+) {
   return handlerServiceAction(
     async (auth) => {
-      props.user = { connect: { id: auth.id } };
-
-      props.user = { connect: { id: auth.id } };
       await prisma.currency.create({ data: props });
     },
     "Add_Currency",
@@ -20,13 +19,10 @@ export async function createCurrency(props: Prisma.CurrencyCreateInput) {
 
 export async function updateCurrency(
   id: number,
-  props: Prisma.CurrencyUpdateInput
+  props: Prisma.CurrencyUncheckedUpdateInput
 ) {
   return handlerServiceAction(
     async (auth) => {
-      props.user = { connect: { id: auth.id } };
-
-      props.user = { connect: { id: auth.id } };
       await prisma.currency.update({ where: { id: id }, data: props });
     },
     "Edit_Currency",

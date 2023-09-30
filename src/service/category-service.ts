@@ -6,12 +6,10 @@ import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 
 export async function createCategory(
-  props: Prisma.CategoryCreateInput
+  props: Prisma.CategoryUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
     async (auth) => {
-      props.user = { connect: { id: auth.id } };
-
       await prisma.category.create({ data: props });
       return;
     },
@@ -23,12 +21,10 @@ export async function createCategory(
 
 export async function updateCategory(
   id: number,
-  props: Prisma.CategoryUpdateInput
+  props: Prisma.CategoryUncheckedUpdateInput
 ): Promise<ServiceActionModel<Prisma.CategoryUpdateInput>> {
   return handlerServiceAction(
     async (auth) => {
-      props.user = { connect: { id: auth.id } };
-
       return await prisma.category.update({
         where: { id },
         data: props,

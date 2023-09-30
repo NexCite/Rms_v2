@@ -1,18 +1,15 @@
 "use server";
 
-import { Category, Prisma, SubCategory } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { handlerServiceAction } from "@rms/lib/handler";
-
 import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 
 export async function createSubCategory(
-  props: Prisma.SubCategoryCreateInput
+  props: Prisma.SubCategoryUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
     async (auth) => {
-      props.user = { connect: { id: auth.id } };
-
       await prisma.subCategory.create({ data: props });
       return;
     },
@@ -24,12 +21,10 @@ export async function createSubCategory(
 
 export async function updateSubCategory(
   id: number,
-  props: Prisma.SubCategoryUpdateInput
+  props: Prisma.SubCategoryUncheckedUpdateInput
 ): Promise<ServiceActionModel<Prisma.SubCategoryUpdateInput>> {
   return handlerServiceAction(
     async (auth) => {
-      props.user = { connect: { id: auth.id } };
-
       return await prisma.subCategory.update({
         where: { id },
         data: props,

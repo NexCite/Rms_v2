@@ -43,8 +43,6 @@ export async function deleteEntry(id: number) {
           where: { id: id },
           data: { status: "Deleted", user_id: id },
         });
-
-      return;
     },
     "Delete_Entry",
     true,

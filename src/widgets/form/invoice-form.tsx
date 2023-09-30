@@ -22,7 +22,7 @@ import { Textarea } from "@rms/components/ui/textarea";
 import useAlertHook from "@rms/hooks/alert-hooks";
 
 import { useRouter } from "next/navigation";
-import React, { useCallback, useMemo, useTransition } from "react";
+import React, { useCallback, useMemo, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
 import { z } from "zod";
@@ -35,6 +35,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rms/components/ui/select";
+import UploadWidget from "../upload/upload-widget";
+type CommonType = Prisma.InvoiceGetPayload<{ include: { media: true } }>;
 
 interface Props {
   id?: number;
@@ -43,7 +45,7 @@ interface Props {
   brokers?: Prisma.BrokerGetPayload<{}>[];
   subCategories?: Prisma.SubCategoryGetPayload<{}>[];
   accounts?: Prisma.AccountGetPayload<{}>[];
-  value: Prisma.InvoiceGetPayload<{}>;
+  value: CommonType;
 }
 
 export default function InvoiceForm(props: Props) {
@@ -53,16 +55,18 @@ export default function InvoiceForm(props: Props) {
     return z.object({
       title: z
         .string()
-        .min(4, { message: "Title must be at least 4 characters" }),
+        .min(1, { message: "Title must be at least 1 characters" }),
       description: z
         .string()
-        .min(4, { message: "Description must be at least 4 characters" }),
+        .min(1, { message: "Description must be at least 1 characters" }),
       note: z
         .string()
-        .min(10, { message: "Note must be at least 10 characters" }),
-      amount: z.any(),
-      discount: z.any(),
-      account_id: z.number(),
+        .min(1, { message: "Note must be at least 1 characters" })
+        .optional()
+        .nullable(),
+      amount: z.number(),
+      discount: z.number().default(0),
+      account_id: z.number().optional().nullable(),
       broker_id: z.number().optional().nullable(),
       currency_id: z.number().optional().nullable(),
       debit_credit: z
@@ -77,12 +81,25 @@ export default function InvoiceForm(props: Props) {
     resolver: zodResolver(validation),
     defaultValues: props.value,
   });
+
+  const [media, setMedia] = useState<Prisma.MediaGetPayload<{}>>();
+
   const { createAlert } = useAlertHook();
 
   const handleSubmit = useCallback(
     (values: z.infer<any>) => {
       values.amount = parseInt(values.amount);
       values.discount = parseInt(values.discount);
+
+      values.media = media
+        ? {
+            create: {
+              path: media.path,
+              title: media.title,
+              type: "Pdf",
+            },
+          }
+        : undefined;
 
       if (props.value) {
         setTransition(async () => {
@@ -116,7 +133,7 @@ export default function InvoiceForm(props: Props) {
         });
       }
     },
-    [back, createAlert, form, props.value]
+    [back, createAlert, form, media, props.value]
   );
   return (
     <>
@@ -140,7 +157,7 @@ export default function InvoiceForm(props: Props) {
                       control={form.control}
                       name="title"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Title</FormLabel>
                           <FormControl>
                             <Input
@@ -161,7 +178,7 @@ export default function InvoiceForm(props: Props) {
                       control={form.control}
                       name="description"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Description</FormLabel>
                           <FormControl onChange={(e) => {}}>
                             <Textarea placeholder="description" {...field} />
@@ -217,7 +234,7 @@ export default function InvoiceForm(props: Props) {
                       control={form.control}
                       name="amount"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Amount</FormLabel>
                           <FormControl>
                             <Input
@@ -239,7 +256,7 @@ export default function InvoiceForm(props: Props) {
                       control={form.control}
                       name={"debit_credit"}
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Type</FormLabel>
                           <FormControl>
                             <Select
@@ -367,6 +384,21 @@ export default function InvoiceForm(props: Props) {
                         </FormItem>
                       )}
                     />
+                  </div>
+                  <div className="grid-cols-12">
+                    {
+                      <UploadWidget
+                        isPdf
+                        path={props.value?.media?.path}
+                        onSave={(e) => {
+                          setMedia(
+                            e
+                              ? { path: e, title: e, type: "Pdf" }
+                              : (undefined as any)
+                          );
+                        }}
+                      />
+                    }
                   </div>
                 </div>
               </CardContent>

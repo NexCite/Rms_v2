@@ -9,10 +9,11 @@ export default async function page(props: {
 }) {
   const id = +props.searchParams.id;
   const isEditMode = id ? true : false;
-  var value: Prisma.InvoiceGetPayload<{}>;
+  var value: Prisma.InvoiceGetPayload<{ include: { media: true } }>;
 
   if (isEditMode) {
     value = await prisma.invoice.findUnique({
+      include: { media: true },
       where: {
         id,
         // status: user.type === "Admin" ? undefined : "Enable",

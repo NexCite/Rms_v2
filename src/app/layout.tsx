@@ -7,6 +7,7 @@ import { env } from "process";
 import NextTopLoader from "nextjs-toploader";
 import { GlobalStyle } from "@rms/components/theme/global-style";
 import prisma from "@rms/prisma/prisma";
+import { createLog } from "@rms/service/log-service";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,12 +29,13 @@ export async function generateMetadata(
     title: "Config",
   };
 }
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const v = env.vesrion;
+
   return (
     <html lang="en">
       <body className={inter.className}>

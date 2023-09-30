@@ -9,12 +9,10 @@ import prisma from "@rms/prisma/prisma";
 //todo: add user by token
 
 export async function createAccount(
-  props: Prisma.AccountCreateInput
+  props: Prisma.AccountUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction<void>(
     async (auth) => {
-      props.user = { connect: { id: auth.id } };
-
       await prisma.account.create({ data: props });
       return;
     },
@@ -26,12 +24,10 @@ export async function createAccount(
 
 export async function updateAccount(
   id: number,
-  props: Prisma.AccountUpdateInput
+  props: Prisma.AccountUncheckedUpdateInput
 ): Promise<ServiceActionModel<Prisma.AccountUpdateInput>> {
   return handlerServiceAction<Prisma.AccountUpdateInput>(
     async (auth) => {
-      props.user = { connect: { id: auth.id } };
-
       var result = await prisma.account.update({
         where: { id },
         data: props,

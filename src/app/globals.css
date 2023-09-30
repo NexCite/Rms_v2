@@ -86,7 +86,7 @@
   background: #101010;
 }
 
-input:focus + label {
+/* input:focus + label {
   width: min-content;
   height: min-content;
   background-color: white;
@@ -101,7 +101,7 @@ input:not(:placeholder-shown) + label {
   background-color: white;
   width: min-content;
   height: min-content;
-}
-label {
+} */
+/* label {
   margin-left: 10px;
-}
+} */

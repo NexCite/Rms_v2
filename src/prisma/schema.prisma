@@ -171,7 +171,7 @@ model Invoice {
   amount          Float
   discount        Float           @default(0)
   account_id      Int?
-  user_id         Int
+  user_id         Int?
   broker_id       Int?
   currency_id     Int?
   status          Status          @default(Enable)
@@ -180,7 +180,7 @@ model Invoice {
   account         Account?        @relation(fields: [account_id], references: [id], onDelete: Cascade)
   broker          Broker?         @relation(fields: [broker_id], references: [id], onDelete: Cascade)
   payments        Payment[]
-  user            User            @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  user            User?           @relation(fields: [user_id], references: [id], onUpdate: NoAction)
   media           Media?
   debit_credit    DebitCreditType @default(Debit)
   sub_category    SubCategory     @relation(fields: [sub_category_id], references: [id], onDelete: Cascade)

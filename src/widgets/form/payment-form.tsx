@@ -22,7 +22,7 @@ import { Textarea } from "@rms/components/ui/textarea";
 import useAlertHook from "@rms/hooks/alert-hooks";
 
 import { useRouter } from "next/navigation";
-import React, { useCallback, useMemo, useTransition } from "react";
+import React, { useCallback, useMemo, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
 import { z } from "zod";
@@ -35,6 +35,7 @@ import {
   SelectValue,
 } from "@rms/components/ui/select";
 import { createPayment, updatePayment } from "@rms/service/payment-service";
+import UploadWidget from "../upload/upload-widget";
 
 interface Props {
   id?: number;
@@ -58,9 +59,18 @@ export default function PaymentForm(props: Props) {
         .string()
         .min(10, { message: "Note must be at least 10 characters" }),
       amount: z.any(),
-      completed: z.boolean(),
+      // completed: z.boolean(),
       type: z.enum(Object.keys($Enums.PaymentType) as any),
       invoice_id: z.number(),
+      // media: z
+      //   .object({
+      //     create: z.object({
+      //       path: z.string(),
+      //       type: z.enum([$Enums.MediaType.Pdf]).default("Pdf"),
+      //       title: z.string(),
+      //     }),
+      //   })
+      //   .optional(),
     });
   }, [props.value]);
 
@@ -68,12 +78,21 @@ export default function PaymentForm(props: Props) {
     resolver: zodResolver(validation),
     defaultValues: props.value,
   });
+  const [media, setMedia] = useState<Prisma.MediaGetPayload<{}>>();
   const { createAlert } = useAlertHook();
 
   const handleSubmit = useCallback(
     (values: z.infer<any>) => {
       values.amount = parseInt(values.amount);
-      values.discount = parseInt(values.discount);
+      values.media = media
+        ? {
+            create: {
+              path: media.path,
+              title: media.title,
+              type: "Pdf",
+            },
+          }
+        : undefined;
 
       if (props.value) {
         setTransition(async () => {
@@ -107,7 +126,7 @@ export default function PaymentForm(props: Props) {
         });
       }
     },
-    [back, createAlert, form, props.value]
+    [back, createAlert, form, media, props.value]
   );
   return (
     <>
@@ -239,7 +258,7 @@ export default function PaymentForm(props: Props) {
                       control={form.control}
                       name={"invoice_id"}
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Invoice</FormLabel>
                           <FormControl>
                             <SearchSelect
@@ -258,6 +277,20 @@ export default function PaymentForm(props: Props) {
                       )}
                     />
                   </div>
+                  {!props.isEditMode && (
+                    <div className="grid-cols-12">
+                      {
+                        <UploadWidget
+                          isPdf
+                          onSave={(e) => {
+                            setMedia({ path: e, title: e, type: "Pdf" } as any);
+                            // form.setValue("media", (e ?? "") as any);
+                            // form.clearErrors("media");
+                          }}
+                        />
+                      }
+                    </div>
+                  )}
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end">

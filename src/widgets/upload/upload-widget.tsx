@@ -22,7 +22,7 @@ type Props = {
 
 export default function UploadWidget(props: Props) {
   const [images, setImages] = useState<ImageListType>([]);
-  const [path, setPath] = useState<string>();
+  const [path, setPath] = useState<string>(props.path);
   const [isPadding, setTransition] = useTransition();
   const maxNumber = 1;
 

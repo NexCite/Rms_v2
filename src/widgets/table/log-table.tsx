@@ -85,7 +85,7 @@ export default function LogTable(props: Props) {
         accessorKey: "page",
         header: "Page",
         accessorFn: (e) => {
-          var name = "";
+          if (!e.page) return;
           const url = new URL(e.page);
           return url.pathname;
         },

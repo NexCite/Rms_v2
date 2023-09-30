@@ -66,23 +66,22 @@ export async function handlerServiceAction<T>(
           message: "Opration Successfully",
         };
       } catch (error: any) {
-        createLog({
-          id: auth.user.id,
-          action: key.includes("Add")
-            ? "Add"
-            : key.includes("Edit")
-            ? "Edit"
-            : key.includes("Delete")
-            ? "Delete"
-            : "View",
-          page: url.toString(),
-          user_id: auth.user.id,
-          body: JSON.stringify(body),
-          error: JSON.stringify(error),
-        });
-
         console.log(error);
         if ((error as any).meta && (error as any).message) {
+          await createLog({
+            action: key.includes("Add")
+              ? "Add"
+              : key.includes("Edit")
+              ? "Edit"
+              : key.includes("Delete")
+              ? "Delete"
+              : "View",
+            page: url.toString(),
+            user_id: auth.user.id,
+            body: JSON.stringify(body),
+            error: JSON.stringify(error.message),
+          });
+
           var errors: any = {};
           var msg = error.message.split(":");
           if (error["meta"]["target"]) {
