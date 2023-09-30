@@ -11,7 +11,7 @@ export async function createLog(props: Prisma.LogUncheckedCreateInput) {
 
 export async function getLogs(props: {
   user_id?: number;
-  page?: number;
+
   date?: Date;
 }) {
   return handlerServiceAction(async (e) => {
@@ -19,8 +19,7 @@ export async function getLogs(props: {
       include: {
         user: true,
       },
-      skip: props.page ?? 0 * 10,
-      take: 10,
+
       orderBy: { create_date: "desc" },
       where: {
         user_id: props.user_id,

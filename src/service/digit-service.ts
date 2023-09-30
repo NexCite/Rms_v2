@@ -14,7 +14,8 @@ export async function createTwoDigit(props: Prisma.Two_DigitCreateInput) {
       return;
     },
     "Add_Two_Digit",
-    true
+    true,
+    props
   );
 }
 
@@ -31,7 +32,8 @@ export async function updateTwoDigit(
       return;
     },
     "Edit_Two_Digit",
-    true
+    true,
+    props
   );
 }
 export async function deleteTwoDigit(id: number) {
@@ -46,7 +48,8 @@ export async function deleteTwoDigit(id: number) {
         });
     },
     "Delete_Two_Digit",
-    true
+    true,
+    { id }
   );
 }
 
@@ -61,7 +64,8 @@ export async function createThreeDigit(
       return;
     },
     "Add_Three_Digit",
-    true
+    true,
+    props
   );
 }
 
@@ -79,7 +83,8 @@ export async function updateThreeDigit(
       return;
     },
     "Edit_Three_Digit",
-    true
+    true,
+    props
   );
 }
 export async function deleteThreeDigit(id: number) {
@@ -94,7 +99,8 @@ export async function deleteThreeDigit(id: number) {
         });
     },
     "Edit_Three_Digit",
-    true
+    true,
+    { id }
   );
 }
 export async function createMoreDigit(
@@ -108,7 +114,8 @@ export async function createMoreDigit(
       return;
     },
     "Add_More_Than_Four_Digit",
-    true
+    true,
+    props
   );
 }
 
@@ -128,7 +135,8 @@ export async function updateMoreDigit(
       return;
     },
     "Edit_More_Than_Four_Digit",
-    true
+    true,
+    props
   );
 }
 export async function deleteMoreDigit(id: number) {
@@ -143,6 +151,7 @@ export async function deleteMoreDigit(id: number) {
         });
     },
     "Delete_More_Than_Four_Digit",
-    true
+    true,
+    { id }
   );
 }

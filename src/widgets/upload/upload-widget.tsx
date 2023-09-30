@@ -127,8 +127,10 @@ export default function UploadWidget(props: Props) {
                       Remove
                     </Button>
                     <Image
+                      width={1000}
+                      height={1000}
                       alt={imageList[0].file?.name}
-                      className="mt-3"
+                      className="mt-3 w-[100px] h-[100px] rounded-full object-fill"
                       src={URL.createObjectURL(imageList[0].file as any)}
                     ></Image>
                   </div>

@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Authorized from "@rms/components/ui/authorized";
 import { $Enums } from "@prisma/client";
 import BackButton from "../ui/back-button";
-import { Button } from "@material-tailwind/react";
+import { Button, Card, CardBody } from "@material-tailwind/react";
 type Props = {
   children: React.ReactNode;
   routes: RouteModel[];
@@ -79,10 +79,8 @@ export default function AppBar(props: Props) {
           </div>
         )}
         {subRouteTitle && (
-          <div className=" m-2 dark:border-gray-700  border overflow-y-auto h-[97vh] rounded-lg">
-            <div className="p-4   rounded-lg dark:border-gray-700  mb-10">
-              {props.children}
-            </div>
+          <div className=" w-full h-[97vh] rounded-lg overflow-y-auto pb-14">
+            {props.children}
           </div>
         )}
       </div>

@@ -13,7 +13,8 @@ export async function createEntry(props: Prisma.EntryCreateInput) {
       return;
     },
     "Add_Entry",
-    true
+    true,
+    props
   );
 }
 
@@ -26,7 +27,8 @@ export async function updateEntry(id: number, props: Prisma.EntryUpdateInput) {
       return;
     },
     "Edit_Entry",
-    true
+    true,
+    props
   );
 }
 export async function deleteEntry(id: number) {
@@ -45,6 +47,7 @@ export async function deleteEntry(id: number) {
       return;
     },
     "Delete_Entry",
-    true
+    true,
+    { id }
   );
 }

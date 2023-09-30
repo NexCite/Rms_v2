@@ -21,7 +21,8 @@ export async function createUser(
       return;
     },
     "Add_User",
-    true
+    true,
+    props
   );
 }
 
@@ -53,7 +54,8 @@ export async function updateUser(
       return await prisma.user.update({ data: params, where: { id } });
     },
     "Edit_User",
-    true
+    true,
+    props
   );
 }
 
@@ -74,6 +76,7 @@ export async function deleteUserById(
       return;
     },
     "Delete_User",
-    true
+    true,
+    props
   );
 }

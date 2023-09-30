@@ -17,7 +17,8 @@ export async function createSubCategory(
       return;
     },
     "Add_SubCategory",
-    true
+    true,
+    props
   );
 }
 
@@ -35,7 +36,8 @@ export async function updateSubCategory(
       });
     },
     "Edit_SubCategory",
-    true
+    true,
+    props
   );
 }
 
@@ -55,6 +57,7 @@ export async function deleteSubCategoryById(
       return;
     },
     "Delete_SubCategory",
-    true
+    true,
+    props
   );
 }

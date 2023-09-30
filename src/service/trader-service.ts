@@ -28,7 +28,8 @@ export async function createTrader(
       return;
     },
     "Add_Trader",
-    true
+    true,
+    props
   );
 }
 
@@ -46,7 +47,8 @@ export async function updateTrader(
       });
     },
     "Edit_Trader",
-    true
+    true,
+    props
   );
 }
 
@@ -66,6 +68,7 @@ export async function deleteTraderById(
       return;
     },
     "Delete_Trader",
-    true
+    true,
+    props
   );
 }

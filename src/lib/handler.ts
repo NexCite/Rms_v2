@@ -23,7 +23,8 @@ export async function handlerServiceAction<T>(
     }>
   ) => Promise<T>,
   key: $Enums.UserPermission | "None",
-  update?: boolean
+  update?: boolean,
+  body?: any
 ) {
   const urlHeader = headers().get("url");
 
@@ -40,19 +41,20 @@ export async function handlerServiceAction<T>(
     if (auth.status === HttpStatusCode.OK) {
       try {
         var result = await action(auth.user!);
-        await createLog({
-          id: auth.user.id,
-          action: key.includes("Add")
-            ? "Add"
-            : key.includes("Edit")
-            ? "Edit"
-            : key.includes("Delete")
-            ? "Delete"
-            : "View",
-          page: url,
-          user_id: auth.user.id,
-          body: JSON.stringify(result),
-        });
+        if (!url.pathname.includes("/log")) {
+          await createLog({
+            action: key.includes("Add")
+              ? "Add"
+              : key.includes("Edit")
+              ? "Edit"
+              : key.includes("Delete")
+              ? "Delete"
+              : "View",
+            page: url.toString(),
+            user_id: auth.user.id,
+            body: JSON.stringify(body),
+          });
+        }
 
         if (update) {
           const paths = generatePaths(url.pathname);
@@ -73,9 +75,9 @@ export async function handlerServiceAction<T>(
             : key.includes("Delete")
             ? "Delete"
             : "View",
-          page: url,
+          page: url.toString(),
           user_id: auth.user.id,
-          body: JSON.stringify({}),
+          body: JSON.stringify(body),
           error: JSON.stringify(error),
         });
 

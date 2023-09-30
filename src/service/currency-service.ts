@@ -13,7 +13,8 @@ export async function createCurrency(props: Prisma.CurrencyCreateInput) {
       await prisma.currency.create({ data: props });
     },
     "Add_Currency",
-    true
+    true,
+    props
   );
 }
 
@@ -29,7 +30,8 @@ export async function updateCurrency(
       await prisma.currency.update({ where: { id: id }, data: props });
     },
     "Edit_Currency",
-    true
+    true,
+    props
   );
 }
 
@@ -47,6 +49,7 @@ export async function deleteCurrency(id: number) {
         });
     },
     "Delete_Currency",
-    true
+    true,
+    props
   );
 }

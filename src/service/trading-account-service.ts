@@ -19,7 +19,8 @@ export async function createAccount(
       return;
     },
     "Add_Account",
-    true
+    true,
+    props
   );
 }
 
@@ -39,7 +40,8 @@ export async function updateAccount(
       return result;
     },
     "Edit_Account",
-    true
+    true,
+    props
   );
 }
 
@@ -59,6 +61,7 @@ export async function deleteAccountById(
       return;
     },
     "Delete_Account",
-    true
+    true,
+    props
   );
 }

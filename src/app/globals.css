@@ -85,3 +85,23 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #101010;
 }
+
+input:focus + label {
+  width: min-content;
+  height: min-content;
+  background-color: white;
+}
+input:focus {
+  border: black solid 2px !important;
+}
+input:not(:placeholder-shown) {
+  border-color: rgb(176 190 197 / var(--tw-border-opacity));
+}
+input:not(:placeholder-shown) + label {
+  background-color: white;
+  width: min-content;
+  height: min-content;
+}
+label {
+  margin-left: 10px;
+}

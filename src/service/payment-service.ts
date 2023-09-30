@@ -15,7 +15,8 @@ export async function createPayment(
       return;
     },
     "Add_Payment",
-    true
+    true,
+    props
   );
 }
 
@@ -28,7 +29,8 @@ export async function updatePayment(
       return await prisma.payment.update({ data: params, where: { id } });
     },
     "Edit_Payment",
-    true
+    true,
+    props
   );
 }
 
@@ -49,6 +51,7 @@ export async function deletePaymentById(
       return;
     },
     "Delete_Payment",
-    true
+    true,
+    props
   );
 }

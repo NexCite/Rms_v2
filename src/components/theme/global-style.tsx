@@ -2,27 +2,9 @@
 import styled from "styled-components";
 
 export const GlobalStyle = styled.div`
-  table {
-    margin-bottom: 5px;
-    tbody,
-    thead,
-    tr,
-    td,
-    th {
-      color: black;
-      font-size: 12pt;
-
-      border: #00000013 solid 1px;
-    }
-
-    table {
-      margin-top: 5px;
-      thead {
-        tr {
-          th {
-          }
-        }
-      }
-    }
+  label::after,
+  label::before {
+    border: none;
+    display: none;
   }
 `;

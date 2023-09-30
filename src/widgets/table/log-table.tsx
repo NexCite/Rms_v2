@@ -1,280 +1,241 @@
 "use client";
-import { PencilIcon } from "@heroicons/react/24/solid";
+
+import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
+import React, { useMemo, useRef, useState, useTransition } from "react";
+import { Prisma } from "@prisma/client";
 import {
-  ArrowDownTrayIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/24/outline";
+  ColumnDef,
+  PaginationState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import useAlertHook from "@rms/hooks/alert-hooks";
+import { Button } from "@rms/components/ui/button";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@rms/components/ui/dropdown-menu";
+import { DotsHorizontalIcon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import { deleteMoreDigit, deleteTwoDigit } from "@rms/service/digit-service";
+import { deleteCurrency } from "@rms/service/currency-service";
+import Authorized from "@rms/components/ui/authorized";
 import {
   Card,
-  CardHeader,
-  Typography,
-  Button,
   CardBody,
-  Chip,
-  CardFooter,
-  Avatar,
-  IconButton,
-  Tooltip,
+  CardHeader,
   Input,
+  Option,
+  Select,
+  Typography,
 } from "@material-tailwind/react";
-import { Prisma } from "@prisma/client";
-
-const TABLE_HEAD = ["Transaction", "Amount", "Date", "Status", "Account", ""];
-
-const TABLE_ROWS = [
-  {
-    img: "/img/logos/logo-spotify.svg",
-    name: "Spotify",
-    amount: "$2,500",
-    date: "Wed 3:00pm",
-    status: "paid",
-    account: "visa",
-    accountNumber: "1234",
-    expiry: "06/2026",
-  },
-  {
-    img: "/img/logos/logo-amazon.svg",
-    name: "Amazon",
-    amount: "$5,000",
-    date: "Wed 1:00pm",
-    status: "paid",
-    account: "master-card",
-    accountNumber: "1234",
-    expiry: "06/2026",
-  },
-  {
-    img: "/img/logos/logo-pinterest.svg",
-    name: "Pinterest",
-    amount: "$3,400",
-    date: "Mon 7:40pm",
-    status: "pending",
-    account: "master-card",
-    accountNumber: "1234",
-    expiry: "06/2026",
-  },
-  {
-    img: "/img/logos/logo-google.svg",
-    name: "Google",
-    amount: "$1,000",
-    date: "Wed 5:00pm",
-    status: "paid",
-    account: "visa",
-    accountNumber: "1234",
-    expiry: "06/2026",
-  },
-  {
-    img: "/img/logos/logo-netflix.svg",
-    name: "netflix",
-    amount: "$14,000",
-    date: "Wed 3:30am",
-    status: "cancelled",
-    account: "visa",
-    accountNumber: "1234",
-    expiry: "06/2026",
-  },
-];
+import { DataRoute } from "@rms/config/route-config";
+import moment from "moment";
 
 type Props = {
   data: Prisma.LogGetPayload<{ include: { user: true } }>[];
 };
-export function LogTable(props: Props) {
-  return (
-    <Card className="h-full w-full">
-      <CardHeader floated={false} shadow={false} className="rounded-none">
-        <div className="mb-4 flex flex-col justify-between gap-8 md:flex-row md:items-center">
-          <div>
-            <Typography variant="h5" color="blue-gray">
-              Recent Transactions
-            </Typography>
-            <Typography color="gray" className="mt-1 font-normal">
-              These are details about the last transactions
-            </Typography>
-          </div>
-          <div className="flex w-full shrink-0 gap-2 md:w-max">
-            <div className="w-full md:w-72">
-              <Input
-                crossOrigin={""}
-                label="Search"
-                icon={<MagnifyingGlassIcon className="h-5 w-5" />}
-              />
+
+export default function LogTable(props: Props) {
+  const pathName = usePathname();
+  const [isActive, setActiveTransition] = useTransition();
+
+  const [globalFilter, setGlobalFilter] = useState("");
+
+  const { createAlert } = useAlertHook();
+  const { push } = useRouter();
+
+  const columns = useMemo<
+    ColumnDef<Prisma.LogGetPayload<{ include: { user: true } }>>[]
+  >(
+    () => [
+      {
+        accessorKey: "id",
+        header: "Id",
+        cell({ row: { original } }) {
+          return (
+            <div
+              className={`text-center rounded-md  ${
+                original.action === "Add"
+                  ? "bg-green-500"
+                  : original.action == "Edit"
+                  ? "bg-yellow-400"
+                  : original.action == "Delete"
+                  ? "bg-red-500"
+                  : "bg-blue-500"
+              }`}
+            >
+              {original.id}
             </div>
-            <Button className="flex items-center gap-3" size="sm">
-              <ArrowDownTrayIcon strokeWidth={2} className="h-4 w-4" /> Download
-            </Button>
+          );
+        },
+      },
+      { accessorKey: "action", header: "Action" },
+      {
+        accessorKey: "page",
+        header: "Page",
+        accessorFn: (e) => {
+          var name = "";
+          const url = new URL(e.page);
+          return url.pathname;
+        },
+      },
+      { accessorKey: "user.username", header: "Username" },
+
+      {
+        accessorKey: "body",
+        header: "Body",
+        accessorFn: (e) => {
+          console.log(e.body);
+          return e.body;
+        },
+      },
+
+      { accessorKey: "error", header: "Error" },
+
+      {
+        accessorKey: "create_date",
+        header: "Date",
+        accessorFn: (e) => moment(e.create_date).fromNow(),
+      },
+    ],
+    [createAlert, isActive, pathName, push]
+  );
+  const table = useReactTable({
+    data: props.data,
+    columns: columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+
+    state: {
+      globalFilter,
+    },
+  });
+
+  return (
+    <div className=" w-full">
+      <Card className="h-full w-full overflow-auto flex justify-between">
+        <CardHeader
+          floated={false}
+          shadow={false}
+          className="rounded-none mx-10"
+        >
+          <div className="mb-4 flex flex-col justify-between gap-8 md:flex-row md:items-center">
+            <div>
+              <Typography variant="h5" color="blue-gray">
+                Recent Transactions
+              </Typography>
+              <Typography color="gray" className="mt-1 font-normal">
+                These are details about the last transactions
+              </Typography>
+            </div>
+            <div className="flex w-full shrink-0 gap-2 md:w-max ">
+              <div className="w-full ">
+                <Input
+                  label="Search"
+                  crossOrigin={""}
+                  onChange={(e) => setGlobalFilter(e.target.value)}
+                  value={globalFilter}
+                  icon={<MagnifyingGlassIcon className="h-5 w-5" />}
+                />
+              </div>
+            </div>
           </div>
-        </div>
-      </CardHeader>
-      <CardBody className="overflow-scroll px-0">
+        </CardHeader>{" "}
         <table className="w-full min-w-max table-auto text-left">
-          <thead>
-            <tr>
-              {TABLE_HEAD.map((head) => (
-                <th
-                  key={head}
-                  className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
-                >
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="font-normal leading-none opacity-70"
+          <thead className="w-full">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <th
+                    className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
+                    key={header.id}
                   >
-                    {head}
-                  </Typography>
-                </th>
-              ))}
-            </tr>
+                    <Typography>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header ??
+                              header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </Typography>
+                  </th>
+                ))}
+              </tr>
+            ))}
           </thead>
           <tbody>
-            {TABLE_ROWS.map(
-              (
-                {
-                  img,
-                  name,
-                  amount,
-                  date,
-                  status,
-                  account,
-                  accountNumber,
-                  expiry,
-                },
-                index
-              ) => {
-                const isLast = index === TABLE_ROWS.length - 1;
-                const classes = isLast
-                  ? "p-4"
-                  : "p-4 border-b border-blue-gray-50";
-
-                return (
-                  <tr key={name}>
-                    <td className={classes}>
-                      <div className="flex items-center gap-3">
-                        <Avatar
-                          src={img}
-                          alt={name}
-                          size="md"
-                          className="border border-blue-gray-50 bg-blue-gray-50/50 object-contain p-1"
-                        />
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-bold"
-                        >
-                          {name}
-                        </Typography>
-                      </div>
-                    </td>
-                    <td className={classes}>
+            {table.getRowModel().rows.length === 0 ? (
+              <tr>
+                <td colSpan={columns.length} className="h-24 text-center">
+                  No results.
+                </td>
+              </tr>
+            ) : (
+              table.getRowModel().rows.map((row) => (
+                <tr key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <td
+                      className="p-4 border-b border-blue-gray-50"
+                      key={cell.id}
+                    >
                       <Typography
+                        as={"div"}
                         variant="small"
                         color="blue-gray"
                         className="font-normal"
                       >
-                        {amount}
+                        {flexRender(
+                          cell.column.columnDef.cell ??
+                            cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
                       </Typography>
                     </td>
-                    <td className={classes}>
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-normal"
-                      >
-                        {date}
-                      </Typography>
-                    </td>
-                    <td className={classes}>
-                      <div className="w-max">
-                        <Chip
-                          size="sm"
-                          variant="ghost"
-                          value={status}
-                          color={
-                            status === "paid"
-                              ? "green"
-                              : status === "pending"
-                              ? "amber"
-                              : "red"
-                          }
-                        />
-                      </div>
-                    </td>
-                    <td className={classes}>
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-12 rounded-md border border-blue-gray-50 p-1">
-                          <Avatar
-                            src={
-                              account === "visa"
-                                ? "https://demos.creative-tim.com/test/corporate-ui-dashboard/assets/img/logos/visa.png"
-                                : "https://demos.creative-tim.com/test/corporate-ui-dashboard/assets/img/logos/mastercard.png"
-                            }
-                            size="sm"
-                            alt={account}
-                            variant="square"
-                            className="h-full w-full object-contain p-1"
-                          />
-                        </div>
-                        <div className="flex flex-col">
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-normal capitalize"
-                          >
-                            {account.split("-").join(" ")} {accountNumber}
-                          </Typography>
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-normal opacity-70"
-                          >
-                            {expiry}
-                          </Typography>
-                        </div>
-                      </div>
-                    </td>
-                    <td className={classes}>
-                      <Tooltip content="Edit User">
-                        <IconButton variant="text">
-                          <PencilIcon className="h-4 w-4" />
-                        </IconButton>
-                      </Tooltip>
-                    </td>
-                  </tr>
-                );
-              }
+                  ))}
+                </tr>
+              ))
             )}
           </tbody>
         </table>
-      </CardBody>
-      <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
-        <Button variant="outlined" size="sm">
-          Previous
-        </Button>
-        <div className="flex items-center gap-2">
-          <IconButton variant="outlined" size="sm">
-            1
-          </IconButton>
-          <IconButton variant="text" size="sm">
-            2
-          </IconButton>
-          <IconButton variant="text" size="sm">
-            3
-          </IconButton>
-          <IconButton variant="text" size="sm">
-            ...
-          </IconButton>
-          <IconButton variant="text" size="sm">
-            8
-          </IconButton>
-          <IconButton variant="text" size="sm">
-            9
-          </IconButton>
-          <IconButton variant="text" size="sm">
-            10
-          </IconButton>
+        <div className="p-2">
+          <div className="flex items-center justify-end space-x-2 py-4">
+            <h5>
+              {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount()} page(s).
+            </h5>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next
+            </Button>
+          </div>
         </div>
-        <Button variant="outlined" size="sm">
-          Next
-        </Button>
-      </CardFooter>
-    </Card>
+      </Card>
+    </div>
   );
 }

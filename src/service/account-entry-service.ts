@@ -14,7 +14,8 @@ export async function createAccountEntry(
       return;
     },
     "Add_AccountEntry",
-    true
+    true,
+    props
   );
 }
 
@@ -28,7 +29,8 @@ export async function updateAccountEntry(
       return await prisma.account_Entry.update(props);
     },
     "Edit_AccountEntry",
-    true
+    true,
+    props
   );
 }
 export async function deleteAccountEntry(id: number) {
@@ -46,6 +48,7 @@ export async function deleteAccountEntry(id: number) {
       return;
     },
     "Delete_AccountEntry",
-    true
+    true,
+    props
   );
 }

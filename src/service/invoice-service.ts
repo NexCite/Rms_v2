@@ -10,30 +10,32 @@ import prisma from "@rms/prisma/prisma";
 import { cookies } from "next/headers";
 
 export async function createInvoice(
-  params: Prisma.InvoiceUncheckedCreateInput
+  props: Prisma.InvoiceUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
     async (auth) => {
-      params.user_id = auth.id;
+      props.user_id = auth.id;
 
-      await prisma.invoice.create({ data: params });
+      await prisma.invoice.create({ data: props });
       return;
     },
     "Add_Invoice",
-    true
+    true,
+    props
   );
 }
 
 export async function updateInvoice(
   id: number,
-  params: Prisma.InvoiceUpdateInput
+  props: Prisma.InvoiceUpdateInput
 ): Promise<ServiceActionModel<Prisma.InvoiceUpdateInput>> {
   return handlerServiceAction(
     async (auth) => {
-      return await prisma.invoice.update({ data: params, where: { id } });
+      return await prisma.invoice.update({ data: props, where: { id } });
     },
     "Edit_Invoice",
-    true
+    true,
+    props
   );
 }
 
@@ -54,6 +56,7 @@ export async function deleteInvoiceById(
       return;
     },
     "Delete_Invoice",
-    true
+    true,
+    { id }
   );
 }

@@ -19,7 +19,8 @@ export async function createBroker(
       return;
     },
     "Add_Broker",
-    true
+    true,
+    props
   );
 }
 
@@ -37,7 +38,8 @@ export async function updateBroker(
       });
     },
     "Edit_Broker",
-    true
+    true,
+    props
   );
 }
 
@@ -57,6 +59,7 @@ export async function deleteBrokerById(
       return;
     },
     "Delete_Broker",
-    true
+    true,
+    { id }
   );
 }
