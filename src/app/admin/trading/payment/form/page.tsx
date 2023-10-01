@@ -9,10 +9,13 @@ export default async function page(props: {
 }) {
   const id = +props.searchParams.id;
   const isEditMode = id ? true : false;
-  var value: Prisma.PaymentGetPayload<{}>;
+  var value: Prisma.PaymentGetPayload<{
+    include: { media: true };
+  }>;
 
   if (isEditMode) {
     value = await prisma.payment.findUnique({
+      include: { media: true },
       where: {
         id,
         // status: user.type === "Admin" ? undefined : "Enable",

@@ -198,7 +198,6 @@ model Payment {
   title         String
   type          PaymentType
   number_id     String      @default("")
-  completed     Boolean     @default(false)
   user          User?       @relation(fields: [user_id], references: [id], onDelete: Cascade)
   media         Media?
   invoice       Invoice     @relation(fields: [invoice_id], references: [id], onDelete: Cascade)

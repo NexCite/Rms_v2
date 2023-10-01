@@ -13,7 +13,7 @@ export async function createInvoice(
     async (auth) => {
       props.user_id = auth.id;
 
-      const result = await prisma.invoice.create({ data: props });
+      await prisma.invoice.create({ data: props });
 
       return;
     },

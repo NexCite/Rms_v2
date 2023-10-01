@@ -10,6 +10,8 @@ export async function createPayment(
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
     async (auth) => {
+      props.user_id = auth.id;
+
       var invoice = await prisma.invoice.findUnique({
         where: {
           id: props.invoice_id,
@@ -31,20 +33,19 @@ export async function createPayment(
           { clientVersion: "1", code: "", meta: { target: ["amount"] } }
         );
       }
-      // props.user_id = auth.user.id;
 
-      const media = props.media as any;
+      // const media = props.media as any;
       props.status = "Enable";
 
-      delete props.media;
+      // delete props.media;
 
-      if (media) {
-        media.type = getMediaType(media.path);
+      // if (media) {
+      //   media.type = getMediaType(media.path);
 
-        (props as any).media = { create: media };
-      }
+      //   (props as any).media = { create: media };
+      // }
       await prisma.payment.create({
-        data: props as any,
+        data: props,
       });
 
       return;
@@ -58,9 +59,11 @@ export async function createPayment(
 export async function updatePayment(
   id: number,
   props: Prisma.PaymentUncheckedUpdateInput
-): Promise<ServiceActionModel<Prisma.PaymentUpdateInput>> {
+) {
   return handlerServiceAction(
     async (auth) => {
+      props.user_id = auth.id;
+
       var invoice = await prisma.invoice.findUnique({
         where: {
           id: +props.invoice_id,
@@ -104,8 +107,6 @@ export async function updatePayment(
         }
       }
 
-      // props.user_id = auth.user.id;
-
       var payment = await prisma.payment.findFirst({
         where: { id },
         include: {
@@ -115,75 +116,82 @@ export async function updatePayment(
         },
       });
 
-      if (props.media == null || undefined) {
-        return prisma.payment.update({
-          where: { id: payment.id },
-          data: {
-            invoice_id: props.invoice_id,
-            amount: props.amount,
-            note: props.note,
-            description: props.description,
-            status: props.status,
-            user_id: props.user_id,
-            type: props.type,
-            number_id: props.number_id,
-            modified_date: new Date(),
-          },
-        });
-      }
+      await prisma.payment.update({
+        where: { id: payment.id },
+        data: props,
+      });
 
-      if ((payment.media === null && props.media !== null) || undefined) {
-        (props as any).media = {
-          create: {
-            title: props.media.title,
-            path: props.media.path,
-            type: getMediaType(props.media.path),
-          },
-        };
+      return;
 
-        return await prisma.payment.update({
-          where: { id },
-          data: {
-            invoice_id: props.invoice_id,
-            amount: props.amount,
-            note: props.note,
-            description: props.description,
-            status: props.status,
-            user_id: props.user_id,
-            type: props.type,
-            number_id: props.number_id,
-            modified_date: new Date(),
-            media: props.media as any,
-          },
-        });
-      }
+      // if (props.media == null || undefined) {
+      //   return prisma.payment.update({
+      //     where: { id: payment.id },
+      //     data: {
+      //       invoice_id: props.invoice_id,
+      //       amount: props.amount,
+      //       note: props.note,
+      //       description: props.description,
+      //       status: props.status,
+      //       user_id: props.user_id,
+      //       type: props.type,
+      //       number_id: props.number_id,
+      //       modified_date: new Date(),
+      //     },
+      //   });
+      // }
 
-      if (payment.media !== null) {
-        (props as any).media = {
-          update: {
-            title: props.media.title,
-            path: props.media.path,
-            type: getMediaType(props.media.path),
-            modified_date: new Date(),
-          },
-        };
-        return await prisma.payment.update({
-          where: { id },
-          data: {
-            invoice_id: props.invoice_id,
-            amount: props.amount,
-            note: props.note,
-            description: props.description,
-            status: props.status,
-            user_id: props.user_id,
-            type: props.type,
-            number_id: props.number_id,
-            modified_date: new Date(),
+      // if ((payment.media === null && props.media !== null) || undefined) {
+      //   (props as any).media = {
+      //     create: {
+      //       title: props.media.title,
+      //       path: props.media.path,
+      //       type: getMediaType(props.media.path),
+      //     },
+      //   };
 
-            media: props.media as any,
-          },
-        });
-      }
+      //   return await prisma.payment.update({
+      //     where: { id },
+      //     data: {
+      //       invoice_id: props.invoice_id,
+      //       amount: props.amount,
+      //       note: props.note,
+      //       description: props.description,
+      //       status: props.status,
+      //       user_id: props.user_id,
+      //       type: props.type,
+      //       number_id: props.number_id,
+      //       modified_date: new Date(),
+      //       media: props.media as any,
+      //     },
+      //   });
+      // }
+
+      // if (payment.media !== null) {
+      //   (props as any).media = {
+      //     update: {
+      //       title: props.media.title,
+      //       path: props.media.path,
+      //       type: getMediaType(props.media.path),
+      //       modified_date: new Date(),
+      //     },
+      //   };
+      //   return await prisma.payment.update({
+      //     where: { id },
+      //     data: {
+      //       invoice_id: props.invoice_id,
+      //       amount: props.amount,
+      //       note: props.note,
+      //       description: props.description,
+      //       status: props.status,
+      //       user_id: props.user_id,
+      //       type: props.type,
+      //       number_id: props.number_id,
+      //       modified_date: new Date(),
+
+      //       media: props.media as any,
+      //     },
+      //   });
+      // }
     },
     "Edit_Payment",
     true,

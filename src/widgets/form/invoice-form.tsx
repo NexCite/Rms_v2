@@ -36,6 +36,7 @@ import {
   SelectValue,
 } from "@rms/components/ui/select";
 import UploadWidget from "../upload/upload-widget";
+import { Alert } from "@rms/components/ui/alert";
 type CommonType = Prisma.InvoiceGetPayload<{ include: { media: true } }>;
 
 interface Props {
@@ -59,13 +60,9 @@ export default function InvoiceForm(props: Props) {
       description: z
         .string()
         .min(1, { message: "Description must be at least 1 characters" }),
-      note: z
-        .string()
-        .min(1, { message: "Note must be at least 1 characters" })
-        .optional()
-        .nullable(),
-      amount: z.number(),
-      discount: z.number().default(0),
+      note: z.string().optional().nullable(),
+      amount: z.any(),
+      discount: z.any(),
       account_id: z.number().optional().nullable(),
       broker_id: z.number().optional().nullable(),
       currency_id: z.number().optional().nullable(),
@@ -73,14 +70,18 @@ export default function InvoiceForm(props: Props) {
         .enum([DebitCreditType.Debit, DebitCreditType.Credit])
         .optional()
         .nullable(),
-      sub_category_id: z.number(),
+      sub_category_id: z.any(),
     });
-  }, [props.value]);
+  }, []);
 
   const form = useForm<z.infer<typeof validation>>({
     resolver: zodResolver(validation),
     defaultValues: props.value,
   });
+
+  const [errors, setErrors] = useState<{ index?: number; message: string }[]>(
+    []
+  );
 
   const [media, setMedia] = useState<Prisma.MediaGetPayload<{}>>();
 
@@ -88,8 +89,47 @@ export default function InvoiceForm(props: Props) {
 
   const handleSubmit = useCallback(
     (values: z.infer<any>) => {
-      values.amount = parseInt(values.amount);
-      values.discount = parseInt(values.discount);
+      const result = validation.safeParse(values);
+      const error = [];
+      if (!props.isEditMode) {
+        if (!form.getValues().debit_credit) {
+          error.push({ message: "Missing  type" });
+        }
+        if (!form.getValues().amount) {
+          error.push({ message: "Missing  amount" });
+        }
+
+        setErrors(error);
+      }
+
+      // if (result.success === false) {
+      //   return Object.keys(result.error.formErrors.fieldErrors).map((res) => {
+      //     form.setError(res as any, {
+      //       message: result.error.formErrors.fieldErrors[res][0],
+      //     });
+      //   });
+      // } else if (error.length > 0) {
+      //   return;
+      // }
+      // form.clearErrors([
+      //   "title",
+      //   "description",
+      //   "discount",
+      //   "account_id",
+      //   "broker_id",
+      //   "currency_id",
+      //   "amount",
+      //   "debit_credit",
+      //   "note",
+      //   "sub_category_id",
+      // ]);
+
+      if (values.amount) {
+        values.amount = parseInt(values.amount);
+      }
+      if (values.discount) {
+        values.discount = parseInt(values.discount);
+      }
 
       values.media = media
         ? {
@@ -142,7 +182,6 @@ export default function InvoiceForm(props: Props) {
           <form className="card" autoComplete="off">
             <Card>
               <CardHeader>
-                {" "}
                 <div className="flex justify-between items-center">
                   <h1 className="font-medium text-2xl">Invoice Form</h1>
                 </div>
@@ -150,6 +189,13 @@ export default function InvoiceForm(props: Props) {
               </CardHeader>
 
               <CardContent>
+                {errors.length > 0 && (
+                  <Alert color="red" className="mb-10" variant="destructive">
+                    {errors.map((res, index) => (
+                      <h4 key={index}>{res.message} Invoice</h4>
+                    ))}
+                  </Alert>
+                )}
                 <div className="grid gap-4">
                   <div className="grid-cols-12">
                     <FormField
@@ -157,7 +203,7 @@ export default function InvoiceForm(props: Props) {
                       control={form.control}
                       name="title"
                       render={({ field }) => (
-                        <FormItem className="required">
+                        <FormItem>
                           <FormLabel>Title</FormLabel>
                           <FormControl>
                             <Input
@@ -178,7 +224,7 @@ export default function InvoiceForm(props: Props) {
                       control={form.control}
                       name="description"
                       render={({ field }) => (
-                        <FormItem className="required">
+                        <FormItem>
                           <FormLabel>Description</FormLabel>
                           <FormControl onChange={(e) => {}}>
                             <Textarea placeholder="description" {...field} />
@@ -191,7 +237,7 @@ export default function InvoiceForm(props: Props) {
                   </div>
                   <div className="grid-cols-12">
                     <FormField
-                      rules={{ required: true }}
+                      rules={{ required: false }}
                       control={form.control}
                       name="note"
                       render={({ field }) => (
@@ -208,7 +254,6 @@ export default function InvoiceForm(props: Props) {
                   </div>
                   <div className="grid-cols-12">
                     <FormField
-                      rules={{ required: true }}
                       control={form.control}
                       name="discount"
                       render={({ field }) => (
@@ -234,7 +279,7 @@ export default function InvoiceForm(props: Props) {
                       control={form.control}
                       name="amount"
                       render={({ field }) => (
-                        <FormItem className="required">
+                        <FormItem>
                           <FormLabel>Amount</FormLabel>
                           <FormControl>
                             <Input
@@ -256,7 +301,7 @@ export default function InvoiceForm(props: Props) {
                       control={form.control}
                       name={"debit_credit"}
                       render={({ field }) => (
-                        <FormItem className="required">
+                        <FormItem>
                           <FormLabel>Type</FormLabel>
                           <FormControl>
                             <Select
@@ -283,60 +328,61 @@ export default function InvoiceForm(props: Props) {
                       )}
                     />
                   </div>
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: true }}
-                      control={form.control}
-                      name={"account_id"}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Account</FormLabel>
-                          <FormControl>
-                            <SearchSelect
-                              hit="search account"
-                              label="account"
-                              default={field.value as number}
-                              data={props.accounts}
-                              onChange={(e) => {
-                                field.onChange(e);
-                              }}
-                            />
-                          </FormControl>
+                  {!form.getValues().broker_id && (
+                    <div className="grid-cols-12">
+                      <FormField
+                        control={form.control}
+                        name={"account_id"}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Account</FormLabel>
+                            <FormControl>
+                              <SearchSelect
+                                hit="search account"
+                                label="account"
+                                default={field.value as number}
+                                data={props.accounts}
+                                onChange={(e) => {
+                                  field.onChange(e);
+                                }}
+                              />
+                            </FormControl>
 
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: true }}
-                      control={form.control}
-                      name={"broker_id"}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Broker</FormLabel>
-                          <FormControl>
-                            <SearchSelect
-                              hit="search brokers"
-                              label="brokers"
-                              default={field.value as number}
-                              data={props.brokers}
-                              onChange={(e) => {
-                                field.onChange(e);
-                              }}
-                            />
-                          </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
+                  {!form.getValues().account_id && (
+                    <div className="grid-cols-12">
+                      <FormField
+                        control={form.control}
+                        name={"broker_id"}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Broker</FormLabel>
+                            <FormControl>
+                              <SearchSelect
+                                hit="search brokers"
+                                label="brokers"
+                                default={field.value as number}
+                                data={props.brokers}
+                                onChange={(e) => {
+                                  field.onChange(e);
+                                }}
+                              />
+                            </FormControl>
 
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
                   {form.getValues().broker_id && (
                     <div className="grid-cols-12">
                       <FormField
-                        rules={{ required: true }}
                         control={form.control}
                         name={"currency_id"}
                         render={({ field }) => (
@@ -386,19 +432,17 @@ export default function InvoiceForm(props: Props) {
                     />
                   </div>
                   <div className="grid-cols-12">
-                    {
-                      <UploadWidget
-                        isPdf
-                        path={props.value?.media?.path}
-                        onSave={(e) => {
-                          setMedia(
-                            e
-                              ? { path: e, title: e, type: "Pdf" }
-                              : (undefined as any)
-                          );
-                        }}
-                      />
-                    }
+                    <UploadWidget
+                      isPdf
+                      path={props.value?.media?.path}
+                      onSave={(e) => {
+                        setMedia(
+                          e
+                            ? { path: e, title: e, type: "Pdf" }
+                            : (undefined as any)
+                        );
+                      }}
+                    />
                   </div>
                 </div>
               </CardContent>

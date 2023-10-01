@@ -41,7 +41,7 @@ interface Props {
   id?: number;
   isEditMode?: boolean;
   invoices?: Prisma.InvoiceGetPayload<{}>[];
-  value: Prisma.PaymentGetPayload<{}>;
+  value: Prisma.PaymentGetPayload<{ include: { media: true } }>;
 }
 
 export default function PaymentForm(props: Props) {
@@ -51,26 +51,16 @@ export default function PaymentForm(props: Props) {
     return z.object({
       title: z
         .string()
-        .min(4, { message: "Title must be at least 4 characters" }),
+        .min(1, { message: "Title must be at least 1 characters" }),
       description: z
         .string()
-        .min(4, { message: "Description must be at least 4 characters" }),
+        .min(1, { message: "Description must be at least 1 characters" }),
       note: z
         .string()
-        .min(10, { message: "Note must be at least 10 characters" }),
+        .min(1, { message: "Note must be at least 1 characters" }),
       amount: z.any(),
-      // completed: z.boolean(),
       type: z.enum(Object.keys($Enums.PaymentType) as any),
       invoice_id: z.number(),
-      // media: z
-      //   .object({
-      //     create: z.object({
-      //       path: z.string(),
-      //       type: z.enum([$Enums.MediaType.Pdf]).default("Pdf"),
-      //       title: z.string(),
-      //     }),
-      //   })
-      //   .optional(),
     });
   }, [props.value]);
 
@@ -184,7 +174,6 @@ export default function PaymentForm(props: Props) {
                   </div>
                   <div className="grid-cols-12">
                     <FormField
-                      rules={{ required: true }}
                       control={form.control}
                       name="note"
                       render={({ field }) => (
@@ -277,20 +266,20 @@ export default function PaymentForm(props: Props) {
                       )}
                     />
                   </div>
-                  {!props.isEditMode && (
-                    <div className="grid-cols-12">
-                      {
-                        <UploadWidget
-                          isPdf
-                          onSave={(e) => {
-                            setMedia({ path: e, title: e, type: "Pdf" } as any);
-                            // form.setValue("media", (e ?? "") as any);
-                            // form.clearErrors("media");
-                          }}
-                        />
-                      }
-                    </div>
-                  )}
+
+                  <div className="grid-cols-12">
+                    <UploadWidget
+                      isPdf
+                      path={props.value?.media?.path}
+                      onSave={(e) => {
+                        setMedia(
+                          e
+                            ? { path: e, title: e, type: "Pdf" }
+                            : (undefined as any)
+                        );
+                      }}
+                    />
+                  </div>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end">
