@@ -55,6 +55,7 @@ export default function InvoiceTable(props: Props) {
     () => [
       {
         accessorKey: "action",
+        maxWidth: "20px",
         cell(originalRow) {
           const { id } = originalRow.row.original;
 
@@ -84,7 +85,7 @@ export default function InvoiceTable(props: Props) {
                       className="cursor-pointer"
                       onClick={() => {
                         const isConfirm = confirm(
-                          `Do You sure you want to delete ${id} id:${id} `
+                          `Do You sure you want to delete invoice id:${id} `
                         );
                         if (isConfirm) {
                           setActiveTransition(async () => {
@@ -105,8 +106,26 @@ export default function InvoiceTable(props: Props) {
         },
       },
       {
+        header: "Status",
+        accessorKey: "status",
+      },
+      {
         accessorKey: "id",
         header: "ID",
+        cell: ({ row: { original } }) => (
+          <div
+            className={`text-center rounded-sm ${
+              original.status === "Deleted"
+                ? "bg-red-500"
+                : original.create_date.toLocaleTimeString() !==
+                  original.modified_date.toLocaleTimeString()
+                ? "bg-yellow-400"
+                : ""
+            }`}
+          >
+            {original.id}
+          </div>
+        ),
       },
       {
         accessorKey: "title",
@@ -127,10 +146,16 @@ export default function InvoiceTable(props: Props) {
       {
         accessorKey: "create_date",
         header: "Create Date",
+        columnDefType: "data",
+        id: "create_date",
+        accessorFn: (p) => p.create_date?.toLocaleDateString(),
       },
       {
         accessorKey: "modified_date",
         header: "Modified Date",
+        columnDefType: "data",
+        id: "modified_date",
+        accessorFn: (p) => p.modified_date?.toLocaleDateString(),
       },
     ],
     [createAlert, isActive, pathName, push]

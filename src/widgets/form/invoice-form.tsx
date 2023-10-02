@@ -61,8 +61,8 @@ export default function InvoiceForm(props: Props) {
         .string()
         .min(1, { message: "Description must be at least 1 characters" }),
       note: z.string().optional().nullable(),
-      amount: z.any(),
-      discount: z.any(),
+      amount: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
+      discount: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
       account_id: z.number().optional().nullable(),
       broker_id: z.number().optional().nullable(),
       currency_id: z.number().optional().nullable(),
@@ -70,7 +70,9 @@ export default function InvoiceForm(props: Props) {
         .enum([DebitCreditType.Debit, DebitCreditType.Credit])
         .optional()
         .nullable(),
-      sub_category_id: z.any(),
+      sub_category_id: z
+        .number()
+        .or(z.string().regex(/^\d+$/).transform(Number)),
     });
   }, []);
 
@@ -102,15 +104,15 @@ export default function InvoiceForm(props: Props) {
         setErrors(error);
       }
 
-      // if (result.success === false) {
-      //   return Object.keys(result.error.formErrors.fieldErrors).map((res) => {
-      //     form.setError(res as any, {
-      //       message: result.error.formErrors.fieldErrors[res][0],
-      //     });
-      //   });
-      // } else if (error.length > 0) {
-      //   return;
-      // }
+      if (result.success === false) {
+        return Object.keys(result.error.formErrors.fieldErrors).map((res) => {
+          form.setError(res as any, {
+            message: result.error.formErrors.fieldErrors[res][0],
+          });
+        });
+      } else if (error.length > 0) {
+        return;
+      }
       // form.clearErrors([
       //   "title",
       //   "description",
@@ -203,7 +205,7 @@ export default function InvoiceForm(props: Props) {
                       control={form.control}
                       name="title"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Title</FormLabel>
                           <FormControl>
                             <Input
@@ -224,7 +226,7 @@ export default function InvoiceForm(props: Props) {
                       control={form.control}
                       name="description"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Description</FormLabel>
                           <FormControl onChange={(e) => {}}>
                             <Textarea placeholder="description" {...field} />
@@ -279,7 +281,7 @@ export default function InvoiceForm(props: Props) {
                       control={form.control}
                       name="amount"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Amount</FormLabel>
                           <FormControl>
                             <Input
@@ -301,7 +303,7 @@ export default function InvoiceForm(props: Props) {
                       control={form.control}
                       name={"debit_credit"}
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Type</FormLabel>
                           <FormControl>
                             <Select
@@ -412,7 +414,7 @@ export default function InvoiceForm(props: Props) {
                       control={form.control}
                       name={"sub_category_id"}
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>SubCategory</FormLabel>
                           <FormControl>
                             <SearchSelect
