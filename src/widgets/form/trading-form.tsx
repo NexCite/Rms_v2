@@ -96,8 +96,10 @@ export default function TradingForm(props: Props) {
           username: z
             .string()
             .min(3, { message: "Username must be at least 3 characters" }),
-          trader_id: z.number(),
-          currency_id: z.number(),
+          trader_id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
+          currency_id: z
+            .number()
+            .or(z.string().regex(/^\d+$/).transform(Number)),
         });
       }
     }

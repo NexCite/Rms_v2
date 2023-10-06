@@ -77,9 +77,9 @@
 .required label {
 }
 .required label:after {
-  color: #e32;
-  content: " *";
-  display: inline;
+  color: #e32 ;
+  content: " *" ;
+  display: inline ;
 }
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {

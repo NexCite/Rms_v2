@@ -36,6 +36,7 @@ import {
 } from "@rms/components/ui/select";
 import { createPayment, updatePayment } from "@rms/service/payment-service";
 import UploadWidget from "../upload/upload-widget";
+import { Alert } from "@rms/components/ui/alert";
 
 interface Props {
   id?: number;
@@ -55,12 +56,10 @@ export default function PaymentForm(props: Props) {
       description: z
         .string()
         .min(1, { message: "Description must be at least 1 characters" }),
-      note: z
-        .string()
-        .min(1, { message: "Note must be at least 1 characters" }),
-      amount: z.any(),
+      note: z.string().optional().nullable(),
+      amount: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
       type: z.enum(Object.keys($Enums.PaymentType) as any),
-      invoice_id: z.number(),
+      invoice_id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
     });
   }, [props.value]);
 
@@ -68,11 +67,48 @@ export default function PaymentForm(props: Props) {
     resolver: zodResolver(validation),
     defaultValues: props.value,
   });
+
+  const [errors, setErrors] = useState<{ index?: number; message: string }[]>(
+    []
+  );
+
   const [media, setMedia] = useState<Prisma.MediaGetPayload<{}>>();
   const { createAlert } = useAlertHook();
 
   const handleSubmit = useCallback(
     (values: z.infer<any>) => {
+      const result = validation.safeParse(values);
+      const error = [];
+      if (!props.isEditMode) {
+        if (!form.getValues().type) {
+          error.push({ message: "Missing  type" });
+        }
+        if (!form.getValues().amount) {
+          error.push({ message: "Missing  amount" });
+        }
+
+        setErrors(error);
+      }
+
+      if (result.success === false) {
+        return Object.keys(result.error.formErrors.fieldErrors).map((res) => {
+          form.setError(res as any, {
+            message: result.error.formErrors.fieldErrors[res][0],
+          });
+        });
+      } else if (error.length > 0) {
+        return;
+      }
+
+      // form.clearErrors([
+      //   "title",
+      //   "description",
+      //   "amount",
+      //   "type",
+      //   "note",
+      //   "invoice_id",
+      // ]);
+
       values.amount = parseInt(values.amount);
       values.media = media
         ? {
@@ -133,6 +169,13 @@ export default function PaymentForm(props: Props) {
               </CardHeader>
 
               <CardContent>
+                {errors.length > 0 && (
+                  <Alert color="red" className="mb-10" variant="destructive">
+                    {errors.map((res, index) => (
+                      <h4 key={index}>{res.message} Invoice</h4>
+                    ))}
+                  </Alert>
+                )}
                 <div className="grid gap-4">
                   <div className="grid-cols-12">
                     <FormField
@@ -140,7 +183,7 @@ export default function PaymentForm(props: Props) {
                       control={form.control}
                       name="title"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Title</FormLabel>
                           <FormControl>
                             <Input
@@ -161,7 +204,7 @@ export default function PaymentForm(props: Props) {
                       control={form.control}
                       name="description"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Description</FormLabel>
                           <FormControl onChange={(e) => {}}>
                             <Textarea placeholder="description" {...field} />
@@ -174,6 +217,7 @@ export default function PaymentForm(props: Props) {
                   </div>
                   <div className="grid-cols-12">
                     <FormField
+                      rules={{ required: false }}
                       control={form.control}
                       name="note"
                       render={({ field }) => (
@@ -194,7 +238,7 @@ export default function PaymentForm(props: Props) {
                       control={form.control}
                       name="amount"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Amount</FormLabel>
                           <FormControl>
                             <Input
@@ -216,7 +260,7 @@ export default function PaymentForm(props: Props) {
                       control={form.control}
                       name={"type"}
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="required">
                           <FormLabel>Type</FormLabel>
                           <FormControl>
                             <Select

@@ -76,7 +76,7 @@ export default function PaymentTable(props: Props) {
                       className="cursor-pointer"
                       onClick={() => {
                         const isConfirm = confirm(
-                          `Do You sure you want to delete ${id} id:${id} `
+                          `Do You sure you want to delete payment id:${id} `
                         );
                         if (isConfirm) {
                           setActiveTransition(async () => {
@@ -97,16 +97,30 @@ export default function PaymentTable(props: Props) {
         },
       },
       {
+        header: "Status",
+        accessorKey: "status",
+      },
+      {
         accessorKey: "id",
         header: "ID",
+        cell: ({ row: { original } }) => (
+          <div
+            className={`text-center rounded-sm ${
+              original.status === "Deleted"
+                ? "bg-red-500"
+                : original.create_date.toLocaleTimeString() !==
+                  original.modified_date.toLocaleTimeString()
+                ? "bg-yellow-400"
+                : ""
+            }`}
+          >
+            {original.id}
+          </div>
+        ),
       },
       {
         accessorKey: "title",
         header: "Title",
-      },
-      {
-        accessorKey: "completed",
-        header: "Completed",
       },
       {
         accessorKey: "amount",
@@ -119,10 +133,16 @@ export default function PaymentTable(props: Props) {
       {
         accessorKey: "create_date",
         header: "Create Date",
+        columnDefType: "data",
+        id: "create_date",
+        accessorFn: (p) => p.create_date?.toLocaleDateString(),
       },
       {
         accessorKey: "modified_date",
         header: "Modified Date",
+        columnDefType: "data",
+        id: "modified_date",
+        accessorFn: (p) => p.modified_date?.toLocaleDateString(),
       },
     ],
     [createAlert, isActive, pathName, push]
