@@ -4,11 +4,10 @@ import { Prisma } from "@prisma/client";
 
 import { handlerServiceAction } from "@rms/lib/handler";
 import prisma from "@rms/prisma/prisma";
-export async function createEntry(props: Prisma.EntryCreateInput) {
+export async function createEntry(props: Prisma.EntryUncheckedCreateInput) {
   return handlerServiceAction(
     async (auth) => {
-      props.user = { connect: { id: auth.id } };
-
+      props.user_id = auth.id;
       await prisma.entry.create({ data: props });
       return;
     },
@@ -18,11 +17,13 @@ export async function createEntry(props: Prisma.EntryCreateInput) {
   );
 }
 
-export async function updateEntry(id: number, props: Prisma.EntryUpdateInput) {
+export async function updateEntry(
+  id: number,
+  props: Prisma.EntryUncheckedUpdateInput
+) {
   return handlerServiceAction(
     async (auth) => {
-      props.user = { connect: { id: auth.id } };
-
+      props.user_id = auth.id;
       await prisma.entry.update({ data: props, where: { id: id } });
       return;
     },

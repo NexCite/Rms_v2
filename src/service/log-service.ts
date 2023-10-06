@@ -2,6 +2,7 @@
 import { $Enums, Prisma } from "@prisma/client";
 import { handlerServiceAction } from "@rms/lib/handler";
 import prisma from "@rms/prisma/prisma";
+import moment from "moment";
 import { revalidatePath } from "next/cache";
 
 export async function createLog(props: Prisma.LogUncheckedCreateInput) {
@@ -25,8 +26,8 @@ export async function getLogs(props: {
         user_id: props.user_id,
         create_date: props.date
           ? {
-              gte: props.date,
-              lte: props.date,
+              gte: moment(props.date).startOf("day").toDate(),
+              lte: moment(props.date).endOf("day").toDate(),
             }
           : undefined,
       },

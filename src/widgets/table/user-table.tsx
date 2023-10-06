@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import React, { useMemo, useState, useTransition } from "react";
 
-import styled from "styled-components";
+import styled from "@emotion/styled";
 import { Prisma } from "@prisma/client";
 import {
   ColumnDef,
@@ -16,14 +16,7 @@ import {
 } from "@tanstack/react-table";
 import useAlertHook from "@rms/hooks/alert-hooks";
 import { Button } from "@rms/components/ui/button";
-import {
-  TableBody,
-  Table,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@rms/components/ui/table";
+import { tbody, Table, td, TableHeader, tr } from "@rms/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -209,32 +202,26 @@ export default function UserTable(props: Props) {
 
         {/* Using Vanilla Mantine Table component here */}
         <div className="p-2">
-          <Table>
+          <table className="w-full min-w-max table-auto text-left">
             {/* Use your own markup, customize however you want using the power of Tandiv Table */}
-            <TableHeader>
+            <thead>
               {table.getRowModel().rows.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
+                <tr>
+                  <th colSpan={columns.length} className="h-24 text-center">
                     No results.
-                  </TableCell>
-                </TableRow>
+                  </th>
+                </tr>
               ) : table.getRowModel().rows.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
+                <tr>
+                  <th colSpan={columns.length} className="h-24 text-center">
                     No results.
-                  </TableCell>
-                </TableRow>
+                  </th>
+                </tr>
               ) : (
                 table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
+                  <tr key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id} style={{ minWidth: "200px" }}>
+                      <th key={header.id} style={{ minWidth: "200px" }}>
                         {header.isPlaceholder
                           ? null
                           : flexRender(
@@ -242,28 +229,28 @@ export default function UserTable(props: Props) {
                                 header.column.columnDef.header,
                               header.getContext()
                             )}
-                      </TableHead>
+                      </th>
                     ))}
-                  </TableRow>
+                  </tr>
                 ))
               )}
-            </TableHeader>
-            <TableBody>
+            </thead>
+            <tbody>
               {table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <tr key={row.id}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <td key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell ??
                           cell.column.columnDef.cell,
                         cell.getContext()
                       )}
-                    </TableCell>
+                    </td>
                   ))}
-                </TableRow>
+                </tr>
               ))}
-            </TableBody>
-          </Table>
+            </tbody>
+          </table>
           <div className="flex items-center justify-end space-x-2 py-4">
             <h5>
               {table.getState().pagination.pageIndex + 1} of{" "}

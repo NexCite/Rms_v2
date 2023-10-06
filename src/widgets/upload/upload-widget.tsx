@@ -6,7 +6,6 @@ import {
   removeMedia,
   uploadMedia,
 } from "@rms/service/media-service";
-import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState, useTransition } from "react";
 import ImageUploading, { ImageListType } from "react-images-uploading";

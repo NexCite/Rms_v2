@@ -11,13 +11,14 @@ import { DateRange } from "react-day-picker";
 type Props = {
   default?: DateRange;
   onChange: (e?: DateRange) => void;
+  className?: string;
 };
 
 export default function DateRangePicker(props: Props) {
   const [value, setValue] = useState<DateRange | undefined>(props.default);
 
   return (
-    <div className={cn("grid gap-2")}>
+    <div className={cn(`grid gap-2 ${props.className ?? ""}`)}>
       <Popover>
         <PopoverTrigger asChild>
           <Button

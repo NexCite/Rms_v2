@@ -36,7 +36,7 @@ import {
 import { useRouter } from "next/navigation";
 import React, { useCallback, useMemo, useTransition } from "react";
 import { useForm } from "react-hook-form";
-import styled from "styled-components";
+import styled from "@emotion/styled";
 import { z } from "zod";
 
 type Props = {

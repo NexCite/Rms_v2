@@ -4,8 +4,7 @@ import { $Enums, Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
 
 import EntryDataTable from "@rms/widgets/table/entry-table";
-import { getUserInfo } from "@rms/lib/auth";
-import { getUserStatus } from "@rms/service/user-service";
+
 export default async function Entry(props: {
   params: {};
   searchParams: {

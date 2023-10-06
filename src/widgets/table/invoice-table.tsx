@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import React, { useMemo, useState, useTransition } from "react";
 
-import styled from "styled-components";
+import styled from "@emotion/styled";
 import { Prisma } from "@prisma/client";
 import {
   ColumnDef,
@@ -16,14 +16,7 @@ import {
 } from "@tanstack/react-table";
 import useAlertHook from "@rms/hooks/alert-hooks";
 import { Button } from "@rms/components/ui/button";
-import {
-  TableBody,
-  Table,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@rms/components/ui/table";
+import { tbody, Table, td, TableHeader, tr } from "@rms/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,6 +31,7 @@ import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { useRouter } from "next/navigation";
 import Authorized from "@rms/components/ui/authorized";
 import { deleteInvoiceById } from "@rms/service/invoice-service";
+import { Typography } from "@material-tailwind/react";
 
 type Props = {
   invoices: Prisma.InvoiceGetPayload<{}>[];
@@ -164,33 +158,16 @@ export default function InvoiceTable(props: Props) {
         </div>
 
         {/* Using Vanilla Mantine Table component here */}
-        <div className="p-2">
-          <Table>
-            {/* Use your own markup, customize however you want using the power of Tandiv Table */}
-            <TableHeader>
-              {table.getRowModel().rows.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No results.
-                  </TableCell>
-                </TableRow>
-              ) : table.getRowModel().rows.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No results.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
+        <div className="rms-container">
+          {" "}
+          <div className="rms-table">
+            <table>
+              {/* Use your own markup, customize however you want using the power of Tandiv Table */}
+              <thead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id} style={{ minWidth: "200px" }}>
+                      <th key={header.id} style={{ minWidth: "200px" }}>
                         {header.isPlaceholder
                           ? null
                           : flexRender(
@@ -198,49 +175,57 @@ export default function InvoiceTable(props: Props) {
                                 header.column.columnDef.header,
                               header.getContext()
                             )}
-                      </TableHead>
+                      </th>
                     ))}
-                  </TableRow>
-                ))
-              )}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell ??
-                          cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <div className="flex items-center justify-end space-x-2 py-4">
-            <h5>
-              {table.getState().pagination.pageIndex + 1} of{" "}
-              {table.getPageCount()} page(s).
-            </h5>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              Next
-            </Button>
+                  </tr>
+                ))}
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.length === 0 ? (
+                  <tr>
+                    <th colSpan={columns.length} className="h-24 text-center">
+                      No results.
+                    </th>
+                  </tr>
+                ) : (
+                  table.getRowModel().rows.map((row) => (
+                    <tr key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <td key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell ??
+                              cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+            <div className="flex items-center justify-end space-x-2 py-4">
+              <h5>
+                {table.getState().pagination.pageIndex + 1} of{" "}
+                {table.getPageCount()} page(s).
+              </h5>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              >
+                Next
+              </Button>
+            </div>
           </div>
         </div>
       </div>

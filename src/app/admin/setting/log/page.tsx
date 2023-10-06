@@ -16,12 +16,13 @@ export default async function page(props: {
     user_id = +props.searchParams.user_id;
   }
   if (!Number.isNaN(+props.searchParams.date)) {
-    date = new Date(props.searchParams.date);
+    date = new Date(+props.searchParams.date);
   }
 
   return (
     <div style={{ display: "flex", justifyContent: "center" }}>
       <LogTable
+        date={date}
         data={(await getLogs({ date: date, user_id: user_id })).result}
       />{" "}
     </div>

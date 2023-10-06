@@ -28,7 +28,7 @@ import React, {
   useTransition,
 } from "react";
 import { useForm } from "react-hook-form";
-import styled from "styled-components";
+import styled from "@emotion/styled";
 import { z } from "zod";
 
 import { Input } from "@rms/components/ui/input";

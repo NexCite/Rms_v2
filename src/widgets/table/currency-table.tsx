@@ -17,15 +17,7 @@ import {
 import useAlertHook from "@rms/hooks/alert-hooks";
 import { Button } from "@rms/components/ui/button";
 import { Input } from "@rms/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@rms/components/ui/table";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +31,7 @@ import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { deleteMoreDigit, deleteTwoDigit } from "@rms/service/digit-service";
 import { deleteCurrency } from "@rms/service/currency-service";
 import Authorized from "@rms/components/ui/authorized";
+import { Typography } from "@material-tailwind/react";
 
 type Props = {
   currencies: Prisma.CurrencyGetPayload<{}>[];
@@ -164,14 +157,14 @@ export default function CurrencyTable(props: Props) {
       </div>
 
       {/* Using Vanilla Mantine Table component here */}
-      <div className="p-2">
-        <Table>
+      <div className="h-full w-full overflow-auto  justify-between rms-container  ">
+        <table className="w-full min-w-max table-auto text-left">
           {/* Use your own markup, customize however you want using the power of Tandiv Table */}
-          <TableHeader>
+          <thead>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} style={{ minWidth: "200px" }}>
+                  <th key={header.id}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -179,38 +172,35 @@ export default function CurrencyTable(props: Props) {
                             header.column.columnDef.header,
                           header.getContext()
                         )}
-                  </TableHead>
+                  </th>
                 ))}
-              </TableRow>
+              </tr>
             ))}
-          </TableHeader>
-          <TableBody>
+          </thead>
+          <tbody>
             {table.getRowModel().rows.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+              <tr>
+                <td colSpan={columns.length} className="h-24 text-center">
                   No results.
-                </TableCell>
-              </TableRow>
+                </td>
+              </tr>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <tr key={row.id}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <td key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell ??
                           cell.column.columnDef.cell,
                         cell.getContext()
                       )}
-                    </TableCell>
+                    </td>
                   ))}
-                </TableRow>
+                </tr>
               ))
             )}
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
         <div className="flex items-center justify-end space-x-2 py-4">
           <h5>
             {table.getState().pagination.pageIndex + 1} of{" "}
@@ -261,7 +251,7 @@ export default function CurrencyTable(props: Props) {
 // import Link from "next/link";
 // import { usePathname } from "next/navigation";
 // import React, { useMemo, useTransition } from "react";
-// import styled from "styled-components";
+// import styled from "@emotion/styled";
 // import { Prisma } from "@prisma/client";
 // import { deleteCurrencyById } from "@rms/services/Config/CurrencyService";
 
@@ -376,7 +366,7 @@ export default function CurrencyTable(props: Props) {
 //             m="0"
 //           >
 //             {/* Use your own markup, customize however you want using the power of TanStack Table */}
-//             <thead>
+//             <td>
 //               {table.getHeaderGroups().map((headerGroup) => (
 //                 <tr key={headerGroup.id}>
 //                   {headerGroup.headers.map((header) => (
@@ -392,7 +382,7 @@ export default function CurrencyTable(props: Props) {
 //                   ))}
 //                 </tr>
 //               ))}
-//             </thead>
+//             </td>
 //             <tbody>
 //               {table.getRowModel().rows.map((row) => (
 //                 <tr key={row.id}>
@@ -408,7 +398,7 @@ export default function CurrencyTable(props: Props) {
 //                 </tr>
 //               ))}
 //             </tbody>
-//           </Table>
+//           </table>
 //         </ScrollArea>
 //         <Flex justify={"end"}>
 //           <MRT_TablePagination table={table} />

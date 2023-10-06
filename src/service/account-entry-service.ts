@@ -4,33 +4,34 @@ import { handlerServiceAction } from "@rms/lib/handler";
 import prisma from "@rms/prisma/prisma";
 
 export async function createAccountEntry(
-  props: Prisma.Account_EntryCreateArgs
+  data: Prisma.Account_EntryUncheckedCreateInput
 ) {
   return handlerServiceAction(
     async (auth) => {
-      props.data.user_id = auth.id;
+      data.user_id = auth.id;
 
-      await prisma.account_Entry.create(props);
+      await prisma.account_Entry.create({ data });
       return;
     },
     "Add_AccountEntry",
     true,
-    props
+    data
   );
 }
 
 export async function updateAccountEntry(
-  props: Prisma.Account_EntryUpdateArgs
+  id: number,
+  data: Prisma.Account_EntryUncheckedUpdateInput
 ) {
   return handlerServiceAction(
     async (auth) => {
-      props.data.user_id = auth.id;
+      data.user_id = auth.id;
 
-      return await prisma.account_Entry.update(props);
+      return await prisma.account_Entry.update({ where: { id }, data: data });
     },
     "Edit_AccountEntry",
     true,
-    props
+    data
   );
 }
 export async function deleteAccountEntry(id: number) {
@@ -48,7 +49,6 @@ export async function deleteAccountEntry(id: number) {
       return;
     },
     "Delete_AccountEntry",
-    true,
-    props
+    true
   );
 }

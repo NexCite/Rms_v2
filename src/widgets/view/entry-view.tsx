@@ -1,23 +1,15 @@
 "use client";
 import { Prisma } from "@prisma/client";
 import { Button } from "@rms/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@rms/components/ui/table";
+import { Table, tbody, td, TableHeader, tr } from "@rms/components/ui/table";
 import useAlertHook from "@rms/hooks/alert-hooks";
 import { FormatNumberWithFixed } from "@rms/lib/global";
 import { deleteEntry } from "@rms/service/entry-service";
-import { Loader2 } from "lucide-react";
 import moment from "moment";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useMemo, useTransition } from "react";
-import styled from "styled-components";
+import styled from "@emotion/styled";
 
 type Props = {
   entry: Prisma.EntryGetPayload<{
@@ -100,99 +92,99 @@ export default function EntryView(props: Props) {
           Export
         </Button>
       </div>
-      <Table>
+      <table className="w-full min-w-max table-auto text-left">
         <TableHeader>
-          <TableRow className="head">
-            <TableHead>Debit</TableHead>
-            <TableHead>Credit</TableHead>
-            <TableHead>Amount</TableHead>
-          </TableRow>
+          <tr className="head">
+            <td className="w-full">Debit</td>
+            <td className="w-full">Credit</td>
+            <td className="w-full">Amount</td>
+          </tr>
         </TableHeader>
 
-        <TableBody>
+        <tbody>
           {props.entry.sub_entries.map((res) => (
-            <TableRow key={res.id}>
+            <tr key={res.id}>
               {res.type === "Debit" && (
                 <>
-                  <TableCell>
+                  <td>
                     ({res.two_digit?.id ?? ""}
                     {res.three_digit?.id ?? ""}
                     {res.more_than_four_digit?.id ?? ""}
                     {res.account_entry?.id ?? ""}) {res.two_digit?.name ?? ""}
                     {res.three_digit?.name ?? ""}
                     {res.account_entry?.username ?? ""}
-                  </TableCell>
-                  <TableCell></TableCell>
+                  </td>
+                  <td></td>
                 </>
               )}
               {res.type === "Credit" && (
                 <>
-                  <TableCell></TableCell>
-                  <TableCell>
+                  <td></td>
+                  <td>
                     ({res.two_digit?.id ?? ""}
                     {res.three_digit?.id ?? ""}
                     {res.more_than_four_digit?.id ?? ""}
                     {res.account_entry?.id ?? ""}) {res.two_digit?.name ?? ""}
                     {res.three_digit?.name ?? ""}
                     {res.account_entry?.username ?? ""}
-                  </TableCell>
+                  </td>
                 </>
               )}
-              <TableCell>
+              <td>
                 {props.entry.currency.symbol}
                 {FormatNumberWithFixed(res.amount)}
-              </TableCell>
-              <TableCell></TableCell>
-              <TableCell></TableCell>
-            </TableRow>
+              </td>
+              <td></td>
+              <td></td>
+            </tr>
           ))}
-          <TableRow>
-            <TableCell></TableCell>
-            <TableCell></TableCell>
-            <TableCell></TableCell>
-            <TableCell className="head">Total</TableCell>
-            <TableCell>
+          <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td className="head">Total</td>
+            <td>
               {props.entry.currency.symbol}
               {FormatNumberWithFixed(amount)}
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell colSpan={6}></TableCell>
-          </TableRow>
-          <TableRow></TableRow>
-          <TableRow className="head ">
-            <TableCell>ID</TableCell>
-            <TableCell>Date</TableCell>
-            <TableCell>Last Update</TableCell>
+            </td>
+          </tr>
+          <tr>
+            <td colSpan={6}></td>
+          </tr>
+          <tr></tr>
+          <tr className="head ">
+            <td>ID</td>
+            <td>Date</td>
+            <td>Last Update</td>
 
-            <TableCell colSpan={2}> Create By</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>{props.entry.id}</TableCell>
-            <TableCell>
+            <td colSpan={2}> Create By</td>
+          </tr>
+          <tr>
+            <td>{props.entry.id}</td>
+            <td>
               {moment(props.entry.to_date).format("dddd DD-MM-yyy hh:mm")}
-            </TableCell>
-            <TableCell>
+            </td>
+            <td>
               {moment(props.entry.modified_date).format("dddd DD-MM-yyy hh:mm")}
-            </TableCell>
-            <TableCell colSpan={2}>{props.entry.user?.username}</TableCell>
-          </TableRow>
-          <TableRow className="head ">
-            <TableCell>Title</TableCell>
-            <TableCell>Description</TableCell>
-            <TableCell>Note</TableCell>
-          </TableRow>
+            </td>
+            <td colSpan={2}>{props.entry.user?.username}</td>
+          </tr>
+          <tr className="head ">
+            <td>Title</td>
+            <td>Description</td>
+            <td>Note</td>
+          </tr>
 
-          <TableRow>
-            <TableCell>{props.entry.title}</TableCell>
-            <TableCell>{props.entry.description}</TableCell>
-            <TableCell>{props.entry.note}</TableCell>
-            <TableCell colSpan={2}></TableCell>
-          </TableRow>
+          <tr>
+            <td>{props.entry.title}</td>
+            <td>{props.entry.description}</td>
+            <td>{props.entry.note}</td>
+            <td colSpan={2}></td>
+          </tr>
 
-          <TableRow className="head">
-            <TableCell>PDF</TableCell>
-            <TableCell colSpan={5}>
+          <tr className="head">
+            <td>PDF</td>
+            <td colSpan={5}>
               {props.entry.media && (
                 <iframe
                   width={"100%"}
@@ -201,17 +193,16 @@ export default function EntryView(props: Props) {
                   src={`/api/media/${props.entry.media.path}`}
                 />
               )}
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </Style>
   );
 }
 const Style = styled.div`
   table {
     tbody,
-    thead,
     tr,
     td,
     th {

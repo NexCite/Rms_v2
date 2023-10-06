@@ -36,7 +36,7 @@ export function Sidebar(props: Props) {
     props.routers.find((res) => pathName.startsWith(res.path))?.index ?? -1
   );
   return (
-    <Card className="h-full w-full p-3">
+    <Card className="h-full w-full p-3 rounded-none">
       <div className="flex flex-col ">
         <Image
           src={`/api/media/${props.config.logo}`}

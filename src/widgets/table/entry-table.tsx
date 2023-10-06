@@ -1,56 +1,33 @@
 "use client";
 import React, { useCallback, useMemo, useState, useTransition } from "react";
 
-import {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import { DotsHorizontalIcon } from "@radix-ui/react-icons";
+import { VisibilityState } from "@tanstack/react-table";
+import { MaterialReactTable, type MRT_ColumnDef } from "material-react-table";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
-import { Button } from "@rms/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@rms/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@rms/components/ui/table";
 import { $Enums, Prisma } from "@prisma/client";
 import { FormatNumberWithFixed } from "@rms/lib/global";
 
 import { usePathname, useRouter } from "next/navigation";
-import styled from "styled-components";
+import styled from "@emotion/styled";
 
-import SearchSelect from "../../components/ui/search-select";
-import Link from "next/link";
 import { DateRange } from "react-day-picker";
-import DateRangePicker from "@rms/components/ui/date-range-pciker";
-import {
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@rms/components/ui/dropdown-menu";
+
 import { deleteEntry } from "@rms/service/entry-service";
 import useAlertHook from "@rms/hooks/alert-hooks";
-import { Loader2 } from "lucide-react";
 import moment from "moment";
 import Authorized from "@rms/components/ui/authorized";
+import {
+  Autocomplete,
+  Card,
+  CardContent,
+  MenuItem,
+  TextField,
+} from "@mui/material";
+import { DatePicker } from "@mui/x-date-pickers";
+import dayjs from "dayjs";
+import LoadingButton from "@mui/lab/LoadingButton";
 
 type CommonEntryType = Prisma.EntryGetPayload<{
   include: {
@@ -119,10 +96,7 @@ export default function EntryDataTable(props: Props) {
     from: props.date[0],
     to: props.date[1],
   });
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
+
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
@@ -151,77 +125,61 @@ export default function EntryDataTable(props: Props) {
     },
     [search, selectDate, pathName, replace]
   );
-  const columns: ColumnDef<CommonEntryType>[] = useMemo(
+
+  const { two_digit, three_digit, four_digit, account } = useMemo(() => {
+    var two_digit: { id: number; name: string } = undefined,
+      three_digit: { id: number; name: string } = undefined,
+      four_digit: { id: number; name: string } = undefined;
+    var account: { id: number; username: string } = undefined;
+    if (search.two_digit_id) {
+      two_digit = props.two_digits.find(
+        (res) => res.id === search.two_digit_id
+      );
+    }
+    if (search.three_digit_id) {
+      three_digit = props.two_digits.find(
+        (res) => res.id === search.three_digit_id
+      );
+    }
+
+    if (search.more_digit_id) {
+      four_digit = props.two_digits.find(
+        (res) => res.id === search.more_digit_id
+      );
+    }
+
+    if (search.account_id) {
+      account = props.two_digits.find(
+        (res) => res.id === search.account_id
+      ) as any;
+    }
+
+    return { two_digit, three_digit, four_digit, account };
+  }, [search]);
+  const columns: MRT_ColumnDef<CommonEntryType>[] = useMemo(
     () => [
-      {
-        accessorKey: "action",
-        cell(originalRow) {
-          const { id, title } = originalRow.row.original;
-
-          return (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <DotsHorizontalIcon />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <Authorized permission="Edit_Entry">
-                    <DropdownMenuItem
-                      onClick={() => push(pathName + "/form?id=" + id)}
-                      className="cursor-pointer"
-                      disabled={isActive}
-                    >
-                      Edit
-                    </DropdownMenuItem>
-                  </Authorized>
-                  <Authorized permission="View_Entry">
-                    <DropdownMenuItem
-                      onClick={() => push(pathName + "/" + id)}
-                      className="cursor-pointer"
-                      disabled={isActive}
-                    >
-                      View
-                    </DropdownMenuItem>
-                  </Authorized>
-                  <Authorized permission="Delete_Entry">
-                    <DropdownMenuItem
-                      disabled={isActive}
-                      className="cursor-pointer"
-                      onClick={() => {
-                        const isConfirm = confirm(
-                          `Do You sure you want to delete ${title} id:${id} `
-                        );
-                        if (isConfirm) {
-                          setActiveTransition(async () => {
-                            const result = await deleteEntry(id);
-
-                            createAlert(result);
-                          });
-                        }
-                      }}
-                    >
-                      {isActive ? <> deleting...</> : "Delete"}
-                    </DropdownMenuItem>
-                  </Authorized>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          );
-        },
-      },
       {
         header: "Status",
         accessorKey: "status",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
 
       {
         accessorKey: "id",
+
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
         header: "ID",
-        cell: ({ row: { original } }) => (
+        Cell: ({ row: { original } }) => (
           <div
             className={`text-center rounded-sm ${
               original.status === "Deleted"
@@ -238,6 +196,14 @@ export default function EntryDataTable(props: Props) {
       },
       {
         accessorKey: "create_date",
+
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+
         header: "Date",
         accessorFn(originalRow) {
           return moment(originalRow?.create_date).format("DD-MM-yyy hh:mm a");
@@ -245,10 +211,24 @@ export default function EntryDataTable(props: Props) {
       },
       {
         accessorKey: "title",
+
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
         header: "Title",
       },
       {
         accessorKey: "amount" as any,
+
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
         header: "Amount",
         accessorFn(originalRow) {
           var amounts = originalRow?.sub_entries
@@ -263,31 +243,40 @@ export default function EntryDataTable(props: Props) {
       },
       {
         accessorKey: "description",
+
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
         header: "SubEntry",
-        cell(originalRow) {
+        size: 500, //large column
+
+        Cell(originalRow) {
           var s = [];
           originalRow?.row.original?.sub_entries
             ?.sort((a, b) => a.type.length - b.type.length)
             .forEach((e, i) =>
               s.push(
-                <TableRow key={e.id + "" + i}>
-                  <TableHead align="center">
+                <tr key={e.id + "" + i}>
+                  <td align="center">
                     {originalRow.row.original.currency.symbol}
                     {FormatNumberWithFixed(e.amount)}
-                  </TableHead>
+                  </td>
 
                   {e.type === "Debit" && (
-                    <TableHead align="center">
+                    <td align="center">
                       {e.reference_id ? (
-                        <Table>
-                          <TableBody>
-                            <TableRow>
-                              <TableCell>
+                        <table className=" min-w-max table-auto text-center">
+                          <tbody>
+                            <tr>
+                              <td>
                                 Reference To: ({e.reference_id}){" "}
                                 {e.reference?.username ?? ""}
-                              </TableCell>
+                              </td>
 
-                              <TableCell colSpan={2}>
+                              <td colSpan={2}>
                                 ({e?.two_digit_id ?? ""}
                                 {e?.three_digit_id ?? ""}
                                 {e?.more_than_four_digit_id ?? ""}
@@ -296,10 +285,10 @@ export default function EntryDataTable(props: Props) {
                                 {e.three_digit?.name ?? ""}
                                 {e.more_than_four_digit?.name ?? ""}
                                 {e.account_entry?.username ?? ""}
-                              </TableCell>
-                            </TableRow>
-                          </TableBody>
-                        </Table>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       ) : (
                         <>
                           ({e?.two_digit_id ?? ""}
@@ -311,21 +300,21 @@ export default function EntryDataTable(props: Props) {
                           {e.account_entry?.username ?? ""}
                         </>
                       )}
-                    </TableHead>
+                    </td>
                   )}
-                  <TableHead></TableHead>
+                  <td className=""></td>
                   {e.type === "Credit" && (
-                    <TableHead align="center">
+                    <td align="center">
                       {e.reference_id ? (
-                        <Table>
-                          <TableBody>
-                            <TableRow>
-                              <TableCell>
+                        <table className=" min-w-max table-auto text-center">
+                          <tbody>
+                            <tr>
+                              <td>
                                 Reference To: ({e.reference_id}){" "}
                                 {e.reference?.username ?? ""}
-                              </TableCell>
+                              </td>
 
-                              <TableCell colSpan={2}>
+                              <td colSpan={2}>
                                 ({e?.two_digit_id ?? ""}
                                 {e?.three_digit_id ?? ""}
                                 {e?.more_than_four_digit_id ?? ""}
@@ -334,10 +323,10 @@ export default function EntryDataTable(props: Props) {
                                 {e.three_digit?.name ?? ""}
                                 {e.more_than_four_digit?.name ?? ""}
                                 {e.account_entry?.username ?? ""}
-                              </TableCell>
-                            </TableRow>
-                          </TableBody>
-                        </Table>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       ) : (
                         <>
                           ({e?.two_digit_id ?? ""}
@@ -349,23 +338,23 @@ export default function EntryDataTable(props: Props) {
                           {e.account_entry?.username ?? ""}
                         </>
                       )}
-                    </TableHead>
+                    </td>
                   )}
-                </TableRow>
+                </tr>
               )
             );
 
           return (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead align="center">Amount</TableHead>
-                  <TableHead align="center">Debit</TableHead>
-                  <TableHead align="center">Credit</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>{s}</TableBody>
-            </Table>
+            <table className=" min-w-max table-auto text-center w-full">
+              <thead>
+                <tr>
+                  <td align="center">Amount</td>
+                  <td align="center">Debit</td>
+                  <td align="center">Credit</td>
+                </tr>
+              </thead>
+              <tbody>{s}</tbody>
+            </table>
           );
         },
       },
@@ -373,247 +362,220 @@ export default function EntryDataTable(props: Props) {
     [createAlert, isActive, pathName, push]
   );
 
-  const table = useReactTable({
-    data: props.data,
-    columns: columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
-  });
-
   return (
-    <Style className="w-full ">
-      <div className="flex justify-between items-center">
-        <h1>Result: {props.data.length}</h1>
-      </div>
-      <form
-        className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mt-4 mb-5"
-        onSubmit={handleSubmit}
-      >
-        <SearchSelect
-          data={props.data.map((res) => ({ id: res.id, name: res.title }))}
-          hit="id"
-          label="Ids"
-          onChange={(e) => {
-            setSearch((prev) => ({
-              ...prev,
-              id: e,
-            }));
-          }}
-          default={search.id}
-        />
+    <Style className=" ">
+      <Card>
+        <CardContent className="mb-0">
+          <form
+            className=" grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4  h-full  overflow-auto  justify-between rms-container p-5"
+            onSubmit={handleSubmit}
+          >
+            <TextField
+              label="Id"
+              type="number"
+              size="small"
+              defaultValue={search.id}
+              onChange={(e) => {
+                setSearch((prev) => ({
+                  ...prev,
+                  id: e.target.value ? +e.target.value : undefined,
+                }));
+              }}
+            />
 
-        <DateRangePicker
-          onChange={setSelectDate}
-          default={{ from: props.date[0], to: props.date[1] }}
-        />
-
-        <SearchSelect
-          data={props.two_digits}
-          hit="two digit"
-          label="Two Digits"
-          onChange={(e) => {
-            setSearch((prev) => ({
-              ...prev,
-              more_digit_id: undefined,
-              three_digit_id: undefined,
-              two_digit_id: e,
-            }));
-          }}
-          default={search.two_digit_id}
-        />
-        <SearchSelect
-          data={props.three_digits}
-          hit="there digit"
-          label="There Digits"
-          onChange={(e) => {
-            setSearch((prev) => ({
-              ...prev,
-              more_digit_id: undefined,
-              three_digit_id: e,
-              two_digit_id: undefined,
-            }));
-          }}
-          default={search.three_digit_id}
-        />
-        <SearchSelect
-          data={props.more_digits}
-          hit="more digit"
-          label="More Digits"
-          onChange={(e) => {
-            setSearch((prev) => ({
-              ...prev,
-              more_digit_id: undefined,
-              three_digit_id: undefined,
-              two_digit_id: e,
-            }));
-          }}
-          default={search.more_digit_id}
-        />
-        <SearchSelect
-          data={props.accounts}
-          hit="account"
-          label="Accounts"
-          onChange={(e) => {
-            setSearch((prev) => ({
-              ...prev,
-              account_id: e,
-            }));
-          }}
-          default={search.account_id}
-        />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild className="w-full">
-            <Button
-              variant="outline"
-              className="ml-auto w-full flex justify-between items-center"
-            >
-              Columns
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-full">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                maxDate={dayjs(selectDate.to)}
+                slotProps={{ textField: { size: "small" } }}
+                label="From Date"
+                defaultValue={dayjs(selectDate.from)}
+                onChange={(e) => {
+                  setSelectDate((prev) => ({ ...prev, from: e?.toDate() }));
+                }}
+              />
+              <DatePicker
+                minDate={dayjs(selectDate.from)}
+                slotProps={{ textField: { size: "small" } }}
+                label="To Date"
+                defaultValue={dayjs(selectDate.to)}
+                onChange={(e) => {
+                  setSelectDate((prev) => ({ ...prev, from: e?.toDate() }));
+                }}
+              />
+            </LocalizationProvider>
+            <Autocomplete
+              disablePortal
+              size="small"
+              defaultValue={
+                two_digit
+                  ? { label: two_digit.name, value: two_digit.id }
+                  : undefined
+              }
+              isOptionEqualToValue={(e) => e.value === two_digit?.id}
+              onChange={(e, f) => {
+                setSearch((prev) => ({
+                  ...prev,
+                  more_digit_id: undefined,
+                  three_digit_id: undefined,
+                  two_digit_id: f ? f.value : undefined,
+                }));
+              }}
+              options={props.two_digits.map((res) => ({
+                label: res.name,
+                value: res.id,
+              }))}
+              renderInput={(params) => (
+                <TextField {...params} label="Two Digits" />
+              )}
+            />
+            <Autocomplete
+              disablePortal
+              size="small"
+              isOptionEqualToValue={(e) => e.value === three_digit?.id}
+              value={
+                three_digit
+                  ? {
+                      label: three_digit.name,
+                      value: three_digit.id,
                     }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <Button className="sm:w-full" type="submit" disabled={isPadding}>
-          {isPadding ? (
-            <>
-              {" "}
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              loading...
-            </>
-          ) : (
-            "Search"
-          )}
-        </Button>
-      </form>
-      <div className="w-full min-w-max table-auto text-left">
-        <Table>
-          <TableHeader className="">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead
-                      key={header.id}
-                      className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
+                  : undefined
+              }
+              onChange={(e, f) => {
+                setSearch((prev) => ({
+                  ...prev,
+                  more_digit_id: undefined,
+                  three_digit_id: f ? f.value : undefined,
+                  two_digit_id: undefined,
+                }));
+              }}
+              options={props.three_digits.map((res) => ({
+                label: res.name,
+                value: res.id,
+              }))}
+              renderInput={(params) => (
+                <TextField {...params} label="Three Digits" />
+              )}
+            />
+
+            <Autocomplete
+              disablePortal
+              size="small"
+              isOptionEqualToValue={(e) => e.value === four_digit?.id}
+              value={
+                four_digit
+                  ? {
+                      label: four_digit.name,
+                      value: four_digit.id,
+                    }
+                  : undefined
+              }
+              onChange={(e, f) => {
+                setSearch((prev) => ({
+                  ...prev,
+                  more_digit_id: f ? f.value : undefined,
+                  three_digit_id: undefined,
+                  two_digit_id: undefined,
+                }));
+              }}
+              options={props.more_digits.map((res) => ({
+                label: res.name,
+                value: res.id,
+              }))}
+              renderInput={(params) => (
+                <TextField {...params} label="More Four Digits" />
+              )}
+            />
+            <Autocomplete
+              disablePortal
+              size="small"
+              isOptionEqualToValue={(e) => e.value === account.id}
+              value={
+                account
+                  ? {
+                      label: `${account.id} ${account.username}`,
+                      value: account.id,
+                    }
+                  : undefined
+              }
+              onChange={(e, f) => {
+                setSearch((prev) => ({
+                  ...prev,
+                  account_id: f.value,
+                }));
+              }}
+              options={props.more_digits.map((res) => ({
+                label: res.name,
+                value: res.id,
+              }))}
+              renderInput={(params) => (
+                <TextField {...params} label="Accounts" />
+              )}
+            />
+
+            <LoadingButton
+              variant="contained"
+              className="hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white"
+              disableElevation
+              loadingIndicator="Loading…"
+              loading={isPadding}
+              type="submit"
+            >
+              Search
+            </LoadingButton>
+          </form>
+        </CardContent>
+        <MaterialReactTable
+          enableRowActions
+          columns={columns}
+          renderRowActionMenuItems={({
+            row: {
+              original: { id, title },
+            },
+          }) => [
+            <Authorized permission="Edit_Entry" key={1}>
+              <MenuItem
+                onClick={() => push(pathName + "/form?id=" + id)}
+                className="cursor-pointer"
+                disabled={isActive}
+              >
+                Edit
+              </MenuItem>
+            </Authorized>,
+            <Authorized permission="View_Entry" key={2}>
+              <MenuItem
+                onClick={() => push(pathName + "/" + id)}
+                className="cursor-pointer"
+                disabled={isActive}
+              >
+                View
+              </MenuItem>
+            </Authorized>,
+            <Authorized permission="Delete_Entry" key={3}>
+              <MenuItem
+                disabled={isActive}
+                className="cursor-pointer"
+                onClick={() => {
+                  const isConfirm = confirm(
+                    `Do You sure you want to delete ${title} id:${id} `
                   );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <h5>
-          {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}{" "}
-          page(s).
-        </h5>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
-      </div>
+                  if (isConfirm) {
+                    setActiveTransition(async () => {
+                      const result = await deleteEntry(id);
+
+                      createAlert(result);
+                    });
+                  }
+                }}
+              >
+                {isActive ? <> deleting...</> : "Delete"}
+              </MenuItem>
+            </Authorized>,
+          ]}
+          data={props.data}
+        />
+      </Card>
+      <div></div>
     </Style>
   );
 }
-const Style = styled.div`
-  table {
-    tbody,
-    thead,
-    tr,
-    td,
-    th {
-      color: black;
-      font-size: 12pt;
-
-      border: #00000013 solid 1px;
-    }
-
-    table {
-      margin-top: 5px;
-      thead {
-        tr {
-          th {
-          }
-        }
-      }
-    }
-  }
-`;
+const Style = styled.div``;

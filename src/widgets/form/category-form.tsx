@@ -24,7 +24,7 @@ import {
 } from "@rms/components/ui/card";
 import { Input } from "@rms/components/ui/input";
 import LoadingButton from "@rms/components/ui/loading-button";
-import styled from "styled-components";
+import styled from "@emotion/styled";
 import {
   createSubCategory,
   updateSubCategory,

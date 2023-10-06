@@ -1,12 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import React, { useMemo, useRef, useState, useTransition } from "react";
+import React, { useEffect, useMemo, useState, useTransition } from "react";
 import { Prisma } from "@prisma/client";
 import {
   ColumnDef,
-  PaginationState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -17,44 +15,32 @@ import {
 import useAlertHook from "@rms/hooks/alert-hooks";
 import { Button } from "@rms/components/ui/button";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@rms/components/ui/dropdown-menu";
-import { DotsHorizontalIcon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
-import { deleteMoreDigit, deleteTwoDigit } from "@rms/service/digit-service";
-import { deleteCurrency } from "@rms/service/currency-service";
-import Authorized from "@rms/components/ui/authorized";
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  Input,
-  Option,
-  Select,
-  Typography,
-} from "@material-tailwind/react";
-import { DataRoute } from "@rms/config/route-config";
+import { Typography } from "@material-tailwind/react";
 import moment from "moment";
+import { Input } from "@rms/components/ui/input";
+import DateRangePicker from "@rms/components/ui/date-range-pciker";
+import { DateRange } from "react-day-picker";
+import DatePicker from "@rms/components/ui/date-picker";
 
 type Props = {
   data: Prisma.LogGetPayload<{ include: { user: true } }>[];
+  date?: Date;
 };
 
 export default function LogTable(props: Props) {
   const pathName = usePathname();
-  const [isActive, setActiveTransition] = useTransition();
+  const [date, setDate] = useState<Date>(props.date);
+  const { replace } = useRouter();
 
   const [globalFilter, setGlobalFilter] = useState("");
 
   const { createAlert } = useAlertHook();
-  const { push } = useRouter();
 
+  useEffect(() => {
+    if (date !== props.date) {
+      replace(`${pathName}?date=${date?.getTime()}`);
+    }
+  }, [date]);
   const columns = useMemo<
     ColumnDef<Prisma.LogGetPayload<{ include: { user: true } }>>[]
   >(
@@ -96,7 +82,6 @@ export default function LogTable(props: Props) {
         accessorKey: "body",
         header: "Body",
         accessorFn: (e) => {
-          console.log(e.body);
           return e.body;
         },
       },
@@ -109,7 +94,7 @@ export default function LogTable(props: Props) {
         accessorFn: (e) => moment(e.create_date).fromNow(),
       },
     ],
-    [createAlert, isActive, pathName, push]
+    [createAlert, pathName]
   );
   const table = useReactTable({
     data: props.data,
@@ -125,92 +110,85 @@ export default function LogTable(props: Props) {
   });
 
   return (
-    <div className=" w-full">
-      <Card className="h-full w-full overflow-auto flex justify-between">
-        <CardHeader
-          floated={false}
-          shadow={false}
-          className="rounded-none mx-10"
-        >
-          <div className="mb-4 flex flex-col justify-between gap-8 md:flex-row md:items-center">
-            <div>
-              <Typography variant="h5" color="blue-gray">
-                Recent Transactions
-              </Typography>
-              <Typography color="gray" className="mt-1 font-normal">
-                These are details about the last transactions
-              </Typography>
-            </div>
-            <div className="flex w-full shrink-0 gap-2 md:w-max ">
-              <div className="w-full ">
-                <Input
-                  label="Search"
-                  crossOrigin={""}
-                  onChange={(e) => setGlobalFilter(e.target.value)}
-                  value={globalFilter}
-                  icon={<MagnifyingGlassIcon className="h-5 w-5" />}
-                />
-              </div>
-            </div>
+    <div className="w-full  flex flex-col gap-10">
+      <div className=" ">
+        <div className="mb-4 flex flex-col justify-between gap-8 md:flex-row md:items-center">
+          <div>
+            <Typography variant="h5" color="blue-gray">
+              Recent Logs
+            </Typography>
+            <Typography color="gray" className="mt-1 font-normal">
+              These are details about the last logs
+            </Typography>
           </div>
-        </CardHeader>{" "}
-        <table className="w-full min-w-max table-auto text-left">
-          <thead className="w-full">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th
-                    className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
-                    key={header.id}
-                  >
-                    <Typography>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header ??
-                              header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </Typography>
-                  </th>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-s md:grid-cols-2  lg:grid-cols-2 xl:grid-cols-4 gap-4 m-5">
+          <Input
+            className="w-full"
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            value={globalFilter}
+            placeholder="search"
+          />
+
+          <DatePicker default={date} onChange={setDate} />
+        </div>
+
+        <div className="rms-container">
+          <div className="rms-table">
+            <table className="">
+              <thead className="w-full">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <th key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header ??
+                                header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </th>
+                    ))}
+                  </tr>
                 ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.length === 0 ? (
-              <tr>
-                <td colSpan={columns.length} className="h-24 text-center">
-                  No results.
-                </td>
-              </tr>
-            ) : (
-              table.getRowModel().rows.map((row) => (
-                <tr key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <td
-                      className="p-4 border-b border-blue-gray-50"
-                      key={cell.id}
-                    >
-                      <Typography
-                        as={"div"}
-                        variant="small"
-                        color="blue-gray"
-                        className="font-normal"
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell ??
-                            cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </Typography>
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.length === 0 ? (
+                  <tr>
+                    <td colSpan={columns.length} className="h-24 text-center">
+                      No results.
                     </td>
-                  ))}
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                  </tr>
+                ) : (
+                  table.getRowModel().rows.map((row) => (
+                    <tr key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <td
+                          className="p-4 border-b border-blue-gray-50"
+                          key={cell.id}
+                        >
+                          <Typography
+                            as={"div"}
+                            variant="small"
+                            color="blue-gray"
+                            className="font-normal"
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell ??
+                                cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </Typography>
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
         <div className="p-2">
           <div className="flex items-center justify-end space-x-2 py-4">
             <h5>
@@ -235,7 +213,7 @@ export default function LogTable(props: Props) {
             </Button>
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

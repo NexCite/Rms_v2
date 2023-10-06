@@ -37,6 +37,25 @@ export async function middleware(request: NextRequest) {
         cache: "no-store",
       }
     ).then((res) => res.json());
+
+    if (!request.nextUrl.pathname.includes("log")) {
+      await fetch(
+        `${process.env.NODE_ENV === "development" ? "http://" : "http://"}${
+          url.host
+        }/api/user`,
+        {
+          method: "Post",
+          body: JSON.stringify({
+            action: "View",
+            page: request.url,
+            body: JSON.stringify({}),
+          }),
+          headers: { Cookie: `rms-auth=${auth.value}`, url: request.url },
+          next: { revalidate: 1 },
+          cache: "no-store",
+        }
+      ).then((res) => res.json());
+    }
     if (!checkAuth.data) {
       return NextResponse.redirect(url);
     }

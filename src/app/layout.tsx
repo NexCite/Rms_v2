@@ -37,7 +37,11 @@ export default async function RootLayout({
   const v = env.vesrion;
 
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      suppressContentEditableWarning={true}
+      suppressHydrationWarning={true}
+    >
       <body className={inter.className}>
         <NextTopLoader showSpinner={false} color="#090808" />
 

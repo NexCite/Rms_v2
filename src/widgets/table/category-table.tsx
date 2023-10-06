@@ -16,15 +16,7 @@ import {
 import useAlertHook from "@rms/hooks/alert-hooks";
 import { Button } from "@rms/components/ui/button";
 import { Input } from "@rms/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@rms/components/ui/table";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +31,7 @@ import { deleteMoreDigit, deleteTwoDigit } from "@rms/service/digit-service";
 import { deleteCategoryById } from "@rms/service/category-service";
 import { deleteSubCategoryById } from "@rms/service/sub-category-service";
 import Authorized from "@rms/components/ui/authorized";
+import { Typography } from "@material-tailwind/react";
 
 type Props =
   | {
@@ -189,53 +182,46 @@ export default function CategoryTable(props: Props) {
       </div>
 
       {/* Using Vanilla Mantine Table component here */}
-      <div className="p-2">
-        <Table>
+      <div className="h-full w-full overflow-auto  justify-between rms-container  ">
+        <table className="w-full min-w-max table-auto text-left">
           {/* Use your own markup, customize however you want using the power of Tandiv Table */}
-          <TableHeader>
+          <thead>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} style={{ minWidth: "200px" }}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header ??
-                            header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
+                  <th key={header.id}>
+                    isPlaceholder ? null : flexRender(
+                    header.column.columnDef.header ??
+                    header.column.columnDef.header, header.getContext() )
+                  </th>
                 ))}
-              </TableRow>
+              </tr>
             ))}
-          </TableHeader>
-          <TableBody>
+          </thead>
+          <tbody>
             {table.getRowModel().rows.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+              <tr>
+                <td colSpan={columns.length} className="h-24 text-center">
                   No results.
-                </TableCell>
-              </TableRow>
+                </td>
+              </tr>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <tr key={row.id}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <td key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell ??
                           cell.column.columnDef.cell,
                         cell.getContext()
                       )}
-                    </TableCell>
+                    </td>
                   ))}
-                </TableRow>
+                </tr>
               ))
             )}
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
 
         <div className="flex items-center justify-end space-x-2 py-4">
           <h5>

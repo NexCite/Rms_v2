@@ -1,7 +1,6 @@
 "use client";
 import React, { useTransition } from "react";
 
-import { Button } from "@rms/components/ui/button";
 import {
   Card,
   CardContent,
@@ -25,8 +24,8 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 
 import useAlertHook from "@rms/hooks/alert-hooks";
-import { Loader2 } from "lucide-react";
 import { createLogin } from "@rms/service/login-service";
+import LoadingButton from "@mui/lab/LoadingButton";
 const formSchema = z.object({
   username: z.string().min(4),
   password: z.string().min(4),
@@ -97,16 +96,16 @@ export default function ConfigWidget() {
                 )}
               />
               <div className="flex justify-end">
-                <Button disabled={isPadding} type="submit">
-                  {isPadding ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      loading...
-                    </>
-                  ) : (
-                    "Login"
-                  )}
-                </Button>
+                <LoadingButton
+                  variant="outlined"
+                  fullWidth
+                  className="hover:bg-blue-gray-50 hover:border-black border-black text-black capitalize "
+                  disableElevation
+                  type="submit"
+                  loadingIndicator="Loading…"
+                >
+                  Login
+                </LoadingButton>
               </div>
             </form>
           </Form>

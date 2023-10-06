@@ -105,3 +105,82 @@ input:not(:placeholder-shown) + label {
 /* label {
   margin-left: 10px;
 } */
+
+/* tr,
+td,
+th {
+  padding: 5px;
+  text-align: center;
+}
+
+.rms-container {
+  width: 100%;
+
+  flex-direction: column;
+  border-width: 1px;
+
+  .rms-table {
+    overflow-x: auto;
+
+    width: 100%;
+    table {
+      thead {
+        > th {
+          width: 100%;
+        }
+        background-color: rgb(236 239 241 / 0.5);
+      }
+      tbody {
+        > td {
+          width: 100%;
+        }
+      }
+      width: 100%;
+      tbody,
+      tr,
+      td,
+      th {
+        color: black;
+        font-size: 12pt;
+
+        border: #00000013 solid 1px;
+      }
+
+      table {
+        width: 100%;
+        margin-top: 5px;
+      }
+    }
+  }
+  .rms-table-footer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 5px;
+    margin-top: 10px;
+    margin-right: 20px;
+    margin-bottom: 10px;
+  } */
+/* } */
+
+table {
+  table {
+    thead {
+      > th {
+        width: 100%;
+      }
+      background-color: rgb(236 239 241 / 0.5);
+    }
+
+    tbody,
+    tr,
+    td,
+    th {
+      color: black;
+      font-size: 12pt;
+      padding: 5px;
+      border: #00000013 solid 1px;
+    }
+  }
+}

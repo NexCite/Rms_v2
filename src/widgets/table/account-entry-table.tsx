@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useMemo, useState, useTransition } from "react";
 
-import styled from "styled-components";
+import styled from "@emotion/styled";
 import { Prisma } from "@prisma/client";
 import {
   ColumnDef,
@@ -14,20 +14,10 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  // return the filtered rows
-  sortingFns,
   useReactTable,
 } from "@tanstack/react-table";
 import useAlertHook from "@rms/hooks/alert-hooks";
 import { Button } from "@rms/components/ui/button";
-import {
-  TableBody,
-  Table,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@rms/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -45,11 +35,13 @@ type CommonAccountType = Prisma.Account_EntryGetPayload<{
     two_digit: true;
   };
 }>;
-import { rankItem, compareItems } from "@tanstack/match-sorter-utils";
 import { Input } from "@rms/components/ui/input";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { deleteAccountEntry } from "@rms/service/account-entry-service";
 import Authorized from "@rms/components/ui/authorized";
+import { Typography } from "@material-tailwind/react";
+import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
+import { Card, MenuItem } from "@mui/material";
 
 type Props = {
   accounts: CommonAccountType[];
@@ -74,60 +66,8 @@ export default function AccountEntryTable(props: Props) {
     [pageIndex, pageSize]
   );
   const { push } = useRouter();
-  const columns = useMemo<ColumnDef<CommonAccountType>[]>(
+  const columns = useMemo<MRT_ColumnDef<CommonAccountType>[]>(
     () => [
-      {
-        accessorKey: "action",
-        cell(originalRow) {
-          const { id, username } = originalRow.row.original;
-
-          return (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <DotsHorizontalIcon />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <Authorized permission="Edit_AccountEntry">
-                    <DropdownMenuItem
-                      onClick={() => push(pathName + "/form?id=" + id)}
-                      className="cursor-pointer"
-                      disabled={isActive}
-                    >
-                      Edit
-                    </DropdownMenuItem>
-                  </Authorized>
-                  <Authorized permission="Delete_AccountEntry">
-                    <DropdownMenuItem
-                      disabled={isActive}
-                      className="cursor-pointer"
-                      onClick={() => {
-                        const isConfirm = confirm(
-                          `Do You sure you want to delete ${username} id:${id} `
-                        );
-                        if (isConfirm) {
-                          setActiveTransition(async () => {
-                            const result = await deleteAccountEntry(id);
-
-                            createAlert(result);
-                          });
-                        }
-                      }}
-                    >
-                      {isActive ? <> deleting...</> : "Delete"}
-                    </DropdownMenuItem>
-                  </Authorized>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          );
-        },
-      },
-
       {
         header: "Status",
         accessorKey: "status",
@@ -136,7 +76,7 @@ export default function AccountEntryTable(props: Props) {
       {
         accessorKey: "id",
         header: "ID",
-        cell: ({ row: { original } }) => (
+        Cell: ({ row: { original } }) => (
           <div
             className={`text-center rounded-sm ${
               original.status === "Deleted"
@@ -214,137 +154,51 @@ export default function AccountEntryTable(props: Props) {
     ],
     [createAlert, isActive, pathName, push]
   );
-  const table = useReactTable({
-    data: props.accounts,
-    columns: columns,
-
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-
-    state: {
-      pagination: pagination,
-      globalFilter,
-    },
-  });
 
   return (
     <Style>
-      <div className="flex gap-6 flex-col">
-        <div className="flex justify-between items-center ">
-          <h1>Result: {props.accounts.length}</h1>
-        </div>
-        <div className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mt-4 mb-5">
-          <Input
-            className="w-[250px]"
-            placeholder="search..."
-            value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-          />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild className="w-full">
-              <Button
-                variant="outline"
-                className="ml-auto w-full flex justify-between items-center"
+      <Card>
+        <MaterialReactTable
+          columns={columns}
+          data={props.accounts}
+          enableRowActions
+          renderRowActionMenuItems={({
+            row: {
+              original: { username, id },
+            },
+          }) => [
+            <Authorized permission="Edit_AccountEntry" key={1}>
+              <MenuItem
+                onClick={() => push(pathName + "/form?id=" + id)}
+                className="cursor-pointer"
+                disabled={isActive}
               >
-                Columns
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-full">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
+                Edit
+              </MenuItem>
+            </Authorized>,
+            <Authorized permission="Delete_AccountEntry" key={2}>
+              <MenuItem
+                disabled={isActive}
+                className="cursor-pointer"
+                onClick={() => {
+                  const isConfirm = confirm(
+                    `Do You sure you want to delete ${username} id:${id} `
                   );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+                  if (isConfirm) {
+                    setActiveTransition(async () => {
+                      const result = await deleteAccountEntry(id);
 
-        {/* Using Vanilla Mantine Table component here */}
-        <div className="p-2">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id} style={{ minWidth: "200px" }}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header ??
-                              header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No results.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell ??
-                            cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-
-          <div className="flex items-center justify-end space-x-2 py-4">
-            <h5>
-              {table.getState().pagination.pageIndex + 1} of{" "}
-              {table.getPageCount()} page(s).
-            </h5>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              Next
-            </Button>
-          </div>
-        </div>
-      </div>
+                      createAlert(result);
+                    });
+                  }
+                }}
+              >
+                {isActive ? <> deleting...</> : "Delete"}
+              </MenuItem>
+            </Authorized>,
+          ]}
+        />
+      </Card>
     </Style>
   );
 }

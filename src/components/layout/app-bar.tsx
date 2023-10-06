@@ -1,5 +1,5 @@
 "use client";
-import React, { Suspense, useMemo } from "react";
+import React, { Suspense, useMemo, useState } from "react";
 import { Sidebar } from "./side-bar";
 import RouteModel from "@rms/models/RouteModel";
 import { usePathname, useRouter } from "next/navigation";
@@ -7,6 +7,7 @@ import Authorized from "@rms/components/ui/authorized";
 import { $Enums } from "@prisma/client";
 import BackButton from "../ui/back-button";
 import { Button, Card, CardBody } from "@material-tailwind/react";
+import LoadingButton from "@mui/lab/LoadingButton";
 type Props = {
   children: React.ReactNode;
   routes: RouteModel[];
@@ -48,6 +49,7 @@ export default function AppBar(props: Props) {
     );
   }, [path]);
   const { push } = useRouter();
+  const [isPadding, setPadding] = useState();
 
   return (
     <>
@@ -71,16 +73,28 @@ export default function AppBar(props: Props) {
 
             {!path.includes("form") && (
               <Authorized permission={permission}>
-                <Button type="button" onClick={() => push(path + "/form")}>
+                <LoadingButton
+                  variant="contained"
+                  className="hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white"
+                  disableElevation
+                  loadingIndicator="Loading…"
+                  loading={isPadding}
+                  type="button"
+                  onClick={() =>
+                    setPadding(() => {
+                      push(path + "/form");
+                    })
+                  }
+                >
                   Add
-                </Button>
+                </LoadingButton>
               </Authorized>
             )}
           </div>
         )}
         {subRouteTitle && (
-          <div className=" w-full h-[97vh] rounded-lg overflow-y-auto pb-14">
-            {props.children}
+          <div className=" w-full h-[97vh] rounded-lg overflow-y-auto pb-14 ">
+            <div className="">{props.children}</div>
           </div>
         )}
       </div>

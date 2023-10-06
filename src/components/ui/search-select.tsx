@@ -15,18 +15,20 @@ import {
 } from "./command";
 import { cn } from "@rms/lib/utils";
 import { FormLabel } from "./form";
-type Props = {
+type Props<T extends string | number> = {
   data: any[];
   label: string;
   hit: string;
-  onChange: (e: number) => void;
-  default?: number;
+  onChange: (e?: T) => void;
+  default?: T;
   name?: string;
   disabled?: boolean;
 };
-export default function SearchSelect(props: Props) {
+export default function SearchSelect<T extends string | number>(
+  props: Props<T>
+) {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState<number>(props.default);
+  const [value, setValue] = React.useState<number | string>(props.default);
 
   return (
     <>
@@ -40,19 +42,21 @@ export default function SearchSelect(props: Props) {
           >
             {value
               ? (() => {
-                  var data = props.data.find((res) => value === res.id)!;
+                  var data = props.data.find((res) => value === res.id);
 
-                  if (data.symbol) {
-                    return `${data.symbol}`;
-                  } else if (data.name) {
-                    return `${data.id} ${data.name}`;
-                  } else if (data.username) {
-                    return `${data.id} ${data.username}`;
-                  } else if (data.title) {
-                    return `(${data.id}) ${data.title}`;
-                  } else {
-                    return undefined;
-                  }
+                  if (data) {
+                    if (data.symbol) {
+                      return `${data.symbol}`;
+                    } else if (data.name) {
+                      return `${data.id} ${data.name}`;
+                    } else if (data.username) {
+                      return `${data.id} ${data.username}`;
+                    } else if (data.title) {
+                      return `(${data.id}) ${data.title}`;
+                    } else {
+                      return undefined;
+                    }
+                  } else return undefined;
                 })()
               : `Search ${props.label}`}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -67,10 +71,18 @@ export default function SearchSelect(props: Props) {
                 <CommandItem
                   key={i}
                   onSelect={(currentValue) => {
-                    var ress = value === res.id ? undefined : res.id;
-                    setValue(ress);
-                    props.onChange(ress);
-                    setOpen(false);
+                    console.log(res);
+                    if (typeof props.default === "number") {
+                      var ress = value === res.id ? undefined : res.id;
+                      setValue(ress);
+                      props.onChange(ress);
+                      setOpen(false);
+                    } else {
+                      console.log("hel");
+                      setValue(res.value);
+                      props.onChange(res.value);
+                      setOpen(false);
+                    }
                   }}
                 >
                   <Check
@@ -79,7 +91,7 @@ export default function SearchSelect(props: Props) {
                       value === res.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {res.symbol ? "" : res.id + " "}
+                  {res.symbol ? "" : res.id ?? "" + " "}
                   {res.symbol ??
                     res.name ??
                     res.username ??

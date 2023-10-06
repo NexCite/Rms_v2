@@ -3,7 +3,7 @@
 import Image from "next/image";
 import React, { useCallback, useMemo } from "react";
 
-import styled from "styled-components";
+import styled from "@emotion/styled";
 import { FormatNumberWithFixed } from "@rms/lib/global";
 
 import { Prisma } from "@prisma/client";

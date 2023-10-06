@@ -517,3 +517,67 @@ enum UserPermission {
   Delete_Media
   View_Log
 }
+
+model PaymentBox {
+  id             Int            @id @default(autoincrement())
+  status         Status         @default(Enable)
+  description    String
+  create_date    DateTime       @default(now())
+  modified_date  DateTime       @default(now()) @updatedAt
+  to_date        DateTime       @default(now())
+  coverage_boxes CoverageBox[]
+  client_boxes   ClientBox[]
+  agent_boxES    AgentBox[]
+  p_l            P_LBox[]
+  expensive_box  ExpensiveBox[]
+}
+
+model CoverageBox {
+  id             Int        @id @default(autoincrement())
+  account        String
+  starting_float Float
+  current_float  Float
+  closed_p_l     Float
+  payment_box_id Int
+  payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id])
+}
+
+model ClientBox {
+  id             Int    @id @default(autoincrement())
+  manger         String
+  starting_float Float
+  current_float  Float
+  p_l            Float
+  commission     Float
+  swap           Float
+
+  payment_box_id Int
+  payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id])
+}
+
+model AgentBox {
+  id       Int    @id @default(autoincrement())
+  name     String
+  comssion Float
+
+  payment_box_id Int
+  payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id])
+}
+
+model P_LBox {
+  id   Int    @id @default(autoincrement())
+  name String
+  p_l  Float
+
+  payment_box_id Int
+  payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id])
+}
+
+model ExpensiveBox {
+  id        Int    @id @default(autoincrement())
+  name      String
+  expensive Float
+
+  payment_box_id Int
+  payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id])
+}

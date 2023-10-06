@@ -4,21 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { $Enums, DidgitType, DebitCreditType, Prisma } from "@prisma/client";
 import useAlertHook from "@rms/hooks/alert-hooks";
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@rms/components/ui/form";
 import { useRouter } from "next/navigation";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@rms/components/ui/card";
 
 import React, {
   useCallback,
@@ -27,22 +13,15 @@ import React, {
   useRef,
   useTransition,
 } from "react";
-import { useForm } from "react-hook-form";
-import styled from "styled-components";
+import { Controller, useForm } from "react-hook-form";
+import styled from "@emotion/styled";
 import { z } from "zod";
-import { Button } from "@rms/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { Input } from "@rms/components/ui/input";
-import SearchSelect from "@rms/components/ui/search-select";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@rms/components/ui/select";
-import { SelectValue } from "@radix-ui/react-select";
 
-import LoadingButton from "@rms/components/ui/loading-button";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import LoadingButton from "@mui/lab/LoadingButton";
+
 import {
   createMoreDigit,
   createThreeDigit,
@@ -51,6 +30,16 @@ import {
   updateThreeDigit,
   updateTwoDigit,
 } from "@rms/service/digit-service";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  FormControl,
+  FormHelperText,
+  TextField,
+} from "@mui/material";
+import { CardFooter } from "@material-tailwind/react";
 type Props = {
   relations?:
     | Prisma.More_Than_Four_DigitGetPayload<{}>[]
@@ -80,7 +69,7 @@ export default function DigitForm(props: Props) {
     switch (props.node) {
       case "two":
         return z.object({
-          id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
+          id: z.number().min(2).or(z.string().regex(/^\d+$/).transform(Number)),
           type: z
             .enum([
               DidgitType.Assets,
@@ -101,7 +90,7 @@ export default function DigitForm(props: Props) {
         });
       case "three":
         return z.object({
-          id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
+          id: z.number().min(3).or(z.string().regex(/^\d+$/).transform(Number)),
           name: z
             .string()
             .min(1, { message: "Name must be at least 1  character" }),
@@ -120,7 +109,7 @@ export default function DigitForm(props: Props) {
 
       case "more":
         return z.object({
-          id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
+          id: z.number().min(4).or(z.string().regex(/^\d+$/).transform(Number)),
           name: z
             .string()
             .min(1, { message: "Name must be at least 1  character" }),
@@ -265,196 +254,212 @@ export default function DigitForm(props: Props) {
   );
   return (
     <>
-      <Style className="card" onSubmit={form.handleSubmit(handleSubmit)}>
-        <Form {...form}>
-          <form className="card" autoComplete="off">
-            <Card>
-              <CardHeader>
-                {" "}
-                <div className="flex justify-between items-center">
-                  <h1 className="font-medium text-2xl">Entry Form</h1>
-                </div>
-                <hr className="my-12 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
-              </CardHeader>
-
-              <CardContent>
-                <div className="grid gap-4">
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: true }}
-                      control={form.control}
-                      name="id"
-                      render={({ field }) => (
-                        <FormItem className="required">
-                          <FormLabel>ID</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="id"
-                              onChange={(e) => {
-                                field.onChange(
-                                  parseInt(
-                                    Number.isNaN(e)
-                                      ? 0
-                                      : (parseInt(e as any) as any)
-                                  )
-                                );
-                              }}
-                              {...field}
-                            />
-                          </FormControl>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+      <Style onSubmit={form.handleSubmit(handleSubmit)}>
+        <form autoComplete="off">
+          <Card>
+            <CardHeader
+              className="capitalize"
+              title={
+                <>
+                  <div className="flex justify-between items-center">
+                    <h1
+                      className="font-medium text-2xl"
+                      style={{ textTransform: "capitalize" }}
+                    >
+                      {" "}
+                      {props.node} Digit And More Form
+                    </h1>
                   </div>
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: true }}
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem className="required">
-                          <FormLabel>Name</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="name"
-                              onChange={(e) => {}}
-                              {...field}
-                            />
-                          </FormControl>
+                  <hr className=" h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
+                </>
+              }
+            >
+              <hr className="my-12 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
+            </CardHeader>
 
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: true }}
-                      control={form.control}
-                      name={"type"}
-                      render={({ field }) => (
-                        <FormItem
-                          className={props.node !== "two" ? "required" : ""}
-                        >
-                          <FormLabel>Type</FormLabel>
-                          <FormControl>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="type" />
-                              </SelectTrigger>
-                              <SelectContent className="w-full p-0  max-h-[200px] overflow-y-auto">
-                                {Object.keys($Enums.DidgitType).map((res) => (
-                                  <SelectItem key={res} value={res}>
-                                    {res}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: true }}
-                      control={form.control}
-                      name={"debit_credit"}
-                      render={({ field }) => (
-                        <FormItem
-                          className={props.node !== "two" ? "required" : ""}
-                        >
-                          <FormLabel>Debit/Credit</FormLabel>
-                          <FormControl>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="debit/credit" />
-                              </SelectTrigger>
-                              <SelectContent className="w-full p-0  max-h-[200px] overflow-y-auto">
-                                {Object.keys($Enums.DebitCreditType).map(
-                                  (res) => (
-                                    <SelectItem key={res} value={res}>
-                                      {res}
-                                    </SelectItem>
-                                  )
-                                )}
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  {props.node === "three" && (
-                    <div className="grid-cols-12">
-                      <FormField
-                        control={form.control}
-                        name="two_digit_id"
-                        render={(renderValue) => (
-                          <FormItem className="required">
-                            <FormLabel>Two Digit</FormLabel>
-                            <SearchSelect
-                              default={renderValue.field.value}
-                              data={props.relations}
-                              hit="select two digit"
-                              label="Two Digit"
-                              onChange={(e) => {
-                                renderValue.field.onChange(e);
-                              }}
-                            />
-                          </FormItem>
-                        )}
+            <CardContent>
+              <div className="grid gap-4">
+                <div className="grid-cols-12">
+                  <Controller
+                    name={"id"}
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <TextField
+                        {...field}
+                        error={Boolean(fieldState?.error?.message)}
+                        size="small"
+                        required
+                        helperText={fieldState.error?.message}
+                        fullWidth
+                        label="ID"
+                        placeholder="id"
                       />
-                    </div>
-                  )}
-                  {props.node === "more" && (
-                    <div className="grid-cols-12">
-                      <FormField
-                        control={form.control}
-                        name="three_digit_id"
-                        render={(renderValue) => (
-                          <FormItem className="required">
-                            <FormLabel>Three Digit</FormLabel>
-                            <SearchSelect
-                              default={renderValue.field.value}
-                              data={props.relations}
-                              hit="select three digit"
-                              label="Three Digit"
-                              onChange={(e) => {
-                                renderValue.field.onChange(e);
-                              }}
-                            />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  )}
+                    )}
+                  />
                 </div>
-              </CardContent>
-              <CardFooter className="flex justify-end">
-                <LoadingButton
-                  type="submit"
-                  label={props.value ? "Update" : "Add"}
-                  loading={isPadding}
-                />
-              </CardFooter>
-            </Card>
-          </form>
-        </Form>
+
+                <div className="grid-cols-12">
+                  <Controller
+                    name={"name"}
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <TextField
+                        {...field}
+                        error={Boolean(fieldState?.error?.message)}
+                        size="small"
+                        required
+                        helperText={fieldState.error?.message}
+                        fullWidth
+                        label="Name"
+                        placeholder="name"
+                      />
+                    )}
+                  />
+                </div>
+
+                <div className="grid-cols-12">
+                  <Controller
+                    name="type"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <FormControl
+                        fullWidth
+                        required={props.node !== "two"}
+                        size="small"
+                        error={Boolean(fieldState?.error?.message)}
+                      >
+                        <InputLabel id="demo-simple-select-label">
+                          Type
+                        </InputLabel>
+
+                        <Select
+                          {...field}
+                          size="small"
+                          fullWidth
+                          label="Type"
+                          placeholder="type"
+                          defaultValue={field.value}
+                        >
+                          <MenuItem key={-1} value={undefined}>
+                            None
+                          </MenuItem>
+
+                          {Object.keys($Enums.DidgitType).map((res) => (
+                            <MenuItem key={res} value={res}>
+                              {" "}
+                              {res}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        <FormHelperText>
+                          {fieldState.error?.message}
+                        </FormHelperText>
+                      </FormControl>
+                    )}
+                  />
+                </div>
+                <div className="grid-cols-12">
+                  <Controller
+                    name="debit_credit"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <FormControl
+                        fullWidth
+                        required={props.node !== "two"}
+                        size="small"
+                        error={Boolean(fieldState?.error?.message)}
+                      >
+                        <InputLabel className="mb-3">Debit/Credit</InputLabel>
+                        <Select
+                          {...field}
+                          label="Debit/Credit"
+                          size="small"
+                          fullWidth
+                          defaultValue={field.value}
+                        >
+                          <MenuItem key={-1} value={undefined}>
+                            None
+                          </MenuItem>
+
+                          {Object.keys($Enums.DebitCreditType).map((res) => (
+                            <MenuItem key={res} value={res}>
+                              {" "}
+                              {res}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        <FormHelperText>
+                          {fieldState.error?.message}
+                        </FormHelperText>
+                      </FormControl>
+                    )}
+                  />
+                </div>
+                {props.node !== "two" && (
+                  <div className="grid-cols-12">
+                    <Controller
+                      name={
+                        props.node === "three"
+                          ? "two_digit_id"
+                          : "three_digit_id"
+                      }
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <FormControl
+                          fullWidth
+                          required
+                          size="small"
+                          error={Boolean(fieldState?.error?.message)}
+                        >
+                          <InputLabel className="mb-3">
+                            {props.node === "three"
+                              ? "Two Digit"
+                              : "Three Digit"}
+                          </InputLabel>
+                          <Select
+                            {...field}
+                            size="small"
+                            fullWidth
+                            label={
+                              props.node === "three"
+                                ? "Two Digit"
+                                : "Three Digit"
+                            }
+                            defaultValue={field.value}
+                          >
+                            {props.relations.map(
+                              (res: Prisma.Two_DigitGetPayload<{}>) => (
+                                <MenuItem key={res.id} value={res.id}>
+                                  ({res.id}) {res.name}
+                                </MenuItem>
+                              )
+                            )}
+                          </Select>
+                          <FormHelperText>
+                            {fieldState.error?.message}
+                          </FormHelperText>
+                        </FormControl>
+                      )}
+                    />
+                  </div>
+                )}
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-end">
+              <LoadingButton
+                variant="outlined"
+                fullWidth
+                className="hover:bg-blue-gray-50 hover:border-black border-black text-black capitalize "
+                disableElevation
+                type="submit"
+                loadingIndicator="Loading…"
+                loading={isPadding}
+              >
+                Save
+              </LoadingButton>
+            </CardFooter>
+          </Card>
+        </form>
       </Style>
     </>
   );
@@ -462,5 +467,5 @@ export default function DigitForm(props: Props) {
 const Style = styled.div`
   margin: auto;
   margin-top: 5px;
-  max-width: 720px;
+  max-width: 420px;
 `;

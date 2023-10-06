@@ -27,19 +27,12 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@rms/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@rms/components/ui/table";
+
 import { $Enums, Prisma } from "@prisma/client";
 import { FormatNumberWithFixed } from "@rms/lib/global";
 
 import { usePathname, useRouter } from "next/navigation";
-import styled from "styled-components";
+import styled from "@emotion/styled";
 
 import SearchSelect from "../../components/ui/search-select";
 
@@ -47,10 +40,27 @@ import { DateRange } from "react-day-picker";
 import DateRangePicker from "@rms/components/ui/date-range-pciker";
 
 import useAlertHook from "@rms/hooks/alert-hooks";
-import { Loader2 } from "lucide-react";
 import moment from "moment";
 import { usePDF } from "react-to-pdf";
 import Image from "next/image";
+import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
+import {
+  Autocomplete,
+  Card,
+  CardContent,
+  Divider,
+  Table,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from "@mui/material";
+import dayjs from "dayjs";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { DatePicker } from "@mui/x-date-pickers";
+import LoadingButton from "@mui/lab/LoadingButton";
 
 export default function ExportEntryDataTable(props: Props) {
   const [isPadding, setTransition] = useTransition();
@@ -69,13 +79,7 @@ export default function ExportEntryDataTable(props: Props) {
     from: props.date[0],
     to: props.date[1],
   });
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
+
   const { replace } = useRouter();
 
   const pathName = usePathname();
@@ -100,11 +104,20 @@ export default function ExportEntryDataTable(props: Props) {
     },
     [search, selectDate, pathName, replace]
   );
-  const columns: ColumnDef<CommonEntryType>[] = useMemo(
+  const columns: MRT_ColumnDef<CommonEntryType>[] = useMemo(
     () => [
       {
         accessorKey: "id",
         header: "ID",
+
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        enableGlobalFilter: false, // do not scan this column during global filtering
+
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
       {
         accessorKey: "create_date",
@@ -112,50 +125,89 @@ export default function ExportEntryDataTable(props: Props) {
         accessorFn(originalRow) {
           return moment(originalRow?.date).format("DD-MM-yyy hh:mm a");
         },
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        enableGlobalFilter: false, // do not scan this column during global filtering
+
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
       {
         accessorKey: "title",
         header: "Title",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        enableGlobalFilter: false, // do not scan this column during global filtering
+
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
       {
         accessorKey: "amount" as any,
         header: "Amount",
         accessorFn(originalRow) {
-          var amounts = originalRow?.subEntries
-            ?.filter((res) => res.type === "Debit")
-            .map((res) => res.amount);
-          var amount = 0;
-          amounts?.forEach((e) => (amount += e));
-          return `${originalRow?.currency}${FormatNumberWithFixed(amount)}`;
+          var debitAmout = 0;
+          var creditAmount = 0;
+
+          originalRow?.subEntries.map((res) => {
+            if (res.type === "Debit") {
+              debitAmout += res.amount;
+            } else {
+              creditAmount += res.amount;
+            }
+          });
+
+          return `${originalRow?.currency}${FormatNumberWithFixed(
+            debitAmout > creditAmount ? debitAmout : creditAmount
+          )}`;
+        },
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        enableGlobalFilter: false, // do not scan this column during global filtering
+
+        muiTableBodyCellProps: {
+          align: "center",
         },
       },
       {
         accessorKey: "description",
         header: "SubEntry",
-        cell(originalRow) {
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+        Cell(originalRow) {
           var s = [];
           originalRow?.row.original.subEntries
             ?.sort((a, b) => a.type.length - b.type.length)
             .forEach((e, i) =>
               s.push(
-                <TableRow key={e.id + "" + i}>
-                  <TableHead align="center">
+                <tr key={e.id + "" + i}>
+                  <td align="center">
                     {originalRow.row.original.currency}
                     {FormatNumberWithFixed(e.amount)}
-                  </TableHead>
+                  </td>
 
                   {e.type === "Debit" && (
-                    <TableHead align="center">
+                    <td align="center">
                       {e.reference_id ? (
-                        <Table>
-                          <TableBody>
-                            <TableRow>
-                              <TableCell>
+                        <table className=" min-w-max table-auto text-left">
+                          <tbody>
+                            <tr>
+                              <td>
                                 Reference To: ({e.reference_id}){" "}
                                 {e.reference?.username ?? ""}
-                              </TableCell>
+                              </td>
 
-                              <TableCell colSpan={2}>
+                              <td colSpan={2}>
                                 ({e?.two_digit_id ?? ""}
                                 {e?.three_digit_id ?? ""}
                                 {e?.more_than_four_digit_id ?? ""}
@@ -164,10 +216,10 @@ export default function ExportEntryDataTable(props: Props) {
                                 {e.three_digit?.name ?? ""}
                                 {e.more_than_four_digit?.name ?? ""}
                                 {e.account_entry?.username ?? ""}
-                              </TableCell>
-                            </TableRow>
-                          </TableBody>
-                        </Table>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       ) : (
                         <>
                           ({e?.two_digit_id ?? ""}
@@ -179,21 +231,21 @@ export default function ExportEntryDataTable(props: Props) {
                           {e.account_entry?.username ?? ""}
                         </>
                       )}
-                    </TableHead>
+                    </td>
                   )}
-                  <TableHead></TableHead>
+                  <td className=""></td>
                   {e.type === "Credit" && (
-                    <TableHead align="center">
+                    <td align="center">
                       {e.reference_id ? (
-                        <Table>
-                          <TableBody>
-                            <TableRow>
-                              <TableCell>
+                        <table className=" min-w-max table-auto text-left">
+                          <tbody>
+                            <tr>
+                              <td>
                                 Reference To: ({e.reference_id}){" "}
                                 {e.reference?.username ?? ""}
-                              </TableCell>
+                              </td>
 
-                              <TableCell colSpan={2}>
+                              <td colSpan={2}>
                                 ({e?.two_digit_id ?? ""}
                                 {e?.three_digit_id ?? ""}
                                 {e?.more_than_four_digit_id ?? ""}
@@ -202,10 +254,10 @@ export default function ExportEntryDataTable(props: Props) {
                                 {e.three_digit?.name ?? ""}
                                 {e.more_than_four_digit?.name ?? ""}
                                 {e.account_entry?.username ?? ""}
-                              </TableCell>
-                            </TableRow>
-                          </TableBody>
-                        </Table>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       ) : (
                         <>
                           ({e?.two_digit_id ?? ""}
@@ -217,23 +269,30 @@ export default function ExportEntryDataTable(props: Props) {
                           {e.account_entry?.username ?? ""}
                         </>
                       )}
-                    </TableHead>
+                    </td>
                   )}
-                </TableRow>
+                </tr>
               )
             );
 
           return (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead align="center">Amount</TableHead>
-                  <TableHead align="center">Credit</TableHead>
-                  <TableHead align="center">Debit</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>{s}</TableBody>
-            </Table>
+            <table className=" min-w-max table-auto text-left w-full">
+              <thead>
+                <tr>
+                  <th align="center">
+                    <Typography>Amount</Typography>
+                  </th>
+                  <th align="center">
+                    {" "}
+                    <Typography>Credit</Typography>
+                  </th>
+                  <th align="center">
+                    <Typography>Debit</Typography>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>{s}</tbody>
+            </table>
           );
         },
       },
@@ -359,169 +418,230 @@ export default function ExportEntryDataTable(props: Props) {
 
     return { entries, totalDebit, totalCredit, currencies };
   }, [props.data, search]);
-  const table = useReactTable({
-    data: entries,
-    columns: columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
+  const { two_digit, three_digit, four_digit, account } = useMemo(() => {
+    var two_digit: { id: number; name: string } = undefined,
+      three_digit: { id: number; name: string } = undefined,
+      four_digit: { id: number; name: string } = undefined;
+    var account: { id: number; username: string } = undefined;
+    if (search.two_digit_id) {
+      two_digit = props.two_digits.find(
+        (res) => res.id === search.two_digit_id
+      );
+    }
+    if (search.three_digit_id) {
+      three_digit = props.two_digits.find(
+        (res) => res.id === search.three_digit_id
+      );
+    }
 
-    state: {
-      sorting,
-      pagination: { pageSize: 999999, pageIndex: 0 },
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
-  });
+    if (search.more_digit_id) {
+      four_digit = props.two_digits.find(
+        (res) => res.id === search.more_digit_id
+      );
+    }
+
+    if (search.account_id) {
+      account = props.two_digits.find(
+        (res) => res.id === search.account_id
+      ) as any;
+    }
+
+    return { two_digit, three_digit, four_digit, account };
+  }, [search]);
   const titleRef = useRef<HTMLHeadingElement>();
   const { toPDF, targetRef } = usePDF();
   return (
-    <Style className="w-full ">
-      <div className="flex justify-between items-center">
-        <h1>Result: {props.data.length}</h1>
-        <Button
-          className="bg-black"
-          color="dark"
-          onClick={() => {
-            toPDF({
-              filename: `${titleRef?.current?.textContent}.pdf`,
-              method: "save",
-              resolution: 3,
-            });
-          }}
+    <Style>
+      <Card>
+        <form
+          className=" grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4  h-full  overflow-auto  justify-between rms-container p-5"
+          onSubmit={handleSubmit}
         >
-          Export
-        </Button>
-      </div>
-      <form
-        className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mt-4 mb-5"
-        onSubmit={handleSubmit}
-      >
-        <SearchSelect
-          data={props.data.map((res) => ({ id: res.id, name: res.title }))}
-          hit="id"
-          label="Ids"
-          onChange={(e) => {
-            setSearch((prev) => ({
-              ...prev,
-              id: e,
-            }));
-          }}
-          default={search.id}
-        />
+          <TextField
+            label="Id"
+            type="number"
+            size="small"
+            defaultValue={search.id}
+            onChange={(e) => {
+              setSearch((prev) => ({
+                ...prev,
+                id: e.target.value ? +e.target.value : undefined,
+              }));
+            }}
+          />
 
-        <DateRangePicker
-          onChange={setSelectDate}
-          default={{ from: props.date[0], to: props.date[1] }}
-        />
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              maxDate={dayjs(selectDate.to)}
+              slotProps={{ textField: { size: "small" } }}
+              label="From Date"
+              defaultValue={dayjs(selectDate.from)}
+              onChange={(e) => {
+                setSelectDate((prev) => ({ ...prev, from: e?.toDate() }));
+              }}
+            />
+            <DatePicker
+              minDate={dayjs(selectDate.from)}
+              slotProps={{ textField: { size: "small" } }}
+              label="To Date"
+              defaultValue={dayjs(selectDate.to)}
+              onChange={(e) => {
+                setSelectDate((prev) => ({ ...prev, from: e?.toDate() }));
+              }}
+            />
+          </LocalizationProvider>
+          <Autocomplete
+            disablePortal
+            size="small"
+            defaultValue={
+              two_digit
+                ? { label: two_digit.name, value: two_digit.id }
+                : undefined
+            }
+            isOptionEqualToValue={(e) => e.value === two_digit?.id}
+            onChange={(e, f) => {
+              setSearch((prev) => ({
+                ...prev,
+                more_digit_id: undefined,
+                three_digit_id: undefined,
+                two_digit_id: f ? f.value : undefined,
+              }));
+            }}
+            options={props.two_digits.map((res) => ({
+              label: res.name,
+              value: res.id,
+            }))}
+            renderInput={(params) => (
+              <TextField {...params} label="Two Digits" />
+            )}
+          />
+          <Autocomplete
+            disablePortal
+            size="small"
+            isOptionEqualToValue={(e) => e.value === three_digit?.id}
+            value={
+              three_digit
+                ? {
+                    label: three_digit.name,
+                    value: three_digit.id,
+                  }
+                : undefined
+            }
+            onChange={(e, f) => {
+              setSearch((prev) => ({
+                ...prev,
+                more_digit_id: undefined,
+                three_digit_id: f ? f.value : undefined,
+                two_digit_id: undefined,
+              }));
+            }}
+            options={props.three_digits.map((res) => ({
+              label: res.name,
+              value: res.id,
+            }))}
+            renderInput={(params) => (
+              <TextField {...params} label="Three Digits" />
+            )}
+          />
 
-        <SearchSelect
-          data={props.two_digits}
-          hit="two digit"
-          label="Two Digits"
-          onChange={(e) => {
-            setSearch((prev) => ({
-              ...prev,
-              more_digit_id: undefined,
-              three_digit_id: undefined,
-              two_digit_id: e,
-            }));
-          }}
-          default={search.two_digit_id}
-        />
-        <SearchSelect
-          data={props.three_digits}
-          hit="there digit"
-          label="There Digits"
-          onChange={(e) => {
-            setSearch((prev) => ({
-              ...prev,
-              more_digit_id: undefined,
-              three_digit_id: e,
-              two_digit_id: undefined,
-            }));
-          }}
-          default={search.three_digit_id}
-        />
-        <SearchSelect
-          data={props.more_digits}
-          hit="more digit"
-          label="More Digits"
-          onChange={(e) => {
-            setSearch((prev) => ({
-              ...prev,
-              more_digit_id: undefined,
-              three_digit_id: undefined,
-              two_digit_id: e,
-            }));
-          }}
-          default={search.more_digit_id}
-        />
-        <SearchSelect
-          data={props.accounts}
-          hit="account"
-          label="Accounts"
-          onChange={(e) => {
-            setSearch((prev) => ({
-              ...prev,
-              account_id: e,
-            }));
-          }}
-          default={search.account_id}
-        />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild className="w-full">
-            <Button
-              variant="outline"
-              className="ml-auto w-full flex justify-between items-center"
-            >
-              Columns
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-full">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <Button className="sm:w-full" type="submit" disabled={isPadding}>
-          {isPadding ? (
-            <>
-              {" "}
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              loading...
-            </>
-          ) : (
-            "Search"
-          )}
-        </Button>
-      </form>
-      <div className="rounded-md p-2" ref={targetRef}>
-        <Table className="">
-          <TableHeader className="static">
-            <TableRow>
-              <TableHead colSpan={5}>
-                <div className="flex  items-center">
+          <Autocomplete
+            disablePortal
+            size="small"
+            isOptionEqualToValue={(e) => e.value === four_digit?.id}
+            value={
+              four_digit
+                ? {
+                    label: four_digit.name,
+                    value: four_digit.id,
+                  }
+                : undefined
+            }
+            onChange={(e, f) => {
+              setSearch((prev) => ({
+                ...prev,
+                more_digit_id: f ? f.value : undefined,
+                three_digit_id: undefined,
+                two_digit_id: undefined,
+              }));
+            }}
+            options={props.more_digits.map((res) => ({
+              label: res.name,
+              value: res.id,
+            }))}
+            renderInput={(params) => (
+              <TextField {...params} label="More Four Digits" />
+            )}
+          />
+          <Autocomplete
+            disablePortal
+            size="small"
+            isOptionEqualToValue={(e) => e.value === account.id}
+            value={
+              account
+                ? {
+                    label: `${account.id} ${account.username}`,
+                    value: account.id,
+                  }
+                : undefined
+            }
+            onChange={(e, f) => {
+              setSearch((prev) => ({
+                ...prev,
+                account_id: f.value,
+              }));
+            }}
+            options={props.more_digits.map((res) => ({
+              label: res.name,
+              value: res.id,
+            }))}
+            renderInput={(params) => <TextField {...params} label="Accounts" />}
+          />
+
+          <LoadingButton
+            variant="contained"
+            className="hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white"
+            disableElevation
+            loadingIndicator="Loading…"
+            loading={isPadding}
+            type="submit"
+          >
+            Search
+          </LoadingButton>
+          <LoadingButton
+            variant="contained"
+            className="hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white"
+            disableElevation
+            loadingIndicator="Loading…"
+            loading={isPadding}
+            type="button"
+            onClick={(e) => {
+              setTransition(() => {
+                toPDF({ filename: titleRef.current.innerText });
+              });
+            }}
+          >
+            Export
+          </LoadingButton>
+        </form>
+        <div ref={targetRef}>
+          <MaterialReactTable
+            columns={columns}
+            data={entries}
+            enablePagination={false}
+            enableFilters={false}
+            enableDensityToggle={false}
+            enableExpandAll={false}
+            enableFullScreenToggle={false}
+            enableExpanding={false}
+            enableHiding={false}
+            enableSorting={false}
+            enableColumnActions={false}
+            enableTableFooter={false}
+            enableStickyFooter={false}
+            muiTableContainerProps={{ sx: { margin: 0 } }}
+            renderTopToolbar={() => (
+              <>
+                <div className="flex  items-center gap-4 p-5">
                   <Image
                     src={"/api/media/" + props.config.logo}
                     width={60}
@@ -529,207 +649,159 @@ export default function ExportEntryDataTable(props: Props) {
                     alt="logo"
                     style={{ borderRadius: "50%" }}
                   />
-                  <h1 style={{ fontSize: 24, color: "black" }}>
+                  <Typography className="text-4xl">
                     {props.config.name}
-                  </h1>
+                  </Typography>
                 </div>
-              </TableHead>
-            </TableRow>
-            <TableRow>
-              <TableHead colSpan={2}>
-                To:{" "}
-                {props.two_digit_id
-                  ? `(${props.two_digit_id}) ${
-                      props.two_digits.find(
-                        (res) => res.id === search.two_digit_id
-                      ).name
-                    }`
-                  : ""}
-                {props.three_digit_id
-                  ? `(${props.three_digit_id}) ${
-                      props.three_digits.find(
-                        (res) => res.id === search.three_digit_id
-                      ).name
-                    }`
-                  : ""}
-                {props.more_digit_id
-                  ? `(${props.more_digit_id}) ${
-                      props.more_digits.find(
-                        (res) => res.id === search.more_digit_id
-                      ).name
-                    }`
-                  : ""}
-                {props.account_id
-                  ? `(${props.account_id}) ${
-                      props.accounts.find((res) => res.id === search.account_id)
-                        .username
-                    }`
-                  : ""}
-              </TableHead>
-              <TableHead>
-                Export Date: {moment().format("dddd DD-MM-yyy hh:mm a")}
-              </TableHead>
-              <TableHead>
-                From: {moment(selectDate.from).format("dddd DD-MM-yyy hh:mm a")}
-              </TableHead>
-              <TableHead>
-                To: {moment(selectDate.to).format("dddd DD-MM-yyy hh:mm a")}
-              </TableHead>
-            </TableRow>
-            <TableRow>
-              <TableHead colSpan={5} align="center">
-                <div
-                  ref={titleRef}
-                  contentEditable
-                  className="text-center text-3xl p-5"
-                >
-                  <span>Type title...</span>
+                <Divider />
+                <div className="flex gap-5 justify-between p-5 mb-5">
+                  <div>
+                    <Typography>
+                      To:{" "}
+                      {props.two_digit_id
+                        ? `${
+                            props.two_digits.find(
+                              (res) => res.id === search.two_digit_id
+                            )?.name ?? ""
+                          }`
+                        : ""}
+                      {props.three_digit_id
+                        ? ` ${
+                            props.three_digits.find(
+                              (res) => res.id === search.three_digit_id
+                            )?.name ?? ""
+                          }`
+                        : ""}
+                      {props.more_digit_id
+                        ? ` ${
+                            props.more_digits.find(
+                              (res) => res.id === search.more_digit_id
+                            )?.name ?? ""
+                          }`
+                        : ""}
+                      {props.account_id
+                        ? `(${props.account_id}) ${
+                            props.accounts.find(
+                              (res) => res.id === search.account_id
+                            )?.username ?? ""
+                          }`
+                        : ""}
+                    </Typography>
+                  </div>
+                  <div>
+                    <Typography>
+                      Export Date: {moment().format("dddd DD-MM-yyy hh:mm a")}
+                    </Typography>
+                  </div>
+                  <div>
+                    <Typography>
+                      From:{" "}
+                      {moment(props.date[0]).format("dddd DD-MM-yyy hh:mm a")}
+                    </Typography>
+                  </div>
+                  <div>
+                    <Typography>
+                      To:{" "}
+                      {moment(props.date[1]).format("dddd DD-MM-yyy hh:mm a")}
+                    </Typography>
+                  </div>
                 </div>
-              </TableHead>
-            </TableRow>
-
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
+                <Divider />
+                <div>
+                  <div>
+                    <div
+                      ref={titleRef}
+                      suppressContentEditableWarning={true}
+                      contentEditable
+                      className="text-center text-3xl p-5 mb-5"
+                    >
+                      <span>Type title...</span>
+                    </div>
+                  </div>
+                  <Divider />
+                </div>
+              </>
             )}
-            <TableRow>
-              <TableHead colSpan={4} align="center">
-                Amount
-              </TableHead>
-              <TableHead>
-                <Table>
-                  <TableHeader>
-                    <TableRow className="">
-                      <TableHead
-                        colSpan={2}
-                        align="center"
-                        className="w-full text-center"
-                      >
-                        Credit
-                      </TableHead>
-                    </TableRow>
+            renderBottomToolbar={(e) => {
+              return (
+                <>
+                  <MaterialReactTable
+                    muiTableContainerProps={{ sx: { margin: 0 } }}
+                    enablePagination={false}
+                    enableFilters={false}
+                    enableDensityToggle={false}
+                    renderTopToolbar={<></>}
+                    enableExpandAll={false}
+                    enableFullScreenToggle={false}
+                    enableExpanding={false}
+                    enableHiding={false}
+                    enableSorting={false}
+                    enableColumnActions={false}
+                    columns={[
+                      {
+                        header: "Currncy",
+                        accessorKey: "currncy",
+                        muiTableHeadCellProps: {
+                          align: "center",
+                        },
 
-                    {Object.keys(totalDebit).map((res) => (
-                      <TableRow key={res}>
-                        <TableHead>{res}</TableHead>
-                        <TableHead key={res}>
-                          {res}
-                          {FormatNumberWithFixed(totalDebit[res])}
-                        </TableHead>
-                      </TableRow>
-                    ))}
-                  </TableHeader>
-                </Table>
-                <Table>
-                  <TableHeader>
-                    <TableRow className="">
-                      <TableHead
-                        colSpan={2}
-                        align="center"
-                        className="w-full text-center"
-                      >
-                        Debit
-                      </TableHead>
-                    </TableRow>
+                        muiTableBodyCellProps: {
+                          align: "center",
+                        },
+                      },
+                      {
+                        header: "Debit",
+                        accessorKey: "debit",
+                        muiTableHeadCellProps: {
+                          align: "center",
+                        },
 
-                    {Object.keys(totalCredit).map((res) => (
-                      <TableRow key={res}>
-                        <TableHead>{res}</TableHead>
-                        <TableHead key={res}>
-                          {res}
-                          {FormatNumberWithFixed(totalCredit[res])}
-                        </TableHead>
-                      </TableRow>
-                    ))}
-                  </TableHeader>
-                </Table>
-              </TableHead>
-            </TableRow>
-            <TableRow>
-              <TableHead colSpan={4}></TableHead>
-              <TableHead>Total</TableHead>
-            </TableRow>
-            {Object.keys(currencies).map((res) => (
-              <TableRow key={res}>
-                <TableHead colSpan={4}></TableHead>
-                <TableHead colSpan={3} align="center">
-                  {res}{" "}
-                  {FormatNumberWithFixed(
-                    Math.abs((totalCredit[res] ?? 0) - (totalDebit[res] ?? 0))
-                  )}
-                </TableHead>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+                        muiTableBodyCellProps: {
+                          align: "center",
+                        },
+                      },
+                      {
+                        header: "Credit",
+                        accessorKey: "credit",
+                        muiTableHeadCellProps: {
+                          align: "center",
+                        },
+
+                        muiTableBodyCellProps: {
+                          align: "center",
+                        },
+                      },
+                      {
+                        header: "Total",
+                        accessorKey: "total",
+                        muiTableHeadCellProps: {
+                          align: "center",
+                        },
+
+                        muiTableBodyCellProps: {
+                          align: "center",
+                        },
+                      },
+                    ]}
+                    data={Object.keys(currencies).map((key) => ({
+                      currncy: key,
+                      debit: FormatNumberWithFixed(totalDebit[key] ?? 0),
+                      credit: FormatNumberWithFixed(totalCredit[key] ?? 0),
+                      total: FormatNumberWithFixed(
+                        (totalDebit[key] ?? 0) - (totalCredit[key] ?? 0)
+                      ),
+                    }))}
+                  />
+                </>
+              );
+            }}
+          />
+        </div>
+      </Card>
     </Style>
   );
 }
-const Style = styled.div`
-  table {
-    tbody,
-    thead,
-    tr,
-    td,
-    TableHead {
-      color: black;
-      font-size: 12pt;
-
-      border: #00000013 solid 1px;
-    }
-
-    table {
-      margin-top: 5px;
-      thead {
-        tr {
-          TableHead {
-          }
-        }
-      }
-    }
-  }
-`;
+const Style = styled.div``;
 type CommonEntryType = {
   title: string;
 

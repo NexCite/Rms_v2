@@ -2,23 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { $Enums, Prisma } from "@prisma/client";
-import { Alert } from "@rms/components/ui/alert";
 import { Button } from "@rms/components/ui/button";
-import { Card, CardContent, CardHeader } from "@rms/components/ui/card";
-import DatePicker from "@rms/components/ui/date-picker";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@rms/components/ui/form";
+
 import { Input } from "@rms/components/ui/input";
 import SearchSelect from "@rms/components/ui/search-select";
 import SelectMenu from "@rms/components/ui/select-menu";
-import { Textarea } from "@rms/components/ui/textarea";
 import useAlertHook from "@rms/hooks/alert-hooks";
 import { FormatNumberWithFixed } from "@rms/lib/global";
 import { createEntry, updateEntry } from "@rms/service/entry-service";
@@ -28,11 +16,29 @@ import moment from "moment";
 
 import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import styled from "styled-components";
+import { Controller, useForm } from "react-hook-form";
+import styled from "@emotion/styled";
 import { z } from "zod";
 import UploadWidget from "../upload/upload-widget";
-import LoadingButton from "@rms/components/ui/loading-button";
+import {
+  Alert,
+  Autocomplete,
+  Card,
+  CardContent,
+  CardHeader,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import LoadingButton from "@mui/lab/LoadingButton";
 
 interface Props {
   id?: number;
@@ -97,21 +103,13 @@ export default function EntryForm(props: Props) {
         title: z.string().min(3),
         description: z.string().min(3),
         note: z.string().optional(),
-        currency: z.object({
-          connect: z.object({
-            id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
-          }),
-        }),
+        currency_id: z.number(),
       })
     : z.object({
         title: z.string().min(3),
         description: z.string().min(3),
         note: z.string().optional(),
-        currency: z.object({
-          connect: z.object({
-            id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
-          }),
-        }),
+        currency_id: z.number(),
         sub_entries: z.object({
           createMany: z.object({
             data: z
@@ -163,622 +161,566 @@ export default function EntryForm(props: Props) {
 
   const [media, setMedia] = useState<Prisma.MediaGetPayload<{}>>();
 
-  const handleSubmit = useCallback(
-    (e: React.FormEvent<HTMLButtonElement>) => {
-      var m: Prisma.EntryCreateInput;
-      m = {
-        description: forms.description,
-        title: forms.title,
-        to_date: forms.to_date,
-        note: forms.note,
-        currency: { connect: { id: forms.currency_id } },
-        sub_entries: props.isEditMode
-          ? undefined
-          : {
-              createMany: {
-                data: forms.sub_entries.map((res) => ({
-                  amount: res.amount,
-                  status: res.status,
-                  type: res.type,
-                  account_entry_id:
-                    res.account_entry_id === 0
-                      ? undefined
-                      : res.account_entry_id,
-                  two_digit_id:
-                    res.two_digit_id === 0 ? undefined : res.two_digit_id,
-                  three_digit_id:
-                    res.three_digit_id === 0 ? undefined : res.three_digit_id,
-                  more_than_four_digit_id:
-                    res.more_than_four_digit_id === 0
-                      ? undefined
-                      : res.more_than_four_digit_id,
-                  reference_id:
-                    res.reference_id === 0 ? undefined : res.reference_id,
-                })),
-              },
+  const handleSubmit = useCallback(() => {
+    var m: Prisma.EntryUncheckedCreateInput;
+    m = {
+      description: forms.description,
+      title: forms.title,
+      to_date: forms.to_date,
+      note: forms.note,
+      currency_id: forms.currency_id,
+      sub_entries: props.isEditMode
+        ? undefined
+        : {
+            createMany: {
+              data: forms.sub_entries.map((res) => ({
+                amount: res.amount,
+                status: res.status,
+                type: res.type,
+                account_entry_id:
+                  res.account_entry_id === 0 ? undefined : res.account_entry_id,
+                two_digit_id:
+                  res.two_digit_id === 0 ? undefined : res.two_digit_id,
+                three_digit_id:
+                  res.three_digit_id === 0 ? undefined : res.three_digit_id,
+                more_than_four_digit_id:
+                  res.more_than_four_digit_id === 0
+                    ? undefined
+                    : res.more_than_four_digit_id,
+                reference_id:
+                  res.reference_id === 0 ? undefined : res.reference_id,
+              })),
             },
-        media: media
-          ? {
-              create: {
-                path: media.path,
-                title: media.title,
-                type: "Pdf",
-              },
-            }
-          : undefined,
-      };
-      const result = formSchema.safeParse(m);
+          },
+      media: media
+        ? {
+            create: {
+              path: media.path,
+              title: media.title,
+              type: "Pdf",
+            },
+          }
+        : undefined,
+    };
+    const result = formSchema.safeParse(m);
+    form.clearErrors([
+      "currency_id",
+      "description",
+      "description",
+      "note",
+      "title",
+    ]);
+
+    const error = [];
+    var debit = 0;
+    var credit = 0;
+    if (!props.isEditMode) {
+      forms.sub_entries.map((res, i) => {
+        if (res.type === "Debit") debit += res.amount;
+        else if (res.type === "Credit") credit += res.amount;
+        if (
+          !res.three_digit_id &&
+          !res.more_than_four_digit_id &&
+          !res.account_entry_id &&
+          !res.two_digit_id
+        ) {
+          error.push({ index: i + 1, message: "Missing  client or level" });
+        }
+        if (!res.type) {
+          error.push({ index: i + 1, message: "Missing  type" });
+        }
+      });
+
+      if (debit - credit !== 0)
+        error.push({
+          index: undefined,
+          message: "Debit must be equal Credit",
+        });
+      setErrors(error);
+    }
+    if (forms.sub_entries.length < 1) {
+      return setErrors(
+        error.concat([{ message: "SubEntry must be not empty" }])
+      );
+    }
+
+    if (result.success === false) {
+      return Object.keys(result.error.formErrors.fieldErrors).map((res) => {
+        form.setError(res as any, {
+          message: result.error.formErrors.fieldErrors[res][0],
+        });
+      });
+    } else if (error.length > 0) {
+      return;
+    } else {
       form.clearErrors([
-        "currency",
+        "currency_id",
         "description",
-        "currency.connect.id",
         "description",
-        "currency",
         "note",
         "title",
       ]);
-      const error = [];
-      var debit = 0;
-      var credit = 0;
-      if (!props.isEditMode) {
-        forms.sub_entries.map((res, i) => {
-          if (res.type === "Debit") debit += res.amount;
-          else if (res.type === "Credit") credit += res.amount;
-          if (
-            !res.three_digit_id &&
-            !res.more_than_four_digit_id &&
-            !res.account_entry_id &&
-            !res.two_digit_id
-          ) {
-            error.push({ index: i + 1, message: "Missing  client or level" });
-          }
-          if (!res.type) {
-            error.push({ index: i + 1, message: "Missing  type" });
-          }
-        });
-
-        if (debit - credit !== 0)
-          error.push({
-            index: undefined,
-            message: "Debit must be equal Credit",
+      setTransition(async () => {
+        if (props.isEditMode) {
+          const result = await updateEntry(props.id, {
+            title: m.title,
+            currency_id: m.currency_id,
+            description: m.description,
+            note: m.note,
           });
-        setErrors(error);
-      }
-      if (result.success === false) {
-        return Object.keys(result.error.formErrors.fieldErrors).map((res) => {
-          form.setError(res as any, {
-            message: result.error.formErrors.fieldErrors[res][0],
-          });
-        });
-      } else if (error.length > 0) {
-        return;
-      } else {
-        form.clearErrors([
-          "currency",
-          "description",
-          "currency.connect.id",
-          "description",
-          "currency",
-          "note",
-          "title",
-        ]);
-        setTransition(async () => {
-          if (props.isEditMode) {
-            const result = await updateEntry(props.id, {
-              title: m.title,
-              currency: m.currency,
-              description: m.description,
-              note: m.note,
-            });
-            createAlert(result);
-            if (result.status === 200) {
-              back();
-            }
-          } else {
-            const result = await createEntry(m);
-            createAlert(result);
-            if (result.status === 200) {
-              back();
-            }
+          createAlert(result);
+          if (result.status === 200) {
+            back();
           }
-        });
-      }
-    },
-    [props, forms, media, formSchema, back, form, createAlert]
-  );
+        } else {
+          const result = await createEntry(m);
+          createAlert(result);
+          if (result.status === 200) {
+            back();
+          }
+        }
+      });
+    }
+  }, [props, forms, media, formSchema, back, form, createAlert]);
 
   return (
-    <Style className="max-h-full  rounded-lg p-5">
-      <Form {...form}>
-        <form className="card" autoComplete="off">
-          <Card>
-            <CardHeader>
-              {" "}
-              <div className="flex justify-between items-center">
-                <h1 className="font-medium text-2xl">Entry Form</h1>
-                <LoadingButton
-                  onClick={handleSubmit}
-                  label={props.isEditMode ? "Update" : "Add"}
-                  type="button"
-                  loading={isPadding}
-                />
-              </div>
-              <hr className="my-12 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
-            </CardHeader>
+    <form className="max-w-[450px] m-auto" noValidate>
+      <Card>
+        {errors.length > 0 && (
+          <Alert severity="error">
+            {errors.map((res) => (
+              <h4 key={res.index}>
+                {res.message} SubEntry {res.index && <span>{res.index}</span>}
+              </h4>
+            ))}
+          </Alert>
+        )}
+        <CardHeader
+          title={
+            <div className="flex justify-between items-center flex-row">
+              <Typography variant="h5">Entry From</Typography>
+              <LoadingButton
+                onClick={(e) => {
+                  handleSubmit();
+                }}
+                variant="contained"
+                className="hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white w-[150px]"
+                disableElevation
+                loading={isPadding}
+              >
+                Save
+              </LoadingButton>
+            </div>
+          }
+        ></CardHeader>
+        <Divider />
+        <CardContent className="flex gap-5 flex-col">
+          <Controller
+            control={form.control}
+            name="title"
+            render={({ field, fieldState }) => (
+              <TextField
+                required
+                {...field}
+                error={Boolean(fieldState.error)}
+                label="Title"
+                size="small"
+                fullWidth
+                value={forms.title}
+                helperText={fieldState?.error?.message}
+                onChange={(e) => {
+                  setForms((prev) => ({
+                    ...prev,
+                    title: e.target.value,
+                  }));
+                }}
+              />
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="description"
+            render={({ field, fieldState }) => (
+              <TextField
+                required
+                {...field}
+                multiline
+                minRows={3}
+                maxRows={5}
+                error={Boolean(fieldState.error)}
+                label="Description"
+                size="small"
+                fullWidth
+                defaultValue={field.value}
+                helperText={fieldState?.error?.message}
+                onChange={(e) => {
+                  setForms((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }));
+                }}
+              />
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="note"
+            render={({ field, fieldState }) => (
+              <TextField
+                {...field}
+                multiline
+                minRows={3}
+                maxRows={5}
+                error={Boolean(fieldState.error)}
+                label="Note"
+                size="small"
+                fullWidth
+                defaultValue={field.value}
+                helperText={fieldState?.error?.message}
+                onChange={(e) => {
+                  setForms((prev) => ({
+                    ...prev,
+                    note: e.target.value,
+                  }));
+                }}
+              />
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="currency_id"
+            render={({ field, fieldState }) => (
+              <Autocomplete
+                size="small"
+                isOptionEqualToValue={(e) => e.value === forms.currency_id}
+                defaultValue={(() => {
+                  const currnecy = props.currencies.find(
+                    (res) => res.id === forms.currency_id
+                  );
 
-            <CardContent>
-              {errors.length > 0 && (
-                <Alert color="red" className="mb-10" variant="destructive">
-                  {errors.map((res) => (
-                    <h4 key={res.index}>
-                      {res.message} SubEntry{" "}
-                      {res.index && <span>{res.index}</span>}
-                    </h4>
-                  ))}
-                </Alert>
-              )}
-              <div>
-                <div className="grid">
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: true }}
-                      control={form.control}
-                      name="title"
-                      render={({ field }) => (
-                        <FormItem className="required">
-                          <FormLabel>Title</FormLabel>
-                          <FormControl
-                            onChange={(e) => {
-                              setForms((prev) => ({
-                                ...prev,
-                                title: (e.target as any).value,
-                              }));
-                            }}
-                          >
-                            <Input
-                              placeholder="title"
-                              onChange={(e) => {
-                                setForms((prev) => ({
-                                  ...prev,
-                                  title: e.target.value,
-                                }));
-                              }}
-                              {...field}
-                            />
-                          </FormControl>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: true }}
-                      control={form.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem className="required">
-                          <FormLabel>Description</FormLabel>
-                          <FormControl
-                            onChange={(e) => {
-                              setForms((prev) => ({
-                                ...prev,
-                                description: (e.target as any).value,
-                              }));
-                            }}
-                          >
-                            <Textarea placeholder="description" {...field} />
-                          </FormControl>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: true }}
-                      control={form.control}
-                      name="note"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Note (Admin)</FormLabel>
-                          <FormControl
-                            onChange={(e) => {
-                              setForms((prev) => ({
-                                ...prev,
-                                note: (e.target as any).value,
-                              }));
-                            }}
-                          >
-                            <Textarea placeholder="note" {...field} />
-                          </FormControl>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: true }}
-                      control={form.control}
-                      name={"currency_id " as any}
-                      render={({ field }) => (
-                        <FormItem className="required">
-                          <FormLabel>Currency</FormLabel>
-                          <FormControl>
-                            <SearchSelect
-                              default={forms?.currency_id}
-                              data={props.currencies}
-                              hit="select currency"
-                              label="Currencies"
-                              onChange={(e) => {
-                                setForms((prev) => ({
-                                  ...prev,
-                                  currency_id: e,
-                                }));
-                              }}
-                            />
-                          </FormControl>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  {!props.isEditMode && (
-                    <div className="grid-cols-12">
-                      <FormField
-                        name={"" as any}
-                        rules={{ required: true }}
-                        control={form.control}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Date</FormLabel>
-                            <FormControl>
-                              <DatePicker
-                                name="to_date"
-                                default={forms?.to_date}
-                                onChange={(e) => {
-                                  setForms((prev) => ({
-                                    ...prev,
-                                    to_date: e,
-                                  }));
-                                }}
-                                maxDate={moment().endOf("day").toDate()}
-                                minDate={moment().subtract(9, "day").toDate()}
-                              />
-                            </FormControl>
-
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  )}
-                  {!props.isEditMode && (
-                    <div className="grid-cols-12">
-                      {
-                        <UploadWidget
-                          isPdf
-                          onSave={(e) => {
-                            setMedia({ path: e, title: e, type: "Pdf" } as any);
-                          }}
-                        />
-                      }
-                    </div>
-                  )}
-                </div>
-                {!props.isEditMode && (
-                  <>
-                    <div style={{ margin: "20px 0px 8px" }}>
-                      <h1 className="text-2xl">Entries</h1>
-                    </div>
-                    <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-5 mb-4" />
-                    {forms?.sub_entries?.map((res, i) => (
-                      <div className="mb-5 " key={i}>
-                        <div className="flex justify-between items-center">
-                          <h1>SubEntry: {i + 1}</h1>
-                          <Button
-                            onClick={() => {
-                              setErrors([]);
-
-                              setForms((prev) => ({
-                                ...prev,
-                                sub_entries: prev.sub_entries.filter(
-                                  (res, ii) => i !== ii
-                                ),
-                              }));
-                            }}
-                            size="sm"
-                            className="bg-black"
-                            color="dark"
-                            type="button"
-                          >
-                            <X size="15" />
-                          </Button>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <FormField
-                            name="amount"
-                            render={() => (
-                              <FormItem className="required">
-                                <FormLabel>Amount</FormLabel>
-
-                                <Input
-                                  id={`amount-${i}`}
-                                  defaultValue={1.0}
-                                  type="number"
-                                  onChange={(e) => {
-                                    if (Number.isNaN(e.target.value)) {
-                                      forms.sub_entries[i].amount = 1;
-                                    } else {
-                                      forms.sub_entries[i].amount =
-                                        +e.target.value;
-                                    }
-
-                                    setForms((prev) => ({
-                                      ...prev,
-                                      sub_entries: prev.sub_entries,
-                                    }));
-                                  }}
-                                  placeholder="amount"
-                                  step=".01"
-                                />
-                                <FormDescription>
-                                  {
-                                    props.currencies.find(
-                                      (res) => forms.currency_id === res.id
-                                    )?.symbol
-                                  }{" "}
-                                  {FormatNumberWithFixed(res.amount)}
-                                </FormDescription>
-                              </FormItem>
-                            )}
-                          />
-
-                          <div>
-                            <FormField
-                              name="type"
-                              render={() => (
-                                <FormItem className="required">
-                                  <FormLabel>Type</FormLabel>
-                                  <SelectMenu
-                                    default={
-                                      i == 0
-                                        ? "Debit"
-                                        : i == 1
-                                        ? "Credit"
-                                        : undefined
-                                    }
-                                    data={[
-                                      $Enums.DebitCreditType.Debit,
-                                      $Enums.DebitCreditType.Credit,
-                                    ]}
-                                    hit="select type"
-                                    label="Type"
-                                    onChange={(e) => {
-                                      forms.sub_entries[i].type = e as any;
-                                      setForms((prev) => ({
-                                        ...prev,
-                                        sub_entries: prev.sub_entries,
-                                      }));
-                                    }}
-                                  />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1  md:grid-cols-2 gap-4 mt-3">
-                          <FormField
-                            name="two_digit"
-                            render={() => (
-                              <FormItem>
-                                <FormLabel>Two Digit</FormLabel>
-                                <SearchSelect
-                                  disabled={
-                                    res.three_digit_id
-                                      ? true
-                                      : res.more_than_four_digit_id
-                                      ? true
-                                      : res.account_entry_id
-                                      ? true
-                                      : false
-                                  }
-                                  data={props.two_digit}
-                                  hit="select two digit"
-                                  label="Two Digit"
-                                  onChange={(e) => {
-                                    forms.sub_entries[i].two_digit_id =
-                                      e as any;
-                                    setForms((prev) => ({
-                                      ...prev,
-                                      sub_entries: prev.sub_entries,
-                                    }));
-                                  }}
-                                />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            name="three_digit"
-                            render={() => (
-                              <FormItem>
-                                <FormLabel>There Digit</FormLabel>
-                                <SearchSelect
-                                  disabled={
-                                    res.two_digit_id
-                                      ? true
-                                      : res.more_than_four_digit_id
-                                      ? true
-                                      : res.account_entry_id
-                                      ? true
-                                      : false
-                                  }
-                                  data={props.three_digit}
-                                  hit="select three digit"
-                                  label="Three Digit"
-                                  onChange={(e) => {
-                                    forms.sub_entries[i].three_digit_id = e;
-                                    setForms((prev) => ({
-                                      ...prev,
-                                      sub_entries: prev.sub_entries,
-                                    }));
-                                  }}
-                                />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            name="more_digit"
-                            render={() => (
-                              <FormItem>
-                                <FormLabel>More Digit</FormLabel>
-                                <SearchSelect
-                                  disabled={
-                                    res.three_digit_id
-                                      ? true
-                                      : res.two_digit_id
-                                      ? true
-                                      : res.account_entry_id
-                                      ? true
-                                      : false
-                                  }
-                                  data={props.more_than_four_digit}
-                                  hit="select two digit"
-                                  label="Two Digit"
-                                  onChange={(e) => {
-                                    forms.sub_entries[
-                                      i
-                                    ].more_than_four_digit_id = e as any;
-                                    setForms((prev) => ({
-                                      ...prev,
-                                      sub_entries: prev.sub_entries,
-                                    }));
-                                  }}
-                                />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            name="account"
-                            render={() => (
-                              <FormItem>
-                                <FormLabel>Account</FormLabel>
-                                <SearchSelect
-                                  disabled={
-                                    res.three_digit_id
-                                      ? true
-                                      : res.two_digit_id
-                                      ? true
-                                      : res.reference_id
-                                      ? true
-                                      : false
-                                  }
-                                  data={props.account_entry}
-                                  hit="select account"
-                                  label="Account"
-                                  onChange={(e) => {
-                                    forms.sub_entries[i].account_entry_id =
-                                      e as any;
-                                    setForms((prev) => ({
-                                      ...prev,
-                                      sub_entries: prev.sub_entries,
-                                    }));
-                                  }}
-                                />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-                          <FormField
-                            name="ref_account"
-                            render={() => (
-                              <FormItem>
-                                <FormLabel>Refrence</FormLabel>
-                                <SearchSelect
-                                  disabled={res.account_entry_id ? true : false}
-                                  data={props.account_entry}
-                                  hit="select refrence"
-                                  label="Refrence"
-                                  onChange={(e) => {
-                                    forms.sub_entries[i].reference_id =
-                                      e as any;
-                                    setForms((prev) => ({
-                                      ...prev,
-                                      sub_entries: prev.sub_entries,
-                                    }));
-                                  }}
-                                />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        {i !== forms.sub_entries.length - 1 && (
-                          <hr className="my-5 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
-                        )}
-                      </div>
-                    ))}
-                  </>
+                  return currnecy
+                    ? { label: currnecy.symbol, value: currnecy.id }
+                    : undefined;
+                })()}
+                onChange={(e, v) =>
+                  setForms((prev) => ({ ...prev, currency_id: v?.value }))
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...field}
+                    value={forms.currency_id}
+                    error={Boolean(fieldState.error)}
+                    helperText={fieldState?.error?.message}
+                    {...params}
+                    label="Currency"
+                    required
+                  />
                 )}
-              </div>
-              {!props.isEditMode && (
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    marginTop: 10,
-                  }}
-                >
-                  <Button
-                    type="button"
-                    className="bg-black"
-                    color="dark"
-                    onClick={() => {
+                options={props.currencies.map((res) => ({
+                  label: res.symbol,
+                  value: res.id,
+                }))}
+              />
+            )}
+          />
+          <Controller
+            control={form.control}
+            name={"to_date" as any}
+            render={({ field, fieldState }) => (
+              <FormControl {...field} size="small">
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    minDate={dayjs().subtract(7, "day")}
+                    label="Date"
+                    maxDate={dayjs()}
+                    slotProps={{
+                      textField: {
+                        size: "small",
+                        required: true,
+                        error: Boolean(fieldState?.error),
+                        helperText: fieldState?.error?.message,
+                      },
+                    }}
+                    value={dayjs(forms.to_date)}
+                    onChange={(e) => {
                       setForms((prev) => ({
                         ...prev,
-
-                        sub_entries: prev.sub_entries.concat({
-                          type:
-                            forms.sub_entries.length === 0
-                              ? "Debit"
-                              : forms.sub_entries.length === 1
-                              ? "Credit"
-                              : undefined,
-                          entry_id: undefined,
-
-                          amount: 1,
-                          two_digit_id: undefined,
-                          reference_id: undefined,
-                          three_digit_id: undefined,
-                          more_than_four_digit_id: undefined,
-                          account_entry_id: undefined,
-                        }),
+                        to_date: e?.toDate(),
                       }));
                     }}
-                  >
-                    <PlusSquare />
-                  </Button>
+                  />
+                </LocalizationProvider>
+              </FormControl>
+            )}
+          />
+
+          <div className="grid-cols-12">
+            {!props.isEditMode && (
+              <UploadWidget
+                isPdf
+                onSave={(e) => {
+                  setMedia({ path: e, title: e, type: "Pdf" } as any);
+                }}
+              />
+            )}
+          </div>
+          {!props.isEditMode && (
+            <>
+              <div style={{ margin: "0px 0px 0px" }}>
+                <h1 className="text-2xl">Entries</h1>
+              </div>
+              <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
+              {forms?.sub_entries?.map((res, i) => (
+                <div className="mb-5 " key={i}>
+                  <div className="flex justify-between items-center">
+                    <h1>SubEntry: {i + 1}</h1>
+                    <Button
+                      onClick={() => {
+                        setErrors([]);
+
+                        setForms((prev) => ({
+                          ...prev,
+                          sub_entries: prev.sub_entries.filter(
+                            (res, ii) => i !== ii
+                          ),
+                        }));
+                      }}
+                      size="sm"
+                      className="bg-black"
+                      color="dark"
+                      type="button"
+                    >
+                      <X size="15" />
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+                    <TextField
+                      size="small"
+                      type="number"
+                      label="Amount"
+                      defaultValue={res.amount}
+                      required
+                      onChange={(e) => {
+                        if (Number.isNaN(e.target.value)) {
+                          forms.sub_entries[i].amount = 1;
+                        } else {
+                          forms.sub_entries[i].amount = +e.target.value;
+                        }
+
+                        setForms((prev) => ({
+                          ...prev,
+                          sub_entries: prev.sub_entries,
+                        }));
+                      }}
+                      helperText={`${FormatNumberWithFixed(res.amount ?? 0)}`}
+                    />
+
+                    <Autocomplete
+                      disablePortal
+                      defaultValue={res.type}
+                      size="small"
+                      onChange={(e, v) => {
+                        forms.sub_entries[i].type = v as any;
+                        setForms((prev) => ({
+                          ...prev,
+                          sub_entries: prev.sub_entries,
+                        }));
+                      }}
+                      options={Object.keys($Enums.DebitCreditType)}
+                      renderInput={(params) => (
+                        <TextField required {...params} label="Type" />
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1  md:grid-cols-2 gap-4 mt-3">
+                    <Autocomplete
+                      disablePortal
+                      size="small"
+                      onChange={(e, v) => {
+                        forms.sub_entries[i].two_digit_id = v?.value;
+                        setForms((prev) => ({
+                          ...prev,
+                          sub_entries: prev.sub_entries,
+                        }));
+                      }}
+                      options={props.two_digit.map((res) => ({
+                        label: res.name,
+                        value: res.id,
+                      }))}
+                      disabled={
+                        res.three_digit_id
+                          ? true
+                          : res.more_than_four_digit_id
+                          ? true
+                          : res.account_entry_id
+                          ? true
+                          : false
+                      }
+                      renderInput={(params) => (
+                        <TextField {...params} label="Two And More" />
+                      )}
+                    />
+                    <Autocomplete
+                      disablePortal
+                      size="small"
+                      onChange={(e, v) => {
+                        forms.sub_entries[i].three_digit_id = v?.value;
+                        setForms((prev) => ({
+                          ...prev,
+                          sub_entries: prev.sub_entries,
+                        }));
+                      }}
+                      options={props.three_digit.map((res) => ({
+                        label: res.name,
+                        value: res.id,
+                      }))}
+                      disabled={
+                        res.two_digit_id
+                          ? true
+                          : res.more_than_four_digit_id
+                          ? true
+                          : res.account_entry_id
+                          ? true
+                          : false
+                      }
+                      renderInput={(params) => (
+                        <TextField {...params} label="Three And More" />
+                      )}
+                    />
+
+                    <Autocomplete
+                      disablePortal
+                      size="small"
+                      onChange={(e, v) => {
+                        forms.sub_entries[i].more_than_four_digit_id = v?.value;
+                        setForms((prev) => ({
+                          ...prev,
+                          sub_entries: prev.sub_entries,
+                        }));
+                      }}
+                      options={props.more_than_four_digit.map((res) => ({
+                        label: res.name,
+                        value: res.id,
+                      }))}
+                      disabled={
+                        res.three_digit_id
+                          ? true
+                          : res.two_digit_id
+                          ? true
+                          : res.account_entry_id
+                          ? true
+                          : false
+                      }
+                      renderInput={(params) => (
+                        <TextField {...params} label="Four And More" />
+                      )}
+                    />
+
+                    <Autocomplete
+                      disablePortal
+                      size="small"
+                      onChange={(e, v) => {
+                        forms.sub_entries[i].account_entry_id = v?.value;
+                        setForms((prev) => ({
+                          ...prev,
+                          sub_entries: prev.sub_entries,
+                        }));
+                      }}
+                      options={props.account_entry.map((res) => ({
+                        label: res.username,
+                        value: res.id,
+                      }))}
+                      disabled={
+                        res.three_digit_id
+                          ? true
+                          : res.two_digit_id
+                          ? true
+                          : res.reference_id
+                          ? true
+                          : res.more_than_four_digit_id
+                          ? true
+                          : false
+                      }
+                      renderInput={(params) => (
+                        <TextField {...params} label="Account" />
+                      )}
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mt-3">
+                    <Autocomplete
+                      disablePortal
+                      size="small"
+                      onChange={(e, v) => {
+                        forms.sub_entries[i].reference_id = v?.value;
+                        setForms((prev) => ({
+                          ...prev,
+                          sub_entries: prev.sub_entries,
+                        }));
+                      }}
+                      options={props.account_entry.map((res) => ({
+                        label: res.username,
+                        value: res.id,
+                      }))}
+                      disabled={res.account_entry_id ? true : false}
+                      renderInput={(params) => (
+                        <TextField {...params} label="Reference Account" />
+                      )}
+                    />
+                  </div>
+                  {i !== forms.sub_entries.length - 1 && (
+                    <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
+                  )}
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </form>
-      </Form>
-    </Style>
+              ))}
+            </>
+          )}
+          {!props.isEditMode && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: 10,
+              }}
+            >
+              <Button
+                type="button"
+                className="bg-black"
+                color="dark"
+                onClick={() => {
+                  setForms((prev) => ({
+                    ...prev,
+
+                    sub_entries: prev.sub_entries.concat({
+                      type:
+                        forms.sub_entries.length === 0
+                          ? "Debit"
+                          : forms.sub_entries.length === 1
+                          ? "Credit"
+                          : undefined,
+                      entry_id: undefined,
+
+                      amount: 1,
+                      two_digit_id: undefined,
+                      reference_id: undefined,
+                      three_digit_id: undefined,
+                      more_than_four_digit_id: undefined,
+                      account_entry_id: undefined,
+                    }),
+                  }));
+                }}
+              >
+                <PlusSquare />
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </form>
   );
 }
 
-const Style = styled.div`
-  margin: auto;
-  max-width: 720px;
-`;
 //  <ActionIcon
 // variant="filled"
 // color="dark"
