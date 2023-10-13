@@ -1,38 +1,29 @@
 "use client";
 import React, { useTransition } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 
+import { Controller, useForm } from "react-hook-form";
+import z from "zod";
+
+import { createLogin } from "@rms/service/login-service";
+import LoadingButton from "@mui/lab/LoadingButton";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
-  CardTitle,
-} from "@rms/components/ui/card";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@rms/components/ui/form";
-import { Input } from "@rms/components/ui/input";
-import { useForm } from "react-hook-form";
-import z from "zod";
-
-import useAlertHook from "@rms/hooks/alert-hooks";
-import { createLogin } from "@rms/service/login-service";
-import LoadingButton from "@mui/lab/LoadingButton";
+  TextField,
+  Typography,
+} from "@mui/material";
+import { useStore } from "@rms/hooks/toast-hook";
+import { useRouter } from "next/navigation";
 const formSchema = z.object({
   username: z.string().min(4),
   password: z.string().min(4),
 });
 export default function ConfigWidget() {
   const [isPadding, setTransition] = useTransition();
-  const { createAlert } = useAlertHook();
+  const { replace } = useRouter();
+  const store = useStore();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -44,71 +35,74 @@ export default function ConfigWidget() {
     setTransition(async () => {
       const req = await createLogin(values);
 
-      createAlert({ ...req, replace: "/admin" });
+      store.OpenAlert({ ...req });
+      replace("/admin");
     });
   }
 
   return (
     <div className="flex justify-center items-center m-7">
       <Card className="w-[350px]">
-        <CardHeader>
-          <CardTitle>Create project</CardTitle>
-          <CardDescription>Setup for new project </CardDescription>
-        </CardHeader>
+        <CardHeader
+          title={
+            <div>
+              <Typography variant="h4">Welcome Back!</Typography>
+              <Typography variant="h6">Login</Typography>
+            </div>
+          }
+        ></CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form
-              autoComplete="off"
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-3"
-            >
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input placeholder="username" {...field} />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        autoComplete="new-password"
-                        type="password"
-                        placeholder="password"
-                        {...field}
-                      />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex justify-end">
-                <LoadingButton
-                  variant="outlined"
+          <form
+            autoComplete="off"
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-3 flex flex-col gap-5"
+          >
+            <Controller
+              control={form.control}
+              name="username"
+              render={({ field, fieldState }) => (
+                <TextField
                   fullWidth
-                  className="hover:bg-blue-gray-50 hover:border-black border-black text-black capitalize "
-                  disableElevation
-                  type="submit"
-                  loadingIndicator="Loading…"
-                >
-                  Login
-                </LoadingButton>
-              </div>
-            </form>
-          </Form>
+                  size="small"
+                  label="Username"
+                  placeholder="username"
+                  InputLabelProps={{ shrink: true }}
+                  {...field}
+                  error={Boolean(fieldState.error)}
+                  helperText={fieldState.error?.message}
+                />
+              )}
+            />
+            <Controller
+              control={form.control}
+              name="password"
+              render={({ field, fieldState }) => (
+                <TextField
+                  label="Password"
+                  fullWidth
+                  type="password"
+                  size="small"
+                  placeholder="password"
+                  InputLabelProps={{ shrink: true }}
+                  {...field}
+                  error={Boolean(fieldState.error)}
+                  helperText={fieldState.error?.message}
+                />
+              )}
+            />
+            <div className="flex justify-end">
+              <LoadingButton
+                variant="contained"
+                fullWidth
+                className="hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
+                disableElevation
+                type="submit"
+                loading={isPadding}
+              >
+                Login
+              </LoadingButton>
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>

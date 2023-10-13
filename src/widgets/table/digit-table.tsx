@@ -1,37 +1,18 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import React, { useMemo, useRef, useState, useTransition } from "react";
 import { Prisma } from "@prisma/client";
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import useAlertHook from "@rms/hooks/alert-hooks";
-import { Button } from "@rms/components/ui/button";
-import { Input } from "@rms/components/ui/input";
+import { usePathname, useRouter } from "next/navigation";
+import { useMemo, useTransition } from "react";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@rms/components/ui/dropdown-menu";
-import { DotsHorizontalIcon } from "@radix-ui/react-icons";
-import { deleteMoreDigit, deleteTwoDigit } from "@rms/service/digit-service";
+import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import Authorized from "@rms/components/ui/authorized";
-import { Typography } from "@material-tailwind/react";
+import {
+  deleteMoreDigit,
+  deleteThreeDigit,
+  deleteTwoDigit,
+} from "@rms/service/digit-service";
 import { MaterialReactTable, type MRT_ColumnDef } from "material-react-table";
-import { MenuItem } from "@mui/material";
+import { useStore } from "@rms/hooks/toast-hook";
 
 type Props = {
   node: CommonNode;
@@ -47,9 +28,7 @@ export default function DigitTable(props: Props) {
   const pathName = usePathname();
   const [isActive, setActiveTransition] = useTransition();
 
-  const [globalFilter, setGlobalFilter] = useState("");
-
-  const { createAlert } = useAlertHook();
+  const store = useStore();
   const { push } = useRouter();
 
   const columns = useMemo<MRT_ColumnDef<any>[]>(
@@ -118,24 +97,23 @@ export default function DigitTable(props: Props) {
             accessorFn: (p) => p.modified_date?.toLocaleDateString(),
           },
         ] as any),
-    [createAlert, props.node, isActive, pathName, push]
+    [props.node]
   );
-  // const table = useReactTable({
-  //   data: props.value[props.node],
-  //   columns: columns,
-
-  //   getCoreRowModel: getCoreRowModel(),
-  //   getPaginationRowModel: getPaginationRowModel(),
-  //   getSortedRowModel: getSortedRowModel(),
-  //   getFilteredRowModel: getFilteredRowModel(),
-
-  //   state: {
-  //     globalFilter,
-  //   },
-  // });
-
   return (
-    <div className="flex gap-6 flex-col ">
+    <Card>
+      <CardHeader
+        title={
+          <Typography variant="h5">
+            {props.node === "two"
+              ? "Two Digit And More"
+              : props.node === "three"
+              ? "Tree Digit And More "
+              : "More Digit Then Four "}{" "}
+            Table
+          </Typography>
+        }
+      />
+
       <MaterialReactTable
         enableRowActions
         columns={columns}
@@ -185,10 +163,10 @@ export default function DigitTable(props: Props) {
                       props.node === "two"
                         ? await deleteTwoDigit(id)
                         : props.node === "three"
-                        ? await deleteTwoDigit(id)
+                        ? await deleteThreeDigit(id)
                         : await deleteMoreDigit(id);
 
-                    createAlert(result);
+                    store.OpenAlert(result);
                   });
                 }
               }}
@@ -199,6 +177,6 @@ export default function DigitTable(props: Props) {
         ]}
         data={props.value[props.node]}
       />
-    </div>
+    </Card>
   );
 }

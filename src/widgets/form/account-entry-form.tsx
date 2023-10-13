@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { $Enums, Prisma } from "@prisma/client";
-import useAlertHook from "@rms/hooks/alert-hooks";
 import {
   createAccountEntry,
   updateAccountEntry,
@@ -10,12 +9,11 @@ import {
 
 import { useRouter } from "next/navigation";
 
-import React, { useCallback, useMemo, useTransition } from "react";
+import { useCallback, useMemo, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
-import styled from "@emotion/styled";
 import { z } from "zod";
 
-import Countries from "@rms/lib/country";
+import LoadingButton from "@mui/lab/LoadingButton";
 import {
   Alert,
   AlertTitle,
@@ -24,13 +22,11 @@ import {
   CardContent,
   CardHeader,
   Divider,
-  FormControl,
-  FormLabel,
-  Select,
   TextField,
   Typography,
 } from "@mui/material";
-import LoadingButton from "@mui/lab/LoadingButton";
+import Countries from "@rms/lib/country";
+import { useStore } from "@rms/hooks/toast-hook";
 
 export default function AccountEntryForm(props: {
   account?: Prisma.Account_EntryGetPayload<{
@@ -119,14 +115,14 @@ export default function AccountEntryForm(props: {
     resolver: zodResolver(formSchema),
     defaultValues: props.account,
   });
-  const { createAlert } = useAlertHook();
+  const store = useStore();
 
   const handleSubmit = useCallback(
     (values: z.infer<typeof formSchema>) => {
       setTransition(async () => {
         if (props.account) {
           await updateAccountEntry(props.account.id, values).then((res) => {
-            createAlert(res);
+            store.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);
             });
@@ -137,7 +133,7 @@ export default function AccountEntryForm(props: {
           });
         } else {
           await createAccountEntry(values as any).then((res) => {
-            createAlert(res);
+            store.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);
             });
@@ -148,7 +144,7 @@ export default function AccountEntryForm(props: {
         }
       });
     },
-    [back, createAlert, props.account, form]
+    [back, store, props.account, form]
   );
   return (
     <>

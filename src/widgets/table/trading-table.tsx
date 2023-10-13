@@ -1,22 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import React, { useMemo, useState, useTransition } from "react";
 import { Prisma } from "@prisma/client";
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import useAlertHook from "@rms/hooks/alert-hooks";
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
+import Authorized from "@rms/components/ui/authorized";
 import { Button } from "@rms/components/ui/button";
-import { Input } from "@rms/components/ui/input";
-import { Table, tbody, td, TableHeader, tr } from "@rms/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,12 +13,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@rms/components/ui/dropdown-menu";
-import { DotsHorizontalIcon } from "@radix-ui/react-icons";
+import { Input } from "@rms/components/ui/input";
+import { useStore } from "@rms/hooks/toast-hook";
 import { deleteBrokerById } from "@rms/service/broker-service";
 import { deleteTraderById } from "@rms/service/trader-service";
 import { deleteAccountById } from "@rms/service/trading-account-service";
-import Authorized from "@rms/components/ui/authorized";
-import { Typography } from "@material-tailwind/react";
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { usePathname, useRouter } from "next/navigation";
+import { useMemo, useState, useTransition } from "react";
 
 type Props =
   | {
@@ -53,7 +50,7 @@ export default function TradingTable(props: Props) {
 
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const { createAlert } = useAlertHook();
+  const store = useStore();
   const { push } = useRouter();
 
   const columns = useMemo<ColumnDef<any>[]>(
@@ -111,7 +108,7 @@ export default function TradingTable(props: Props) {
                                 }
                               }
 
-                              createAlert(result);
+                              store.OpenAlert(result);
                             });
                           }
                         }}
@@ -218,7 +215,7 @@ export default function TradingTable(props: Props) {
             accessorFn: (e) => e.modified_date.toLocaleDateString(),
           },
         ] as any) as any,
-    [createAlert, props.node, isActive, pathName, push]
+    [store.OpenAlert, props.node, , store]
   );
   const table = useReactTable({
     data: props.data,

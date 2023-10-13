@@ -6,6 +6,7 @@ import HttpStatusCode from "@rms/models/HttpStatusCode";
 import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 import { cookies } from "next/headers";
+import { createLog } from "./log-service";
 
 export async function createLogin(params: {
   username?: string;

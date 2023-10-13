@@ -1,37 +1,25 @@
 "use client";
-import { CommonRouteKeys } from "@rms/models/CommonModel";
 import { useRouter } from "next/navigation";
-import React from "react";
-import styled from "@emotion/styled";
-import { Button } from "./button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-type Props = {
-  node?: CommonRouteKeys;
-  title?: string;
-};
+import React, { useTransition } from "react";
+import { ChevronLeft } from "lucide-react";
+import { Button } from "@mui/material";
+type Props = {};
 export default function BackButton(props: Props) {
   const { back } = useRouter();
+  const [isPadding, setPadding] = useTransition();
   return (
-    <Style>
-      <Button
-        onClick={() => back()}
-        className="w-10 h-10 "
-        variant="outline"
-        size="icon"
-      >
-        <ChevronLeft className="h-4 w-4" />
-      </Button>
-    </Style>
+    <Button
+      id="back-btn"
+      disableElevation
+      variant="outlined"
+      className="min-w-[15px] h-[35px] text-black border-black hover:bg-gray-100 hover:border-black"
+      onClick={() =>
+        setPadding(() => {
+          back();
+        })
+      }
+    >
+      <ChevronLeft className="h-4 w-4" />
+    </Button>
   );
 }
-const Style = styled.div`
-  align-items: center;
-  display: flex;
-  #back-btn {
-    color: white;
-    :hover {
-      background-color: "#010101c7";
-      color: "white";
-    }
-  }
-`;

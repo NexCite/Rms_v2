@@ -41,14 +41,15 @@ export async function deleteCategoryById(
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction<void>(
     async (auth) => {
-      if (auth.type === "Admin") {
-        await prisma.category.delete({ where: { id } });
-      } else {
-        await prisma.category.update({
-          where: { id },
-          data: { status: "Deleted", user_id: auth.id },
-        });
-      }
+      await prisma.category.delete({ where: { id } });
+      // if (auth.type === "Admin") {
+      //   await prisma.category.delete({ where: { id } });
+      // } else {
+      //   await prisma.category.update({
+      //     where: { id },
+      //     data: { status: "Deleted", user_id: auth.id },
+      //   });
+      // }
 
       return;
     },

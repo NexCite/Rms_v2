@@ -69,14 +69,16 @@ export async function deleteInvoiceById(
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
     async (auth) => {
-      if (auth.type === "Admin") {
-        await prisma.invoice.delete({ where: { id: id } });
-      } else {
-        await prisma.invoice.update({
-          where: { id: id },
-          data: { status: "Deleted" },
-        });
-      }
+      await prisma.invoice.delete({ where: { id: id } });
+
+      // if (auth.type === "Admin") {
+      //   await prisma.invoice.delete({ where: { id: id } });
+      // } else {
+      //   await prisma.invoice.update({
+      //     where: { id: id },
+      //     data: { status: "Deleted" },
+      //   });
+      // }
 
       return;
     },

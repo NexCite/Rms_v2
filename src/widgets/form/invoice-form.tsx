@@ -19,15 +19,9 @@ import {
 import { Input } from "@rms/components/ui/input";
 import SearchSelect from "@rms/components/ui/search-select";
 import { Textarea } from "@rms/components/ui/textarea";
-import useAlertHook from "@rms/hooks/alert-hooks";
 
-import { useRouter } from "next/navigation";
-import React, { useCallback, useMemo, useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
 import styled from "@emotion/styled";
-import { z } from "zod";
-import LoadingButton from "@rms/components/ui/loading-button";
-import { createInvoice, updateInvoice } from "@rms/service/invoice-service";
+import { Alert } from "@rms/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -35,8 +29,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rms/components/ui/select";
+import { createInvoice, updateInvoice } from "@rms/service/invoice-service";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo, useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import UploadWidget from "../upload/upload-widget";
-import { Alert } from "@rms/components/ui/alert";
+import { useStore } from "@rms/hooks/toast-hook";
 type CommonType = Prisma.InvoiceGetPayload<{ include: { media: true } }>;
 
 interface Props {
@@ -87,8 +86,7 @@ export default function InvoiceForm(props: Props) {
 
   const [media, setMedia] = useState<Prisma.MediaGetPayload<{}>>();
 
-  const { createAlert } = useAlertHook();
-
+  const store = useStore();
   const handleSubmit = useCallback(
     (values: z.infer<any>) => {
       const result = validation.safeParse(values);
@@ -148,7 +146,7 @@ export default function InvoiceForm(props: Props) {
           var value2 = JSON.parse(JSON.stringify(values));
 
           await updateInvoice(props.value.id, value2).then((res) => {
-            createAlert(res);
+            store.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);
             });
@@ -163,7 +161,7 @@ export default function InvoiceForm(props: Props) {
           var value2 = JSON.parse(JSON.stringify(values));
 
           await createInvoice(value2).then((res) => {
-            createAlert(res);
+            store.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);
             });
@@ -175,7 +173,7 @@ export default function InvoiceForm(props: Props) {
         });
       }
     },
-    [back, createAlert, form, media, props.value]
+    [back, store.OpenAlert, form, media, props.value]
   );
   return (
     <>
@@ -449,11 +447,11 @@ export default function InvoiceForm(props: Props) {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end">
-                <LoadingButton
+                {/* <LoadingButton
                   type="submit"
                   label={props.value ? "Update" : "Add"}
                   loading={isPadding}
-                />
+                /> */}
               </CardFooter>
             </Card>
           </form>

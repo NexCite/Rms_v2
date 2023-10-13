@@ -1,33 +1,16 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import React, { useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 
 import styled from "@emotion/styled";
+import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import { Prisma } from "@prisma/client";
-import {
-  ColumnDef,
-  PaginationState,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import useAlertHook from "@rms/hooks/alert-hooks";
-import { Button } from "@rms/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@rms/components/ui/dropdown-menu";
+import Authorized from "@rms/components/ui/authorized";
+import { deleteAccountEntry } from "@rms/service/account-entry-service";
+import { PaginationState } from "@tanstack/react-table";
+import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
+import { useStore } from "@rms/hooks/toast-hook";
 type CommonAccountType = Prisma.Account_EntryGetPayload<{
   include: {
     more_than_four_digit: true;
@@ -35,13 +18,6 @@ type CommonAccountType = Prisma.Account_EntryGetPayload<{
     two_digit: true;
   };
 }>;
-import { Input } from "@rms/components/ui/input";
-import { DotsHorizontalIcon } from "@radix-ui/react-icons";
-import { deleteAccountEntry } from "@rms/service/account-entry-service";
-import Authorized from "@rms/components/ui/authorized";
-import { Typography } from "@material-tailwind/react";
-import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
-import { Card, MenuItem } from "@mui/material";
 
 type Props = {
   accounts: CommonAccountType[];
@@ -55,16 +31,8 @@ export default function AccountEntryTable(props: Props) {
     pageSize: 10,
   });
 
-  const [globalFilter, setGlobalFilter] = useState("");
+  const store = useStore();
 
-  const { createAlert } = useAlertHook();
-  const pagination = useMemo(
-    () => ({
-      pageIndex,
-      pageSize,
-    }),
-    [pageIndex, pageSize]
-  );
   const { push } = useRouter();
   const columns = useMemo<MRT_ColumnDef<CommonAccountType>[]>(
     () => [
@@ -152,12 +120,15 @@ export default function AccountEntryTable(props: Props) {
         accessorFn: (e) => e.modified_date.toLocaleDateString(),
       },
     ],
-    [createAlert, isActive, pathName, push]
+    []
   );
 
   return (
     <Style>
       <Card>
+        <CardHeader
+          title={<Typography variant="h5">Account Table</Typography>}
+        />
         <MaterialReactTable
           columns={columns}
           data={props.accounts}
@@ -188,7 +159,7 @@ export default function AccountEntryTable(props: Props) {
                     setActiveTransition(async () => {
                       const result = await deleteAccountEntry(id);
 
-                      createAlert(result);
+                      store.OpenAlert(result);
                     });
                   }
                 }}

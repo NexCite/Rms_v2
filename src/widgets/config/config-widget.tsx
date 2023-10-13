@@ -1,30 +1,16 @@
 "use client";
-import React, { useTransition } from "react";
+import { useTransition } from "react";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@rms/components/ui/card";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@rms/components/ui/form";
-import { Input } from "@rms/components/ui/input";
-import { useForm } from "react-hook-form";
+import LoadingButton from "@mui/lab/LoadingButton";
+import { Card, CardContent, CardHeader, TextField } from "@mui/material";
+import { useStore } from "@rms/hooks/toast-hook";
+import { createConfig } from "@rms/service/config-service";
+import { useRouter } from "next/navigation";
+import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 import UploadWidget from "../upload/upload-widget";
-import { createConfig } from "@rms/service/config-service";
-import useAlertHook from "@rms/hooks/alert-hooks";
-import LoadingButton from "@rms/components/ui/loading-button";
 const formSchema = z.object({
   name: z.string().min(3),
   logo: z.string().min(3),
@@ -44,7 +30,8 @@ const formSchema = z.object({
 });
 export default function ConfigWidget() {
   const [isPadding, setTransition] = useTransition();
-  const { createAlert } = useAlertHook();
+  const store = useStore();
+  const { replace } = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -53,156 +40,160 @@ export default function ConfigWidget() {
     setTransition(async () => {
       const req = await createConfig(values as any);
 
-      createAlert({ ...req, replace: "/login" });
+      store.OpenAlert({ ...req });
+      replace("/login");
     });
   }
 
   return (
     <div className="flex justify-center items-center">
       <Card className="w-[350px] overflow-y-auto mt-3  max-h-[100vh] ">
-        <CardHeader>
-          <CardTitle>Create project</CardTitle>
-          <CardDescription>Setup for new project </CardDescription>
-        </CardHeader>
+        <CardHeader
+          title={
+            <div>
+              <h1>Setup New Project</h1>
+              <h5>create project</h5>
+            </div>
+          }
+        ></CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form
-              autoComplete="off"
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-3"
-            >
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>App Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="app name" {...field} />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="first_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>First Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="first name" {...field} />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="last_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Last Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="last name" {...field} />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input placeholder="username" {...field} />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        autoComplete="new-password"
-                        type="password"
-                        placeholder="password"
-                        {...field}
-                      />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="email" {...field} />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="phone_number"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
-                    <FormControl>
-                      <Input placeholder="phone number" {...field} />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="logo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Upload Image</FormLabel>
-                    <FormControl>
-                      <UploadWidget
-                        onSave={(e) => {
-                          form.setValue("logo", e ?? "");
-                          form.clearErrors("logo");
-                        }}
-                      />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex justify-end">
-                <LoadingButton
-                  type="submit"
-                  label="Create"
-                  loading={isPadding}
+          <form
+            autoComplete="off"
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-3"
+          >
+            <Controller
+              control={form.control}
+              name="name"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  error={Boolean(fieldState.error)}
+                  helperText={fieldState.error?.message}
+                  label={"App Name"}
+                  placeholder="app name"
+                  size="small"
+                  InputLabelProps={{ shrink: true }}
                 />
-              </div>
-            </form>
-          </Form>
+              )}
+            />
+            <Controller
+              control={form.control}
+              name="first_name"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  error={Boolean(fieldState.error)}
+                  helperText={fieldState.error?.message}
+                  label={"First Name"}
+                  placeholder="first name"
+                  size="small"
+                  InputLabelProps={{ shrink: true }}
+                />
+              )}
+            />
+            <Controller
+              control={form.control}
+              name="last_name"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  error={Boolean(fieldState.error)}
+                  helperText={fieldState.error?.message}
+                  label={"Last Name"}
+                  placeholder="last name"
+                  size="small"
+                  InputLabelProps={{ shrink: true }}
+                />
+              )}
+            />
+            <Controller
+              control={form.control}
+              name="username"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  error={Boolean(fieldState.error)}
+                  helperText={fieldState.error?.message}
+                  label={"Username"}
+                  placeholder="username"
+                  size="small"
+                  InputLabelProps={{ shrink: true }}
+                />
+              )}
+            />
+            <Controller
+              control={form.control}
+              name="password"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  error={Boolean(fieldState.error)}
+                  helperText={fieldState.error?.message}
+                  label={"Password"}
+                  placeholder="password"
+                  type="password"
+                  size="small"
+                  InputLabelProps={{ shrink: true }}
+                />
+              )}
+            />
+            <Controller
+              control={form.control}
+              name="email"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  error={Boolean(fieldState.error)}
+                  helperText={fieldState.error?.message}
+                  label={"Email"}
+                  placeholder="email"
+                  size="small"
+                  InputLabelProps={{ shrink: true }}
+                />
+              )}
+            />
+            <Controller
+              control={form.control}
+              name="phone_number"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  error={Boolean(fieldState.error)}
+                  helperText={fieldState.error?.message}
+                  label={"Phone Number"}
+                  placeholder="phone number"
+                  size="small"
+                  InputLabelProps={{ shrink: true }}
+                />
+              )}
+            />
+            <Controller
+              control={form.control}
+              name="logo"
+              render={({ field, fieldState }) => (
+                <UploadWidget
+                  onSave={(e) => {
+                    form.setValue("logo", e ?? "");
+                    form.clearErrors("logo");
+                  }}
+                />
+              )}
+            />
+
+            <div className="flex justify-end">
+              <LoadingButton
+                variant="contained"
+                fullWidth
+                className="hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white "
+                disableElevation
+                type="submit"
+                loading={isPadding}
+              >
+                Save
+              </LoadingButton>
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>

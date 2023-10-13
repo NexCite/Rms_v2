@@ -37,18 +37,21 @@ export async function updateAccountEntry(
 export async function deleteAccountEntry(id: number) {
   return handlerServiceAction(
     async (auth) => {
-      if (auth.type === "Admin") {
-        await prisma.account_Entry.delete({ where: { id: id } });
-      } else {
-        await prisma.account_Entry.update({
-          where: { id: id },
-          data: { status: "Deleted", user_id: auth.id },
-        });
-      }
+      await prisma.account_Entry.delete({ where: { id: id } });
+
+      // if (auth.type === "Admin") {
+      //   await prisma.account_Entry.delete({ where: { id: id } });
+      // } else {
+      //   await prisma.account_Entry.update({
+      //     where: { id: id },
+      //     data: { status: "Deleted", user_id: auth.id },
+      //   });
+      // }
 
       return;
     },
     "Delete_AccountEntry",
-    true
+    true,
+    { id }
   );
 }

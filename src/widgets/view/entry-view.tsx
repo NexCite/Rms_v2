@@ -1,8 +1,6 @@
 "use client";
 import { Prisma } from "@prisma/client";
 import { Button } from "@rms/components/ui/button";
-import { Table, tbody, td, TableHeader, tr } from "@rms/components/ui/table";
-import useAlertHook from "@rms/hooks/alert-hooks";
 import { FormatNumberWithFixed } from "@rms/lib/global";
 import { deleteEntry } from "@rms/service/entry-service";
 import moment from "moment";
@@ -10,6 +8,15 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useMemo, useTransition } from "react";
 import styled from "@emotion/styled";
+import { useStore } from "@rms/hooks/toast-hook";
+import {
+  CircularProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 
 type Props = {
   entry: Prisma.EntryGetPayload<{
@@ -42,7 +49,7 @@ export default function EntryView(props: Props) {
     return a;
   }, [props]);
   const [isPadding, setPadding] = useTransition();
-  const { createAlert } = useAlertHook();
+  const store = useStore();
   const pathName = usePathname();
   return (
     <Style className="card">
@@ -57,7 +64,10 @@ export default function EntryView(props: Props) {
               setPadding(async () => {
                 const result = await deleteEntry(props.entry.id);
 
-                createAlert({ ...result, replace: "/admin/accounting/entry" });
+                store.OpenAlert({
+                  ...result,
+                  replace: "/admin/accounting/entry",
+                });
               });
             }
           }}
@@ -67,7 +77,7 @@ export default function EntryView(props: Props) {
           {isPadding ? (
             <>
               {" "}
-              <Loader2 /> loading...
+              <CircularProgress sx={{ color: "black" }} />
             </>
           ) : (
             "Delete"
@@ -92,99 +102,99 @@ export default function EntryView(props: Props) {
           Export
         </Button>
       </div>
-      <table className="w-full min-w-max table-auto text-left">
-        <TableHeader>
-          <tr className="head">
-            <td className="w-full">Debit</td>
-            <td className="w-full">Credit</td>
-            <td className="w-full">Amount</td>
-          </tr>
-        </TableHeader>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Debit</TableCell>
+            <TableCell>Credit</TableCell>
+            <TableCell>Amount</TableCell>
+          </TableRow>
+        </TableHead>
 
-        <tbody>
+        <TableBody>
           {props.entry.sub_entries.map((res) => (
-            <tr key={res.id}>
+            <TableRow key={res.id}>
               {res.type === "Debit" && (
                 <>
-                  <td>
+                  <TableCell>
                     ({res.two_digit?.id ?? ""}
                     {res.three_digit?.id ?? ""}
                     {res.more_than_four_digit?.id ?? ""}
                     {res.account_entry?.id ?? ""}) {res.two_digit?.name ?? ""}
                     {res.three_digit?.name ?? ""}
                     {res.account_entry?.username ?? ""}
-                  </td>
-                  <td></td>
+                  </TableCell>
+                  <TableCell></TableCell>
                 </>
               )}
               {res.type === "Credit" && (
                 <>
-                  <td></td>
-                  <td>
+                  <TableCell></TableCell>
+                  <TableCell>
                     ({res.two_digit?.id ?? ""}
                     {res.three_digit?.id ?? ""}
                     {res.more_than_four_digit?.id ?? ""}
                     {res.account_entry?.id ?? ""}) {res.two_digit?.name ?? ""}
                     {res.three_digit?.name ?? ""}
                     {res.account_entry?.username ?? ""}
-                  </td>
+                  </TableCell>
                 </>
               )}
-              <td>
+              <TableCell>
                 {props.entry.currency.symbol}
                 {FormatNumberWithFixed(res.amount)}
-              </td>
-              <td></td>
-              <td></td>
-            </tr>
+              </TableCell>
+              <TableCell></TableCell>
+              <TableCell></TableCell>
+            </TableRow>
           ))}
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td className="head">Total</td>
-            <td>
+          <TableRow>
+            <TableCell></TableCell>
+            <TableCell></TableCell>
+            <TableCell></TableCell>
+            <TableCell className="head">Total</TableCell>
+            <TableCell>
               {props.entry.currency.symbol}
               {FormatNumberWithFixed(amount)}
-            </td>
-          </tr>
-          <tr>
-            <td colSpan={6}></td>
-          </tr>
-          <tr></tr>
-          <tr className="head ">
-            <td>ID</td>
-            <td>Date</td>
-            <td>Last Update</td>
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell colSpan={6}></TableCell>
+          </TableRow>
+          <TableRow></TableRow>
+          <TableRow>
+            <TableCell>ID</TableCell>
+            <TableCell>Date</TableCell>
+            <TableCell>Last Update</TableCell>
 
-            <td colSpan={2}> Create By</td>
-          </tr>
-          <tr>
-            <td>{props.entry.id}</td>
-            <td>
+            <TableCell colSpan={2}> Create By</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>{props.entry.id}</TableCell>
+            <TableCell>
               {moment(props.entry.to_date).format("dddd DD-MM-yyy hh:mm")}
-            </td>
-            <td>
+            </TableCell>
+            <TableCell>
               {moment(props.entry.modified_date).format("dddd DD-MM-yyy hh:mm")}
-            </td>
-            <td colSpan={2}>{props.entry.user?.username}</td>
-          </tr>
-          <tr className="head ">
-            <td>Title</td>
-            <td>Description</td>
-            <td>Note</td>
-          </tr>
+            </TableCell>
+            <TableCell colSpan={2}>{props.entry.user?.username}</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>Title</TableCell>
+            <TableCell>Description</TableCell>
+            <TableCell>Note</TableCell>
+          </TableRow>
 
-          <tr>
-            <td>{props.entry.title}</td>
-            <td>{props.entry.description}</td>
-            <td>{props.entry.note}</td>
-            <td colSpan={2}></td>
-          </tr>
+          <TableRow>
+            <TableCell>{props.entry.title}</TableCell>
+            <TableCell>{props.entry.description}</TableCell>
+            <TableCell>{props.entry.note}</TableCell>
+            <TableCell colSpan={2}></TableCell>
+          </TableRow>
 
-          <tr className="head">
-            <td>PDF</td>
-            <td colSpan={5}>
+          <TableRow className="head">
+            <TableCell>PDF</TableCell>
+            <TableCell colSpan={5}>
               {props.entry.media && (
                 <iframe
                   width={"100%"}
@@ -193,18 +203,18 @@ export default function EntryView(props: Props) {
                   src={`/api/media/${props.entry.media.path}`}
                 />
               )}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
     </Style>
   );
 }
 const Style = styled.div`
   table {
-    tbody,
-    tr,
-    td,
+    TableBody,
+    TableRow,
+    TableCell,
     th {
       color: black;
       font-size: 12pt;
@@ -215,7 +225,7 @@ const Style = styled.div`
     table {
       margin-top: 5px;
       thead {
-        tr {
+        TableRow {
           th {
           }
         }

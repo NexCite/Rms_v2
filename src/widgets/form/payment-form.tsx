@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { $Enums, DebitCreditType, Prisma } from "@prisma/client";
+import { $Enums, Prisma } from "@prisma/client";
 import {
   Card,
   CardContent,
@@ -19,14 +19,9 @@ import {
 import { Input } from "@rms/components/ui/input";
 import SearchSelect from "@rms/components/ui/search-select";
 import { Textarea } from "@rms/components/ui/textarea";
-import useAlertHook from "@rms/hooks/alert-hooks";
 
-import { useRouter } from "next/navigation";
-import React, { useCallback, useMemo, useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
 import styled from "@emotion/styled";
-import { z } from "zod";
-import LoadingButton from "@rms/components/ui/loading-button";
+import { Alert } from "@rms/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -35,8 +30,12 @@ import {
   SelectValue,
 } from "@rms/components/ui/select";
 import { createPayment, updatePayment } from "@rms/service/payment-service";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo, useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import UploadWidget from "../upload/upload-widget";
-import { Alert } from "@rms/components/ui/alert";
+import { useStore } from "@rms/hooks/toast-hook";
 
 interface Props {
   id?: number;
@@ -73,8 +72,7 @@ export default function PaymentForm(props: Props) {
   );
 
   const [media, setMedia] = useState<Prisma.MediaGetPayload<{}>>();
-  const { createAlert } = useAlertHook();
-
+  const store = useStore();
   const handleSubmit = useCallback(
     (values: z.infer<any>) => {
       const result = validation.safeParse(values);
@@ -125,7 +123,7 @@ export default function PaymentForm(props: Props) {
           var value2 = JSON.parse(JSON.stringify(values));
 
           await updatePayment(props.value.id, value2).then((res) => {
-            createAlert(res);
+            store.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);
             });
@@ -140,7 +138,7 @@ export default function PaymentForm(props: Props) {
           var value2 = JSON.parse(JSON.stringify(values));
 
           await createPayment(value2).then((res) => {
-            createAlert(res);
+            store.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);
             });
@@ -152,7 +150,7 @@ export default function PaymentForm(props: Props) {
         });
       }
     },
-    [back, createAlert, form, media, props.value]
+    [back, store, form, media, props.value, props.isEditMode]
   );
   return (
     <>
@@ -327,11 +325,11 @@ export default function PaymentForm(props: Props) {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end">
-                <LoadingButton
+                {/* <LoadingButton
                   type="submit"
                   label={props.value ? "Update" : "Add"}
                   loading={isPadding}
-                />
+                /> */}
               </CardFooter>
             </Card>
           </form>

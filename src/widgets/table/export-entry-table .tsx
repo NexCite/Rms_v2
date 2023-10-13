@@ -7,60 +7,29 @@ import React, {
   useTransition,
 } from "react";
 
-import {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-
-import { Button } from "@rms/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@rms/components/ui/dropdown-menu";
-
 import { $Enums, Prisma } from "@prisma/client";
 import { FormatNumberWithFixed } from "@rms/lib/global";
 
-import { usePathname, useRouter } from "next/navigation";
 import styled from "@emotion/styled";
-
-import SearchSelect from "../../components/ui/search-select";
+import { usePathname, useRouter } from "next/navigation";
 
 import { DateRange } from "react-day-picker";
-import DateRangePicker from "@rms/components/ui/date-range-pciker";
 
-import useAlertHook from "@rms/hooks/alert-hooks";
-import moment from "moment";
-import { usePDF } from "react-to-pdf";
-import Image from "next/image";
-import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
+import LoadingButton from "@mui/lab/LoadingButton";
 import {
   Autocomplete,
   Card,
-  CardContent,
   Divider,
-  Table,
-  TableCell,
-  TableHead,
-  TableRow,
   TextField,
   Typography,
 } from "@mui/material";
-import dayjs from "dayjs";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { DatePicker } from "@mui/x-date-pickers";
-import LoadingButton from "@mui/lab/LoadingButton";
+import dayjs from "dayjs";
+import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
+import moment from "moment";
+import Image from "next/image";
+import { usePDF } from "react-to-pdf";
 
 export default function ExportEntryDataTable(props: Props) {
   const [isPadding, setTransition] = useTransition();
@@ -300,6 +269,26 @@ export default function ExportEntryDataTable(props: Props) {
     []
   );
 
+  const defaultValue = useMemo(() => {
+    const account = props.accounts.find((res) => res.id === props.account_id);
+    const two_digit = props.two_digits.find(
+      (res) => res.id === props.two_digit_id
+    );
+    const three_digit = props.three_digits.find(
+      (res) => res.id === props.three_digit_id
+    );
+    const more_digit = props.more_digits.find(
+      (res) => res.id === props.more_digit_id
+    );
+
+    return {
+      account,
+      two_digit,
+      three_digit,
+      more_digit,
+    };
+  }, [props]);
+
   const { entries, totalCredit, totalDebit, currencies } = useMemo(() => {
     var totalDebit: Record<string, number> = {},
       totalCredit: Record<string, number> = {},
@@ -390,64 +379,34 @@ export default function ExportEntryDataTable(props: Props) {
           newEntry.amount = amount;
         }
 
-        if (
-          (two_digit_id ?? 0) !== subEntry.two_digit_id &&
-          (three_digit_id ?? 0) !== subEntry.three_digit_id &&
-          (more_digit_id ?? 0) !== more_digit_id
-        ) {
-          if (
-            account_id &&
-            !two_digit_id &&
-            !three_digit_id &&
-            !more_digit_id
-          ) {
-            if (account_id === subEntry.account_entry_id) {
-              return;
-            } else {
-              newEntry.subEntries.push(subEntry);
-
-              return;
-            }
-          }
-          newEntry.subEntries.push(subEntry);
+        if (two_digit_id === subEntry.two_digit_id) {
+          return;
         }
+        if (three_digit_id === subEntry.three_digit_id) {
+          return;
+        }
+        if (more_digit_id === subEntry.more_than_four_digit_id) {
+          return;
+        }
+
+        if (account_id && !two_digit_id && !three_digit_id && !more_digit_id) {
+          if (account_id === subEntry.account_entry_id) {
+            return;
+          } else {
+            newEntry.subEntries.push(subEntry);
+
+            return;
+          }
+        }
+        newEntry.subEntries.push(subEntry);
       });
 
       entries.push(newEntry);
     });
 
     return { entries, totalDebit, totalCredit, currencies };
-  }, [props.data, search]);
-  const { two_digit, three_digit, four_digit, account } = useMemo(() => {
-    var two_digit: { id: number; name: string } = undefined,
-      three_digit: { id: number; name: string } = undefined,
-      four_digit: { id: number; name: string } = undefined;
-    var account: { id: number; username: string } = undefined;
-    if (search.two_digit_id) {
-      two_digit = props.two_digits.find(
-        (res) => res.id === search.two_digit_id
-      );
-    }
-    if (search.three_digit_id) {
-      three_digit = props.two_digits.find(
-        (res) => res.id === search.three_digit_id
-      );
-    }
+  }, [props.data]);
 
-    if (search.more_digit_id) {
-      four_digit = props.two_digits.find(
-        (res) => res.id === search.more_digit_id
-      );
-    }
-
-    if (search.account_id) {
-      account = props.two_digits.find(
-        (res) => res.id === search.account_id
-      ) as any;
-    }
-
-    return { two_digit, three_digit, four_digit, account };
-  }, [search]);
   const titleRef = useRef<HTMLHeadingElement>();
   const { toPDF, targetRef } = usePDF();
   return (
@@ -457,19 +416,6 @@ export default function ExportEntryDataTable(props: Props) {
           className=" grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4  h-full  overflow-auto  justify-between rms-container p-5"
           onSubmit={handleSubmit}
         >
-          <TextField
-            label="Id"
-            type="number"
-            size="small"
-            defaultValue={search.id}
-            onChange={(e) => {
-              setSearch((prev) => ({
-                ...prev,
-                id: e.target.value ? +e.target.value : undefined,
-              }));
-            }}
-          />
-
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
               maxDate={dayjs(selectDate.to)}
@@ -493,12 +439,19 @@ export default function ExportEntryDataTable(props: Props) {
           <Autocomplete
             disablePortal
             size="small"
+            disabled={
+              search.more_digit_id !== undefined ||
+              search.three_digit_id !== undefined
+            }
             defaultValue={
-              two_digit
-                ? { label: two_digit.name, value: two_digit.id }
+              defaultValue.two_digit
+                ? {
+                    label: defaultValue.two_digit.name,
+                    value: defaultValue.two_digit.id,
+                  }
                 : undefined
             }
-            isOptionEqualToValue={(e) => e.value === two_digit?.id}
+            isOptionEqualToValue={(e) => e.value === search.two_digit_id}
             onChange={(e, f) => {
               setSearch((prev) => ({
                 ...prev,
@@ -518,12 +471,16 @@ export default function ExportEntryDataTable(props: Props) {
           <Autocomplete
             disablePortal
             size="small"
-            isOptionEqualToValue={(e) => e.value === three_digit?.id}
-            value={
-              three_digit
+            isOptionEqualToValue={(e) => e.value === search.three_digit_id}
+            disabled={
+              search.two_digit_id !== undefined ||
+              search.more_digit_id !== undefined
+            }
+            defaultValue={
+              defaultValue.three_digit
                 ? {
-                    label: three_digit.name,
-                    value: three_digit.id,
+                    label: defaultValue.three_digit.name,
+                    value: defaultValue.three_digit.id,
                   }
                 : undefined
             }
@@ -547,12 +504,16 @@ export default function ExportEntryDataTable(props: Props) {
           <Autocomplete
             disablePortal
             size="small"
-            isOptionEqualToValue={(e) => e.value === four_digit?.id}
-            value={
-              four_digit
+            disabled={
+              search.two_digit_id !== undefined ||
+              search.three_digit_id !== undefined
+            }
+            isOptionEqualToValue={(e) => e.value === search.more_digit_id}
+            defaultValue={
+              defaultValue.more_digit
                 ? {
-                    label: four_digit.name,
-                    value: four_digit.id,
+                    label: defaultValue.more_digit.name,
+                    value: defaultValue.more_digit.id,
                   }
                 : undefined
             }
@@ -575,23 +536,23 @@ export default function ExportEntryDataTable(props: Props) {
           <Autocomplete
             disablePortal
             size="small"
-            isOptionEqualToValue={(e) => e.value === account.id}
-            value={
-              account
+            isOptionEqualToValue={(e) => e.value === search.account_id}
+            defaultValue={
+              defaultValue.account
                 ? {
-                    label: `${account.id} ${account.username}`,
-                    value: account.id,
+                    label: `${defaultValue.account.username}`,
+                    value: defaultValue.account.id,
                   }
                 : undefined
             }
             onChange={(e, f) => {
               setSearch((prev) => ({
                 ...prev,
-                account_id: f.value,
+                account_id: f?.value,
               }));
             }}
-            options={props.more_digits.map((res) => ({
-              label: res.name,
+            options={props.accounts.map((res) => ({
+              label: res.username,
               value: res.id,
             }))}
             renderInput={(params) => <TextField {...params} label="Accounts" />}
@@ -783,12 +744,15 @@ export default function ExportEntryDataTable(props: Props) {
                         },
                       },
                     ]}
-                    data={Object.keys(currencies).map((key) => ({
-                      currncy: key,
-                      debit: FormatNumberWithFixed(totalDebit[key] ?? 0),
-                      credit: FormatNumberWithFixed(totalCredit[key] ?? 0),
+                    data={props.currencies.map((res) => ({
+                      currncy: res.symbol,
+                      debit: FormatNumberWithFixed(totalDebit[res.symbol] ?? 0),
+                      credit: FormatNumberWithFixed(
+                        totalCredit[res.symbol] ?? 0
+                      ),
                       total: FormatNumberWithFixed(
-                        (totalDebit[key] ?? 0) - (totalCredit[key] ?? 0)
+                        (totalDebit[res.symbol] ?? 0) -
+                          (totalCredit[res.symbol] ?? 0)
                       ),
                     }))}
                   />
@@ -863,7 +827,7 @@ type Props = {
   accounts?: Prisma.Account_EntryGetPayload<{}>[];
   debit?: $Enums.EntryType;
   type?: $Enums.DidgitType;
-
+  currencies: Prisma.CurrencyGetPayload<{}>[];
   data: Prisma.EntryGetPayload<{
     include: {
       currency: true;

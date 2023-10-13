@@ -5,7 +5,7 @@ import React, { useCallback, useMemo } from "react";
 
 import styled from "@emotion/styled";
 import { FormatNumberWithFixed } from "@rms/lib/global";
-
+import { AiOutlineClose } from "react-icons/ai";
 import { Prisma } from "@prisma/client";
 import {
   Tabs,
@@ -13,8 +13,9 @@ import {
   TabsList,
   TabsTrigger,
 } from "@rms/components/ui/tabs";
-import BackButton from "@rms/components/ui/back-button";
 import { Button } from "@rms/components/ui/button";
+import { useRouter } from "next/navigation";
+import { IconButton } from "@mui/material";
 
 type Props = {
   config: {
@@ -43,6 +44,7 @@ type Props = {
   }>;
 };
 export default function MainExport(props: Props) {
+  const { back } = useRouter();
   const handlePdf = useCallback(async () => {
     const actionDiv = document.getElementById("export-pdf");
     actionDiv.style.display = "none";
@@ -56,6 +58,14 @@ export default function MainExport(props: Props) {
       <Tabs defaultValue="1">
         <div id="export-pdf">
           <div id="action">
+            <IconButton
+              onClick={() => {
+                back();
+              }}
+            >
+              <AiOutlineClose />
+            </IconButton>
+
             <Button className="bg-black" color="dark" onClick={handlePdf}>
               Export
             </Button>

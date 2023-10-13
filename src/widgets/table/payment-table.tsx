@@ -1,20 +1,12 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import React, { useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 
 import styled from "@emotion/styled";
 import { Prisma } from "@prisma/client";
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import useAlertHook from "@rms/hooks/alert-hooks";
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
+import Authorized from "@rms/components/ui/authorized";
 import { Button } from "@rms/components/ui/button";
 import {
   DropdownMenu,
@@ -26,10 +18,18 @@ import {
   DropdownMenuTrigger,
 } from "@rms/components/ui/dropdown-menu";
 import { Input } from "@rms/components/ui/input";
-import { DotsHorizontalIcon } from "@radix-ui/react-icons";
-import { useRouter } from "next/navigation";
-import Authorized from "@rms/components/ui/authorized";
 import { deletePaymentById } from "@rms/service/payment-service";
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { useRouter } from "next/navigation";
+import { useStore } from "@rms/hooks/toast-hook";
 
 type Props = {
   payments: Prisma.PaymentGetPayload<{}>[];
@@ -41,7 +41,7 @@ export default function PaymentTable(props: Props) {
 
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const { createAlert } = useAlertHook();
+  const store = useStore();
   const { push } = useRouter();
   const columns = useMemo<ColumnDef<Prisma.PaymentGetPayload<{}>>[]>(
     () => [
@@ -82,7 +82,7 @@ export default function PaymentTable(props: Props) {
                           setActiveTransition(async () => {
                             const result = await deletePaymentById(id);
 
-                            createAlert(result);
+                            store.OpenAlert(result);
                           });
                         }
                       }}
@@ -145,7 +145,7 @@ export default function PaymentTable(props: Props) {
         accessorFn: (p) => p.modified_date?.toLocaleDateString(),
       },
     ],
-    [createAlert, isActive, pathName, push]
+    [store]
   );
   const table = useReactTable({
     data: props.payments,

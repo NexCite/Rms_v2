@@ -44,13 +44,15 @@ export async function deleteBrokerById(
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction<void>(
     async (auth) => {
-      if (auth.type === "Admin")
-        await prisma.broker.delete({ where: { id: id } });
-      else
-        await prisma.broker.update({
-          where: { id: id },
-          data: { status: "Deleted", user_id: auth.id },
-        });
+      await prisma.broker.delete({ where: { id: id } });
+
+      // if (auth.type === "Admin")
+      //   await prisma.broker.delete({ where: { id: id } });
+      // else
+      //   await prisma.broker.update({
+      //     where: { id: id },
+      //     data: { status: "Deleted", user_id: auth.id },
+      //   });
 
       return;
     },

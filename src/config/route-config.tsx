@@ -190,7 +190,7 @@ export default function GetRoutes(permissions: $Enums.UserPermission[]) {
         {
           index: 3,
           title: "Profile",
-          path: "/admin/trading/profile",
+          path: "/admin/setting/profile",
           key: "View_Profile",
         },
         {

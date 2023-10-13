@@ -1,27 +1,28 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { $Enums, DidgitType, DebitCreditType, Prisma } from "@prisma/client";
-import useAlertHook from "@rms/hooks/alert-hooks";
+import { $Enums, DebitCreditType, DidgitType, Prisma } from "@prisma/client";
 
 import { useRouter } from "next/navigation";
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useTransition,
-} from "react";
-import { Controller, useForm } from "react-hook-form";
 import styled from "@emotion/styled";
+import { useCallback, useMemo, useTransition } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import LoadingButton from "@mui/lab/LoadingButton";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
-import LoadingButton from "@mui/lab/LoadingButton";
 
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  FormControl,
+  FormHelperText,
+  TextField,
+} from "@mui/material";
 import {
   createMoreDigit,
   createThreeDigit,
@@ -30,16 +31,7 @@ import {
   updateThreeDigit,
   updateTwoDigit,
 } from "@rms/service/digit-service";
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  FormControl,
-  FormHelperText,
-  TextField,
-} from "@mui/material";
-import { CardFooter } from "@material-tailwind/react";
+import { useStore } from "@rms/hooks/toast-hook";
 type Props = {
   relations?:
     | Prisma.More_Than_Four_DigitGetPayload<{}>[]
@@ -94,14 +86,20 @@ export default function DigitForm(props: Props) {
           name: z
             .string()
             .min(1, { message: "Name must be at least 1  character" }),
-          type: z.enum([
-            DidgitType.Assets,
-            DidgitType.Liabilities,
-            DidgitType.Owner_Equity,
-            DidgitType.Expensive,
-            DidgitType.Income,
-          ]),
-          debit_credit: z.enum([DebitCreditType.Debit, DebitCreditType.Credit]),
+          type: z
+            .enum([
+              DidgitType.Assets,
+              DidgitType.Liabilities,
+              DidgitType.Owner_Equity,
+              DidgitType.Expensive,
+              DidgitType.Income,
+            ])
+            .optional()
+            .nullable(),
+          debit_credit: z
+            .enum([DebitCreditType.Debit, DebitCreditType.Credit])
+            .optional()
+            .nullable(),
           two_digit_id: z
             .number()
             .or(z.string().regex(/^\d+$/).transform(Number)),
@@ -113,14 +111,20 @@ export default function DigitForm(props: Props) {
           name: z
             .string()
             .min(1, { message: "Name must be at least 1  character" }),
-          type: z.enum([
-            DidgitType.Assets,
-            DidgitType.Liabilities,
-            DidgitType.Owner_Equity,
-            DidgitType.Expensive,
-            DidgitType.Income,
-          ]),
-          debit_credit: z.enum([DebitCreditType.Debit, DebitCreditType.Credit]),
+          type: z
+            .enum([
+              DidgitType.Assets,
+              DidgitType.Liabilities,
+              DidgitType.Owner_Equity,
+              DidgitType.Expensive,
+              DidgitType.Income,
+            ])
+            .optional()
+            .nullable(),
+          debit_credit: z
+            .enum([DebitCreditType.Debit, DebitCreditType.Credit])
+            .optional()
+            .nullable(),
           three_digit_id: z
             .number()
             .or(z.string().regex(/^\d+$/).transform(Number)),
@@ -132,8 +136,7 @@ export default function DigitForm(props: Props) {
     resolver: zodResolver(formSchema),
     defaultValues: props.value,
   });
-  const { createAlert } = useAlertHook();
-
+  const store = useStore();
   const handleSubmit = useCallback(
     (values: z.infer<typeof formSchema>) => {
       setTransition(async () => {
@@ -146,7 +149,7 @@ export default function DigitForm(props: Props) {
                 ) as Prisma.Three_DigitUncheckedUpdateInput;
                 value2.two_digit_id = +(value2.two_digit_id + "");
                 await updateThreeDigit(props.value.id, value2).then((res) => {
-                  createAlert(res);
+                  store.OpenAlert(res);
                   Object.keys(res.errors ?? []).map((e) => {
                     form.setError(e as any, res[e]);
                   });
@@ -161,7 +164,7 @@ export default function DigitForm(props: Props) {
                 ) as Prisma.Two_DigitUncheckedUpdateInput;
 
                 await updateTwoDigit(props.value.id, value1).then((res) => {
-                  createAlert(res);
+                  store.OpenAlert(res);
                   Object.keys(res.errors ?? []).map((e) => {
                     form.setError(e as any, res[e]);
                   });
@@ -178,7 +181,7 @@ export default function DigitForm(props: Props) {
                 value3.three_digit_id = +(value3.three_digit_id + "");
 
                 await updateMoreDigit(props.value.id, value3).then((res) => {
-                  createAlert(res);
+                  store.OpenAlert(res);
                   Object.keys(res.errors ?? []).map((e) => {
                     form.setError(e as any, res[e]);
                   });
@@ -201,7 +204,7 @@ export default function DigitForm(props: Props) {
                 ) as Prisma.Three_DigitUncheckedCreateInput;
                 value2.two_digit_id = +(value2.two_digit_id + "");
                 await createThreeDigit(value2).then((res) => {
-                  createAlert(res);
+                  store.OpenAlert(res);
                   Object.keys(res.errors ?? []).map((e) => {
                     form.setError(e as any, res[e]);
                   });
@@ -216,7 +219,7 @@ export default function DigitForm(props: Props) {
                 ) as Prisma.Two_DigitUncheckedCreateInput;
 
                 await createTwoDigit(value1).then((res) => {
-                  createAlert(res);
+                  store.OpenAlert(res);
                   Object.keys(res.errors ?? []).map((e) => {
                     form.setError(e as any, res[e]);
                   });
@@ -233,7 +236,7 @@ export default function DigitForm(props: Props) {
                 value3.three_digit_id = +(value3.three_digit_id + "");
 
                 await createMoreDigit(value3).then((res) => {
-                  createAlert(res);
+                  store.OpenAlert(res);
                   Object.keys(res.errors ?? []).map((e) => {
                     form.setError(e as any, res[e]);
                   });
@@ -250,12 +253,12 @@ export default function DigitForm(props: Props) {
         }
       });
     },
-    [back, createAlert, props.node, props.value, form]
+    [back, store, props.node, props.value, form]
   );
   return (
     <>
       <Style onSubmit={form.handleSubmit(handleSubmit)}>
-        <form autoComplete="off">
+        <form autoComplete="off" noValidate>
           <Card>
             <CardHeader
               className="capitalize"
@@ -324,7 +327,6 @@ export default function DigitForm(props: Props) {
                     render={({ field, fieldState }) => (
                       <FormControl
                         fullWidth
-                        required={props.node !== "two"}
                         size="small"
                         error={Boolean(fieldState?.error?.message)}
                       >
@@ -365,7 +367,6 @@ export default function DigitForm(props: Props) {
                     render={({ field, fieldState }) => (
                       <FormControl
                         fullWidth
-                        required={props.node !== "two"}
                         size="small"
                         error={Boolean(fieldState?.error?.message)}
                       >
@@ -401,7 +402,7 @@ export default function DigitForm(props: Props) {
                       name={
                         props.node === "three"
                           ? "two_digit_id"
-                          : "three_digit_id"
+                          : ("three_digit_id" as any)
                       }
                       control={form.control}
                       render={({ field, fieldState }) => (
@@ -445,19 +446,18 @@ export default function DigitForm(props: Props) {
                 )}
               </div>
             </CardContent>
-            <CardFooter className="flex justify-end">
+            <div className="flex justify-end5 m-5 mt-2">
               <LoadingButton
-                variant="outlined"
                 fullWidth
-                className="hover:bg-blue-gray-50 hover:border-black border-black text-black capitalize "
+                variant="contained"
+                className="hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
                 disableElevation
-                type="submit"
-                loadingIndicator="Loading…"
                 loading={isPadding}
+                type="submit"
               >
                 Save
               </LoadingButton>
-            </CardFooter>
+            </div>
           </Card>
         </form>
       </Style>

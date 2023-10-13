@@ -338,10 +338,10 @@ model Three_Digit {
   account_entries      Account_Entry[]
 
   two_digit_id Int
-  two_digit    Two_Digit       @relation(fields: [two_digit_id], references: [id], onDelete: Cascade)
-  status       Status          @default(Enable)
-  type         DidgitType
-  debit_credit DebitCreditType @default(Debit)
+  two_digit    Two_Digit        @relation(fields: [two_digit_id], references: [id], onDelete: Cascade)
+  status       Status           @default(Enable)
+  type         DidgitType?
+  debit_credit DebitCreditType?
 
   sub_entries SubEntry[]
   user_id     Int?
@@ -351,15 +351,15 @@ model Three_Digit {
 model More_Than_Four_Digit {
   id Int @id @unique
 
-  name            String          @unique
-  create_date     DateTime        @default(now())
-  modified_date   DateTime        @default(now()) @updatedAt
+  name            String           @unique
+  create_date     DateTime         @default(now())
+  modified_date   DateTime         @default(now()) @updatedAt
   account_entries Account_Entry[]
   three_digit_id  Int
-  three_digit     Three_Digit     @relation(fields: [three_digit_id], references: [id], onDelete: Cascade)
-  status          Status          @default(Enable)
-  type            DidgitType
-  debit_credit    DebitCreditType @default(Debit)
+  three_digit     Three_Digit      @relation(fields: [three_digit_id], references: [id], onDelete: Cascade)
+  status          Status           @default(Enable)
+  type            DidgitType?
+  debit_credit    DebitCreditType?
   sub_entries     SubEntry[]
   user_id         Int?
 

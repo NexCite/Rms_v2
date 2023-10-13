@@ -2,39 +2,16 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Prisma } from "@prisma/client";
-import useAlertHook from "@rms/hooks/alert-hooks";
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@rms/components/ui/form";
 import { useRouter } from "next/navigation";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@rms/components/ui/card";
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useTransition,
-} from "react";
-import { useForm } from "react-hook-form";
-import styled from "@emotion/styled";
+import { useCallback, useMemo, useTransition } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Input } from "@rms/components/ui/input";
-
-import LoadingButton from "@rms/components/ui/loading-button";
-
+import LoadingButton from "@mui/lab/LoadingButton";
+import { Card, CardContent, CardHeader, TextField } from "@mui/material";
+import { useStore } from "@rms/hooks/toast-hook";
 import { createCurrency, updateCurrency } from "@rms/service/currency-service";
 type Props = { value: Prisma.CurrencyGetPayload<{}> };
 export default function CurrencyForm(props: Props) {
@@ -55,7 +32,7 @@ export default function CurrencyForm(props: Props) {
     resolver: zodResolver(formSchema),
     defaultValues: props.value,
   });
-  const { createAlert } = useAlertHook();
+  const store = useStore();
 
   const handleSubmit = useCallback(
     (values: z.infer<typeof formSchema>) => {
@@ -63,7 +40,7 @@ export default function CurrencyForm(props: Props) {
         if (props.value) {
           setTransition(async () => {
             const result = await updateCurrency(props.value.id, values);
-            createAlert(result);
+            store.OpenAlert(result);
             if (result.status === 200) back();
             Object.keys(result.errors ?? []).map((e) => {
               form.setError(e as any, result[e]);
@@ -72,7 +49,7 @@ export default function CurrencyForm(props: Props) {
         } else {
           setTransition(async () => {
             const result = await createCurrency(values as any);
-            createAlert(result);
+            store.OpenAlert(result);
             if (result.status === 200) back();
             Object.keys(result.errors ?? []).map((e) => {
               form.setError(e as any, result[e]);
@@ -81,84 +58,71 @@ export default function CurrencyForm(props: Props) {
         }
       });
     },
-    [back, createAlert, props.value, form]
+    [back, props.value, form, store]
   );
   return (
     <>
-      <Style className="card" onSubmit={form.handleSubmit(handleSubmit)}>
-        <Form {...form}>
-          <form className="card" autoComplete="off">
-            <Card>
-              <CardHeader>
-                {" "}
-                <div className="flex justify-between items-center">
-                  <h1 className="font-medium text-2xl">Currency Form</h1>
-                </div>
-                <hr className="my-12 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
-              </CardHeader>
-
-              <CardContent>
-                <div className="grid gap-4">
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: true }}
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem className="required">
-                          <FormLabel>Name</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="name"
-                              onChange={(e) => {}}
-                              {...field}
-                            />
-                          </FormControl>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: true }}
-                      control={form.control}
-                      name="symbol"
-                      render={({ field }) => (
-                        <FormItem className="required">
-                          <FormLabel>Symbol</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="symbol"
-                              onChange={(e) => {}}
-                              {...field}
-                            />
-                          </FormControl>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-end">
-                <LoadingButton
-                  type="submit"
-                  label={props.value ? "Update" : "Add"}
-                  loading={isPadding}
-                />
-              </CardFooter>
-            </Card>
-          </form>
-        </Form>
-      </Style>
+      <form
+        className="max-w-[450px] m-auto"
+        onSubmit={form.handleSubmit(handleSubmit)}
+        noValidate
+      >
+        <Card>
+          <CardHeader title="Currency Form" />
+          <CardContent className="flex flex-col gap-5">
+            <Controller
+              name="name"
+              control={form.control}
+              render={({ field, fieldState }) => {
+                return (
+                  <TextField
+                    size="small"
+                    label="Name"
+                    placeholder="name"
+                    required
+                    fullWidth
+                    error={Boolean(fieldState.error)}
+                    helperText={fieldState.error?.message}
+                    {...field}
+                    InputLabelProps={{ shrink: true }}
+                  />
+                );
+              }}
+            />
+            <Controller
+              name="symbol"
+              control={form.control}
+              render={({ field, fieldState }) => {
+                return (
+                  <TextField
+                    size="small"
+                    label="Symbol"
+                    placeholder="symbol"
+                    required
+                    fullWidth
+                    error={Boolean(fieldState.error)}
+                    helperText={fieldState.error?.message}
+                    {...field}
+                    InputLabelProps={{ shrink: true }}
+                  />
+                );
+              }}
+            />
+          </CardContent>
+          <div className="flex justify-end5 m-5 mt-2">
+            <LoadingButton
+              fullWidth
+              variant="contained"
+              className="hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
+              disableElevation
+              loading={isPadding}
+              type="submit"
+            >
+              Save
+            </LoadingButton>
+          </div>
+        </Card>
+      </form>
     </>
   );
 }
-const Style = styled.div`
-  margin: auto;
-  margin-top: 5px;
-  max-width: 720px;
-`;

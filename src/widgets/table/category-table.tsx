@@ -1,37 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import React, { useMemo, useRef, useState, useTransition } from "react";
 import { Prisma } from "@prisma/client";
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import useAlertHook from "@rms/hooks/alert-hooks";
-import { Button } from "@rms/components/ui/button";
-import { Input } from "@rms/components/ui/input";
+import { usePathname, useRouter } from "next/navigation";
+import { useMemo, useTransition } from "react";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@rms/components/ui/dropdown-menu";
-import { DotsHorizontalIcon } from "@radix-ui/react-icons";
-import { deleteMoreDigit, deleteTwoDigit } from "@rms/service/digit-service";
+import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
+import Authorized from "@rms/components/ui/authorized";
 import { deleteCategoryById } from "@rms/service/category-service";
 import { deleteSubCategoryById } from "@rms/service/sub-category-service";
-import Authorized from "@rms/components/ui/authorized";
-import { Typography } from "@material-tailwind/react";
+import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
+import { useStore } from "@rms/hooks/toast-hook";
 
 type Props =
   | {
@@ -47,79 +25,32 @@ export default function CategoryTable(props: Props) {
   const pathName = usePathname();
   const [isActive, setActiveTransition] = useTransition();
 
-  const [globalFilter, setGlobalFilter] = useState("");
-
-  const { createAlert } = useAlertHook();
+  const store = useStore();
   const { push } = useRouter();
 
-  const columns = useMemo<ColumnDef<any>[]>(
+  const columns = useMemo<MRT_ColumnDef<any>[]>(
     () => [
-      {
-        accessorKey: "action",
-        cell(originalRow) {
-          const { id, name } = originalRow.row.original;
-
-          return (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <DotsHorizontalIcon />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <Authorized permission="Edit_Category">
-                    <DropdownMenuItem
-                      onClick={() => push(pathName + "/form?id=" + id)}
-                      className="cursor-pointer"
-                      disabled={isActive}
-                    >
-                      Edit
-                    </DropdownMenuItem>
-                  </Authorized>
-
-                  <Authorized permission="Delete_Category">
-                    {" "}
-                    <DropdownMenuItem
-                      disabled={isActive}
-                      className="cursor-pointer"
-                      onClick={() => {
-                        const isConfirm = confirm(
-                          `Do You sure you want to delete ${name} id:${id} `
-                        );
-                        if (isConfirm) {
-                          setActiveTransition(async () => {
-                            const result =
-                              props.node === "category"
-                                ? await deleteCategoryById(id)
-                                : await deleteSubCategoryById(id);
-
-                            createAlert(result);
-                          });
-                        }
-                      }}
-                    >
-                      {isActive ? <> deleting...</> : "Delete"}
-                    </DropdownMenuItem>
-                  </Authorized>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          );
-        },
-      },
-
       {
         header: "Status",
         accessorKey: "status",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
 
       {
         accessorKey: "id",
         header: "ID",
-        cell: ({ row: { original } }) => (
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+        Cell: ({ row: { original } }) => (
           <div
             className={`text-center rounded-sm ${
               original.status === "Deleted"
@@ -137,115 +68,96 @@ export default function CategoryTable(props: Props) {
       {
         accessorKey: "name",
         header: "Name",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
       {
         accessorKey: "create_date",
         header: "Create Date",
         accessorFn: (e) => e.create_date.toLocaleDateString(),
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
 
       {
         accessorKey: "modified_date",
         header: "Modified Date",
         accessorFn: (e) => e.modified_date.toLocaleDateString(),
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
     ],
-    [createAlert, props.node, isActive, pathName, push]
+    []
   );
-  const table = useReactTable({
-    data: props.data,
-    columns: columns,
-
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-
-    state: {
-      globalFilter,
-    },
-  });
-
-  const ref = useRef<HTMLDivElement>();
 
   return (
-    <div className="flex gap-6 flex-col">
-      <div className="flex justify-between items-center ">
-        <h1>Result: {props.data.length}</h1>
-      </div>
-      <div className="max-w-xs">
-        <Input
-          placeholder="search..."
-          value={globalFilter}
-          onChange={(e) => setGlobalFilter(e.target.value)}
-        />
-      </div>
+    <Card>
+      <CardHeader
+        title={
+          <Typography variant="h5">
+            {props.node === "category" ? "Category" : "SubCategory"} Table
+          </Typography>
+        }
+      ></CardHeader>
+      <MaterialReactTable
+        enableRowActions
+        columns={columns}
+        renderRowActionMenuItems={({
+          row: {
+            original: { id, name },
+          },
+        }) => [
+          <Authorized permission="Edit_Currency" key={1}>
+            <MenuItem
+              onClick={() => push(pathName + "/form?id=" + id)}
+              className="cursor-pointer"
+              disabled={isActive}
+            >
+              Edit
+            </MenuItem>
+          </Authorized>,
 
-      {/* Using Vanilla Mantine Table component here */}
-      <div className="h-full w-full overflow-auto  justify-between rms-container  ">
-        <table className="w-full min-w-max table-auto text-left">
-          {/* Use your own markup, customize however you want using the power of Tandiv Table */}
-          <thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th key={header.id}>
-                    isPlaceholder ? null : flexRender(
-                    header.column.columnDef.header ??
-                    header.column.columnDef.header, header.getContext() )
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.length === 0 ? (
-              <tr>
-                <td colSpan={columns.length} className="h-24 text-center">
-                  No results.
-                </td>
-              </tr>
-            ) : (
-              table.getRowModel().rows.map((row) => (
-                <tr key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell ??
-                          cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+          <Authorized permission="Delete_Currency" key={3}>
+            <MenuItem
+              disabled={isActive}
+              className="cursor-pointer"
+              onClick={() => {
+                const isConfirm = confirm(
+                  `Do You sure you want to delete ${name} id:${id} `
+                );
+                if (isConfirm) {
+                  setActiveTransition(async () => {
+                    var result;
+                    if (props.node === "category") {
+                      result = await deleteCategoryById(id);
+                    } else {
+                      result = await deleteSubCategoryById(id);
+                    }
 
-        <div className="flex items-center justify-end space-x-2 py-4">
-          <h5>
-            {table.getState().pagination.pageIndex + 1} of{" "}
-            {table.getPageCount()} page(s).
-          </h5>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
-        </div>
-      </div>
-    </div>
+                    store.OpenAlert(result);
+                  });
+                }
+              }}
+            >
+              {isActive ? <> deleting...</> : "Delete"}
+            </MenuItem>
+          </Authorized>,
+        ]}
+        data={props.data}
+        enableGlobalFilter
+      />
+    </Card>
   );
 }

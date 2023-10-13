@@ -3,19 +3,20 @@ import React from "react";
 
 import RouteModel from "@rms/models/RouteModel";
 
-import {
-  Card,
-  Typography,
-  List,
-  ListItem,
-  Accordion,
-  AccordionHeader,
-  AccordionBody,
-} from "@material-tailwind/react";
 import { ChevronDownIcon } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
+
 import Image from "next/image";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Card,
+  Divider,
+  List,
+  ListItemButton,
+  Typography,
+} from "@mui/material";
 
 type Props = {
   routers: RouteModel[];
@@ -36,8 +37,8 @@ export function Sidebar(props: Props) {
     props.routers.find((res) => pathName.startsWith(res.path))?.index ?? -1
   );
   return (
-    <Card className="h-full w-full p-3 rounded-none">
-      <div className="flex flex-col ">
+    <Card className="h-full w-full rounded-none flex flex-col">
+      <div className="flex flex-col p-3 ">
         <Image
           src={`/api/media/${props.config.logo}`}
           alt={props.config.name}
@@ -46,7 +47,7 @@ export function Sidebar(props: Props) {
           className="rounded-full w-12 h-12 mb-1"
         />
       </div>
-      <hr className="divide-x-0" />
+      <Divider />
       <List>
         {props.routers
           .filter((res) => !res.end)
@@ -54,49 +55,45 @@ export function Sidebar(props: Props) {
             res.children.length === 0 ? undefined : (
               <Accordion
                 key={res.title}
-                open={open === res.index}
-                icon={
-                  <ChevronDownIcon
-                    strokeWidth={2.5}
-                    className={`mx-auto h-4 w-4 transition-transform ${
-                      open === res.index ? "rotate-180" : ""
-                    }`}
-                  />
-                }
+                expanded={open === res.index}
+                elevation={0}
               >
-                <ListItem className="p-1" selected={open === res.index}>
+                <ListItemButton selected={open === res.index}>
                   <div>{res.icon}</div>
-                  <AccordionHeader
+                  <AccordionSummary
+                    expandIcon={
+                      <ChevronDownIcon
+                        strokeWidth={2.5}
+                        className={`mx-auto h-4 w-4 `}
+                      />
+                    }
                     onClick={() => handleOpen(res.index)}
-                    className="border-b-0 p-3 "
+                    className=" w-full "
                   >
-                    <Typography
-                      color="blue-gray"
-                      className="mr-auto font-normal"
-                    >
+                    <Typography className="mr-auto font-normal">
                       {res.title}
                     </Typography>
-                  </AccordionHeader>
-                </ListItem>
-                <AccordionBody className="py-1">
-                  <List className="p-0" key={res.index}>
+                  </AccordionSummary>
+                </ListItemButton>
+                <AccordionDetails className="py-1">
+                  <List key={res.index}>
                     {res.children
                       .filter((res) => !res.hide)
                       .map((res) => (
-                        <ListItem
+                        <ListItemButton
                           key={res.title}
                           onClick={() => push(res.path)}
                           className={
                             pathName === res.path
-                              ? "dark:bg-white dark:text-black bg-black text-white  rounded-xl"
-                              : ""
+                              ? "hover:bg-black dark:bg-white dark:text-black bg-black text-white  my-1 rounded-lg"
+                              : "hover:bg-black hover:text-white  mt-1 my-1 rounded-lg"
                           }
                         >
                           {res.title}
-                        </ListItem>
+                        </ListItemButton>
                       ))}
                   </List>
-                </AccordionBody>
+                </AccordionDetails>
               </Accordion>
             )
           )}
@@ -108,168 +105,55 @@ export function Sidebar(props: Props) {
             res.children.length === 0 ? undefined : (
               <Accordion
                 key={res.title}
-                open={open === res.index}
-                icon={
-                  <ChevronDownIcon
-                    strokeWidth={2.5}
-                    className={`mx-auto h-4 w-4 transition-transform ${
-                      open === res.index ? "rotate-180" : ""
-                    }`}
-                  />
-                }
+                elevation={0}
+                expanded={open === res.index}
               >
-                <ListItem className="p-1" selected={open === res.index}>
+                <ListItemButton selected={open === res.index}>
                   <div>{res.icon}</div>
-                  <AccordionHeader
+                  <AccordionSummary
+                    expandIcon={
+                      <ChevronDownIcon
+                        strokeWidth={2.5}
+                        className={` h-4 w-4 `}
+                      />
+                    }
                     onClick={() => handleOpen(res.index)}
-                    className="border-b-0 p-3 "
+                    className=" w-full "
                   >
-                    <Typography
-                      color="blue-gray"
-                      className="mr-auto font-normal"
-                    >
+                    <Typography className="mr-auto font-normal">
                       {res.title}
                     </Typography>
-                  </AccordionHeader>
-                </ListItem>
-                <AccordionBody className="py-1">
-                  <List className="p-0" key={res.index}>
+                  </AccordionSummary>
+                </ListItemButton>
+                <AccordionDetails className="py-1">
+                  <List className="p-0 m-0" key={res.index}>
                     {res.children
                       .filter((res) => !res.hide)
                       .map((res) => (
-                        <ListItem
+                        <ListItemButton
                           key={res.title}
                           onClick={() => push(res.path)}
                           className={
                             pathName === res.path
-                              ? "dark:bg-white dark:text-black bg-black text-white  rounded-xl"
-                              : ""
+                              ? "hover:bg-black dark:bg-white dark:text-black bg-black text-white  my-1  rounded-lg"
+                              : "hover:bg-black hover:text-white  my-1  rounded-lg"
                           }
                         >
                           {res.title}
-                        </ListItem>
+                        </ListItemButton>
                       ))}
                   </List>
-                </AccordionBody>
+                </AccordionDetails>
               </Accordion>
             )
           )}
 
-        <ListItem onClick={() => replace("/logout")}>Logout</ListItem>
+        <ListItemButton onClick={() => replace("/logout")}>
+          Logout
+        </ListItemButton>
       </List>
     </Card>
   );
 }
 
 export const dynamic = "force-dynamic";
-
-// export default function SideBar(props: Props) {
-//   const pathName = usePathname();
-
-//   return props.route?.children ? (
-//     <Style className=" w-full max-h-full">
-//       <ul style={{ overflow: "auto" }}>
-//         {props.route.children
-//           .filter((res) => !res.hide)
-//           .sort((a, b) => a.index - b.index)
-//           .map((res) => (
-//             <li key={res.title}>
-//               <Link
-//                 href={res.path}
-//                 id={pathName.startsWith(res.path) ? "active" : undefined}
-//               >
-//                 <h1>{res.title}</h1>
-//               </Link>
-//             </li>
-//           ))}
-//       </ul>
-
-//       <div className="divide-y-2 w-full" />
-//     </Style>
-//   ) : (
-//     <div></div>
-//   );
-// }
-
-// const Style = styled.div`
-//   display: flex;
-//   justify-content: start;
-//   align-items: start;
-//   flex-direction: column;
-//   box-shadow: rgb(8 8 8 / 15%) 1px 0px 0px;
-//   height: 85dvh;
-
-//   width: 150px;
-//   gap: 7px;
-
-//   ul {
-//     gap: 7px;
-//     height: 100%;
-//     margin: auto;
-//     text-align: center;
-//     padding: 5px;
-//     list-style: none;
-//     display: flex;
-//     flex-direction: column;
-//     width: 150px;
-//     align-items: center;
-
-//     li {
-//       display: flex;
-
-//       width: 100%;
-//       border-radius: 0.25rem;
-
-//       #active {
-//         background-color: #000000;
-
-//         h1 {
-//           color: #ffffff;
-//         }
-//         svg {
-//           color: #fefefe;
-//         }
-//       }
-//       :hover {
-//         background-color: #000000;
-
-//         h1 {
-//           color: #ffffff;
-//         }
-//         svg {
-//           color: #fefefe;
-//         }
-//       }
-//       a {
-//         width: 100%;
-//         padding: 14px;
-//         border-radius: 0.25rem;
-
-//         #active {
-//           background-color: #000000;
-
-//           h1 {
-//             color: #ffffff;
-//           }
-//           svg {
-//             color: #fefefe;
-//           }
-//         }
-//         display: flex;
-//         align-items: center;
-//         gap: 6px;
-//         text-decoration: none;
-//         svg {
-//           color: black;
-//         }
-//         h1 {
-//           text-shadow: 0px 0px 1px #0000007a;
-//           width: 100%;
-//           align-items: center;
-//           font-size: 12pt;
-//           color: #000000d2;
-//         }
-//       }
-//     }
-//   }
-// `;

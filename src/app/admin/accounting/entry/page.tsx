@@ -92,8 +92,28 @@ export default async function Entry(props: {
       };
     };
   }>[] = [];
-
-  if (two_digit_id) {
+  if (id) {
+    entries = await prisma.entry.findMany({
+      where: {
+        id,
+      },
+      orderBy: {
+        to_date: "desc",
+      },
+      include: {
+        currency: true,
+        sub_entries: {
+          include: {
+            account_entry: true,
+            more_than_four_digit: true,
+            reference: true,
+            three_digit: true,
+            two_digit: true,
+          },
+        },
+      },
+    });
+  } else if (two_digit_id) {
     entries = await prisma.entry
       .findMany({
         where: {

@@ -204,14 +204,16 @@ export async function deletePaymentById(
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
     async (auth) => {
-      if (auth.type === "Admin") {
-        await prisma.payment.delete({ where: { id: id } });
-      } else {
-        await prisma.payment.update({
-          where: { id: id },
-          data: { status: "Deleted" },
-        });
-      }
+      await prisma.payment.delete({ where: { id: id } });
+
+      // if (auth.type === "Admin") {
+      //   await prisma.payment.delete({ where: { id: id } });
+      // } else {
+      //   await prisma.payment.update({
+      //     where: { id: id },
+      //     data: { status: "Deleted" },
+      //   });
+      // }
 
       return;
     },

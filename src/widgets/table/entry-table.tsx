@@ -1,23 +1,20 @@
 "use client";
 import React, { useCallback, useMemo, useState, useTransition } from "react";
 
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { VisibilityState } from "@tanstack/react-table";
 import { MaterialReactTable, type MRT_ColumnDef } from "material-react-table";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 import { $Enums, Prisma } from "@prisma/client";
 import { FormatNumberWithFixed } from "@rms/lib/global";
 
-import { usePathname, useRouter } from "next/navigation";
 import styled from "@emotion/styled";
+import { usePathname, useRouter } from "next/navigation";
 
 import { DateRange } from "react-day-picker";
 
-import { deleteEntry } from "@rms/service/entry-service";
-import useAlertHook from "@rms/hooks/alert-hooks";
-import moment from "moment";
-import Authorized from "@rms/components/ui/authorized";
+import LoadingButton from "@mui/lab/LoadingButton";
 import {
   Autocomplete,
   Card,
@@ -26,8 +23,11 @@ import {
   TextField,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
+import Authorized from "@rms/components/ui/authorized";
+import { deleteEntry } from "@rms/service/entry-service";
 import dayjs from "dayjs";
-import LoadingButton from "@mui/lab/LoadingButton";
+import moment from "moment";
+import { useStore } from "@rms/hooks/toast-hook";
 
 type CommonEntryType = Prisma.EntryGetPayload<{
   include: {
@@ -97,11 +97,8 @@ export default function EntryDataTable(props: Props) {
     to: props.date[1],
   });
 
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
   const { replace, push } = useRouter();
-  const { createAlert } = useAlertHook();
+  const store = useStore();
 
   const pathName = usePathname();
 
@@ -155,7 +152,7 @@ export default function EntryDataTable(props: Props) {
     }
 
     return { two_digit, three_digit, four_digit, account };
-  }, [search]);
+  }, [search, props.two_digit_id, props.two_digit_id]);
   const columns: MRT_ColumnDef<CommonEntryType>[] = useMemo(
     () => [
       {
@@ -359,7 +356,7 @@ export default function EntryDataTable(props: Props) {
         },
       },
     ],
-    [createAlert, isActive, pathName, push]
+    []
   );
 
   return (
@@ -372,6 +369,12 @@ export default function EntryDataTable(props: Props) {
           >
             <TextField
               label="Id"
+              disabled={
+                search.three_digit_id !== undefined ||
+                search.more_digit_id !== undefined ||
+                search.two_digit_id !== undefined ||
+                search.account_id !== undefined
+              }
               type="number"
               size="small"
               defaultValue={search.id}
@@ -406,6 +409,11 @@ export default function EntryDataTable(props: Props) {
             <Autocomplete
               disablePortal
               size="small"
+              disabled={
+                search.three_digit_id !== undefined ||
+                search.more_digit_id !== undefined ||
+                search.id !== undefined
+              }
               defaultValue={
                 two_digit
                   ? { label: two_digit.name, value: two_digit.id }
@@ -431,6 +439,11 @@ export default function EntryDataTable(props: Props) {
             <Autocomplete
               disablePortal
               size="small"
+              disabled={
+                search.more_digit_id !== undefined ||
+                search.two_digit_id !== undefined ||
+                search.id !== undefined
+              }
               isOptionEqualToValue={(e) => e.value === three_digit?.id}
               value={
                 three_digit
@@ -459,6 +472,11 @@ export default function EntryDataTable(props: Props) {
 
             <Autocomplete
               disablePortal
+              disabled={
+                search.three_digit_id !== undefined ||
+                search.two_digit_id !== undefined ||
+                search.id !== undefined
+              }
               size="small"
               isOptionEqualToValue={(e) => e.value === four_digit?.id}
               value={
@@ -487,6 +505,7 @@ export default function EntryDataTable(props: Props) {
             />
             <Autocomplete
               disablePortal
+              disabled={search.id !== undefined}
               size="small"
               isOptionEqualToValue={(e) => e.value === account.id}
               value={
@@ -562,7 +581,7 @@ export default function EntryDataTable(props: Props) {
                     setActiveTransition(async () => {
                       const result = await deleteEntry(id);
 
-                      createAlert(result);
+                      store.OpenAlert(result);
                     });
                   }
                 }}

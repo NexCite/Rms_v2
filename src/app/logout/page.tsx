@@ -13,6 +13,6 @@ export default function Page() {
     removeCookies("rms-auth");
     removeCookies("rms-permissions");
     replace("/login");
-  }, [replace, setCookies]);
+  }, [replace, removeCookies]);
   return <div>logout...</div>;
 }

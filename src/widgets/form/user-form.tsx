@@ -1,40 +1,29 @@
 "use client";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { $Enums, Prisma } from "@prisma/client";
 import { createUser, updateUser } from "@rms/service/user-service";
-import { zodResolver } from "@hookform/resolvers/zod";
-import useAlertHook from "@rms/hooks/alert-hooks";
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@rms/components/ui/form";
 import { useRouter } from "next/navigation";
+
+import LoadingButton from "@mui/lab/LoadingButton";
 import {
+  Autocomplete,
   Card,
   CardContent,
-  CardFooter,
   CardHeader,
-} from "@rms/components/ui/card";
-
-import React, { useCallback, useMemo, useRef, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import styled from "@emotion/styled";
-import { z } from "zod";
-import { Input } from "@rms/components/ui/input";
-import {
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  MenuItem,
   Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@rms/components/ui/select";
-import { SelectValue } from "@radix-ui/react-select";
+  TextField,
+  Typography,
+} from "@mui/material";
 import Countries from "@rms/lib/country";
-import LoadingButton from "@rms/components/ui/loading-button";
-import { MultiSelect } from "@rms/components/ui/multi-select";
+import { useCallback, useMemo, useTransition } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
+import { useStore } from "@rms/hooks/toast-hook";
 
 type Props = {
   user?: {
@@ -110,8 +99,7 @@ export default function UserFormComponent(props: Props) {
     resolver: zodResolver(validation),
     defaultValues: props.value,
   });
-  const { createAlert } = useAlertHook();
-
+  const store = useStore();
   const handleSubmit = useCallback(
     (values: z.infer<any>) => {
       if (props.value) {
@@ -119,7 +107,7 @@ export default function UserFormComponent(props: Props) {
           var value2 = JSON.parse(JSON.stringify(values));
 
           await updateUser(props.value.id, value2).then((res) => {
-            createAlert(res);
+            store.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);
             });
@@ -134,7 +122,7 @@ export default function UserFormComponent(props: Props) {
           var value2 = JSON.parse(JSON.stringify(values));
 
           await createUser(value2).then((res) => {
-            createAlert(res);
+            store.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);
             });
@@ -146,281 +134,258 @@ export default function UserFormComponent(props: Props) {
         });
       }
     },
-    [back, createAlert, form, props.value]
+    [back, store, form, props.value]
   );
   return (
-    <>
-      <Style className="card" onSubmit={form.handleSubmit(handleSubmit)}>
-        <Form {...form}>
-          <form className="card" autoComplete="off">
-            <Card>
-              <CardHeader>
-                {" "}
-                <div className="flex justify-between items-center">
-                  <h1 className="font-medium text-2xl">User Form</h1>
-                </div>
-                <hr className="my-12 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
-              </CardHeader>
+    <form
+      className=""
+      autoComplete="off"
+      noValidate
+      onSubmit={form.handleSubmit(handleSubmit)}
+    >
+      <Card className="max-w-[450px] m-auto p-2">
+        <CardHeader title={<Typography variant="h5">User Form</Typography>}>
+          {" "}
+        </CardHeader>
 
-              <CardContent>
-                <div className="grid gap-4">
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: true }}
-                      control={form.control}
-                      name="username"
-                      render={({ field }) => (
-                        <FormItem className="required">
-                          <FormLabel>Username</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="username"
-                              onChange={(e) => {}}
-                              {...field}
-                            />
-                          </FormControl>
+        <CardContent className="flex flex-col gap-5">
+          <Controller
+            control={form.control}
+            name="username"
+            render={({ field, fieldState }) => (
+              <TextField
+                {...field}
+                error={Boolean(fieldState.error)}
+                helperText={fieldState.error?.message}
+                size="small"
+                label="Username"
+                placeholder="username"
+                autoComplete="off"
+                required
+                InputLabelProps={{ shrink: true }}
+              />
+            )}
+          />
 
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: true }}
-                      control={form.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem className="required">
-                          <FormLabel>Password</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="password"
-                              placeholder="password"
-                              onChange={(e) => {}}
-                              {...field}
-                            />
-                          </FormControl>
+          <Controller
+            control={form.control}
+            name="password"
+            render={({ field, fieldState }) => (
+              <TextField
+                autoComplete="off"
+                {...field}
+                error={Boolean(fieldState.error)}
+                helperText={fieldState.error?.message}
+                size="small"
+                label="Password"
+                type="password"
+                placeholder="password"
+                required
+                InputLabelProps={{ shrink: true }}
+              />
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="first_name"
+            render={({ field, fieldState }) => (
+              <TextField
+                {...field}
+                error={Boolean(fieldState.error)}
+                helperText={fieldState.error?.message}
+                size="small"
+                label="First Name"
+                placeholder="first name"
+                required
+                InputLabelProps={{ shrink: true }}
+              />
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="last_name"
+            render={({ field, fieldState }) => (
+              <TextField
+                {...field}
+                error={Boolean(fieldState.error)}
+                helperText={fieldState.error?.message}
+                size="small"
+                label="Last Name"
+                placeholder="last name"
+                required
+                InputLabelProps={{ shrink: true }}
+              />
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="phone_number"
+            render={({ field, fieldState }) => (
+              <TextField
+                {...field}
+                error={Boolean(fieldState.error)}
+                helperText={fieldState.error?.message}
+                size="small"
+                required
+                label="Phone Number"
+                placeholder="phonen number"
+                InputLabelProps={{ shrink: true }}
+              />
+            )}
+          />
 
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: true }}
-                      control={form.control}
-                      name="first_name"
-                      render={({ field }) => (
-                        <FormItem className="required">
-                          <FormLabel>First Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="first name" {...field} />
-                          </FormControl>
+          <Controller
+            name="gender"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <FormControl
+                fullWidth
+                required
+                size="small"
+                error={Boolean(fieldState?.error?.message)}
+              >
+                <InputLabel className="mb-3" shrink placeholder="gender">
+                  Gender
+                </InputLabel>
+                <Select
+                  {...field}
+                  error={Boolean(fieldState.error)}
+                  size="small"
+                  label="Gender"
+                  notched
+                  fullWidth
+                  placeholder="gender"
+                  defaultValue={field.value}
+                >
+                  <MenuItem key={-1} value={undefined}>
+                    None
+                  </MenuItem>
 
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: true }}
-                      control={form.control}
-                      name="last_name"
-                      render={({ field }) => (
-                        <FormItem className="required">
-                          <FormLabel>Last Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="last name" {...field} />
-                          </FormControl>
+                  {Object.keys($Enums.Gender).map((res) => (
+                    <MenuItem key={res} value={res}>
+                      {" "}
+                      {res}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <FormHelperText>{fieldState.error?.message}</FormHelperText>
+              </FormControl>
+            )}
+          />
 
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: true }}
-                      control={form.control}
-                      name="phone_number"
-                      render={({ field }) => (
-                        <FormItem className="required">
-                          <FormLabel>Phone Number</FormLabel>
-                          <FormControl>
-                            <Input placeholder="phone number" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: true }}
-                      control={form.control}
-                      name={"gender"}
-                      render={({ field }) => (
-                        <FormItem className="required">
-                          <FormLabel>Gender</FormLabel>
-                          <FormControl>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="gender" />
-                              </SelectTrigger>
-                              <SelectContent className="w-full p-0  max-h-[200px] overflow-y-auto">
-                                <SelectItem value={$Enums.Gender.Male}>
-                                  {$Enums.Gender.Male}
-                                </SelectItem>
-                                <SelectItem value={$Enums.Gender.Female}>
-                                  {$Enums.Gender.Female}
-                                </SelectItem>
-                                <SelectItem value={$Enums.Gender.Other}>
-                                  {$Enums.Gender.Other}
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
+          <Controller
+            control={form.control}
+            name="email"
+            render={({ field, fieldState }) => (
+              <TextField
+                {...field}
+                error={Boolean(fieldState.error)}
+                helperText={fieldState.error?.message}
+                size="small"
+                label="Email"
+                placeholder="email"
+                InputLabelProps={{ shrink: true }}
+              />
+            )}
+          />
 
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: true }}
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input placeholder="email" {...field} />
-                          </FormControl>
+          <Controller
+            name={"permissions"}
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Autocomplete
+                disablePortal
+                onChange={(e, v) => {
+                  field.onChange(v);
+                }}
+                multiple
+                defaultValue={field.value}
+                size="small"
+                options={Object.keys($Enums.UserPermission)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    error={Boolean(fieldState.error)}
+                    helperText={fieldState.error?.message}
+                    InputLabelProps={{ shrink: true }}
+                    label="Permissions"
+                    placeholder="permissions"
+                  />
+                )}
+              />
+            )}
+          />
 
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid-cols-12">
-                    <FormField
-                      control={form.control}
-                      disabled={props.user.type === "User"}
-                      name="permissions"
-                      render={(value) => {
-                        return (
-                          <FormItem className="required">
-                            <FormLabel>Permissions</FormLabel>
-                            <FormControl>
-                              <MultiSelect
-                                selected={value.field.value ?? []}
-                                onChange={(e) => {
-                                  form.setValue("permissions", e as string[]);
-                                }}
-                                options={Object.keys($Enums.UserPermission).map(
-                                  (res) => ({
-                                    label: res,
-                                    value: res,
-                                  })
-                                )}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        );
-                      }}
-                    />
-                  </div>
-
-                  <div className="grid-cols-12">
-                    <FormField
-                      control={form.control}
-                      name={"country"}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Country</FormLabel>
-                          <FormControl>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="country" />
-                              </SelectTrigger>
-                              <SelectContent className="w-full p-0  max-h-[200px] overflow-y-auto">
-                                {Countries.map((res) => (
-                                  <SelectItem key={res} value={res}>
-                                    {res}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: false }}
-                      control={form.control}
-                      name="address1"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Address 1</FormLabel>
-                          <FormControl>
-                            <Input placeholder="address 1" {...field} />
-                          </FormControl>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: false }}
-                      control={form.control}
-                      name="address2"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Address2</FormLabel>
-                          <FormControl>
-                            <Input placeholder="address2" {...field} />
-                          </FormControl>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-end">
-                <LoadingButton
-                  type="submit"
-                  label={props.value ? "Update" : "Add"}
-                  loading={isPadding}
-                />
-              </CardFooter>
-            </Card>
-          </form>
-        </Form>
-      </Style>
-    </>
+          <Controller
+            name={"country"}
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Autocomplete
+                disablePortal
+                onChange={(e, v) => {
+                  field.onChange(v);
+                }}
+                isOptionEqualToValue={(e) => e === props.value?.country}
+                defaultValue={field.value}
+                size="small"
+                options={Countries}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    error={Boolean(fieldState.error)}
+                    helperText={fieldState.error?.message}
+                    InputLabelProps={{ shrink: true }}
+                    label="Country"
+                    placeholder="country"
+                  />
+                )}
+              />
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="address1"
+            render={({ field, fieldState }) => (
+              <TextField
+                {...field}
+                error={Boolean(fieldState.error)}
+                helperText={fieldState.error?.message}
+                size="small"
+                label="Address 1"
+                placeholder="address 1"
+                InputLabelProps={{ shrink: true }}
+              />
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="address2"
+            render={({ field, fieldState }) => (
+              <TextField
+                {...field}
+                error={Boolean(fieldState.error)}
+                helperText={fieldState.error?.message}
+                size="small"
+                label="Address 2"
+                placeholder="address 2"
+                InputLabelProps={{ shrink: true }}
+              />
+            )}
+          />
+        </CardContent>
+        <LoadingButton
+          variant="contained"
+          fullWidth
+          className="hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white "
+          disableElevation
+          type="submit"
+          loading={isPadding}
+        >
+          Save
+        </LoadingButton>
+      </Card>
+    </form>
   );
 }
-const Style = styled.div`
-  margin: auto;
-  margin-top: 5px;
-  max-width: 720px;
-`;

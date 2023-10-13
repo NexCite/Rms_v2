@@ -1,4 +1,5 @@
 "use client";
+import styled from "@emotion/styled";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { $Enums, Gender, Prisma } from "@prisma/client";
 import {
@@ -16,7 +17,6 @@ import {
   FormMessage,
 } from "@rms/components/ui/form";
 import { Input } from "@rms/components/ui/input";
-import LoadingButton from "@rms/components/ui/loading-button";
 import SearchSelect from "@rms/components/ui/search-select";
 import {
   Select,
@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rms/components/ui/select";
-import useAlertHook from "@rms/hooks/alert-hooks";
+import { useStore } from "@rms/hooks/toast-hook";
 import Countries from "@rms/lib/country";
 import { createBroker, updateBroker } from "@rms/service/broker-service";
 import { createTrader, updateTrader } from "@rms/service/trader-service";
@@ -34,9 +34,8 @@ import {
   updateAccount,
 } from "@rms/service/trading-account-service";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useMemo, useTransition } from "react";
+import { useCallback, useMemo, useTransition } from "react";
 import { useForm } from "react-hook-form";
-import styled from "@emotion/styled";
 import { z } from "zod";
 
 type Props = {
@@ -109,8 +108,7 @@ export default function TradingForm(props: Props) {
     resolver: zodResolver(validation),
     defaultValues: props.value,
   });
-  const { createAlert } = useAlertHook();
-
+  const store = useStore();
   const handleSubmit = useCallback(
     (values: z.infer<any>) => {
       if (props.value) {
@@ -119,7 +117,7 @@ export default function TradingForm(props: Props) {
           switch (props.node) {
             case "broker": {
               await updateBroker(props.value.id, value2).then((res) => {
-                createAlert(res);
+                store.OpenAlert(res);
                 Object.keys(res.errors ?? []).map((e) => {
                   form.setError(e as any, res[e]);
                 });
@@ -132,7 +130,7 @@ export default function TradingForm(props: Props) {
             }
             case "account": {
               await updateAccount(props.value.id, value2).then((res) => {
-                createAlert(res);
+                store.OpenAlert(res);
                 Object.keys(res.errors ?? []).map((e) => {
                   form.setError(e as any, res[e]);
                 });
@@ -145,7 +143,7 @@ export default function TradingForm(props: Props) {
             }
             case "trader": {
               await updateTrader(props.value.id, value2).then((res) => {
-                createAlert(res);
+                store.OpenAlert(res);
                 Object.keys(res.errors ?? []).map((e) => {
                   form.setError(e as any, res[e]);
                 });
@@ -164,7 +162,7 @@ export default function TradingForm(props: Props) {
           switch (props.node) {
             case "broker": {
               await createBroker(value2).then((res) => {
-                createAlert(res);
+                store.OpenAlert(res);
                 Object.keys(res.errors ?? []).map((e) => {
                   form.setError(e as any, res[e]);
                 });
@@ -177,7 +175,7 @@ export default function TradingForm(props: Props) {
             }
             case "account": {
               await createAccount(value2).then((res) => {
-                createAlert(res);
+                store.OpenAlert(res);
                 Object.keys(res.errors ?? []).map((e) => {
                   form.setError(e as any, res[e]);
                 });
@@ -190,7 +188,7 @@ export default function TradingForm(props: Props) {
             }
             case "trader": {
               await createTrader(value2).then((res) => {
-                createAlert(res);
+                store.OpenAlert(res);
                 Object.keys(res.errors ?? []).map((e) => {
                   form.setError(e as any, res[e]);
                 });
@@ -205,7 +203,7 @@ export default function TradingForm(props: Props) {
         });
       }
     },
-    [form, back, props.node, props.value, createAlert]
+    [form, back, props.node, props.value, store]
   );
   return (
     <>
@@ -539,13 +537,7 @@ export default function TradingForm(props: Props) {
                   )}
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-end">
-                <LoadingButton
-                  type="submit"
-                  label={props.value ? "Update" : "Add"}
-                  loading={isPadding}
-                />
-              </CardFooter>
+              <CardFooter className="flex justify-end"></CardFooter>
             </Card>
           </form>
         </Form>

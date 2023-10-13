@@ -10,6 +10,7 @@ export default async function page(props: {
   var value: Prisma.UserGetPayload<{}>[] = await prisma.user.findMany({
     where: {
       status: await getUserStatus(),
+      type: "User",
     },
     orderBy: {
       id: "desc",

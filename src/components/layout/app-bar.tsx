@@ -1,12 +1,11 @@
 "use client";
-import React, { Suspense, useMemo, useState } from "react";
+import React, { useMemo, useTransition } from "react";
 import { Sidebar } from "./side-bar";
 import RouteModel from "@rms/models/RouteModel";
 import { usePathname, useRouter } from "next/navigation";
 import Authorized from "@rms/components/ui/authorized";
 import { $Enums } from "@prisma/client";
 import BackButton from "../ui/back-button";
-import { Button, Card, CardBody } from "@material-tailwind/react";
 import LoadingButton from "@mui/lab/LoadingButton";
 type Props = {
   children: React.ReactNode;
@@ -49,7 +48,7 @@ export default function AppBar(props: Props) {
     );
   }, [path]);
   const { push } = useRouter();
-  const [isPadding, setPadding] = useState();
+  const [isPadding, setPadding] = useTransition();
 
   return (
     <>
@@ -75,13 +74,12 @@ export default function AppBar(props: Props) {
               <Authorized permission={permission}>
                 <LoadingButton
                   variant="contained"
-                  className="hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white"
+                  className="hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
                   disableElevation
-                  loadingIndicator="Loading…"
                   loading={isPadding}
                   type="button"
                   onClick={() =>
-                    setPadding(() => {
+                    setPadding(async () => {
                       push(path + "/form");
                     })
                   }

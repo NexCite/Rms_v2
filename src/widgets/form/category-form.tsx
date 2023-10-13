@@ -1,42 +1,37 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Prisma } from "@prisma/client";
-import useAlertHook from "@rms/hooks/alert-hooks";
 import { createCategory, updateCategory } from "@rms/service/category-service";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useMemo, useRef, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useCallback, useMemo, useTransition } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@rms/components/ui/form";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@rms/components/ui/card";
-import { Input } from "@rms/components/ui/input";
-import LoadingButton from "@rms/components/ui/loading-button";
-import styled from "@emotion/styled";
 import {
   createSubCategory,
   updateSubCategory,
 } from "@rms/service/sub-category-service";
 
-import SearchSelect from "@rms/components/ui/search-select";
+import LoadingButton from "@mui/lab/LoadingButton";
+import {
+  Autocomplete,
+  Card,
+  CardContent,
+  Divider,
+  TextField,
+} from "@mui/material";
+import { useStore } from "@rms/hooks/toast-hook";
 
-type Props = {
-  node: "category" | "sub_category";
-  relations?: Prisma.CategoryGetPayload<{}>[];
-  value?: Prisma.CategoryGetPayload<{}> | Prisma.SubCategoryGetPayload<{}>;
-};
+type Props =
+  | {
+      node: "category";
+      value?: Prisma.CategoryGetPayload<{}> | Prisma.SubCategoryGetPayload<{}>;
+    }
+  | {
+      node: "sub_category";
+      relations?: Prisma.CategoryGetPayload<{}>[];
+      value?: Prisma.SubCategoryGetPayload<{}>;
+    };
 
 export default function CategoryForm(props: Props) {
   const [isPadding, setTransition] = useTransition();
@@ -59,8 +54,7 @@ export default function CategoryForm(props: Props) {
     resolver: zodResolver(validation),
     defaultValues: props.value,
   });
-  const { createAlert } = useAlertHook();
-
+  const store = useStore();
   const handleSubmit = useCallback(
     (values: z.infer<any>) => {
       if (props.value) {
@@ -69,7 +63,7 @@ export default function CategoryForm(props: Props) {
           switch (props.node) {
             case "category": {
               await updateCategory(props.value.id, value2).then((res) => {
-                createAlert(res);
+                store.OpenAlert(res);
                 Object.keys(res.errors ?? []).map((e) => {
                   form.setError(e as any, res[e]);
                 });
@@ -81,7 +75,7 @@ export default function CategoryForm(props: Props) {
             }
             case "sub_category": {
               await updateSubCategory(props.value.id, value2).then((res) => {
-                createAlert(res);
+                store.OpenAlert(res);
                 Object.keys(res.errors ?? []).map((e) => {
                   form.setError(e as any, res[e]);
                 });
@@ -99,7 +93,7 @@ export default function CategoryForm(props: Props) {
           switch (props.node) {
             case "category": {
               await createCategory(value2).then((res) => {
-                createAlert(res);
+                store.OpenAlert(res);
                 Object.keys(res.errors ?? []).map((e) => {
                   form.setError(e as any, res[e]);
                 });
@@ -111,7 +105,7 @@ export default function CategoryForm(props: Props) {
             }
             case "sub_category": {
               await createSubCategory(value2).then((res) => {
-                createAlert(res);
+                store.OpenAlert(res);
                 Object.keys(res.errors ?? []).map((e) => {
                   form.setError(e as any, res[e]);
                 });
@@ -125,91 +119,104 @@ export default function CategoryForm(props: Props) {
         });
       }
     },
-    [back, createAlert, props.node, props.value, form]
+    [back, store, props.node, props.value, form]
   );
   return (
-    <>
-      <Style className="card" onSubmit={form.handleSubmit(handleSubmit)}>
-        <Form {...form}>
-          <form className="card" autoComplete="off">
-            <Card>
-              <CardHeader>
-                {" "}
-                <div className="flex justify-between items-center">
-                  <h1 className="font-medium text-2xl">
-                    {props.node === "category" ? "Category" : "SubCategory"}{" "}
-                    Form
-                  </h1>
-                </div>
-                <hr className="my-12 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
-              </CardHeader>
+    <form
+      className="card"
+      autoComplete="off"
+      onSubmit={form.handleSubmit(handleSubmit)}
+      noValidate
+    >
+      <Card className="max-w-lg m-auto">
+        <CardContent>
+          <div className="flex justify-between items-center mb-2">
+            <h1 className="font-medium text-2xl">
+              {props.node === "category" ? "Category" : "SubCategory"} Form
+            </h1>
+          </div>
 
-              <CardContent>
-                <div className="grid gap-4">
-                  <div className="grid-cols-12">
-                    <FormField
-                      rules={{ required: true }}
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Name</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="name"
-                              onChange={(e) => {}}
-                              {...field}
-                            />
-                          </FormControl>
+          <Divider />
+        </CardContent>
 
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  {props.node === "sub_category" && (
-                    <div className="grid-cols-12">
-                      <FormField
-                        rules={{ required: true }}
-                        control={form.control}
-                        name={"category_id" as any}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Categories</FormLabel>
-                            <FormControl>
-                              <SearchSelect
-                                data={props.relations}
-                                hit="select categories"
-                                label="categories"
-                                onChange={(e) => field.onChange(e)}
-                                default={field.value}
-                              />
-                            </FormControl>
-
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-end">
-                <LoadingButton
-                  type="submit"
-                  label={props.value ? "Update" : "Add"}
-                  loading={isPadding}
+        <CardContent className="flex gap-5 flex-col">
+          <Controller
+            name="name"
+            control={form.control}
+            render={({ field, fieldState }) => {
+              return (
+                <TextField
+                  error={Boolean(fieldState.error)}
+                  helperText={fieldState.error?.message}
+                  label="Name"
+                  size="small"
+                  fullWidth
+                  placeholder="name"
+                  {...field}
+                  required
+                  InputLabelProps={{ shrink: true }}
                 />
-              </CardFooter>
-            </Card>
-          </form>
-        </Form>
-      </Style>
-    </>
+              );
+            }}
+          />
+
+          {props.node === "sub_category" && (
+            <Controller
+              name={"category_id" as any}
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Autocomplete
+                  disablePortal
+                  onChange={(e, v) => {
+                    console.log(v);
+                    field.onChange(v?.value);
+                  }}
+                  isOptionEqualToValue={(e) => e.value === props.value?.id}
+                  defaultValue={(() => {
+                    const result = props.relations.find(
+                      (res) => res.id === field.value
+                    );
+
+                    return result
+                      ? {
+                          label: result.name,
+                          value: result.id,
+                        }
+                      : undefined;
+                  })()}
+                  size="small"
+                  options={props.relations.map((res) => ({
+                    label: res.name,
+                    value: res.id,
+                  }))}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      required
+                      error={Boolean(fieldState.error)}
+                      helperText={fieldState.error?.message}
+                      InputLabelProps={{ shrink: true }}
+                      label="Category"
+                      placeholder="category"
+                    />
+                  )}
+                />
+              )}
+            />
+          )}
+
+          <LoadingButton
+            variant="contained"
+            fullWidth
+            className="hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white "
+            disableElevation
+            type="submit"
+            loading={isPadding}
+          >
+            Save
+          </LoadingButton>
+        </CardContent>
+      </Card>
+    </form>
   );
 }
-const Style = styled.div`
-  margin: auto;
-  margin-top: 5px;
-  max-width: 720px;
-`;

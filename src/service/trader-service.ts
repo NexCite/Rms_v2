@@ -43,18 +43,20 @@ export async function deleteTraderById(
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction<void>(
     async (auth) => {
-      if (auth.type === "Admin")
-        await prisma.trader.delete({ where: { id: id } });
-      else
-        await prisma.trader.update({
-          where: { id: id },
-          data: { status: "Deleted", user_id: id },
-        });
+      await prisma.trader.delete({ where: { id: id } });
+
+      // if (auth.type === "Admin")
+      //   await prisma.trader.delete({ where: { id: id } });
+      // else
+      //   await prisma.trader.update({
+      //     where: { id: id },
+      //     data: { status: "Deleted", user_id: id },
+      //   });
 
       return;
     },
     "Delete_Trader",
     true,
-    props
+    { id }
   );
 }

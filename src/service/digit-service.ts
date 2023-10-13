@@ -39,13 +39,17 @@ export async function updateTwoDigit(
 export async function deleteTwoDigit(id: number) {
   return handlerServiceAction(
     async (auth) => {
-      if (auth.type === "Admin")
-        await prisma.two_Digit.delete({ where: { id: id } });
-      else
-        await prisma.two_Digit.update({
-          where: { id: id },
-          data: { status: "Disable", user_id: auth.id },
-        });
+      console.log(id);
+
+      await prisma.two_Digit.delete({ where: { id: id } });
+
+      // if (auth.type === "Admin")
+      //   await prisma.two_Digit.delete({ where: { id: id } });
+      // else
+      //   await prisma.two_Digit.update({
+      //     where: { id: id },
+      //     data: { status: "Disable", user_id: auth.id },
+      //   });
     },
     "Delete_Two_Digit",
     true,
@@ -90,13 +94,14 @@ export async function updateThreeDigit(
 export async function deleteThreeDigit(id: number) {
   return handlerServiceAction(
     async (auth) => {
-      if (auth.type === "Admin")
-        await prisma.three_Digit.delete({ where: { id: id } });
-      else
-        await prisma.three_Digit.update({
-          where: { id: id },
-          data: { status: "Deleted", user_id: auth.id },
-        });
+      await prisma.three_Digit.delete({ where: { id: id } });
+      // if (auth.type === "Admin")
+      //   await prisma.three_Digit.delete({ where: { id: id } });
+      // else
+      //   await prisma.three_Digit.update({
+      //     where: { id: id },
+      //     data: { status: "Deleted", user_id: auth.id },
+      //   });
     },
     "Edit_Three_Digit",
     true,
@@ -142,13 +147,15 @@ export async function updateMoreDigit(
 export async function deleteMoreDigit(id: number) {
   return handlerServiceAction(
     async (auth) => {
-      if (auth.type === "Admin")
-        await prisma.more_Than_Four_Digit.delete({ where: { id: id } });
-      else
-        await prisma.more_Than_Four_Digit.update({
-          where: { id: id },
-          data: { status: "Disable", user_id: auth.id },
-        });
+      await prisma.more_Than_Four_Digit.delete({ where: { id: id } });
+
+      // if (auth.type === "Admin")
+      //   await prisma.more_Than_Four_Digit.delete({ where: { id: id } });
+      // else
+      //   await prisma.more_Than_Four_Digit.update({
+      //     where: { id: id },
+      //     data: { status: "Disable", user_id: auth.id },
+      //   });
     },
     "Delete_More_Than_Four_Digit",
     true,

@@ -2,7 +2,6 @@
 import RouteModel from "@rms/models/RouteModel";
 
 import React, { useCallback, useRef } from "react";
-import { ThemeProvider } from "@material-tailwind/react";
 
 import AppBar from "./app-bar";
 

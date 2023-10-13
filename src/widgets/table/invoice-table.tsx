@@ -1,22 +1,13 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import React, { useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 
 import styled from "@emotion/styled";
 import { Prisma } from "@prisma/client";
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import useAlertHook from "@rms/hooks/alert-hooks";
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
+import Authorized from "@rms/components/ui/authorized";
 import { Button } from "@rms/components/ui/button";
-import { tbody, Table, td, TableHeader, tr } from "@rms/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,11 +18,18 @@ import {
   DropdownMenuTrigger,
 } from "@rms/components/ui/dropdown-menu";
 import { Input } from "@rms/components/ui/input";
-import { DotsHorizontalIcon } from "@radix-ui/react-icons";
-import { useRouter } from "next/navigation";
-import Authorized from "@rms/components/ui/authorized";
 import { deleteInvoiceById } from "@rms/service/invoice-service";
-import { Typography } from "@material-tailwind/react";
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { useRouter } from "next/navigation";
+import { useStore } from "@rms/hooks/toast-hook";
 
 type Props = {
   invoices: Prisma.InvoiceGetPayload<{}>[];
@@ -43,7 +41,8 @@ export default function InvoiceTable(props: Props) {
 
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const { createAlert } = useAlertHook();
+  const store = useStore();
+
   const { push } = useRouter();
   const columns = useMemo<ColumnDef<Prisma.InvoiceGetPayload<{}>>[]>(
     () => [
@@ -85,7 +84,7 @@ export default function InvoiceTable(props: Props) {
                           setActiveTransition(async () => {
                             const result = await deleteInvoiceById(id);
 
-                            createAlert(result);
+                            store.OpenAlert(result);
                           });
                         }
                       }}
@@ -152,7 +151,7 @@ export default function InvoiceTable(props: Props) {
         accessorFn: (p) => p.modified_date?.toLocaleDateString(),
       },
     ],
-    [createAlert, isActive, pathName, push]
+    [store.OpenAlert, , store]
   );
   const table = useReactTable({
     data: props.invoices,

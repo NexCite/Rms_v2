@@ -422,6 +422,7 @@ export default async function Entry(props: {
   return (
     <div>
       <ExportEntryDataTable
+        currencies={await prisma.currency.findMany()}
         config={config}
         data={entries}
         date={date}

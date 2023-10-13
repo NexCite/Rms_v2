@@ -34,18 +34,19 @@ export async function updateCurrency(
 export async function deleteCurrency(id: number) {
   return handlerServiceAction(
     async (auth) => {
-      if (auth.type === "Admin") {
-        await prisma.entry.deleteMany({ where: { currency_id: id } });
-        await prisma.invoice.deleteMany({ where: { currency_id: id } });
-        return await prisma.currency.delete({ where: { id: id } });
-      } else
-        return await prisma.entry.update({
-          where: { id: id },
-          data: { status: "Deleted", user_id: auth.id },
-        });
+      return await prisma.currency.delete({ where: { id: id } });
+      // if (auth.type === "Admin") {
+      //   await prisma.entry.deleteMany({ where: { currency_id: id } });
+      //   await prisma.invoice.deleteMany({ where: { currency_id: id } });
+      //   return await prisma.currency.delete({ where: { id: id } });
+      // } else
+      //   return await prisma.entry.update({
+      //     where: { id: id },
+      //     data: { status: "Deleted", user_id: auth.id },
+      //   });
     },
     "Delete_Currency",
     true,
-    props
+    { id }
   );
 }

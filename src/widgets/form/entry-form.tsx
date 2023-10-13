@@ -4,22 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { $Enums, Prisma } from "@prisma/client";
 import { Button } from "@rms/components/ui/button";
 
-import { Input } from "@rms/components/ui/input";
-import SearchSelect from "@rms/components/ui/search-select";
-import SelectMenu from "@rms/components/ui/select-menu";
-import useAlertHook from "@rms/hooks/alert-hooks";
 import { FormatNumberWithFixed } from "@rms/lib/global";
 import { createEntry, updateEntry } from "@rms/service/entry-service";
 import { PlusSquare, X } from "lucide-react";
 
-import moment from "moment";
-
-import { useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useState, useTransition } from "react";
-import { Controller, useForm } from "react-hook-form";
-import styled from "@emotion/styled";
-import { z } from "zod";
-import UploadWidget from "../upload/upload-widget";
+import LoadingButton from "@mui/lab/LoadingButton";
 import {
   Alert,
   Autocomplete,
@@ -28,17 +17,18 @@ import {
   CardHeader,
   Divider,
   FormControl,
-  FormControlLabel,
-  FormLabel,
-  MenuItem,
-  Select,
   TextField,
   Typography,
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-import LoadingButton from "@mui/lab/LoadingButton";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState, useTransition } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
+import UploadWidget from "../upload/upload-widget";
+import { useStore } from "@rms/hooks/toast-hook";
 
 interface Props {
   id?: number;
@@ -147,7 +137,7 @@ export default function EntryForm(props: Props) {
     []
   );
 
-  const { createAlert } = useAlertHook();
+  const store = useStore();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: props.entry,
@@ -268,20 +258,20 @@ export default function EntryForm(props: Props) {
             description: m.description,
             note: m.note,
           });
-          createAlert(result);
+          store.OpenAlert(result);
           if (result.status === 200) {
             back();
           }
         } else {
           const result = await createEntry(m);
-          createAlert(result);
+          store.OpenAlert(result);
           if (result.status === 200) {
             back();
           }
         }
       });
     }
-  }, [props, forms, media, formSchema, back, form, createAlert]);
+  }, [props, forms, media, formSchema, back, form, store]);
 
   return (
     <form className="max-w-[450px] m-auto" noValidate>
@@ -320,6 +310,7 @@ export default function EntryForm(props: Props) {
             name="title"
             render={({ field, fieldState }) => (
               <TextField
+                InputLabelProps={{ shrink: true }}
                 required
                 {...field}
                 error={Boolean(fieldState.error)}
@@ -342,6 +333,7 @@ export default function EntryForm(props: Props) {
             name="description"
             render={({ field, fieldState }) => (
               <TextField
+                InputLabelProps={{ shrink: true }}
                 required
                 {...field}
                 multiline
@@ -367,6 +359,7 @@ export default function EntryForm(props: Props) {
             name="note"
             render={({ field, fieldState }) => (
               <TextField
+                InputLabelProps={{ shrink: true }}
                 {...field}
                 multiline
                 minRows={3}
@@ -407,6 +400,7 @@ export default function EntryForm(props: Props) {
                 }
                 renderInput={(params) => (
                   <TextField
+                    InputLabelProps={{ shrink: true }}
                     {...field}
                     value={forms.currency_id}
                     error={Boolean(fieldState.error)}
@@ -496,6 +490,7 @@ export default function EntryForm(props: Props) {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
                     <TextField
+                      InputLabelProps={{ shrink: true }}
                       size="small"
                       type="number"
                       label="Amount"
@@ -529,7 +524,12 @@ export default function EntryForm(props: Props) {
                       }}
                       options={Object.keys($Enums.DebitCreditType)}
                       renderInput={(params) => (
-                        <TextField required {...params} label="Type" />
+                        <TextField
+                          InputLabelProps={{ shrink: true }}
+                          required
+                          {...params}
+                          label="Type"
+                        />
                       )}
                     />
                   </div>
@@ -559,7 +559,11 @@ export default function EntryForm(props: Props) {
                           : false
                       }
                       renderInput={(params) => (
-                        <TextField {...params} label="Two And More" />
+                        <TextField
+                          InputLabelProps={{ shrink: true }}
+                          {...params}
+                          label="Two And More"
+                        />
                       )}
                     />
                     <Autocomplete
@@ -586,7 +590,11 @@ export default function EntryForm(props: Props) {
                           : false
                       }
                       renderInput={(params) => (
-                        <TextField {...params} label="Three And More" />
+                        <TextField
+                          InputLabelProps={{ shrink: true }}
+                          {...params}
+                          label="Three And More"
+                        />
                       )}
                     />
 
@@ -614,7 +622,11 @@ export default function EntryForm(props: Props) {
                           : false
                       }
                       renderInput={(params) => (
-                        <TextField {...params} label="Four And More" />
+                        <TextField
+                          InputLabelProps={{ shrink: true }}
+                          {...params}
+                          label="Four And More"
+                        />
                       )}
                     />
 
@@ -644,7 +656,11 @@ export default function EntryForm(props: Props) {
                           : false
                       }
                       renderInput={(params) => (
-                        <TextField {...params} label="Account" />
+                        <TextField
+                          InputLabelProps={{ shrink: true }}
+                          {...params}
+                          label="Account"
+                        />
                       )}
                     />
                   </div>
@@ -665,7 +681,11 @@ export default function EntryForm(props: Props) {
                       }))}
                       disabled={res.account_entry_id ? true : false}
                       renderInput={(params) => (
-                        <TextField {...params} label="Reference Account" />
+                        <TextField
+                          InputLabelProps={{ shrink: true }}
+                          {...params}
+                          label="Reference Account"
+                        />
                       )}
                     />
                   </div>

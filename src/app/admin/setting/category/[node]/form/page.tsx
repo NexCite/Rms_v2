@@ -40,7 +40,7 @@ export default async function page(props: {
     <>
       <CategoryForm
         relations={relation}
-        value={value}
+        value={value as any}
         node={props.params.node}
       />
     </>

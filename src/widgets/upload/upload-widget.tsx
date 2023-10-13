@@ -1,17 +1,10 @@
 "use client";
-import { Prisma } from "@prisma/client";
-import { Button } from "@rms/components/ui/button";
-import {
-  deleteMedia,
-  removeMedia,
-  uploadMedia,
-} from "@rms/service/media-service";
-import { useRouter } from "next/navigation";
-import React, { useState, useTransition } from "react";
-import ImageUploading, { ImageListType } from "react-images-uploading";
-import { FileUploader } from "react-drag-drop-files";
+import LoadingButton from "@mui/lab/LoadingButton";
 import PDFUploader from "@rms/components/ui/pdf-uploader";
+import { removeMedia, uploadMedia } from "@rms/service/media-service";
 import Image from "next/image";
+import { useState, useTransition } from "react";
+import ImageUploading, { ImageListType } from "react-images-uploading";
 
 type Props = {
   path?: string;
@@ -48,8 +41,11 @@ export default function UploadWidget(props: Props) {
             <>
               {path ? (
                 <div>
-                  <Button
-                    disabled={isPadding}
+                  <LoadingButton
+                    variant="contained"
+                    className="hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white "
+                    disableElevation
+                    loading={isPadding}
                     onClick={() => {
                       setPath(undefined);
 
@@ -63,13 +59,9 @@ export default function UploadWidget(props: Props) {
                       });
                     }}
                     type="button"
-                    size={"sm"}
                   >
-                    {isPadding && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
                     Remove
-                  </Button>
+                  </LoadingButton>
                   <iframe
                     className="w-full h-[500px] bg-white mt-5"
                     src={`/api/media/${path}`}
@@ -103,8 +95,8 @@ export default function UploadWidget(props: Props) {
               {({ onImageRemove, imageList, errors, onImageUpload }) =>
                 imageList.length > 0 ? (
                   <div>
-                    <Button
-                      disabled={isPadding}
+                    <LoadingButton
+                      loading={isPadding}
                       onClick={() => {
                         onImageRemove(0);
 
@@ -118,13 +110,9 @@ export default function UploadWidget(props: Props) {
                         });
                       }}
                       type="button"
-                      size={"sm"}
                     >
-                      {isPadding && (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      )}
                       Remove
-                    </Button>
+                    </LoadingButton>
                     <Image
                       width={1000}
                       height={1000}

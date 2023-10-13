@@ -22,7 +22,7 @@ export async function createUser(
     },
     "Add_User",
     true,
-    props
+    params
   );
 }
 
@@ -55,7 +55,7 @@ export async function updateUser(
     },
     "Edit_User",
     true,
-    props
+    params
   );
 }
 
@@ -64,19 +64,21 @@ export async function deleteUserById(
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
     async (auth) => {
-      if (auth.type === "Admin") {
-        await prisma.user.delete({ where: { id: id } });
-      } else {
-        await prisma.user.update({
-          where: { id: id },
-          data: { status: "Deleted" },
-        });
-      }
+      await prisma.user.delete({ where: { id: id } });
+
+      // if (auth.type === "Admin") {
+      //   await prisma.user.delete({ where: { id: id } });
+      // } else {
+      //   await prisma.user.update({
+      //     where: { id: id },
+      //     data: { status: "Deleted" },
+      //   });
+      // }
 
       return;
     },
     "Delete_User",
     true,
-    props
+    { id }
   );
 }
