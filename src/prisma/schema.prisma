@@ -435,6 +435,11 @@ enum EntryType {
 }
 
 enum UserPermission {
+  PaymentBox
+  View_Payment_Box
+  Add_Payment_Box
+  Edit_Payment_Box
+  Delete_Payment_Box
   Add_Account_Entry
   Edit_Account_Entry
   Delete_Account_Entry
@@ -549,7 +554,7 @@ model PaymentBox {
   to_date        DateTime       @default(now())
   coverage_boxes CoverageBox[]
   client_boxes   ClientBox[]
-  agent_boxES    AgentBox[]
+  agent_boxes    AgentBox[]
   p_l            P_LBox[]
   expensive_box  ExpensiveBox[]
 }
@@ -578,9 +583,9 @@ model ClientBox {
 }
 
 model AgentBox {
-  id       Int    @id @default(autoincrement())
-  name     String
-  comssion Float
+  id         Int    @id @default(autoincrement())
+  name       String
+  commission Float
 
   payment_box_id Int
   payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id])

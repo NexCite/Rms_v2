@@ -469,10 +469,11 @@ export default function EntryForm(props: Props) {
                 <div className="mb-5 " key={i}>
                   <div className="flex justify-between items-center">
                     <h1>SubEntry: {i + 1}</h1>
+                    {forms.sub_entries.length}
                     <Button
                       onClick={() => {
                         setErrors([]);
-
+                        console.log(i, forms.sub_entries.length);
                         setForms((prev) => ({
                           ...prev,
                           sub_entries: prev.sub_entries.filter(
@@ -495,7 +496,7 @@ export default function EntryForm(props: Props) {
                       size="small"
                       type="number"
                       label="Amount"
-                      defaultValue={res.amount}
+                      value={res.amount}
                       required
                       onChange={(e) => {
                         if (Number.isNaN(e.target.value)) {
@@ -514,7 +515,7 @@ export default function EntryForm(props: Props) {
 
                     <Autocomplete
                       disablePortal
-                      defaultValue={res.type}
+                      isOptionEqualToValue={(ress) => ress == res.type}
                       size="small"
                       onChange={(e, v) => {
                         forms.sub_entries[i].type = v as any;
@@ -523,6 +524,7 @@ export default function EntryForm(props: Props) {
                           sub_entries: prev.sub_entries,
                         }));
                       }}
+                      value={res.type}
                       options={Object.keys($Enums.DebitCreditType)}
                       renderInput={(params) => (
                         <TextField
@@ -539,6 +541,21 @@ export default function EntryForm(props: Props) {
                     <Autocomplete
                       disablePortal
                       size="small"
+                      isOptionEqualToValue={(ress) =>
+                        ress.value === res.two_digit_id
+                      }
+                      value={(() => {
+                        const result = props.two_digit.find(
+                          (ress) => ress.id === res.two_digit_id
+                        );
+
+                        return result
+                          ? {
+                              label: `(${result.id}) ${result.name}`,
+                              value: result.id,
+                            }
+                          : undefined;
+                      })()}
                       onChange={(e, v) => {
                         forms.sub_entries[i].two_digit_id = v?.value;
                         setForms((prev) => ({
@@ -569,7 +586,22 @@ export default function EntryForm(props: Props) {
                     />
                     <Autocomplete
                       disablePortal
+                      isOptionEqualToValue={(ress) =>
+                        ress.value === res.three_digit_id
+                      }
                       size="small"
+                      value={(() => {
+                        const result = props.three_digit.find(
+                          (ress) => ress.id === res.three_digit_id
+                        );
+
+                        return result
+                          ? {
+                              label: `(${result.id}) ${result.name}`,
+                              value: result.id,
+                            }
+                          : undefined;
+                      })()}
                       onChange={(e, v) => {
                         forms.sub_entries[i].three_digit_id = v?.value;
                         setForms((prev) => ({
@@ -600,7 +632,22 @@ export default function EntryForm(props: Props) {
                     />
 
                     <Autocomplete
+                      isOptionEqualToValue={(ress) =>
+                        ress.value === res.more_than_four_digit_id
+                      }
                       disablePortal
+                      value={(() => {
+                        const result = props.more_than_four_digit.find(
+                          (ress) => ress.id === res.more_than_four_digit_id
+                        );
+
+                        return result
+                          ? {
+                              label: `(${result.id}) ${result.name}`,
+                              value: result.id,
+                            }
+                          : undefined;
+                      })()}
                       size="small"
                       onChange={(e, v) => {
                         forms.sub_entries[i].more_than_four_digit_id = v?.value;
@@ -632,6 +679,9 @@ export default function EntryForm(props: Props) {
                     />
 
                     <Autocomplete
+                      isOptionEqualToValue={(ress) =>
+                        ress.value === res.account_entry_id
+                      }
                       disablePortal
                       size="small"
                       onChange={(e, v) => {
@@ -641,6 +691,19 @@ export default function EntryForm(props: Props) {
                           sub_entries: prev.sub_entries,
                         }));
                       }}
+                      value={(() => {
+                        const result = props.account_entry.find(
+                          (ress) => ress.id === res.account_entry_id
+                        );
+
+                        return result
+                          ? {
+                              label: `(${result.id}) ${result.username}`,
+                              value: result.id,
+                              group: result.type,
+                            }
+                          : undefined;
+                      })()}
                       groupBy={(res) => res.group}
                       options={props.account_entry.map((res) => ({
                         label: `(${res.id}) ${res.username}`,
@@ -670,6 +733,22 @@ export default function EntryForm(props: Props) {
                   <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mt-3">
                     <Autocomplete
                       disablePortal
+                      isOptionEqualToValue={(ress) =>
+                        ress.value === res.reference_id
+                      }
+                      value={(() => {
+                        const result = props.account_entry.find(
+                          (ress) => ress.id === res.reference_id
+                        );
+
+                        return result
+                          ? {
+                              label: `(${result.id}) ${result.username}`,
+                              value: result.id,
+                              group: result.type,
+                            }
+                          : undefined;
+                      })()}
                       size="small"
                       onChange={(e, v) => {
                         forms.sub_entries[i].reference_id = v?.value;

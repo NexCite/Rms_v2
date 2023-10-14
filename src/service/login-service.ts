@@ -27,7 +27,7 @@ export async function createLogin(params: {
       });
       return {
         status: HttpStatusCode.OK,
-        message: "LogedIn",
+        message: "Logged In",
       };
     }
   }
@@ -51,6 +51,6 @@ export async function deleteLogin(): Promise<ServiceActionModel<string>> {
   }
   return {
     status: HttpStatusCode.OK,
-    message: "LogedOut",
+    message: "Logged Out",
   };
 }
