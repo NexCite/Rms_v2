@@ -79,6 +79,8 @@ type Type = {
 
 export default function EntryForm(props: Props) {
   const [isPadding, setTransition] = useTransition();
+  const [isUiLoading, setUiLoading] = useTransition();
+
   const { back } = useRouter();
   const [forms, setForms] = useState<Type>({
     title: props.entry?.title,
@@ -279,8 +281,8 @@ export default function EntryForm(props: Props) {
       <Card>
         {errors.length > 0 && (
           <Alert severity="error">
-            {errors.map((res) => (
-              <h4 key={res.index}>
+            {errors.map((res, i) => (
+              <h4 key={i}>
                 {res.message} SubEntry {res.index && <span>{res.index}</span>}
               </h4>
             ))}
@@ -459,14 +461,16 @@ export default function EntryForm(props: Props) {
               />
             )}
           </div>
-          {!props.isEditMode && (
+          {!props.isEditMode && isUiLoading ? (
+            <></>
+          ) : (
             <>
               <div style={{ margin: "0px 0px 0px" }}>
                 <h1 className="text-2xl">Entries</h1>
               </div>
               <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
               {forms?.sub_entries?.map((res, i) => (
-                <div className="mb-5 " key={i}>
+                <div className="mb-5 " key={new Date().getTime()}>
                   <div className="flex justify-between items-center">
                     <h1>SubEntry: {i + 1}</h1>
                     {forms.sub_entries.length}
@@ -474,12 +478,14 @@ export default function EntryForm(props: Props) {
                       onClick={() => {
                         setErrors([]);
                         console.log(i, forms.sub_entries.length);
-                        setForms((prev) => ({
-                          ...prev,
-                          sub_entries: prev.sub_entries.filter(
-                            (res, ii) => i !== ii
-                          ),
-                        }));
+                        setUiLoading(() => {
+                          setForms((prev) => ({
+                            ...prev,
+                            sub_entries: prev.sub_entries.filter(
+                              (res, ii) => i !== ii
+                            ),
+                          }));
+                        });
                       }}
                       size="sm"
                       className="bg-black"
@@ -544,18 +550,14 @@ export default function EntryForm(props: Props) {
                       isOptionEqualToValue={(ress) =>
                         ress.value === res.two_digit_id
                       }
-                      value={(() => {
-                        const result = props.two_digit.find(
-                          (ress) => ress.id === res.two_digit_id
-                        );
-
-                        return result
-                          ? {
-                              label: `(${result.id}) ${result.name}`,
-                              value: result.id,
-                            }
-                          : undefined;
-                      })()}
+                      value={
+                        props.two_digit
+                          .filter((ress) => ress.id === res.two_digit_id)
+                          .map((res) => ({
+                            label: `(${res.id}) ${res.name}`,
+                            value: res.id,
+                          }))[0] || null
+                      }
                       onChange={(e, v) => {
                         forms.sub_entries[i].two_digit_id = v?.value;
                         setForms((prev) => ({
@@ -578,8 +580,8 @@ export default function EntryForm(props: Props) {
                       }
                       renderInput={(params) => (
                         <TextField
-                          InputLabelProps={{ shrink: true }}
                           {...params}
+                          InputLabelProps={{ shrink: true }}
                           label="Two And More"
                         />
                       )}
@@ -590,18 +592,14 @@ export default function EntryForm(props: Props) {
                         ress.value === res.three_digit_id
                       }
                       size="small"
-                      value={(() => {
-                        const result = props.three_digit.find(
-                          (ress) => ress.id === res.three_digit_id
-                        );
-
-                        return result
-                          ? {
-                              label: `(${result.id}) ${result.name}`,
-                              value: result.id,
-                            }
-                          : undefined;
-                      })()}
+                      value={
+                        props.three_digit
+                          .filter((ress) => ress.id === res.three_digit_id)
+                          .map((res) => ({
+                            label: `(${res.id}) ${res.name}`,
+                            value: res.id,
+                          }))[0] || null
+                      }
                       onChange={(e, v) => {
                         forms.sub_entries[i].three_digit_id = v?.value;
                         setForms((prev) => ({
@@ -624,8 +622,8 @@ export default function EntryForm(props: Props) {
                       }
                       renderInput={(params) => (
                         <TextField
-                          InputLabelProps={{ shrink: true }}
                           {...params}
+                          InputLabelProps={{ shrink: true }}
                           label="Three And More"
                         />
                       )}
@@ -636,18 +634,16 @@ export default function EntryForm(props: Props) {
                         ress.value === res.more_than_four_digit_id
                       }
                       disablePortal
-                      value={(() => {
-                        const result = props.more_than_four_digit.find(
-                          (ress) => ress.id === res.more_than_four_digit_id
-                        );
-
-                        return result
-                          ? {
-                              label: `(${result.id}) ${result.name}`,
-                              value: result.id,
-                            }
-                          : undefined;
-                      })()}
+                      value={
+                        props.more_than_four_digit
+                          .filter(
+                            (ress) => ress.id === res.more_than_four_digit_id
+                          )
+                          .map((res) => ({
+                            label: `(${res.id}) ${res.name}`,
+                            value: res.id,
+                          }))[0] || null
+                      }
                       size="small"
                       onChange={(e, v) => {
                         forms.sub_entries[i].more_than_four_digit_id = v?.value;
@@ -671,8 +667,8 @@ export default function EntryForm(props: Props) {
                       }
                       renderInput={(params) => (
                         <TextField
-                          InputLabelProps={{ shrink: true }}
                           {...params}
+                          InputLabelProps={{ shrink: true }}
                           label="Four And More"
                         />
                       )}
@@ -691,19 +687,6 @@ export default function EntryForm(props: Props) {
                           sub_entries: prev.sub_entries,
                         }));
                       }}
-                      value={(() => {
-                        const result = props.account_entry.find(
-                          (ress) => ress.id === res.account_entry_id
-                        );
-
-                        return result
-                          ? {
-                              label: `(${result.id}) ${result.username}`,
-                              value: result.id,
-                              group: result.type,
-                            }
-                          : undefined;
-                      })()}
                       groupBy={(res) => res.group}
                       options={props.account_entry.map((res) => ({
                         label: `(${res.id}) ${res.username}`,
@@ -721,10 +704,19 @@ export default function EntryForm(props: Props) {
                           ? true
                           : false
                       }
+                      value={
+                        props.account_entry
+                          .filter((ress) => ress.id === res.account_entry_id)
+                          .map((res) => ({
+                            label: `(${res.id}) ${res.username}`,
+                            value: res.id,
+                            group: res.type,
+                          }))[0] || null
+                      }
                       renderInput={(params) => (
                         <TextField
-                          InputLabelProps={{ shrink: true }}
                           {...params}
+                          InputLabelProps={{ shrink: true }}
                           label="Account"
                         />
                       )}
@@ -736,19 +728,15 @@ export default function EntryForm(props: Props) {
                       isOptionEqualToValue={(ress) =>
                         ress.value === res.reference_id
                       }
-                      value={(() => {
-                        const result = props.account_entry.find(
-                          (ress) => ress.id === res.reference_id
-                        );
-
-                        return result
-                          ? {
-                              label: `(${result.id}) ${result.username}`,
-                              value: result.id,
-                              group: result.type,
-                            }
-                          : undefined;
-                      })()}
+                      value={
+                        props.account_entry
+                          .filter((ress) => ress.id === res.account_entry_id)
+                          .map((res) => ({
+                            label: `(${res.id}) ${res.username}`,
+                            value: res.id,
+                            group: res.type,
+                          }))[0] || null
+                      }
                       size="small"
                       onChange={(e, v) => {
                         forms.sub_entries[i].reference_id = v?.value;
@@ -766,8 +754,8 @@ export default function EntryForm(props: Props) {
                       disabled={res.account_entry_id ? true : false}
                       renderInput={(params) => (
                         <TextField
-                          InputLabelProps={{ shrink: true }}
                           {...params}
+                          InputLabelProps={{ shrink: true }}
                           label="Reference Account"
                         />
                       )}

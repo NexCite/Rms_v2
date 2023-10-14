@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@rms/components/ui/dropdown-menu";
 import { Input } from "@rms/components/ui/input";
+import { useStore } from "@rms/hooks/toast-hook";
 import { deletePaymentById } from "@rms/service/payment-service";
 import {
   ColumnDef,
@@ -29,7 +30,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
-import { useStore } from "@rms/hooks/toast-hook";
 
 type Props = {
   payments: Prisma.PaymentGetPayload<{}>[];

@@ -4,7 +4,6 @@ import type { Metadata, ResolvingMetadata } from "next";
 import { Inter } from "next/font/google";
 import { env } from "process";
 import NextTopLoader from "nextjs-toploader";
-import { GlobalStyle } from "@rms/components/theme/global-style";
 import prisma from "@rms/prisma/prisma";
 import { AlertProvider } from "@rms/hooks/toast-hook";
 
@@ -41,10 +40,9 @@ export default async function RootLayout({
           <div className="absolute bottom-0 right-5 z-20">
             <h1>version {v}</h1>
           </div>
-          <GlobalStyle>
-            {children}
-            <AlertProvider />
-          </GlobalStyle>
+
+          {children}
+          <AlertProvider />
         </ThemeProvider>
       </body>
     </html>

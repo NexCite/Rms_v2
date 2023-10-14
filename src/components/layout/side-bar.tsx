@@ -51,7 +51,7 @@ export function Sidebar(props: Props) {
       <List>
         {props.routers
           .filter((res) => !res.end)
-          .map((res) =>
+          .map((res, i) =>
             res.children.length === 0 ? undefined : (
               <Accordion
                 key={res.title}
@@ -76,7 +76,7 @@ export function Sidebar(props: Props) {
                   </AccordionSummary>
                 </ListItemButton>
                 <AccordionDetails className="py-1">
-                  <List key={res.index}>
+                  <List key={i}>
                     {res.children
                       .filter((res) => !res.hide)
                       .map((res) => (
@@ -126,7 +126,7 @@ export function Sidebar(props: Props) {
                   </AccordionSummary>
                 </ListItemButton>
                 <AccordionDetails className="py-1">
-                  <List className="p-0 m-0" key={res.index}>
+                  <List className="p-0 m-0" key={i}>
                     {res.children
                       .filter((res) => !res.hide)
                       .map((res) => (

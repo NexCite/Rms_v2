@@ -1,37 +1,15 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useTransition } from "react";
 
-import styled from "@emotion/styled";
-import { Prisma } from "@prisma/client";
-import { DotsHorizontalIcon } from "@radix-ui/react-icons";
-import Authorized from "@rms/components/ui/authorized";
-import { Button } from "@rms/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@rms/components/ui/dropdown-menu";
-import { Input } from "@rms/components/ui/input";
-import { deleteUserById } from "@rms/service/user-service";
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import { useRouter } from "next/navigation";
-import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
+import { Prisma } from "@prisma/client";
+import Authorized from "@rms/components/ui/authorized";
 import { useStore } from "@rms/hooks/toast-hook";
+import { deleteUserById } from "@rms/service/user-service";
+import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
+import { useRouter } from "next/navigation";
 
 type Props = {
   users: Prisma.UserGetPayload<{}>[];

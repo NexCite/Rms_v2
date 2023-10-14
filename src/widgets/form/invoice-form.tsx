@@ -20,7 +20,6 @@ import { Input } from "@rms/components/ui/input";
 import SearchSelect from "@rms/components/ui/search-select";
 import { Textarea } from "@rms/components/ui/textarea";
 
-import styled from "@emotion/styled";
 import { Alert } from "@rms/components/ui/alert";
 import {
   Select,
@@ -177,7 +176,10 @@ export default function InvoiceForm(props: Props) {
   );
   return (
     <>
-      <Style className="card" onSubmit={form.handleSubmit(handleSubmit)}>
+      <div
+        className="max-w-[750px] m-auto"
+        onSubmit={form.handleSubmit(handleSubmit)}
+      >
         <Form {...form}>
           <form className="card" autoComplete="off">
             <Card>
@@ -456,12 +458,7 @@ export default function InvoiceForm(props: Props) {
             </Card>
           </form>
         </Form>
-      </Style>
+      </div>
     </>
   );
 }
-const Style = styled.div`
-  margin: auto;
-  margin-top: 5px;
-  max-width: 720px;
-`;

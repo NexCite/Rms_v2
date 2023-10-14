@@ -208,3 +208,53 @@ type UserSelectCommon = Prisma.UserGetPayload<{
   };
 }>;
 export type { UserSelectCommon };
+
+export interface Activity {
+  id: number;
+  status: number;
+  type: ActivityType;
+  amount: number;
+  user_id: number;
+  client_id: number;
+  create_date: Date;
+  last_modified_date: Date;
+  note: string;
+  description: string;
+  account_id: string;
+  send_to_accounting: boolean;
+  accounting_status: ActivityStatus;
+  client: {
+    id: number;
+    username: string;
+    first_name: string;
+    token: string;
+    last_name: string;
+    status: number;
+    currency_id: number;
+    all: number;
+    user_id: number;
+    last_modified_date: string;
+    create_date: string;
+    note: string;
+    currency: {
+      id: number;
+      name: string;
+      symbol: string;
+    };
+  };
+}
+
+// Now you can use 'data' with the defined interface in your TypeScript code.
+enum ActivityStatus {
+  Padding,
+  Provided,
+  Closed,
+}
+enum ActivityType {
+  Credit_In = "Credit_In",
+  Balance = "Balanced",
+  Deposit = "Deposit",
+  Credit_Out = "Credit_Out",
+  Withdrawl = "Withdrawl",
+  Commission = "Commission",
+}
