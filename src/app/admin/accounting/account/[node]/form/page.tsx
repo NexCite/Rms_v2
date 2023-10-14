@@ -1,15 +1,13 @@
-import { Prisma } from "@prisma/client";
-import BackButton from "@rms/components/ui/back-button";
-import { getUserInfo } from "@rms/lib/auth";
+import { $Enums, Prisma } from "@prisma/client";
 
 import prisma from "@rms/prisma/prisma";
 import { getUserStatus } from "@rms/service/user-service";
-import AccountEntryForm from "@rms/widgets/form/account-entry-form";
+import Account_EntryForm from "@rms/widgets/form/account-entry-form";
 
 import React from "react";
 
 export default async function page(props: {
-  params: {};
+  params: { node: $Enums.Account_Entry_Type };
   searchParams: { id?: string };
 }) {
   const id = +props.searchParams.id;
@@ -46,7 +44,8 @@ export default async function page(props: {
 
   return (
     <>
-      <AccountEntryForm
+      <Account_EntryForm
+        node={props.params.node}
         account={value}
         three_digit={three_digit}
         more_digit={more_digit}

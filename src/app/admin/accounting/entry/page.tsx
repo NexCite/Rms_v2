@@ -17,11 +17,11 @@ export default async function Entry(props: {
     more_digit_id?: string;
     account_id?: string;
     debit?: $Enums.EntryType;
-    type?: $Enums.DidgitType;
+    type?: $Enums.DigitType;
   };
 }) {
   var debit: $Enums.EntryType | undefined = undefined,
-    type: $Enums.DidgitType | undefined = undefined,
+    type: $Enums.DigitType | undefined = undefined,
     two_digit_id: number | undefined = undefined,
     id: number | undefined = undefined,
     three_digit_id: number | undefined = undefined,

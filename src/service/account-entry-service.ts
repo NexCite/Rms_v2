@@ -1,10 +1,11 @@
 "use server";
-import { Prisma } from "@prisma/client";
+import { $Enums, Prisma } from "@prisma/client";
 import { handlerServiceAction } from "@rms/lib/handler";
 import prisma from "@rms/prisma/prisma";
 
-export async function createAccountEntry(
-  data: Prisma.Account_EntryUncheckedCreateInput
+export async function createAccount_Entry(
+  data: Prisma.Account_EntryUncheckedCreateInput,
+  node: $Enums.Account_Entry_Type
 ) {
   return handlerServiceAction(
     async (auth) => {
@@ -13,15 +14,21 @@ export async function createAccountEntry(
       await prisma.account_Entry.create({ data });
       return;
     },
-    "Add_AccountEntry",
+    node === "Client"
+      ? "Add_Entry_Client"
+      : node === "IB"
+      ? "Add_Entry_IB"
+      : "Add_Entry_Supplier",
+
     true,
     data
   );
 }
 
-export async function updateAccountEntry(
+export async function updateAccount_Entry(
   id: number,
-  data: Prisma.Account_EntryUncheckedUpdateInput
+  data: Prisma.Account_EntryUncheckedUpdateInput,
+  node: $Enums.Account_Entry_Type
 ) {
   return handlerServiceAction(
     async (auth) => {
@@ -29,12 +36,19 @@ export async function updateAccountEntry(
 
       return await prisma.account_Entry.update({ where: { id }, data: data });
     },
-    "Edit_AccountEntry",
+    node === "Client"
+      ? "Edit_Entry_Client"
+      : node === "IB"
+      ? "Edit_Entry_IB"
+      : "Edit_Entry_Supplier",
     true,
     data
   );
 }
-export async function deleteAccountEntry(id: number) {
+export async function deleteAccount_Entry(
+  id: number,
+  node: $Enums.Account_Entry_Type
+) {
   return handlerServiceAction(
     async (auth) => {
       await prisma.account_Entry.delete({ where: { id: id } });
@@ -50,7 +64,11 @@ export async function deleteAccountEntry(id: number) {
 
       return;
     },
-    "Delete_AccountEntry",
+    node === "Client"
+      ? "Delete_Entry_Client"
+      : node === "IB"
+      ? "Delete_Entry_IB"
+      : "Delete_Entry_Supplier",
     true,
     { id }
   );

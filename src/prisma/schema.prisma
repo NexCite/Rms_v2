@@ -305,7 +305,7 @@ enum DebitCreditType {
   Debit
 }
 
-enum DidgitType {
+enum DigitType {
   Assets
   Liabilities
   Owner_Equity
@@ -325,7 +325,7 @@ model Two_Digit {
   account_entries Account_Entry[]
   sub_entries     SubEntry[]
 
-  type         DidgitType?
+  type         DigitType?
   debit_credit DebitCreditType?
 }
 
@@ -340,7 +340,7 @@ model Three_Digit {
   two_digit_id Int
   two_digit    Two_Digit        @relation(fields: [two_digit_id], references: [id], onDelete: Cascade)
   status       Status           @default(Enable)
-  type         DidgitType?
+  type         DigitType?
   debit_credit DebitCreditType?
 
   sub_entries SubEntry[]
@@ -358,7 +358,7 @@ model More_Than_Four_Digit {
   three_digit_id  Int
   three_digit     Three_Digit      @relation(fields: [three_digit_id], references: [id], onDelete: Cascade)
   status          Status           @default(Enable)
-  type            DidgitType?
+  type            DigitType?
   debit_credit    DebitCreditType?
   sub_entries     SubEntry[]
   user_id         Int?
@@ -390,6 +390,7 @@ model Account_Entry {
   user_id                 Int?
   user                    User?                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
   ref_entries             SubEntry[]            @relation("reference")
+  type                    Account_Entry_Type?
 }
 
 model Entry {
@@ -434,11 +435,11 @@ enum EntryType {
 }
 
 enum UserPermission {
-  Add_AccountEntry
-  Edit_AccountEntry
-  Delete_AccountEntry
-  View_AccountEntry
-  View_AccountEntries
+  Add_Account_Entry
+  Edit_Account_Entry
+  Delete_Account_Entry
+  View_Account_Entry
+  View_Account_Entries
   Add_Two_Digit
   View_Export_Entry
   Edit_Two_Digit
@@ -462,9 +463,9 @@ enum UserPermission {
   View_Entry
   View_Entries
   Accounting
-  AccountingLevel
+  Accounting_Level
   Trading
-  AccountEntry
+  Account_Entry
   Setting
   View_Invoice
   Edit_Invoice
@@ -516,6 +517,27 @@ enum UserPermission {
   View_Medias
   Delete_Media
   View_Log
+  View_Entry_Client
+  View_Entry_Clients
+  Delete_Entry_Client
+  Edit_Entry_Client
+  Add_Entry_Client
+  View_Entry_IB
+  View_Entry_IBs
+  Delete_Entry_IB
+  Edit_Entry_IB
+  Add_Entry_IB
+  View_Entry_Supplier
+  View_Entry_Suppliers
+  Delete_Entry_Supplier
+  Edit_Entry_Supplier
+  Add_Entry_Supplier
+}
+
+enum Account_Entry_Type {
+  Client
+  IB
+  Supplier
 }
 
 model PaymentBox {

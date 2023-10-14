@@ -186,7 +186,7 @@ export default function CategoryForm(props: Props) {
                   })()}
                   size="small"
                   options={props.relations.map((res) => ({
-                    label: res.name,
+                    label: `(${res.id}) ${res.name}`,
                     value: res.id,
                   }))}
                   renderInput={(params) => (

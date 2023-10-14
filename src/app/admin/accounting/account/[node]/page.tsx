@@ -1,9 +1,12 @@
+import { $Enums } from "@prisma/client";
 import { getUserInfo } from "@rms/lib/auth";
 import prisma from "@rms/prisma/prisma";
 import { getUserStatus } from "@rms/service/user-service";
-import AccountEntryTable from "@rms/widgets/table/account-entry-table";
+import Account_EntryTable from "@rms/widgets/table/account-entry-table";
 
-export default async function page() {
+export default async function page(props: {
+  params: { node: $Enums.Account_Entry_Type };
+}) {
   const accounts = await prisma.account_Entry.findMany({
     include: {
       three_digit: true,
@@ -12,12 +15,14 @@ export default async function page() {
       two_digit: true,
     },
     orderBy: { modified_date: "desc" },
-    where: {},
+    where: {
+      type: props.params.node,
+    },
   });
 
   return (
     <div>
-      <AccountEntryTable accounts={accounts} />
+      <Account_EntryTable accounts={accounts} node={props.params.node} />
     </div>
   );
 }

@@ -1,14 +1,13 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useTransition } from "react";
 
 import styled from "@emotion/styled";
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
-import { Prisma } from "@prisma/client";
+import { $Enums, Prisma } from "@prisma/client";
 import Authorized from "@rms/components/ui/authorized";
-import { deleteAccountEntry } from "@rms/service/account-entry-service";
-import { PaginationState } from "@tanstack/react-table";
+import { deleteAccount_Entry } from "@rms/service/account-entry-service";
 import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
 import { useStore } from "@rms/hooks/toast-hook";
 type CommonAccountType = Prisma.Account_EntryGetPayload<{
@@ -21,15 +20,12 @@ type CommonAccountType = Prisma.Account_EntryGetPayload<{
 
 type Props = {
   accounts: CommonAccountType[];
+  node: $Enums.Account_Entry_Type;
 };
 
-export default function AccountEntryTable(props: Props) {
+export default function Account_EntryTable(props: Props) {
   const pathName = usePathname();
   const [isActive, setActiveTransition] = useTransition();
-  const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
 
   const store = useStore();
 
@@ -39,9 +35,23 @@ export default function AccountEntryTable(props: Props) {
       {
         header: "Status",
         accessorKey: "status",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
 
       {
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+
+        muiTableBodyCellProps: {
+          align: "center",
+        },
         accessorKey: "id",
         header: "ID",
         Cell: ({ row: { original } }) => (
@@ -62,14 +72,35 @@ export default function AccountEntryTable(props: Props) {
       {
         accessorKey: "username",
         header: "References",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
       {
         accessorKey: "first_name",
         header: "First Name",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
       {
         accessorKey: "last_name",
         header: "Last Name",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
       {
         accessorKey: "digit" as any,
@@ -82,42 +113,105 @@ export default function AccountEntryTable(props: Props) {
           })  ${e.three_digit?.name ?? ""}${e.two_digit?.name ?? ""}${
             e.more_than_four_digit?.name ?? ""
           }`,
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
 
       {
         accessorKey: "phone_number",
         header: "Phone number",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
       {
         accessorKey: "email",
         header: "Email",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
       {
         accessorKey: "gender",
         header: "Gender",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
       {
         accessorKey: "country",
         header: "Country",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
       {
         accessorKey: "address1",
         header: "Address 1",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
       {
         accessorKey: "address2",
         header: "Address 2",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
       {
         accessorKey: "create_date",
         header: "Create Date",
         accessorFn: (e) => e.create_date.toLocaleDateString(),
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
 
       {
         accessorKey: "modified_date",
         header: "Modified Date",
         accessorFn: (e) => e.modified_date.toLocaleDateString(),
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
     ],
     []
@@ -127,7 +221,7 @@ export default function AccountEntryTable(props: Props) {
     <Style>
       <Card>
         <CardHeader
-          title={<Typography variant="h5">Account Table</Typography>}
+          title={<Typography variant="h5">{props.node}s Table</Typography>}
         />
         <MaterialReactTable
           columns={columns}
@@ -138,7 +232,7 @@ export default function AccountEntryTable(props: Props) {
               original: { username, id },
             },
           }) => [
-            <Authorized permission="Edit_AccountEntry" key={1}>
+            <Authorized permission="Edit_Account_Entry" key={1}>
               <MenuItem
                 onClick={() => push(pathName + "/form?id=" + id)}
                 className="cursor-pointer"
@@ -147,7 +241,7 @@ export default function AccountEntryTable(props: Props) {
                 Edit
               </MenuItem>
             </Authorized>,
-            <Authorized permission="Delete_AccountEntry" key={2}>
+            <Authorized permission="Delete_Account_Entry" key={2}>
               <MenuItem
                 disabled={isActive}
                 className="cursor-pointer"
@@ -157,7 +251,7 @@ export default function AccountEntryTable(props: Props) {
                   );
                   if (isConfirm) {
                     setActiveTransition(async () => {
-                      const result = await deleteAccountEntry(id);
+                      const result = await deleteAccount_Entry(id, props.node);
 
                       store.OpenAlert(result);
                     });

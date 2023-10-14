@@ -4,7 +4,7 @@ import { getUserInfo } from "@rms/lib/auth";
 
 import prisma from "@rms/prisma/prisma";
 import { getUserStatus } from "@rms/service/user-service";
-import AccountEntryForm from "@rms/widgets/form/account-entry-form";
+import Account_EntryForm from "@rms/widgets/form/account-entry-form";
 import DigitForm from "@rms/widgets/form/digit-form";
 
 import React from "react";

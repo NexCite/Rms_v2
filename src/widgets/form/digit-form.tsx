@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { $Enums, DebitCreditType, DidgitType, Prisma } from "@prisma/client";
+import { $Enums, DebitCreditType, DigitType, Prisma } from "@prisma/client";
 
 import { useRouter } from "next/navigation";
 
@@ -64,11 +64,11 @@ export default function DigitForm(props: Props) {
           id: z.number().min(2).or(z.string().regex(/^\d+$/).transform(Number)),
           type: z
             .enum([
-              DidgitType.Assets,
-              DidgitType.Liabilities,
-              DidgitType.Owner_Equity,
-              DidgitType.Expensive,
-              DidgitType.Income,
+              DigitType.Assets,
+              DigitType.Liabilities,
+              DigitType.Owner_Equity,
+              DigitType.Expensive,
+              DigitType.Income,
             ])
             .optional()
             .nullable(),
@@ -88,11 +88,11 @@ export default function DigitForm(props: Props) {
             .min(1, { message: "Name must be at least 1  character" }),
           type: z
             .enum([
-              DidgitType.Assets,
-              DidgitType.Liabilities,
-              DidgitType.Owner_Equity,
-              DidgitType.Expensive,
-              DidgitType.Income,
+              DigitType.Assets,
+              DigitType.Liabilities,
+              DigitType.Owner_Equity,
+              DigitType.Expensive,
+              DigitType.Income,
             ])
             .optional()
             .nullable(),
@@ -113,11 +113,11 @@ export default function DigitForm(props: Props) {
             .min(1, { message: "Name must be at least 1  character" }),
           type: z
             .enum([
-              DidgitType.Assets,
-              DidgitType.Liabilities,
-              DidgitType.Owner_Equity,
-              DidgitType.Expensive,
-              DidgitType.Income,
+              DigitType.Assets,
+              DigitType.Liabilities,
+              DigitType.Owner_Equity,
+              DigitType.Expensive,
+              DigitType.Income,
             ])
             .optional()
             .nullable(),
@@ -346,7 +346,7 @@ export default function DigitForm(props: Props) {
                             None
                           </MenuItem>
 
-                          {Object.keys($Enums.DidgitType).map((res) => (
+                          {Object.keys($Enums.DigitType).map((res) => (
                             <MenuItem key={res} value={res}>
                               {" "}
                               {res}

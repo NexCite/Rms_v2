@@ -73,6 +73,7 @@ export default function ConfigWidget() {
                   label={"App Name"}
                   placeholder="app name"
                   size="small"
+                  fullWidth
                   InputLabelProps={{ shrink: true }}
                 />
               )}
@@ -88,6 +89,7 @@ export default function ConfigWidget() {
                   label={"First Name"}
                   placeholder="first name"
                   size="small"
+                  fullWidth
                   InputLabelProps={{ shrink: true }}
                 />
               )}
@@ -103,6 +105,7 @@ export default function ConfigWidget() {
                   label={"Last Name"}
                   placeholder="last name"
                   size="small"
+                  fullWidth
                   InputLabelProps={{ shrink: true }}
                 />
               )}
@@ -118,6 +121,7 @@ export default function ConfigWidget() {
                   label={"Username"}
                   placeholder="username"
                   size="small"
+                  fullWidth
                   InputLabelProps={{ shrink: true }}
                 />
               )}
@@ -134,6 +138,7 @@ export default function ConfigWidget() {
                   placeholder="password"
                   type="password"
                   size="small"
+                  fullWidth
                   InputLabelProps={{ shrink: true }}
                 />
               )}
@@ -149,6 +154,7 @@ export default function ConfigWidget() {
                   label={"Email"}
                   placeholder="email"
                   size="small"
+                  fullWidth
                   InputLabelProps={{ shrink: true }}
                 />
               )}
@@ -164,6 +170,7 @@ export default function ConfigWidget() {
                   label={"Phone Number"}
                   placeholder="phone number"
                   size="small"
+                  fullWidth
                   InputLabelProps={{ shrink: true }}
                 />
               )}

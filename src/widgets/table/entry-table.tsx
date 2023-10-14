@@ -60,7 +60,7 @@ type Props = {
   }>[];
   accounts?: Prisma.Account_EntryGetPayload<{}>[];
   debit?: $Enums.EntryType;
-  type?: $Enums.DidgitType;
+  type?: $Enums.DigitType;
 
   data: Prisma.EntryGetPayload<{
     include: {
@@ -122,37 +122,25 @@ export default function EntryDataTable(props: Props) {
     },
     [search, selectDate, pathName, replace]
   );
+  const defaultValue = useMemo(() => {
+    const account = props.accounts.find((res) => res.id === props.account_id);
+    const two_digit = props.two_digits.find(
+      (res) => res.id === props.two_digit_id
+    );
+    const three_digit = props.three_digits.find(
+      (res) => res.id === props.three_digit_id
+    );
+    const more_digit = props.more_digits.find(
+      (res) => res.id === props.more_digit_id
+    );
 
-  const { two_digit, three_digit, four_digit, account } = useMemo(() => {
-    var two_digit: { id: number; name: string } = undefined,
-      three_digit: { id: number; name: string } = undefined,
-      four_digit: { id: number; name: string } = undefined;
-    var account: { id: number; username: string } = undefined;
-    if (search.two_digit_id) {
-      two_digit = props.two_digits.find(
-        (res) => res.id === search.two_digit_id
-      );
-    }
-    if (search.three_digit_id) {
-      three_digit = props.two_digits.find(
-        (res) => res.id === search.three_digit_id
-      );
-    }
-
-    if (search.more_digit_id) {
-      four_digit = props.two_digits.find(
-        (res) => res.id === search.more_digit_id
-      );
-    }
-
-    if (search.account_id) {
-      account = props.two_digits.find(
-        (res) => res.id === search.account_id
-      ) as any;
-    }
-
-    return { two_digit, three_digit, four_digit, account };
-  }, [search, props.two_digit_id, props.two_digit_id]);
+    return {
+      account,
+      two_digit,
+      three_digit,
+      more_digit,
+    };
+  }, [props]);
   const columns: MRT_ColumnDef<CommonEntryType>[] = useMemo(
     () => [
       {
@@ -415,21 +403,26 @@ export default function EntryDataTable(props: Props) {
                 search.id !== undefined
               }
               defaultValue={
-                two_digit
-                  ? { label: two_digit.name, value: two_digit.id }
+                defaultValue.two_digit
+                  ? {
+                      label: `(${defaultValue.two_digit.id}) ${defaultValue.two_digit.name}`,
+                      value: defaultValue.two_digit.id,
+                    }
                   : undefined
               }
-              isOptionEqualToValue={(e) => e.value === two_digit?.id}
+              isOptionEqualToValue={(e) =>
+                e.value === defaultValue.two_digit?.id
+              }
               onChange={(e, f) => {
                 setSearch((prev) => ({
                   ...prev,
                   more_digit_id: undefined,
                   three_digit_id: undefined,
-                  two_digit_id: f ? f.value : undefined,
+                  two_digit_id: f?.value,
                 }));
               }}
               options={props.two_digits.map((res) => ({
-                label: res.name,
+                label: `(${res.id}) ${res.name}`,
                 value: res.id,
               }))}
               renderInput={(params) => (
@@ -444,12 +437,14 @@ export default function EntryDataTable(props: Props) {
                 search.two_digit_id !== undefined ||
                 search.id !== undefined
               }
-              isOptionEqualToValue={(e) => e.value === three_digit?.id}
-              value={
-                three_digit
+              isOptionEqualToValue={(e) =>
+                e.value === defaultValue.three_digit?.id
+              }
+              defaultValue={
+                defaultValue.three_digit
                   ? {
-                      label: three_digit.name,
-                      value: three_digit.id,
+                      label: `(${defaultValue.three_digit.id}) ${defaultValue.three_digit.name}`,
+                      value: defaultValue.three_digit.id,
                     }
                   : undefined
               }
@@ -457,12 +452,12 @@ export default function EntryDataTable(props: Props) {
                 setSearch((prev) => ({
                   ...prev,
                   more_digit_id: undefined,
-                  three_digit_id: f ? f.value : undefined,
+                  three_digit_id: f?.value,
                   two_digit_id: undefined,
                 }));
               }}
               options={props.three_digits.map((res) => ({
-                label: res.name,
+                label: `(${res.id}) ${res.name}`,
                 value: res.id,
               }))}
               renderInput={(params) => (
@@ -478,25 +473,27 @@ export default function EntryDataTable(props: Props) {
                 search.id !== undefined
               }
               size="small"
-              isOptionEqualToValue={(e) => e.value === four_digit?.id}
-              value={
-                four_digit
+              isOptionEqualToValue={(e) =>
+                e.value === defaultValue.more_digit?.id
+              }
+              defaultValue={
+                defaultValue.more_digit
                   ? {
-                      label: four_digit.name,
-                      value: four_digit.id,
+                      label: `(${defaultValue.more_digit.id}) ${defaultValue.more_digit.name}`,
+                      value: defaultValue.more_digit.id,
                     }
                   : undefined
               }
               onChange={(e, f) => {
                 setSearch((prev) => ({
                   ...prev,
-                  more_digit_id: f ? f.value : undefined,
+                  more_digit_id: f?.value,
                   three_digit_id: undefined,
                   two_digit_id: undefined,
                 }));
               }}
               options={props.more_digits.map((res) => ({
-                label: res.name,
+                label: `(${res.id}) ${res.name}`,
                 value: res.id,
               }))}
               renderInput={(params) => (
@@ -507,24 +504,27 @@ export default function EntryDataTable(props: Props) {
               disablePortal
               disabled={search.id !== undefined}
               size="small"
-              isOptionEqualToValue={(e) => e.value === account.id}
-              value={
-                account
+              isOptionEqualToValue={(e) => e.value === defaultValue.account?.id}
+              defaultValue={
+                defaultValue.account
                   ? {
-                      label: `${account.id} ${account.username}`,
-                      value: account.id,
+                      label: `${defaultValue.account.id} ${defaultValue.account.username}`,
+                      value: defaultValue.account.id,
+                      group: defaultValue.account.type,
                     }
                   : undefined
               }
+              groupBy={(option) => option.group}
               onChange={(e, f) => {
                 setSearch((prev) => ({
                   ...prev,
-                  account_id: f.value,
+                  account_id: f?.value,
                 }));
               }}
-              options={props.more_digits.map((res) => ({
-                label: res.name,
+              options={props.accounts.map((res) => ({
+                label: `(${res.id}) ${res.username} `,
                 value: res.id,
+                group: res.type,
               }))}
               renderInput={(params) => (
                 <TextField {...params} label="Accounts" />

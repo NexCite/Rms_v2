@@ -522,7 +522,7 @@ export default function TradingForm(props: Props) {
                                       key={res.id}
                                       value={res.id.toString()}
                                     >
-                                      {`(${res.id}) ${res.username} `}
+                                      {`(${res.id}) ${res.username}`}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>

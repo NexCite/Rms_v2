@@ -10,29 +10,13 @@ import { AlertProvider } from "@rms/hooks/toast-hook";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export async function generateMetadata(
-  c,
-  parent: ResolvingMetadata
-): Promise<Metadata> {
-  var result = await prisma.config.findFirst({});
-
-  if (result) {
-    return {
-      title: result.name,
-
-      icons: [`/api/media/${result.logo}`],
-    };
-  }
-
-  return {
-    title: "Config",
-  };
-}
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  var result = await prisma.config.findFirst({});
+
   const v = env.vesrion;
 
   return (
@@ -41,6 +25,10 @@ export default async function RootLayout({
       suppressContentEditableWarning={true}
       suppressHydrationWarning={true}
     >
+      <head>
+        <link rel="icon" href={`/api/media/${result?.logo}?v=${env.v}`} />
+        <title>{result ? result.name : "Setup"}</title>
+      </head>
       <body className={inter.className}>
         <NextTopLoader showSpinner={false} color="#090808" />
 

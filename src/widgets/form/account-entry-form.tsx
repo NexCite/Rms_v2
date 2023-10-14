@@ -3,8 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { $Enums, Prisma } from "@prisma/client";
 import {
-  createAccountEntry,
-  updateAccountEntry,
+  createAccount_Entry,
+  updateAccount_Entry,
 } from "@rms/service/account-entry-service";
 
 import { useRouter } from "next/navigation";
@@ -28,7 +28,7 @@ import {
 import Countries from "@rms/lib/country";
 import { useStore } from "@rms/hooks/toast-hook";
 
-export default function AccountEntryForm(props: {
+export default function Account_EntryForm(props: {
   account?: Prisma.Account_EntryGetPayload<{
     include: {
       more_than_four_digit: { include: { three_digit: true } };
@@ -36,6 +36,7 @@ export default function AccountEntryForm(props: {
       two_digit: {};
     };
   }>;
+  node: $Enums.Account_Entry_Type;
   three_digit: Prisma.Three_DigitGetPayload<{ include: { two_digit: true } }>[];
   two_digit: Prisma.Two_DigitGetPayload<{}>[];
   more_digit: Prisma.More_Than_Four_DigitGetPayload<{
@@ -61,6 +62,9 @@ export default function AccountEntryForm(props: {
           .string()
 
           .optional(),
+        type: z
+          .enum(Object.keys($Enums.Account_Entry_Type) as any)
+          .default(props.node),
         country: z.string(),
         address1: z.string().optional(),
         email: z.string().optional(),
@@ -109,7 +113,7 @@ export default function AccountEntryForm(props: {
           path: ["two_digit_id"],
         }
       );
-  }, []);
+  }, [props.node]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -121,18 +125,20 @@ export default function AccountEntryForm(props: {
     (values: z.infer<typeof formSchema>) => {
       setTransition(async () => {
         if (props.account) {
-          await updateAccountEntry(props.account.id, values).then((res) => {
-            store.OpenAlert(res);
-            Object.keys(res.errors ?? []).map((e) => {
-              form.setError(e as any, res[e]);
-            });
+          await updateAccount_Entry(props.account.id, values, props.node).then(
+            (res) => {
+              store.OpenAlert(res);
+              Object.keys(res.errors ?? []).map((e) => {
+                form.setError(e as any, res[e]);
+              });
 
-            if (res.status === 200) {
-              back();
+              if (res.status === 200) {
+                back();
+              }
             }
-          });
+          );
         } else {
-          await createAccountEntry(values as any).then((res) => {
+          await createAccount_Entry(values as any, props.node).then((res) => {
             store.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);
@@ -157,7 +163,7 @@ export default function AccountEntryForm(props: {
           <CardHeader
             title={
               <div className="flex justify-between items-center flex-row">
-                <Typography variant="h5">Entry From</Typography>
+                <Typography variant="h5">{props.node} From</Typography>
               </div>
             }
           ></CardHeader>

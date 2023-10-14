@@ -289,7 +289,7 @@ export default function ExportEntryDataTable(props: Props) {
     };
   }, [props]);
 
-  const { entries, totalCredit, totalDebit, currencies } = useMemo(() => {
+  const { entries, totalCredit, totalDebit } = useMemo(() => {
     var totalDebit: Record<string, number> = {},
       totalCredit: Record<string, number> = {},
       currencies: { [k: string]: boolean } = {},
@@ -359,21 +359,21 @@ export default function ExportEntryDataTable(props: Props) {
 
         if (amount === 0) {
           if (subEntry.type === "Credit") {
-            if (totalCredit[entry.currency.symbol]) {
-              totalCredit[entry.currency.symbol] += subEntry.amount;
+            if (totalDebit[entry.currency.symbol]) {
+              totalDebit[entry.currency.symbol] += subEntry.amount;
             } else {
               if (!currencies[entry.currency.symbol]) {
                 currencies[entry.currency.symbol] = true;
               }
-              totalCredit[entry.currency.symbol] = subEntry.amount;
+              totalDebit[entry.currency.symbol] = subEntry.amount;
             }
-          } else if (totalDebit[entry.currency.symbol]) {
-            totalDebit[entry.currency.symbol] += subEntry.amount;
+          } else if (totalCredit[entry.currency.symbol]) {
+            totalCredit[entry.currency.symbol] += subEntry.amount;
           } else {
             if (!currencies[entry.currency.symbol]) {
               currencies[entry.currency.symbol] = true;
             }
-            totalDebit[entry.currency.symbol] = subEntry.amount;
+            totalCredit[entry.currency.symbol] = subEntry.amount;
           }
         } else {
           newEntry.amount = amount;
@@ -440,28 +440,29 @@ export default function ExportEntryDataTable(props: Props) {
             disablePortal
             size="small"
             disabled={
+              search.three_digit_id !== undefined ||
               search.more_digit_id !== undefined ||
-              search.three_digit_id !== undefined
+              search.id !== undefined
             }
             defaultValue={
               defaultValue.two_digit
                 ? {
-                    label: defaultValue.two_digit.name,
+                    label: `(${defaultValue.two_digit.id}) ${defaultValue.two_digit.name}`,
                     value: defaultValue.two_digit.id,
                   }
                 : undefined
             }
-            isOptionEqualToValue={(e) => e.value === search.two_digit_id}
+            isOptionEqualToValue={(e) => e.value === defaultValue.two_digit?.id}
             onChange={(e, f) => {
               setSearch((prev) => ({
                 ...prev,
                 more_digit_id: undefined,
                 three_digit_id: undefined,
-                two_digit_id: f ? f.value : undefined,
+                two_digit_id: f?.value,
               }));
             }}
             options={props.two_digits.map((res) => ({
-              label: res.name,
+              label: `(${res.id}) ${res.name}`,
               value: res.id,
             }))}
             renderInput={(params) => (
@@ -471,15 +472,18 @@ export default function ExportEntryDataTable(props: Props) {
           <Autocomplete
             disablePortal
             size="small"
-            isOptionEqualToValue={(e) => e.value === search.three_digit_id}
             disabled={
+              search.more_digit_id !== undefined ||
               search.two_digit_id !== undefined ||
-              search.more_digit_id !== undefined
+              search.id !== undefined
+            }
+            isOptionEqualToValue={(e) =>
+              e.value === defaultValue.three_digit?.id
             }
             defaultValue={
               defaultValue.three_digit
                 ? {
-                    label: defaultValue.three_digit.name,
+                    label: `(${defaultValue.three_digit.id}) ${defaultValue.three_digit.name}`,
                     value: defaultValue.three_digit.id,
                   }
                 : undefined
@@ -488,12 +492,12 @@ export default function ExportEntryDataTable(props: Props) {
               setSearch((prev) => ({
                 ...prev,
                 more_digit_id: undefined,
-                three_digit_id: f ? f.value : undefined,
+                three_digit_id: f?.value,
                 two_digit_id: undefined,
               }));
             }}
             options={props.three_digits.map((res) => ({
-              label: res.name,
+              label: `(${res.id}) ${res.name}`,
               value: res.id,
             }))}
             renderInput={(params) => (
@@ -503,16 +507,19 @@ export default function ExportEntryDataTable(props: Props) {
 
           <Autocomplete
             disablePortal
-            size="small"
             disabled={
+              search.three_digit_id !== undefined ||
               search.two_digit_id !== undefined ||
-              search.three_digit_id !== undefined
+              search.id !== undefined
             }
-            isOptionEqualToValue={(e) => e.value === search.more_digit_id}
+            size="small"
+            isOptionEqualToValue={(e) =>
+              e.value === defaultValue.more_digit?.id
+            }
             defaultValue={
               defaultValue.more_digit
                 ? {
-                    label: defaultValue.more_digit.name,
+                    label: `(${defaultValue.more_digit.id}) ${defaultValue.more_digit.name}`,
                     value: defaultValue.more_digit.id,
                   }
                 : undefined
@@ -520,13 +527,13 @@ export default function ExportEntryDataTable(props: Props) {
             onChange={(e, f) => {
               setSearch((prev) => ({
                 ...prev,
-                more_digit_id: f ? f.value : undefined,
+                more_digit_id: f?.value,
                 three_digit_id: undefined,
                 two_digit_id: undefined,
               }));
             }}
             options={props.more_digits.map((res) => ({
-              label: res.name,
+              label: `(${res.id}) ${res.name}`,
               value: res.id,
             }))}
             renderInput={(params) => (
@@ -535,13 +542,15 @@ export default function ExportEntryDataTable(props: Props) {
           />
           <Autocomplete
             disablePortal
+            disabled={search.id !== undefined}
             size="small"
-            isOptionEqualToValue={(e) => e.value === search.account_id}
+            isOptionEqualToValue={(e) => e.value === defaultValue.account?.id}
             defaultValue={
               defaultValue.account
                 ? {
-                    label: `${defaultValue.account.username}`,
+                    label: `${defaultValue.account.id} ${defaultValue.account.username}`,
                     value: defaultValue.account.id,
+                    group: defaultValue.account.type,
                   }
                 : undefined
             }
@@ -551,9 +560,11 @@ export default function ExportEntryDataTable(props: Props) {
                 account_id: f?.value,
               }));
             }}
+            groupBy={(option) => option.group}
             options={props.accounts.map((res) => ({
-              label: res.username,
+              label: `(${res.id}) ${res.username} `,
               value: res.id,
+              group: res.type,
             }))}
             renderInput={(params) => <TextField {...params} label="Accounts" />}
           />
@@ -622,28 +633,28 @@ export default function ExportEntryDataTable(props: Props) {
                       {props.two_digit_id
                         ? `${
                             props.two_digits.find(
-                              (res) => res.id === search.two_digit_id
+                              (res) => res.id === props.two_digit_id
                             )?.name ?? ""
                           }`
                         : ""}
                       {props.three_digit_id
                         ? ` ${
                             props.three_digits.find(
-                              (res) => res.id === search.three_digit_id
+                              (res) => res.id === props.three_digit_id
                             )?.name ?? ""
                           }`
                         : ""}
                       {props.more_digit_id
                         ? ` ${
                             props.more_digits.find(
-                              (res) => res.id === search.more_digit_id
+                              (res) => res.id === props.more_digit_id
                             )?.name ?? ""
                           }`
                         : ""}
                       {props.account_id
                         ? `(${props.account_id}) ${
                             props.accounts.find(
-                              (res) => res.id === search.account_id
+                              (res) => res.id === props.account_id
                             )?.username ?? ""
                           }`
                         : ""}
@@ -751,8 +762,10 @@ export default function ExportEntryDataTable(props: Props) {
                         totalCredit[res.symbol] ?? 0
                       ),
                       total: FormatNumberWithFixed(
-                        (totalDebit[res.symbol] ?? 0) -
-                          (totalCredit[res.symbol] ?? 0)
+                        Math.abs(
+                          (totalDebit[res.symbol] ?? 0) -
+                            (totalCredit[res.symbol] ?? 0)
+                        )
                       ),
                     }))}
                   />
@@ -826,7 +839,7 @@ type Props = {
   }>[];
   accounts?: Prisma.Account_EntryGetPayload<{}>[];
   debit?: $Enums.EntryType;
-  type?: $Enums.DidgitType;
+  type?: $Enums.DigitType;
   currencies: Prisma.CurrencyGetPayload<{}>[];
   data: Prisma.EntryGetPayload<{
     include: {

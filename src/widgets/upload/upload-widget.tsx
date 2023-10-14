@@ -96,6 +96,7 @@ export default function UploadWidget(props: Props) {
                 imageList.length > 0 ? (
                   <div>
                     <LoadingButton
+                      className="hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white "
                       loading={isPadding}
                       onClick={() => {
                         onImageRemove(0);

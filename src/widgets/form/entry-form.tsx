@@ -49,7 +49,7 @@ interface Props {
     modified_date: Date;
     status: $Enums.Status;
     user_id: number;
-    type: $Enums.DidgitType;
+    type: $Enums.DigitType;
     debit_credit: $Enums.DebitCreditType;
   }[];
   three_digit: {
@@ -63,6 +63,7 @@ interface Props {
   account_entry: {
     id: number;
     username: string;
+    type: $Enums.Account_Entry_Type;
   }[];
   currencies: Prisma.CurrencyGetPayload<{}>[];
 }
@@ -546,7 +547,7 @@ export default function EntryForm(props: Props) {
                         }));
                       }}
                       options={props.two_digit.map((res) => ({
-                        label: res.name,
+                        label: `(${res.id}) ${res.name}`,
                         value: res.id,
                       }))}
                       disabled={
@@ -577,7 +578,7 @@ export default function EntryForm(props: Props) {
                         }));
                       }}
                       options={props.three_digit.map((res) => ({
-                        label: res.name,
+                        label: `(${res.id}) ${res.name}`,
                         value: res.id,
                       }))}
                       disabled={
@@ -609,7 +610,7 @@ export default function EntryForm(props: Props) {
                         }));
                       }}
                       options={props.more_than_four_digit.map((res) => ({
-                        label: res.name,
+                        label: `(${res.id}) ${res.name}`,
                         value: res.id,
                       }))}
                       disabled={
@@ -640,9 +641,11 @@ export default function EntryForm(props: Props) {
                           sub_entries: prev.sub_entries,
                         }));
                       }}
+                      groupBy={(res) => res.group}
                       options={props.account_entry.map((res) => ({
-                        label: res.username,
+                        label: `(${res.id}) ${res.username}`,
                         value: res.id,
+                        group: res.type,
                       }))}
                       disabled={
                         res.three_digit_id
@@ -675,9 +678,11 @@ export default function EntryForm(props: Props) {
                           sub_entries: prev.sub_entries,
                         }));
                       }}
+                      groupBy={(res) => res.group}
                       options={props.account_entry.map((res) => ({
-                        label: res.username,
+                        label: `(${res.id}) ${res.username}`,
                         value: res.id,
+                        group: res.type,
                       }))}
                       disabled={res.account_entry_id ? true : false}
                       renderInput={(params) => (
