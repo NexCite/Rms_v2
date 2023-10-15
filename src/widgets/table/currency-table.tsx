@@ -24,17 +24,6 @@ export default function CurrencyTable(props: Props) {
   const columns = useMemo<MRT_ColumnDef<Prisma.CurrencyGetPayload<{}>>[]>(
     () => [
       {
-        header: "Status",
-        accessorKey: "status",
-        muiTableHeadCellProps: {
-          align: "center",
-        },
-        muiTableBodyCellProps: {
-          align: "center",
-        },
-      },
-
-      {
         accessorKey: "id",
         muiTableHeadCellProps: {
           align: "center",

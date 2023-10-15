@@ -1,15 +1,20 @@
 import { Prisma } from "@prisma/client";
 import BackButton from "@rms/components/ui/back-button";
+import { Activity } from "@rms/models/CommonModel";
 import prisma from "@rms/prisma/prisma";
+import { getActivities } from "@rms/service/activity-service";
 import { getUserStatus } from "@rms/service/user-service";
 import EntryForm from "@rms/widgets/form/entry-form";
 import React from "react";
 
 export default async function page(props: {
   params: {};
-  searchParams: { id: string };
+  searchParams: { id: string; activity_id: string };
 }) {
-  var id: number, entry: Prisma.EntryGetPayload<{ include: { media: true } }>;
+  var id: number,
+    entry: Prisma.EntryGetPayload<{ include: { media: true } }>,
+    activity_id: number | undefined;
+  var activity: Activity;
 
   if (props.searchParams.id && !Number.isInteger(+props.searchParams.id)) {
     return (
@@ -35,6 +40,10 @@ export default async function page(props: {
         </>
       );
     }
+  }
+
+  if (Number.isInteger(+props.searchParams.activity_id)) {
+    activity_id = +props.searchParams.activity_id;
   }
 
   const three_digit = await prisma.three_Digit.findMany({
@@ -70,7 +79,7 @@ export default async function page(props: {
     where: { status: await getUserStatus() },
     select: {
       username: true,
-
+      type: true,
       id: true,
     },
     orderBy: { modified_date: "desc" },
@@ -78,10 +87,15 @@ export default async function page(props: {
   const currencies = await prisma.currency.findMany({
     orderBy: { modified_date: "desc" },
   });
+  if (activity_id) {
+    const result = await getActivities(activity_id);
+    activity = result.status !== 200 ? undefined : result.result;
+  }
 
   return (
     <div>
       <EntryForm
+        activity={activity}
         id={id}
         isEditMode={id ? true : false}
         entry={entry}

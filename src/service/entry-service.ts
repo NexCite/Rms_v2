@@ -4,11 +4,25 @@ import { Prisma } from "@prisma/client";
 
 import { handlerServiceAction } from "@rms/lib/handler";
 import prisma from "@rms/prisma/prisma";
-export async function createEntry(props: Prisma.EntryUncheckedCreateInput) {
+import { confirmActivity } from "./activity-service";
+import { ActivityStatus } from "@rms/models/CommonModel";
+export async function createEntry(
+  props: Prisma.EntryUncheckedCreateInput,
+  activity?: {
+    id: number;
+    status?: ActivityStatus;
+  }
+) {
   return handlerServiceAction(
     async (auth) => {
       props.user_id = auth.id;
-      await prisma.entry.create({ data: props });
+      if (activity) activity.status = ActivityStatus.Provided;
+
+      await Promise.all([
+        prisma.entry.create({ data: props }),
+        activity ? confirmActivity(activity) : undefined,
+      ]);
+
       return;
     },
     "Add_Entry",

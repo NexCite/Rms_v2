@@ -1,7 +1,6 @@
-import React from "react";
-import moment from "moment";
 import { $Enums, Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
+import moment from "moment";
 
 import EntryDataTable from "@rms/widgets/table/entry-table";
 
@@ -10,7 +9,7 @@ export default async function Entry(props: {
   searchParams: {
     from_date?: string;
     to_date?: string;
-
+    activity_id?: string;
     id?: string;
     two_digit_id?: string;
     three_digit_id?: string;
@@ -26,7 +25,8 @@ export default async function Entry(props: {
     id: number | undefined = undefined,
     three_digit_id: number | undefined = undefined,
     more_digit_id: number | undefined = undefined,
-    account_id: number | undefined = undefined;
+    account_id: number | undefined = undefined,
+    activity_id: number | undefined;
 
   if ((props.searchParams.type as any) !== "undefined") {
     type = props.searchParams.type;
@@ -50,7 +50,9 @@ export default async function Entry(props: {
   if (!Number.isNaN(+props.searchParams.id)) {
     id = +props.searchParams.id;
   }
-
+  if (!Number.isNaN(+props.searchParams.activity_id)) {
+    activity_id = +props.searchParams.activity_id;
+  }
   const startDate = parseInt(props.searchParams.from_date);
   const endDate = parseInt(props.searchParams.to_date);
 

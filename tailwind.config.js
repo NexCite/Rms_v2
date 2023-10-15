@@ -18,6 +18,9 @@ module.exports = {
       },
     },
     extend: {
+      screens: {
+        "entry-form-size": "1380px",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

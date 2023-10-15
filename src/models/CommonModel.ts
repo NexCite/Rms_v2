@@ -245,12 +245,12 @@ export interface Activity {
 }
 
 // Now you can use 'data' with the defined interface in your TypeScript code.
-enum ActivityStatus {
-  Padding,
-  Provided,
-  Closed,
+export enum ActivityStatus {
+  Padding = "Padding",
+  Provided = "Provided",
+  Closed = "Closed",
 }
-enum ActivityType {
+export enum ActivityType {
   Credit_In = "Credit_In",
   Balance = "Balanced",
   Deposit = "Deposit",

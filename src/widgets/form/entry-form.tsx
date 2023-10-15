@@ -10,7 +10,11 @@ import { PlusSquare, X } from "lucide-react";
 
 import LoadingButton from "@mui/lab/LoadingButton";
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Alert,
+  AlertTitle,
   Autocomplete,
   Card,
   CardContent,
@@ -22,17 +26,21 @@ import {
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import Loading from "@rms/components/ui/loading";
+import { useStore } from "@rms/hooks/toast-hook";
+import { Activity, ActivityStatus } from "@rms/models/CommonModel";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { MdOutlineKeyboardArrowUp } from "react-icons/md";
 import { z } from "zod";
 import UploadWidget from "../upload/upload-widget";
-import { useStore } from "@rms/hooks/toast-hook";
 
 interface Props {
   id?: number;
-  entry?: Prisma.EntryGetPayload<{ include: { media: true } }>;
+  entry?: Prisma.EntryGetPayload<{ include: {} }>;
+  activity?: Activity;
   isEditMode?: boolean;
   more_than_four_digit: {
     three_digit: {
@@ -60,6 +68,7 @@ interface Props {
       name: string;
     };
   }[];
+
   account_entry: {
     id: number;
     username: string;
@@ -67,192 +76,167 @@ interface Props {
   }[];
   currencies: Prisma.CurrencyGetPayload<{}>[];
 }
-type Type = {
-  title?: string;
-  description: string;
-  note?: string;
-  to_date?: Date;
-  sub_entries?: Prisma.SubEntryCreateManyInput[];
-  media?: Prisma.MediaCreateNestedOneWithoutEntryInput;
-  currency_id: number;
-};
+// type Type = {
+//   title?: string;
+//   description: string;
+//   note?: string;
+//   to_date?: Date;
+//   sub_entries?: Prisma.SubEntryCreateManyInput[];
+//   media?: Prisma.MediaCreateNestedOneWithoutEntryInput;
+//   currency_id: number;
+// };
 
 export default function EntryForm(props: Props) {
   const [isPadding, setTransition] = useTransition();
-  const [isUiLoading, setUiLoading] = useTransition();
-
   const { back } = useRouter();
-  const [forms, setForms] = useState<Type>({
-    title: props.entry?.title,
-    description: props.entry?.description,
-    note: props.entry?.note,
-    currency_id: props.entry?.currency_id,
-    sub_entries: [],
-    to_date: new Date(),
-  });
 
-  const formSchema = props.isEditMode
-    ? z.object({
-        title: z.string().min(3),
-        description: z.string().min(3),
-        note: z.string().optional(),
-        currency_id: z.number(),
-      })
-    : z.object({
-        title: z.string().min(3),
-        description: z.string().min(3),
-        note: z.string().optional(),
-        currency_id: z.number(),
-        sub_entries: z.object({
-          createMany: z.object({
-            data: z
-              .array(
-                z.object({
-                  type: z.enum([
-                    $Enums.DebitCreditType.Debit,
-                    $Enums.DebitCreditType.Credit,
-                  ]),
-                  amount: z.number().min(0),
-                  account_entry_id: z.number().optional(),
-                  three_digit_id: z.number().optional(),
-                  two_digit_id: z.number().optional(),
-                  reference_id: z.number().optional(),
+  const formSchema = z.object({
+    title: z.string().min(3),
+    description: z.string().min(3),
+    note: z.string().optional(),
+    currency_id: z.number(),
+    sub_entries: props.isEditMode
+      ? z.any()
+      : z
+          .array(
+            z.object({
+              type: z.enum([
+                $Enums.DebitCreditType.Debit,
+                $Enums.DebitCreditType.Credit,
+              ]),
+              amount: z.number().min(0.01),
+              account_entry_id: z.number().optional(),
+              three_digit_id: z.number().optional(),
+              two_digit_id: z.number().optional(),
+              reference_id: z.number().optional(),
 
-                  more_than_four_digit_id: z.number().optional(),
-                })
-              )
-              .min(2),
-          }),
-        }),
-        media: z
+              more_than_four_digit_id: z.number().optional(),
+            })
+          )
+          .min(2),
+    media: props.isEditMode
+      ? z.any()
+      : z
           .object({
-            create: z.object({
-              path: z.string(),
-              type: z.enum([$Enums.MediaType.Pdf]).default("Pdf"),
-              title: z.string(),
-            }),
+            path: z.string(),
+            type: z.enum([$Enums.MediaType.Pdf]).default("Pdf"),
+            title: z.string(),
           })
           .optional(),
-        to_date: z.date(),
-      });
-
-  const [errors, setErrors] = useState<{ index?: number; message: string }[]>(
-    []
-  );
+    to_date: z.date(),
+  });
 
   const store = useStore();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: props.entry,
+    defaultValues: props.activity
+      ? {
+          description: props.activity.description,
+          note: props.activity.note,
+          to_date: new Date(props.activity.create_date),
+          currency_id: (() =>
+            props.currencies.find(
+              (res) => res.symbol === props.activity.client.currency.symbol
+            )?.id ?? undefined)(),
+          sub_entries: [],
+        }
+      : {
+          to_date: props.entry?.to_date ?? new Date(),
+          description: props.entry?.description ?? undefined,
+          note: props.entry?.note ?? undefined,
+          title: props.entry?.title ?? undefined,
+          currency_id: props.entry?.currency_id ?? undefined,
+          sub_entries: [],
+        },
   });
-
-  useEffect(() => {
-    if (props.isEditMode) {
-      setForms(props.entry as any);
-    }
-  }, [props.isEditMode, props.entry]);
 
   const [media, setMedia] = useState<Prisma.MediaGetPayload<{}>>();
 
-  const handleSubmit = useCallback(() => {
-    var m: Prisma.EntryUncheckedCreateInput;
-    m = {
-      description: forms.description,
-      title: forms.title,
-      to_date: forms.to_date,
-      note: forms.note,
-      currency_id: forms.currency_id,
-      sub_entries: props.isEditMode
-        ? undefined
-        : {
-            createMany: {
-              data: forms.sub_entries.map((res) => ({
-                amount: res.amount,
-                status: res.status,
-                type: res.type,
-                account_entry_id:
-                  res.account_entry_id === 0 ? undefined : res.account_entry_id,
-                two_digit_id:
-                  res.two_digit_id === 0 ? undefined : res.two_digit_id,
-                three_digit_id:
-                  res.three_digit_id === 0 ? undefined : res.three_digit_id,
-                more_than_four_digit_id:
-                  res.more_than_four_digit_id === 0
-                    ? undefined
-                    : res.more_than_four_digit_id,
-                reference_id:
-                  res.reference_id === 0 ? undefined : res.reference_id,
-              })),
+  const handleSubmit = useCallback(
+    (values) => {
+      var m: Prisma.EntryUncheckedCreateInput;
+      m = {
+        description: values.description,
+        title: values.title,
+        to_date: values.to_date,
+        note: values.note,
+        currency_id: values.currency_id,
+        sub_entries: props.isEditMode
+          ? undefined
+          : {
+              createMany: {
+                data: values.sub_entries.map((res) => ({
+                  amount: res.amount,
+                  status: "Enable",
+                  type: res.type,
+                  account_entry_id:
+                    res.account_entry_id === 0
+                      ? undefined
+                      : res.account_entry_id,
+                  two_digit_id:
+                    res.two_digit_id === 0 ? undefined : res.two_digit_id,
+                  three_digit_id:
+                    res.three_digit_id === 0 ? undefined : res.three_digit_id,
+                  more_than_four_digit_id:
+                    res.more_than_four_digit_id === 0
+                      ? undefined
+                      : res.more_than_four_digit_id,
+                  reference_id:
+                    res.reference_id === 0 ? undefined : res.reference_id,
+                })),
+              },
             },
-          },
-      media: media
-        ? {
-            create: {
-              path: media.path,
-              title: media.title,
-              type: "Pdf",
-            },
+        media: media
+          ? {
+              create: {
+                path: media.path,
+                title: media.title,
+                type: "Pdf",
+              },
+            }
+          : undefined,
+      };
+
+      const error = [];
+      var debit = 0;
+      var credit = 0;
+      if (!props.isEditMode) {
+        values.sub_entries.map((res, i) => {
+          if (res.type === "Debit") debit += res.amount;
+          else if (res.type === "Credit") credit += res.amount;
+          if (
+            !res.three_digit_id &&
+            !res.more_than_four_digit_id &&
+            !res.account_entry_id &&
+            !res.two_digit_id
+          ) {
+            error.push({ index: i + 1, message: "Missing  client or level" });
           }
-        : undefined,
-    };
-    const result = formSchema.safeParse(m);
-    form.clearErrors([
-      "currency_id",
-      "description",
-      "description",
-      "note",
-      "title",
-    ]);
-
-    const error = [];
-    var debit = 0;
-    var credit = 0;
-    if (!props.isEditMode) {
-      forms.sub_entries.map((res, i) => {
-        if (res.type === "Debit") debit += res.amount;
-        else if (res.type === "Credit") credit += res.amount;
-        if (
-          !res.three_digit_id &&
-          !res.more_than_four_digit_id &&
-          !res.account_entry_id &&
-          !res.two_digit_id
-        ) {
-          error.push({ index: i + 1, message: "Missing  client or level" });
-        }
-        if (!res.type) {
-          error.push({ index: i + 1, message: "Missing  type" });
-        }
-      });
-
-      if (debit - credit !== 0)
-        error.push({
-          index: undefined,
-          message: "Debit must be equal Credit",
+          if (!res.type) {
+            error.push({ index: i + 1, message: "Missing  type" });
+          }
         });
-      setErrors(error);
-    }
-    if (forms.sub_entries.length < 1) {
-      return setErrors(
-        error.concat([{ message: "SubEntry must be not empty" }])
-      );
-    }
 
-    if (result.success === false) {
-      return Object.keys(result.error.formErrors.fieldErrors).map((res) => {
-        form.setError(res as any, {
-          message: result.error.formErrors.fieldErrors[res][0],
+        if (debit - credit !== 0)
+          error.push({
+            index: undefined,
+            message: "Debit must be equal Credit",
+          });
+      }
+      if (error.length > 0) {
+        form.setError("sub_entries", {
+          message: error
+            .map(
+              (res) =>
+                (res.index ? `\n SubEntry Index (${res.index}):` : "") +
+                ` ${res.message}`
+            )
+            .join("#space#"),
+          type: "required",
         });
-      });
-    } else if (error.length > 0) {
-      return;
-    } else {
-      form.clearErrors([
-        "currency_id",
-        "description",
-        "description",
-        "note",
-        "title",
-      ]);
+        return;
+      }
+
       setTransition(async () => {
         if (props.isEditMode) {
           const result = await updateEntry(props.id, {
@@ -266,549 +250,671 @@ export default function EntryForm(props: Props) {
             back();
           }
         } else {
-          const result = await createEntry(m);
+          const result = await createEntry(
+            m,
+            props.activity
+              ? { id: props.activity.id, status: ActivityStatus.Provided }
+              : undefined
+          );
           store.OpenAlert(result);
           if (result.status === 200) {
             back();
           }
         }
       });
-    }
-  }, [props, forms, media, formSchema, back, form, store]);
+    },
+    [props, media, formSchema, back, form, store]
+  );
+  const [loadingUi, setLoadingUi] = useState(true);
+  useEffect(() => {
+    setLoadingUi(false);
+  }, []);
 
   return (
-    <form className="max-w-[450px] m-auto" noValidate>
-      <Card>
-        {errors.length > 0 && (
-          <Alert severity="error">
-            {errors.map((res, i) => (
-              <h4 key={i}>
-                {res.message} SubEntry {res.index && <span>{res.index}</span>}
-              </h4>
-            ))}
-          </Alert>
-        )}
-        <CardHeader
-          title={
-            <div className="flex justify-between items-center flex-row">
-              <Typography variant="h5">Entry From</Typography>
-              <LoadingButton
-                onClick={(e) => {
-                  handleSubmit();
-                }}
-                variant="contained"
-                className="hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white w-[150px]"
-                disableElevation
-                loading={isPadding}
+    <form
+      className="max-w-[450px] m-auto"
+      noValidate
+      onSubmit={form.handleSubmit(handleSubmit)}
+    >
+      {loadingUi ? (
+        <Loading />
+      ) : (
+        <Card>
+          {props.activity && (
+            <div className=" entry-form-size:absolute top-[80px] flex  end-[2%] entry-form-size:max-w-xs  w-full    max-h-full ">
+              <Accordion
+                defaultExpanded
+                variant="outlined"
+                elevation={0}
+                className="rounded-none"
               >
-                Save
-              </LoadingButton>
-            </div>
-          }
-        ></CardHeader>
-        <Divider />
-        <CardContent className="flex gap-5 flex-col">
-          <Controller
-            control={form.control}
-            name="title"
-            render={({ field, fieldState }) => (
-              <TextField
-                InputLabelProps={{ shrink: true }}
-                required
-                {...field}
-                error={Boolean(fieldState.error)}
-                label="Title"
-                size="small"
-                fullWidth
-                value={forms.title}
-                helperText={fieldState?.error?.message}
-                onChange={(e) => {
-                  setForms((prev) => ({
-                    ...prev,
-                    title: e.target.value,
-                  }));
-                }}
-              />
-            )}
-          />
-          <Controller
-            control={form.control}
-            name="description"
-            render={({ field, fieldState }) => (
-              <TextField
-                InputLabelProps={{ shrink: true }}
-                required
-                {...field}
-                multiline
-                minRows={3}
-                maxRows={5}
-                error={Boolean(fieldState.error)}
-                label="Description"
-                size="small"
-                fullWidth
-                defaultValue={field.value}
-                helperText={fieldState?.error?.message}
-                onChange={(e) => {
-                  setForms((prev) => ({
-                    ...prev,
-                    description: e.target.value,
-                  }));
-                }}
-              />
-            )}
-          />
-          <Controller
-            control={form.control}
-            name="note"
-            render={({ field, fieldState }) => (
-              <TextField
-                InputLabelProps={{ shrink: true }}
-                {...field}
-                multiline
-                minRows={3}
-                maxRows={5}
-                error={Boolean(fieldState.error)}
-                label="Note"
-                size="small"
-                fullWidth
-                defaultValue={field.value}
-                helperText={fieldState?.error?.message}
-                onChange={(e) => {
-                  setForms((prev) => ({
-                    ...prev,
-                    note: e.target.value,
-                  }));
-                }}
-              />
-            )}
-          />
-          <Controller
-            control={form.control}
-            name="currency_id"
-            render={({ field, fieldState }) => (
-              <Autocomplete
-                size="small"
-                isOptionEqualToValue={(e) => e.value === forms.currency_id}
-                defaultValue={(() => {
-                  const currnecy = props.currencies.find(
-                    (res) => res.id === forms.currency_id
-                  );
+                <AccordionSummary
+                  expandIcon={<MdOutlineKeyboardArrowUp />}
+                  aria-controls="panel1a-content"
+                >
+                  <Typography className="text-2xl">
+                    Activity Information
+                  </Typography>
+                </AccordionSummary>
+                <Divider />
+                <AccordionDetails className="p-0">
+                  <Card
+                    className="  w-full  entry-form-size:max-h-[600px]  max-h-full overflow-auto  border-none"
+                    variant="outlined"
+                  >
+                    <CardContent className="flex flex-col gap-3">
+                      <div className="flex justify-between items-center">
+                        <Typography className="text-xl">Activty Id</Typography>
+                        <Typography className="text-xl">
+                          {props.activity.id}
+                        </Typography>
+                      </div>
 
-                  return currnecy
-                    ? { label: currnecy.symbol, value: currnecy.id }
-                    : undefined;
-                })()}
-                onChange={(e, v) =>
-                  setForms((prev) => ({ ...prev, currency_id: v?.value }))
-                }
-                renderInput={(params) => (
+                      <div className="flex justify-between items-center">
+                        <Typography className="text-xl">Currency</Typography>
+                        <Typography className="text-xl">
+                          {props.activity.client.currency.symbol}
+                        </Typography>
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <Typography className="text-xl">Client Id</Typography>
+                        <Typography className="text-xl">
+                          {props.activity.client.id}
+                        </Typography>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <Typography className="text-xl">Account Id</Typography>
+                        <Typography className="text-xl">
+                          {props.activity.account_id}
+                        </Typography>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <Typography className="text-xl">Client </Typography>
+                        <Typography className="text-xl">
+                          {props.activity.client.username}
+                        </Typography>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <Typography className="text-xl">Client Id</Typography>
+                        <Typography className="text-xl">
+                          {props.activity.client.id}
+                        </Typography>
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <Typography className="text-xl">Amount</Typography>
+                        <Typography className="text-xl">
+                          {props.activity.client.currency.symbol}{" "}
+                          {FormatNumberWithFixed(props.activity.amount)}
+                        </Typography>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <Typography className="text-xl">
+                          Activity Type
+                        </Typography>
+                        <Typography className="text-xl">
+                          {props.activity.type}
+                        </Typography>
+                      </div>
+
+                      <div className="flex justify-between items-start flex-col gap-2 border rounded-sm p-2">
+                        <Typography className="text-2xl">
+                          Description
+                        </Typography>
+
+                        <Typography className="text-xl">
+                          {props.activity.description}{" "}
+                        </Typography>
+                      </div>
+
+                      <div className="flex justify-between items-start flex-col gap-2 border rounded-sm p-2">
+                        <Typography className="text-2xl">Note</Typography>
+
+                        <Typography className="text-xl">
+                          {props.activity.note}{" "}
+                        </Typography>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </AccordionDetails>
+              </Accordion>
+            </div>
+          )}
+
+          <CardHeader
+            title={
+              <div className="flex justify-between items-center flex-row">
+                <Typography variant="h5">Entry From</Typography>
+                <LoadingButton
+                  type="submit"
+                  variant="contained"
+                  className="hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white w-[150px]"
+                  disableElevation
+                  loading={isPadding}
+                >
+                  Save
+                </LoadingButton>
+              </div>
+            }
+          ></CardHeader>
+          <Divider />
+          <CardContent className="flex gap-5 flex-col">
+            <>
+              <Controller
+                control={form.control}
+                name="title"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    InputLabelProps={{ shrink: true }}
+                    required
+                    {...field}
+                    error={Boolean(fieldState.error)}
+                    label="Title"
+                    size="small"
+                    fullWidth
+                    helperText={fieldState?.error?.message}
+                  />
+                )}
+              />
+              <Controller
+                control={form.control}
+                name="description"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    InputLabelProps={{ shrink: true }}
+                    required
+                    {...field}
+                    multiline
+                    disabled={Boolean(props.activity)}
+                    minRows={3}
+                    maxRows={5}
+                    error={Boolean(fieldState.error)}
+                    label="Description"
+                    size="small"
+                    fullWidth
+                    defaultValue={field.value}
+                    helperText={fieldState?.error?.message}
+                  />
+                )}
+              />
+              <Controller
+                control={form.control}
+                name="note"
+                render={({ field, fieldState }) => (
                   <TextField
                     InputLabelProps={{ shrink: true }}
                     {...field}
-                    value={forms.currency_id}
+                    disabled={Boolean(props.activity)}
+                    multiline
+                    minRows={3}
+                    maxRows={5}
                     error={Boolean(fieldState.error)}
+                    label="Note"
+                    size="small"
+                    fullWidth
+                    defaultValue={field.value}
                     helperText={fieldState?.error?.message}
-                    {...params}
-                    label="Currency"
-                    required
                   />
                 )}
-                options={props.currencies.map((res) => ({
-                  label: res.symbol,
-                  value: res.id,
-                }))}
               />
-            )}
-          />
-          <Controller
-            control={form.control}
-            name={"to_date" as any}
-            render={({ field, fieldState }) => (
-              <FormControl {...field} size="small">
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DatePicker
-                    minDate={dayjs().subtract(7, "day")}
-                    label="Date"
-                    maxDate={dayjs()}
-                    slotProps={{
-                      textField: {
-                        size: "small",
-                        required: true,
-                        error: Boolean(fieldState?.error),
-                        helperText: fieldState?.error?.message,
-                      },
-                    }}
-                    value={dayjs(forms.to_date)}
-                    onChange={(e) => {
-                      setForms((prev) => ({
-                        ...prev,
-                        to_date: e?.toDate(),
-                      }));
+              <Controller
+                control={form.control}
+                name="currency_id"
+                render={({ field, fieldState }) => (
+                  <Autocomplete
+                    size="small"
+                    disabled={Boolean(
+                      props.activity
+                        ? props.currencies.find(
+                            (res) =>
+                              res.symbol ===
+                              props.activity.client.currency.symbol
+                          ) ?? false
+                        : false
+                    )}
+                    isOptionEqualToValue={(e) => e.value === field.value}
+                    defaultValue={(() => {
+                      const currnecy = props.currencies.find(
+                        (res) => res.id === field.value
+                      );
+
+                      return currnecy
+                        ? { label: currnecy.symbol, value: currnecy.id }
+                        : undefined;
+                    })()}
+                    onChange={(e, v) => field.onChange(v?.value)}
+                    renderInput={(params) => (
+                      <TextField
+                        {...field}
+                        error={Boolean(fieldState.error)}
+                        helperText={fieldState?.error?.message}
+                        {...params}
+                        InputLabelProps={{ shrink: true }}
+                        label="Currency"
+                        required
+                      />
+                    )}
+                    options={props.currencies.map((res) => ({
+                      label: res.symbol,
+                      value: res.id,
+                    }))}
+                  />
+                )}
+              />
+              <Controller
+                control={form.control}
+                name={"to_date" as any}
+                render={({ field, fieldState }) => (
+                  <FormControl {...field} size="small">
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DatePicker
+                        disabled={Boolean(props.activity)}
+                        minDate={dayjs().subtract(7, "day")}
+                        label="Date"
+                        maxDate={dayjs()}
+                        slotProps={{
+                          textField: {
+                            size: "small",
+                            required: true,
+                            error: Boolean(fieldState?.error),
+                            helperText: fieldState?.error?.message,
+                          },
+                        }}
+                        defaultValue={dayjs(field.value)}
+                        onChange={(e) => {
+                          field.onChange(e?.toDate());
+                        }}
+                      />
+                    </LocalizationProvider>
+                  </FormControl>
+                )}
+              />
+
+              <div className="grid-cols-12">
+                {!props.isEditMode && (
+                  <UploadWidget
+                    isPdf
+                    onSave={(e) => {
+                      setMedia({ path: e, title: e, type: "Pdf" } as any);
                     }}
                   />
-                </LocalizationProvider>
-              </FormControl>
-            )}
-          />
-
-          <div className="grid-cols-12">
-            {!props.isEditMode && (
-              <UploadWidget
-                isPdf
-                onSave={(e) => {
-                  setMedia({ path: e, title: e, type: "Pdf" } as any);
-                }}
-              />
-            )}
-          </div>
-          {!props.isEditMode && isUiLoading ? (
-            <></>
-          ) : (
-            <>
-              <div style={{ margin: "0px 0px 0px" }}>
-                <h1 className="text-2xl">Entries</h1>
+                )}
               </div>
-              <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
-              {forms?.sub_entries?.map((res, i) => (
-                <div className="mb-5 " key={new Date().getTime()}>
-                  <div className="flex justify-between items-center">
-                    <h1>SubEntry: {i + 1}</h1>
-                    {forms.sub_entries.length}
-                    <Button
-                      onClick={() => {
-                        setErrors([]);
-                        console.log(i, forms.sub_entries.length);
-                        setUiLoading(() => {
-                          setForms((prev) => ({
-                            ...prev,
-                            sub_entries: prev.sub_entries.filter(
-                              (res, ii) => i !== ii
-                            ),
-                          }));
-                        });
-                      }}
-                      size="sm"
-                      className="bg-black"
-                      color="dark"
-                      type="button"
-                    >
-                      <X size="15" />
-                    </Button>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-                    <TextField
-                      InputLabelProps={{ shrink: true }}
-                      size="small"
-                      type="number"
-                      label="Amount"
-                      value={res.amount}
-                      required
-                      onChange={(e) => {
-                        if (Number.isNaN(e.target.value)) {
-                          forms.sub_entries[i].amount = 1;
-                        } else {
-                          forms.sub_entries[i].amount = +e.target.value;
-                        }
-
-                        setForms((prev) => ({
-                          ...prev,
-                          sub_entries: prev.sub_entries,
-                        }));
-                      }}
-                      helperText={`${FormatNumberWithFixed(res.amount ?? 0)}`}
-                    />
-
-                    <Autocomplete
-                      disablePortal
-                      isOptionEqualToValue={(ress) => ress == res.type}
-                      size="small"
-                      onChange={(e, v) => {
-                        forms.sub_entries[i].type = v as any;
-                        setForms((prev) => ({
-                          ...prev,
-                          sub_entries: prev.sub_entries,
-                        }));
-                      }}
-                      value={res.type}
-                      options={Object.keys($Enums.DebitCreditType)}
-                      renderInput={(params) => (
-                        <TextField
-                          InputLabelProps={{ shrink: true }}
-                          required
-                          {...params}
-                          label="Type"
-                        />
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1  md:grid-cols-2 gap-4 mt-3">
-                    <Autocomplete
-                      disablePortal
-                      size="small"
-                      isOptionEqualToValue={(ress) =>
-                        ress.value === res.two_digit_id
-                      }
-                      value={
-                        props.two_digit
-                          .filter((ress) => ress.id === res.two_digit_id)
-                          .map((res) => ({
-                            label: `(${res.id}) ${res.name}`,
-                            value: res.id,
-                          }))[0] || null
-                      }
-                      onChange={(e, v) => {
-                        forms.sub_entries[i].two_digit_id = v?.value;
-                        setForms((prev) => ({
-                          ...prev,
-                          sub_entries: prev.sub_entries,
-                        }));
-                      }}
-                      options={props.two_digit.map((res) => ({
-                        label: `(${res.id}) ${res.name}`,
-                        value: res.id,
-                      }))}
-                      disabled={
-                        res.three_digit_id
-                          ? true
-                          : res.more_than_four_digit_id
-                          ? true
-                          : res.account_entry_id
-                          ? true
-                          : false
-                      }
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          InputLabelProps={{ shrink: true }}
-                          label="Two And More"
-                        />
-                      )}
-                    />
-                    <Autocomplete
-                      disablePortal
-                      isOptionEqualToValue={(ress) =>
-                        ress.value === res.three_digit_id
-                      }
-                      size="small"
-                      value={
-                        props.three_digit
-                          .filter((ress) => ress.id === res.three_digit_id)
-                          .map((res) => ({
-                            label: `(${res.id}) ${res.name}`,
-                            value: res.id,
-                          }))[0] || null
-                      }
-                      onChange={(e, v) => {
-                        forms.sub_entries[i].three_digit_id = v?.value;
-                        setForms((prev) => ({
-                          ...prev,
-                          sub_entries: prev.sub_entries,
-                        }));
-                      }}
-                      options={props.three_digit.map((res) => ({
-                        label: `(${res.id}) ${res.name}`,
-                        value: res.id,
-                      }))}
-                      disabled={
-                        res.two_digit_id
-                          ? true
-                          : res.more_than_four_digit_id
-                          ? true
-                          : res.account_entry_id
-                          ? true
-                          : false
-                      }
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          InputLabelProps={{ shrink: true }}
-                          label="Three And More"
-                        />
-                      )}
-                    />
-
-                    <Autocomplete
-                      isOptionEqualToValue={(ress) =>
-                        ress.value === res.more_than_four_digit_id
-                      }
-                      disablePortal
-                      value={
-                        props.more_than_four_digit
-                          .filter(
-                            (ress) => ress.id === res.more_than_four_digit_id
-                          )
-                          .map((res) => ({
-                            label: `(${res.id}) ${res.name}`,
-                            value: res.id,
-                          }))[0] || null
-                      }
-                      size="small"
-                      onChange={(e, v) => {
-                        forms.sub_entries[i].more_than_four_digit_id = v?.value;
-                        setForms((prev) => ({
-                          ...prev,
-                          sub_entries: prev.sub_entries,
-                        }));
-                      }}
-                      options={props.more_than_four_digit.map((res) => ({
-                        label: `(${res.id}) ${res.name}`,
-                        value: res.id,
-                      }))}
-                      disabled={
-                        res.three_digit_id
-                          ? true
-                          : res.two_digit_id
-                          ? true
-                          : res.account_entry_id
-                          ? true
-                          : false
-                      }
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          InputLabelProps={{ shrink: true }}
-                          label="Four And More"
-                        />
-                      )}
-                    />
-
-                    <Autocomplete
-                      isOptionEqualToValue={(ress) =>
-                        ress.value === res.account_entry_id
-                      }
-                      disablePortal
-                      size="small"
-                      onChange={(e, v) => {
-                        forms.sub_entries[i].account_entry_id = v?.value;
-                        setForms((prev) => ({
-                          ...prev,
-                          sub_entries: prev.sub_entries,
-                        }));
-                      }}
-                      groupBy={(res) => res.group}
-                      options={props.account_entry.map((res) => ({
-                        label: `(${res.id}) ${res.username}`,
-                        value: res.id,
-                        group: res.type,
-                      }))}
-                      disabled={
-                        res.three_digit_id
-                          ? true
-                          : res.two_digit_id
-                          ? true
-                          : res.reference_id
-                          ? true
-                          : res.more_than_four_digit_id
-                          ? true
-                          : false
-                      }
-                      value={
-                        props.account_entry
-                          .filter((ress) => ress.id === res.account_entry_id)
-                          .map((res) => ({
-                            label: `(${res.id}) ${res.username}`,
-                            value: res.id,
-                            group: res.type,
-                          }))[0] || null
-                      }
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          InputLabelProps={{ shrink: true }}
-                          label="Account"
-                        />
-                      )}
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mt-3">
-                    <Autocomplete
-                      disablePortal
-                      isOptionEqualToValue={(ress) =>
-                        ress.value === res.reference_id
-                      }
-                      value={
-                        props.account_entry
-                          .filter((ress) => ress.id === res.account_entry_id)
-                          .map((res) => ({
-                            label: `(${res.id}) ${res.username}`,
-                            value: res.id,
-                            group: res.type,
-                          }))[0] || null
-                      }
-                      size="small"
-                      onChange={(e, v) => {
-                        forms.sub_entries[i].reference_id = v?.value;
-                        setForms((prev) => ({
-                          ...prev,
-                          sub_entries: prev.sub_entries,
-                        }));
-                      }}
-                      groupBy={(res) => res.group}
-                      options={props.account_entry.map((res) => ({
-                        label: `(${res.id}) ${res.username}`,
-                        value: res.id,
-                        group: res.type,
-                      }))}
-                      disabled={res.account_entry_id ? true : false}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          InputLabelProps={{ shrink: true }}
-                          label="Reference Account"
-                        />
-                      )}
-                    />
-                  </div>
-                  {i !== forms.sub_entries.length - 1 && (
-                    <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
-                  )}
-                </div>
-              ))}
             </>
-          )}
-          {!props.isEditMode && (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                marginTop: 10,
-              }}
-            >
-              <Button
-                type="button"
-                className="bg-black"
-                color="dark"
-                onClick={() => {
-                  setForms((prev) => ({
-                    ...prev,
+            {!props.isEditMode && (
+              <>
+                <div style={{ margin: "0px 0px 0px" }}>
+                  <h1 className="text-2xl">Entries</h1>
+                </div>
+                <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
+                {
+                  <Controller
+                    control={form.control}
+                    name="sub_entries"
+                    render={({ field, fieldState }) => {
+                      return (
+                        <>
+                          {Boolean(fieldState.error?.message) && (
+                            <Alert variant="outlined" severity="error">
+                              <AlertTitle>
+                                {fieldState.error.message.replaceAll(
+                                  "#space#",
+                                  "\n"
+                                )}
+                              </AlertTitle>
+                            </Alert>
+                          )}
 
-                    sub_entries: prev.sub_entries.concat({
-                      type:
-                        forms.sub_entries.length === 0
-                          ? "Debit"
-                          : forms.sub_entries.length === 1
-                          ? "Credit"
-                          : undefined,
-                      entry_id: undefined,
+                          {field.value?.map((res, i) => (
+                            <div className="mb-5 " key={i}>
+                              <div className="flex justify-between items-center">
+                                <h1>SubEntry: {i + 1}</h1>
+                                <Button
+                                  onClick={() => {
+                                    field.onChange(
+                                      field.value.filter((res, ii) => i !== ii)
+                                    );
 
-                      amount: 1,
-                      two_digit_id: undefined,
-                      reference_id: undefined,
-                      three_digit_id: undefined,
-                      more_than_four_digit_id: undefined,
-                      account_entry_id: undefined,
-                    }),
-                  }));
+                                    // setForms((prev) => ({
+                                    //   ...prev,
+                                    //   sub_entries: prev.sub_entries.filter(
+                                    //     (res, ii) => i !== ii
+                                    //   ),
+                                    // }));
+                                  }}
+                                  size="sm"
+                                  className="bg-black"
+                                  color="dark"
+                                  type="button"
+                                >
+                                  <X size="15" />
+                                </Button>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+                                <TextField
+                                  InputLabelProps={{ shrink: true }}
+                                  size="small"
+                                  type="number"
+                                  value={field.value[i].amount}
+                                  required
+                                  error={Boolean(
+                                    checkSubEntriesError(
+                                      fieldState,
+                                      i,
+                                      "amount"
+                                    )
+                                  )}
+                                  onChange={(e) => {
+                                    if (Number.isNaN(e.target.value)) {
+                                      field.value[i].amount = 1;
+                                    } else {
+                                      field.value[i].amount = +e.target.value;
+                                    }
+
+                                    field.onChange(field.value);
+                                  }}
+                                  helperText={`${FormatNumberWithFixed(
+                                    res.amount ?? 0
+                                  )}  ${checkSubEntriesError(
+                                    fieldState,
+                                    i,
+                                    "amount"
+                                  )}`}
+                                />
+
+                                <Autocomplete
+                                  value={
+                                    !res.type
+                                      ? null
+                                      : { label: res.type, value: res.type }
+                                  }
+                                  size="small"
+                                  onChange={(e, v) => {
+                                    field.value[i].type = v?.value as any;
+                                    field.onChange(field.value);
+                                  }}
+                                  options={Object.keys(
+                                    $Enums.DebitCreditType
+                                  ).map((res) => ({ label: res, value: res }))}
+                                  isOptionEqualToValue={(ress) =>
+                                    res.type === (ress.value as any)
+                                  }
+                                  renderInput={(params) => (
+                                    <TextField
+                                      required
+                                      {...params}
+                                      InputLabelProps={{ shrink: true }}
+                                      label="Type"
+                                      error={Boolean(
+                                        checkSubEntriesError(
+                                          fieldState,
+                                          i,
+                                          "type"
+                                        )
+                                      )}
+                                      helperText={checkSubEntriesError(
+                                        fieldState,
+                                        i,
+                                        "type"
+                                      )}
+                                    />
+                                  )}
+                                />
+                              </div>
+
+                              <div className="grid grid-cols-1  md:grid-cols-2 gap-4 mt-3">
+                                <Autocomplete
+                                  isOptionEqualToValue={(ress) =>
+                                    ress.value === res.two_digit_id
+                                  }
+                                  value={
+                                    props.two_digit
+                                      .filter(
+                                        (ress) => ress.id === res.two_digit_id
+                                      )
+                                      .map((res) => ({
+                                        label: `(${res.id}) ${res.name}`,
+                                        value: res.id,
+                                      }))[0] || null
+                                  }
+                                  size="small"
+                                  onChange={(e, v) => {
+                                    field.value[i].two_digit_id = v?.value;
+                                    field.onChange(field.value);
+                                  }}
+                                  options={props.two_digit.map((res) => ({
+                                    label: `(${res.id}) ${res.name}`,
+                                    value: res.id,
+                                  }))}
+                                  disabled={
+                                    res.three_digit_id
+                                      ? true
+                                      : res.more_than_four_digit_id
+                                      ? true
+                                      : res.account_entry_id
+                                      ? true
+                                      : false
+                                  }
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      InputLabelProps={{ shrink: true }}
+                                      label="Two And More"
+                                    />
+                                  )}
+                                />
+                                <Autocomplete
+                                  disablePortal
+                                  size="small"
+                                  value={
+                                    props.three_digit
+                                      .filter(
+                                        (ress) => ress.id === res.three_digit_id
+                                      )
+                                      .map((res) => ({
+                                        label: `(${res.id}) ${res.name}`,
+                                        value: res.id,
+                                      }))[0] || null
+                                  }
+                                  onChange={(e, v) => {
+                                    field.value[i].three_digit_id = v?.value;
+                                    field.onChange(field.value);
+                                  }}
+                                  options={props.three_digit.map((res) => ({
+                                    label: `(${res.id}) ${res.name}`,
+                                    value: res.id,
+                                  }))}
+                                  isOptionEqualToValue={(ress) =>
+                                    ress.value === res.three_digit_id
+                                  }
+                                  disabled={
+                                    res.two_digit_id
+                                      ? true
+                                      : res.more_than_four_digit_id
+                                      ? true
+                                      : res.account_entry_id
+                                      ? true
+                                      : false
+                                  }
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      InputLabelProps={{ shrink: true }}
+                                      label="Three And More"
+                                    />
+                                  )}
+                                />
+
+                                <Autocomplete
+                                  disablePortal
+                                  size="small"
+                                  value={
+                                    props.more_than_four_digit
+                                      .filter(
+                                        (ress) =>
+                                          ress.id ===
+                                          res.more_than_four_digit_id
+                                      )
+                                      .map((res) => ({
+                                        label: `(${res.id}) ${res.name}`,
+                                        value: res.id,
+                                      }))[0] || null
+                                  }
+                                  onChange={(e, v) => {
+                                    field.value[i].more_than_four_digit_id =
+                                      v?.value;
+                                    field.onChange(field.value);
+                                  }}
+                                  options={props.more_than_four_digit.map(
+                                    (res) => ({
+                                      label: `(${res.id}) ${res.name}`,
+                                      value: res.id,
+                                    })
+                                  )}
+                                  disabled={
+                                    res.three_digit_id
+                                      ? true
+                                      : res.two_digit_id
+                                      ? true
+                                      : res.account_entry_id
+                                      ? true
+                                      : false
+                                  }
+                                  isOptionEqualToValue={(ress) =>
+                                    ress.value === res.more_than_four_digit_id
+                                  }
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      InputLabelProps={{ shrink: true }}
+                                      label="Four And More"
+                                    />
+                                  )}
+                                />
+
+                                <Autocomplete
+                                  disablePortal
+                                  size="small"
+                                  value={
+                                    props.account_entry
+                                      .filter(
+                                        (ress) =>
+                                          ress.id === res.account_entry_id
+                                      )
+                                      .map((res) => ({
+                                        label: `(${res.id}) ${res.username}`,
+                                        value: res.id,
+                                        group: res.type,
+                                      }))[0] || null
+                                  }
+                                  onChange={(e, v) => {
+                                    field.value[i].account_entry_id = v?.value;
+                                    field.onChange(field.value);
+                                  }}
+                                  isOptionEqualToValue={(ress) =>
+                                    ress.value === res.account_entry_id
+                                  }
+                                  groupBy={(res) => res.group}
+                                  options={props.account_entry.map((res) => ({
+                                    label: `(${res.id}) ${res.username}`,
+                                    value: res.id,
+                                    group: res.type,
+                                  }))}
+                                  disabled={
+                                    res.three_digit_id
+                                      ? true
+                                      : res.two_digit_id
+                                      ? true
+                                      : res.reference_id
+                                      ? true
+                                      : res.more_than_four_digit_id
+                                      ? true
+                                      : false
+                                  }
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      InputLabelProps={{ shrink: true }}
+                                      label="Account"
+                                    />
+                                  )}
+                                />
+                              </div>
+                              <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mt-3">
+                                <Autocomplete
+                                  disablePortal
+                                  isOptionEqualToValue={(ress) =>
+                                    ress.value === res.reference_id
+                                  }
+                                  size="small"
+                                  value={
+                                    props.account_entry
+                                      .filter(
+                                        (ress) => ress.id === res.reference_id
+                                      )
+                                      .map((res) => ({
+                                        label: `(${res.id}) ${res.username}`,
+                                        value: res.id,
+                                        group: res.type,
+                                      }))[0] || null
+                                  }
+                                  onChange={(e, v) => {
+                                    field.value[i].reference_id = v?.value;
+                                    field.onChange(field.value);
+                                  }}
+                                  groupBy={(res) => res.group}
+                                  options={props.account_entry.map((res) => ({
+                                    label: `(${res.id}) ${res.username}`,
+                                    value: res.id,
+                                    group: res.type,
+                                  }))}
+                                  disabled={res.account_entry_id ? true : false}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      InputLabelProps={{ shrink: true }}
+                                      label="Reference Account"
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </>
+                      );
+                    }}
+                  />
+                }
+              </>
+            )}
+            {!props.isEditMode && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  marginTop: 10,
                 }}
               >
-                <PlusSquare />
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                <Button
+                  type="button"
+                  className="bg-black"
+                  color="dark"
+                  onClick={() => {
+                    form.setValue(
+                      "sub_entries",
+                      form.watch("sub_entries").concat([{ amount: 1 }])
+                    );
+                  }}
+                >
+                  <PlusSquare />
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </form>
   );
 }
@@ -823,3 +929,20 @@ export default function EntryForm(props: Props) {
 // >
 // <MdDelete size={25} />
 // </ActionIcon>
+
+function checkSubEntriesError(props: any, index: number, name: string) {
+  if (Boolean(props.error)) {
+    if (Boolean(props.error))
+      switch (Boolean(props.error.message)) {
+        case true:
+          if (Boolean(props.error[index]))
+            return props.error[index][name]?.message ?? "";
+
+        default:
+          if (Boolean(props.error[index]))
+            return props.error[index][name]?.message ?? "";
+      }
+  }
+
+  return "";
+}

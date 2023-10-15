@@ -13,13 +13,16 @@ import {
 } from "@rms/service/digit-service";
 import { MaterialReactTable, type MRT_ColumnDef } from "material-react-table";
 import { useStore } from "@rms/hooks/toast-hook";
-import { Activity } from "@rms/models/CommonModel";
+import { Activity, ActivityStatus } from "@rms/models/CommonModel";
+import { confirmActivity } from "@rms/service/activity-service";
+import moment from "moment";
+import { FormatNumberWithFixed } from "@rms/lib/global";
 
 type Props = {
-  data:Activity[]
+  data: Activity[];
 };
 
-export default function DigitTable(props: Props) {
+export default function ActivityTable(props: Props) {
   const pathName = usePathname();
   const [isActive, setActiveTransition] = useTransition();
 
@@ -27,56 +30,115 @@ export default function DigitTable(props: Props) {
   const { push } = useRouter();
 
   const columns = useMemo<MRT_ColumnDef<Activity>[]>(
-    () =>
-      [
-        {
-          accessorKey: "id",
-          header: "ID",
-          Cell: ({ row: { original } }) => (
-            <div
-              className={`text-center rounded-sm ${
-                original.type === "Deleted"
-                  ? "bg-red-500"
-                  : original.create_date.toLocaleTimeString() !==
-                    original.last_modified_date.toLocaleTimeString()
-                  ? "bg-yellow-400"
-                  : ""
-              }`}
-            >
-              {original.id}
-            </div>
-          ),
+    () => [
+      {
+        accessorKey: "id",
+        header: "ID",
+        muiTableHeadCellProps: {
+          align: "center",
         },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+        Cell: ({ row: { original } }) => (
+          <div
+            className={`text-center rounded-sm ${
+              new Date(original.create_date).toLocaleTimeString() !==
+              new Date(original.last_modified_date).toLocaleTimeString()
+                ? "bg-yellow-400"
+                : ""
+            }`}
+          >
+            {original.id}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "amount",
+        header: "Amount",
+        accessorFn: (params) =>
+          `${params.client?.currency?.symbol ?? ""} ${FormatNumberWithFixed(
+            params.amount
+          )}`,
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+      },
+      {
+        accessorKey: "description",
+        header: "Description",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+      },
+      {
+        accessorKey: "note",
+        header: "Note",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+      },
 
-        {
-          accessorKey: "name",
-          header: "Name",
+      {
+        accessorKey: "client.id",
+        header: "Client Id",
+        muiTableHeadCellProps: {
+          align: "center",
         },
-        {
-          accessorKey: "type",
-          header: "Type",
+        muiTableBodyCellProps: {
+          align: "center",
         },
-        {
-          accessorKey: "debit_credit",
-          header: "Debit/Credit",
+      },
+      {
+        accessorKey: "client.username",
+        header: "Username",
+        muiTableHeadCellProps: {
+          align: "center",
         },
-      ]
-       ,
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+      },
+      {
+        accessorKey: "create_date",
+
+        header: "Create Date",
+        accessorFn: (e) => moment(e.create_date).fromNow() as any,
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+      },
+      {
+        accessorKey: "last_modified_date",
+
+        header: "Modified Date",
+        accessorFn: (e) => moment(e.last_modified_date).fromNow() as any,
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+      },
+    ],
     []
   );
   return (
     <Card>
       <CardHeader
-        title={
-          <Typography variant="h5">
-            {props.node === "two"
-              ? "Two Digit And More"
-              : props.node === "three"
-              ? "Tree Digit And More "
-              : "More Digit Then Four "}{" "}
-            Table
-          </Typography>
-        }
+        title={<Typography variant="h5">Activies Table</Typography>}
       />
 
       <MaterialReactTable
@@ -84,53 +146,34 @@ export default function DigitTable(props: Props) {
         columns={columns}
         renderRowActionMenuItems={({
           row: {
-            original: { id, username },
+            original: { id, description },
           },
         }) => [
-          <Authorized
-            key={1}
-            permission={
-              props.node === "two"
-                ? "Edit_Two_Digit"
-                : props.node === "three"
-                ? "Edit_Three_Digit"
-                : "Edit_More_Than_Four_Digit"
-            }
-          >
+          <Authorized key={1} permission={"Edit_Activity"}>
             <MenuItem
-              onClick={() => push(pathName + "/form?id=" + id)}
+              onClick={() =>
+                push("/admin/accounting/entry" + "/form?activity_id=" + id)
+              }
               className="cursor-pointer"
               disabled={isActive}
             >
               Edit
             </MenuItem>
           </Authorized>,
-          <Authorized
-            key={2}
-            permission={
-              props.node === "two"
-                ? "Delete_Two_Digit"
-                : props.node === "three"
-                ? "Delete_Three_Digit"
-                : "Delete_More_Than_Four_Digit"
-            }
-          >
+          <Authorized key={2} permission={"Delete_Activity"}>
             <MenuItem
               disabled={isActive}
               className="cursor-pointer"
               onClick={() => {
                 const isConfirm = confirm(
-                  `Do You sure you want to delete ${username} id:${id} `
+                  `Do You sure you want to delete ${description} id:${id} `
                 );
                 if (isConfirm) {
                   setActiveTransition(async () => {
-                    const result =
-                      props.node === "two"
-                        ? await deleteTwoDigit(id)
-                        : props.node === "three"
-                        ? await deleteThreeDigit(id)
-                        : await deleteMoreDigit(id);
-
+                    var result = await confirmActivity({
+                      id: id,
+                      status: ActivityStatus.Closed,
+                    });
                     store.OpenAlert(result);
                   });
                 }
@@ -140,7 +183,7 @@ export default function DigitTable(props: Props) {
             </MenuItem>
           </Authorized>,
         ]}
-        data={props.value[props.node]}
+        data={props.data}
       />
     </Card>
   );

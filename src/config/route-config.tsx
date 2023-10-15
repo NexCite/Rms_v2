@@ -36,7 +36,7 @@ export default function GetRoutes(permissions: $Enums.UserPermission[]) {
           index: 1,
           title: "Clients",
           path: "/admin/accounting/account/Client",
-          key: "View_Account_Entries",
+          key: "View_Entry_Clients",
           addKey: "Add_Entry_Client",
         },
 
@@ -44,16 +44,16 @@ export default function GetRoutes(permissions: $Enums.UserPermission[]) {
           index: 2,
           title: "IBs",
           path: "/admin/accounting/account/IB",
-          key: "View_Account_Entries",
-          addKey: "Add_Account_Entry",
+          key: "View_Entry_IBs",
+          addKey: "Add_Entry_IB",
         },
 
         {
           index: 3,
           title: "Suppliers",
           path: "/admin/accounting/account/Supplier",
-          key: "View_Account_Entries",
-          addKey: "Add_Account_Entry",
+          key: "View_Entry_Suppliers",
+          addKey: "Add_Entry_Supplier",
         },
         {
           index: 4,
@@ -84,6 +84,12 @@ export default function GetRoutes(permissions: $Enums.UserPermission[]) {
         },
         {
           index: 8,
+          title: "Activity",
+          path: "/admin/accounting/activity",
+          key: "View_Activities",
+        },
+        {
+          index: 9,
           title: "View Entry",
           path: "/admin/accounting/entry/[id]",
           key: "View_Entry",

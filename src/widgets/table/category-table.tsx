@@ -31,17 +31,6 @@ export default function CategoryTable(props: Props) {
   const columns = useMemo<MRT_ColumnDef<any>[]>(
     () => [
       {
-        header: "Status",
-        accessorKey: "status",
-        muiTableHeadCellProps: {
-          align: "center",
-        },
-        muiTableBodyCellProps: {
-          align: "center",
-        },
-      },
-
-      {
         accessorKey: "id",
         header: "ID",
         muiTableHeadCellProps: {

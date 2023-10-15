@@ -63,7 +63,7 @@ export async function handlerServiceAction<T>(
         return {
           status: HttpStatusCode.OK,
           result,
-          message: "Opration Successfully",
+          message: "Operation Successfully",
         };
       } catch (error: any) {
         console.log(error);

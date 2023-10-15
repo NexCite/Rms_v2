@@ -532,6 +532,10 @@ enum UserPermission {
   Delete_Entry_IB
   Edit_Entry_IB
   Add_Entry_IB
+  View_Activity
+  View_Activities
+  Delete_Activity
+  Edit_Activity
   View_Entry_Supplier
   View_Entry_Suppliers
   Delete_Entry_Supplier

@@ -27,6 +27,7 @@ import { useStore } from "@rms/hooks/toast-hook";
 import { deleteEntry } from "@rms/service/entry-service";
 import dayjs from "dayjs";
 import moment from "moment";
+import { Activity } from "@rms/models/CommonModel";
 
 type CommonEntryType = Prisma.EntryGetPayload<{
   include: {
@@ -142,17 +143,6 @@ export default function EntryDataTable(props: Props) {
   }, [props]);
   const columns: MRT_ColumnDef<CommonEntryType>[] = useMemo(
     () => [
-      {
-        header: "Status",
-        accessorKey: "status",
-        muiTableHeadCellProps: {
-          align: "center",
-        },
-        muiTableBodyCellProps: {
-          align: "center",
-        },
-      },
-
       {
         accessorKey: "id",
 
@@ -543,7 +533,9 @@ export default function EntryDataTable(props: Props) {
           </form>
         </CardContent>
         <MaterialReactTable
+          state={{ isLoading: isPadding }}
           enableRowActions
+          sortDescFirst={false}
           columns={columns}
           renderRowActionMenuItems={({
             row: {
