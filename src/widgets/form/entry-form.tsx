@@ -380,7 +380,11 @@ export default function EntryForm(props: Props) {
                 <LoadingButton
                   type="submit"
                   variant="contained"
-                  className="hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white w-[150px]"
+                  className={
+                    isPadding
+                      ? ""
+                      : "hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white w-[150px]"
+                  }
                   disableElevation
                   loading={isPadding}
                 >

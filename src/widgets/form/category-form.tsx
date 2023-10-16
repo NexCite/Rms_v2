@@ -208,7 +208,11 @@ export default function CategoryForm(props: Props) {
           <LoadingButton
             variant="contained"
             fullWidth
-            className="hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white "
+            className={
+              isPadding
+                ? ""
+                : "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
+            }
             disableElevation
             type="submit"
             loading={isPadding}

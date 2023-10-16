@@ -1,3 +1,4 @@
+import prisma from "@rms/prisma/prisma";
 import { readMedia } from "@rms/service/media-service";
 import { File } from "@web-std/file";
 import { NextRequest, NextResponse } from "next/server";
@@ -15,5 +16,6 @@ export async function GET(
 
     return new NextResponse(new File([result.file], result.name));
   }
+
   return NextResponse.error();
 }

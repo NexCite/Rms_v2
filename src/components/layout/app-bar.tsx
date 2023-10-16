@@ -74,7 +74,11 @@ export default function AppBar(props: Props) {
               <Authorized permission={permission}>
                 <LoadingButton
                   variant="contained"
-                  className="hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
+                  className={
+                    isPadding
+                      ? ""
+                      : "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
+                  }
                   disableElevation
                   loading={isPadding}
                   type="button"

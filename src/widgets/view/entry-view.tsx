@@ -17,6 +17,7 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
+import LoadingButton from "@mui/lab/LoadingButton";
 
 type Props = {
   entry: Prisma.EntryGetPayload<{
@@ -54,8 +55,12 @@ export default function EntryView(props: Props) {
   return (
     <Style className="card">
       <div className="mb-10 gap-5 justify-end flex">
-        <Button
-          className="bg-black"
+        <LoadingButton
+          className={
+            isPadding
+              ? ""
+              : "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
+          }
           onClick={() => {
             const isConfirm = confirm(
               `Do You sure you want to delete ${props.entry.title} id:${props.entry.id} `
@@ -71,8 +76,7 @@ export default function EntryView(props: Props) {
               });
             }
           }}
-          color="dark"
-          disabled={isPadding}
+          loading={isPadding}
         >
           {isPadding ? (
             <>
@@ -82,25 +86,31 @@ export default function EntryView(props: Props) {
           ) : (
             "Delete"
           )}
-        </Button>
+        </LoadingButton>
 
-        <Button
+        <LoadingButton
           onClick={() => push(pathName + "/form?id=" + props.entry.id)}
-          className="bg-black"
-          color="dark"
-          disabled={isPadding}
+          className={
+            isPadding
+              ? ""
+              : "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
+          }
+          loading={isPadding}
         >
           Edit
-        </Button>
+        </LoadingButton>
 
-        <Button
+        <LoadingButton
           onClick={() => push(pathName + "/export")}
-          className="bg-black"
-          color="dark"
-          disabled={isPadding}
+          className={
+            isPadding
+              ? ""
+              : "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
+          }
+          loading={isPadding}
         >
           Export
-        </Button>
+        </LoadingButton>
       </div>
       <Table>
         <TableHead>

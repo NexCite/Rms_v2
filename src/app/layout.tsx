@@ -25,7 +25,10 @@ export default async function RootLayout({
       suppressHydrationWarning={true}
     >
       <head>
-        <link rel="icon" href={`/api/media/${result?.logo}?v=${env.v}`} />
+        <link
+          rel="icon"
+          href={result ? `/api/media/${result?.logo}?v=${env.v}` : "/logo.png"}
+        />
         <title>{result ? result.name : "Setup"}</title>
       </head>
       <body className={inter.className}>
