@@ -29,10 +29,10 @@ export default async function page() {
           </div>
 
           <h3 className="opacity-90">{user.type}</h3>
-          <Authorized permission="Edit_Profile">
+          <Authorized permission="Edit_Profile" className="w-full ">
             <Link
               href={`/admin/setting/user/form?id=${userInfo.id}`}
-              className="bg-black w-full text-white p-2 rounded-md text-center"
+              className="bg-black w-full text-white p-2 rounded-md text-center inline-block"
             >
               Edit
             </Link>
