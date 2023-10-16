@@ -76,15 +76,6 @@ interface Props {
   }[];
   currencies: Prisma.CurrencyGetPayload<{}>[];
 }
-// type Type = {
-//   title?: string;
-//   description: string;
-//   note?: string;
-//   to_date?: Date;
-//   sub_entries?: Prisma.SubEntryCreateManyInput[];
-//   media?: Prisma.MediaCreateNestedOneWithoutEntryInput;
-//   currency_id: number;
-// };
 
 export default function EntryForm(props: Props) {
   const [isPadding, setTransition] = useTransition();
@@ -406,9 +397,9 @@ export default function EntryForm(props: Props) {
                 name="title"
                 render={({ field, fieldState }) => (
                   <TextField
+                    {...field}
                     InputLabelProps={{ shrink: true }}
                     required
-                    {...field}
                     error={Boolean(fieldState.error)}
                     label="Title"
                     size="small"
@@ -422,9 +413,9 @@ export default function EntryForm(props: Props) {
                 name="description"
                 render={({ field, fieldState }) => (
                   <TextField
+                    {...field}
                     InputLabelProps={{ shrink: true }}
                     required
-                    {...field}
                     multiline
                     disabled={Boolean(props.activity)}
                     minRows={3}
@@ -443,8 +434,8 @@ export default function EntryForm(props: Props) {
                 name="note"
                 render={({ field, fieldState }) => (
                   <TextField
-                    InputLabelProps={{ shrink: true }}
                     {...field}
+                    InputLabelProps={{ shrink: true }}
                     disabled={Boolean(props.activity)}
                     multiline
                     minRows={3}
@@ -575,13 +566,6 @@ export default function EntryForm(props: Props) {
                                     field.onChange(
                                       field.value.filter((res, ii) => i !== ii)
                                     );
-
-                                    // setForms((prev) => ({
-                                    //   ...prev,
-                                    //   sub_entries: prev.sub_entries.filter(
-                                    //     (res, ii) => i !== ii
-                                    //   ),
-                                    // }));
                                   }}
                                   size="sm"
                                   className="bg-black"
@@ -597,15 +581,9 @@ export default function EntryForm(props: Props) {
                                   InputLabelProps={{ shrink: true }}
                                   size="small"
                                   type="number"
-                                  value={field.value[i].amount}
+                                  label="Amount"
+                                  value={res.amount}
                                   required
-                                  error={Boolean(
-                                    checkSubEntriesError(
-                                      fieldState,
-                                      i,
-                                      "amount"
-                                    )
-                                  )}
                                   onChange={(e) => {
                                     if (Number.isNaN(e.target.value)) {
                                       field.value[i].amount = 1;
@@ -615,6 +593,13 @@ export default function EntryForm(props: Props) {
 
                                     field.onChange(field.value);
                                   }}
+                                  error={Boolean(
+                                    checkSubEntriesError(
+                                      fieldState,
+                                      i,
+                                      "amount"
+                                    )
+                                  )}
                                   helperText={`${FormatNumberWithFixed(
                                     res.amount ?? 0
                                   )}  ${checkSubEntriesError(
