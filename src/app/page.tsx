@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 
 export default async function Index() {
   const config = await prisma.config.findFirst();
-  console.log(config);
 
   if (config) redirect("/login");
 

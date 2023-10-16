@@ -39,8 +39,6 @@ export async function updateTwoDigit(
 export async function deleteTwoDigit(id: number) {
   return handlerServiceAction(
     async (auth) => {
-      console.log(id);
-
       await prisma.two_Digit.delete({ where: { id: id } });
 
       // if (auth.type === "Admin")

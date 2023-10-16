@@ -12,7 +12,6 @@ export async function confirmActivity({
 }) {
   return handlerServiceAction(
     async () => {
-      console.log(id);
       var result = await fetch(process.env["APEX_URL"], {
         body: JSON.stringify({
           id,

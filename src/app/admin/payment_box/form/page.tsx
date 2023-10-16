@@ -61,8 +61,6 @@ export default async function page(props: {
     paymentBoxes = await prisma.paymentBox.findMany();
   }
 
-  console.log("herentewr", value, relations);
-
   return (
     <>
       <PaymentBoxForm

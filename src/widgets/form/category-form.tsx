@@ -168,7 +168,6 @@ export default function CategoryForm(props: Props) {
                 <Autocomplete
                   disablePortal
                   onChange={(e, v) => {
-                    console.log(v);
                     field.onChange(v?.value);
                   }}
                   isOptionEqualToValue={(e) => e.value === props.value?.id}

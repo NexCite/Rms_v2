@@ -71,14 +71,12 @@ export default function SearchSelect<T extends string | number>(
                 <CommandItem
                   key={i}
                   onSelect={(currentValue) => {
-                    console.log(res);
                     if (typeof props.default === "number") {
                       var ress = value === res.id ? undefined : res.id;
                       setValue(ress);
                       props.onChange(ress);
                       setOpen(false);
                     } else {
-                      console.log("hel");
                       setValue(res.value);
                       props.onChange(res.value);
                       setOpen(false);
