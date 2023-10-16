@@ -533,9 +533,15 @@ export default function EntryDataTable(props: Props) {
           </form>
         </CardContent>
         <MaterialReactTable
-          state={{ isLoading: isPadding }}
+          state={{ showProgressBars: isPadding }}
           enableRowActions
-          sortDescFirst={false}
+          muiLinearProgressProps={({ isTopToolbar }) => ({
+            variant: "query", //if you want to show exact progress value
+
+            sx: {
+              display: isTopToolbar ? "block" : "none", //hide bottom progress bar
+            },
+          })}
           columns={columns}
           renderRowActionMenuItems={({
             row: {
