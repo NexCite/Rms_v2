@@ -6,7 +6,6 @@ import HttpStatusCode from "@rms/models/HttpStatusCode";
 import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 import { cookies } from "next/headers";
-import { createLog } from "./log-service";
 
 export async function createLogin(params: {
   username?: string;
@@ -21,6 +20,7 @@ export async function createLogin(params: {
     if (isPasswordOk) {
       var token = generateToken(user.username);
       cookies().set("rms-auth", token);
+      cookies().set("rms-permissions", JSON.stringify(user.permissions));
 
       await prisma.auth.create({
         data: { token: token, user_id: user.id, status: "Enable" },
