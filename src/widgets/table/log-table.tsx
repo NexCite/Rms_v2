@@ -22,7 +22,7 @@ export default function LogTable(props: Props) {
     if (date !== props.date) {
       replace(`${pathName}?date=${date?.getTime()}`);
     }
-  }, [date, pathName, replace]);
+  }, [date, pathName, replace, props.date]);
   const columns = useMemo<
     MRT_ColumnDef<Prisma.LogGetPayload<{ include: { user: true } }>>[]
   >(
