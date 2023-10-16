@@ -36,7 +36,9 @@ export default function ConfigWidget() {
       const req = await createLogin(values);
 
       store.OpenAlert({ ...req });
-      replace("/admin");
+      if (req.status == 200) {
+        replace("/admin");
+      }
     });
   }
 

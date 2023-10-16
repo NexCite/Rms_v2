@@ -50,7 +50,7 @@ const AlertProvider: React.FC = () => {
           <AlertTitle>
             {store?.status === 200
               ? store?.message ?? "Operation Successful"
-              : "Operation Error"}
+              : store?.message ?? "Operation Error"}
           </AlertTitle>
         </Alert>
       </div>
