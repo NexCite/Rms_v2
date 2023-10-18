@@ -20,27 +20,61 @@ export async function handlerServiceAction<T>(
         permissions: true;
         type: true;
       };
-    }>
+    }>,
+    config_id?: number
   ) => Promise<T>,
   key: $Enums.UserPermission | "None",
   update?: boolean,
   body?: any
 ) {
-  const urlHeader = headers().get("url");
+  const urlHeader = headers().get("url") || headers().get("next-url");
 
   if (!urlHeader) {
     return;
   }
 
   if (key === "None") {
-    var result = await action();
+    try {
+      var result = await action();
+      return {
+        status: HttpStatusCode.OK,
+        result,
+        message: "Operation Successfully",
+      };
+    } catch (error: any) {
+      console.log(error);
+      if ((error as any).meta && (error as any).message) {
+        var errors: any = {};
+        var msg = error.message.split(":");
+        if (error["meta"]["target"]) {
+          error["meta"]["target"].map((res: any) => {
+            errors[res] = msg.length > 1 ? msg[1] : msg[0];
+          });
+
+          return {
+            status: HttpStatusCode.BAD_REQUEST,
+            message: error.message,
+            errors: errors,
+          };
+        }
+        return {
+          status: HttpStatusCode.BAD_REQUEST,
+          message: error.message,
+        };
+      } else {
+        return {
+          status: HttpStatusCode.INTERNAL_SERVER_ERROR,
+          message: error.message,
+        };
+      }
+    }
   } else {
     const auth = await checkUserPermissions(key);
     const url = new URL(urlHeader);
 
     if (auth.status === HttpStatusCode.OK) {
       try {
-        var result = await action(auth.user!);
+        var result = await action(auth.user!, auth.user.config_id);
         if (!url.pathname.includes("/log")) {
           await createLog({
             action: key.includes("Add")

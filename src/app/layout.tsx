@@ -1,11 +1,12 @@
 import { ThemeProvider } from "@rms/components/theme/theme-provider";
 import "./globals.css";
-import type { Metadata, ResolvingMetadata } from "next";
+
 import { Inter } from "next/font/google";
 import { env } from "process";
 import NextTopLoader from "nextjs-toploader";
 import prisma from "@rms/prisma/prisma";
 import { AlertProvider } from "@rms/hooks/toast-hook";
+import { getConfigId } from "@rms/lib/config";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,7 +15,15 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  var result = await prisma.config.findFirst({});
+  const config_id = await getConfigId();
+  var logo = "/logo.png";
+
+  if (config_id) {
+    var result = await prisma.config.findUnique({ where: { id: config_id } });
+    if (result) {
+      logo = result.logo;
+    }
+  }
 
   const v = env.vesrion;
 
@@ -25,11 +34,8 @@ export default async function RootLayout({
       suppressHydrationWarning={true}
     >
       <head>
-        <link
-          rel="icon"
-          href={result ? `/api/media/${result?.logo}?v=${env.v}` : "/logo.png"}
-        />
-        <title>{result ? result.name : "Setup"}</title>
+        <link rel="icon" href={logo} />
+        <title>Rms System</title>
       </head>
       <body className={inter.className}>
         <NextTopLoader showSpinner={false} color="#090808" />

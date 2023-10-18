@@ -9,6 +9,7 @@ import Authorized from "@rms/components/ui/authorized";
 import { deleteCurrency } from "@rms/service/currency-service";
 import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
 import { useStore } from "@rms/hooks/toast-hook";
+import Link from "next/link";
 
 type Props = {
   currencies: Prisma.CurrencyGetPayload<{}>[];
@@ -88,13 +89,11 @@ export default function CurrencyTable(props: Props) {
             },
           }) => [
             <Authorized permission="Edit_Currency" key={1}>
-              <MenuItem
-                onClick={() => push(pathName + "/form?id=" + id)}
-                className="cursor-pointer"
-                disabled={isActive}
-              >
-                Edit
-              </MenuItem>
+              <Link href={pathName + "/form?id=" + id}>
+                <MenuItem className="cursor-pointer" disabled={isActive}>
+                  Edit
+                </MenuItem>
+              </Link>
             </Authorized>,
 
             <Authorized permission="Delete_Currency" key={3}>

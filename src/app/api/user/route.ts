@@ -11,8 +11,6 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const data = await getUserInfo();
-  const urlHeader = req.url;
-  const url = new URL(urlHeader);
 
   createLog({ ...(await req.json()), user_id: data.id });
 

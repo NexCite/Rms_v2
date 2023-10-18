@@ -1,4 +1,5 @@
 import { checkUserPermissions } from "@rms/lib/auth";
+import { getConfigId } from "@rms/lib/config";
 import prisma from "@rms/prisma/prisma";
 import { getConfig } from "@rms/service/config-service";
 import { getUserStatus } from "@rms/service/user-service";
@@ -14,6 +15,8 @@ export default async function page(props: {
     id: string;
   };
 }) {
+  const config_id = await getConfigId();
+
   const config = await getConfig();
   const user = await checkUserPermissions("View_Export_Entry").then((res) => {
     if (res.status === 200) {
@@ -21,8 +24,9 @@ export default async function page(props: {
     }
   });
 
-  const entry = await prisma.entry.findUnique({
+  const entry = await prisma.entry.findFirst({
     where: {
+      config_id,
       id: +props.params.id,
       status: await getUserStatus(),
     },
@@ -51,7 +55,7 @@ export default async function page(props: {
         last_name: user.user.last_name,
       }}
       entry={entry as any}
-      config={config}
+      config={config.result}
     />
   );
 }

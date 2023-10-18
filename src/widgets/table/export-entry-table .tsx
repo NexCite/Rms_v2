@@ -405,7 +405,7 @@ export default function ExportEntryDataTable(props: Props) {
     });
 
     return { entries, totalDebit, totalCredit, currencies };
-  }, [props.data]);
+  }, [props.data, search]);
 
   const titleRef = useRef<HTMLHeadingElement>();
   const { toPDF, targetRef } = usePDF();

@@ -4,9 +4,8 @@ import React from "react";
 import RouteModel from "@rms/models/RouteModel";
 
 import { ChevronDownIcon } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
-import Image from "next/image";
 import {
   Accordion,
   AccordionDetails,
@@ -17,6 +16,8 @@ import {
   ListItemButton,
   Typography,
 } from "@mui/material";
+import Image from "next/image";
+import Link from "next/link";
 
 type Props = {
   routers: RouteModel[];
@@ -27,7 +28,6 @@ type Props = {
 };
 export function Sidebar(props: Props) {
   const pathName = usePathname();
-  const { push, replace } = useRouter();
 
   const handleOpen = (value) => {
     setOpen(open === value ? -1 : value);
@@ -36,6 +36,7 @@ export function Sidebar(props: Props) {
   const [open, setOpen] = React.useState(
     props.routers.find((res) => pathName.startsWith(res.path))?.index ?? -1
   );
+
   return (
     <Card className="h-full w-full rounded-none flex flex-col">
       <div className="flex flex-col p-3 ">
@@ -54,7 +55,7 @@ export function Sidebar(props: Props) {
           .map((res, i) =>
             res.children.length === 0 ? undefined : (
               <Accordion
-                key={res.title}
+                key={`${res.key}_${res.index}`}
                 expanded={open === res.index}
                 elevation={0}
               >
@@ -76,21 +77,21 @@ export function Sidebar(props: Props) {
                   </AccordionSummary>
                 </ListItemButton>
                 <AccordionDetails className="py-1">
-                  <List key={i}>
+                  <List>
                     {res.children
                       .filter((res) => !res.hide)
                       .map((res) => (
-                        <ListItemButton
-                          key={res.title}
-                          onClick={() => push(res.path)}
-                          className={
-                            pathName === res.path
-                              ? "hover:bg-black dark:bg-white dark:text-black bg-black text-white  my-1 rounded-lg"
-                              : "hover:bg-black hover:text-white  mt-1 my-1 rounded-lg"
-                          }
-                        >
-                          {res.title}
-                        </ListItemButton>
+                        <Link href={res.path} key={`${res.key}_${res.index}`}>
+                          <ListItemButton
+                            className={
+                              pathName === res.path
+                                ? "hover:bg-black dark:bg-white dark:text-black bg-black text-white  my-1 rounded-lg"
+                                : "hover:bg-black hover:text-white  mt-1 my-1 rounded-lg"
+                            }
+                          >
+                            {res.title}
+                          </ListItemButton>
+                        </Link>
                       ))}
                   </List>
                 </AccordionDetails>
@@ -104,7 +105,7 @@ export function Sidebar(props: Props) {
           .map((res, i) =>
             res.children.length === 0 ? undefined : (
               <Accordion
-                key={res.title}
+                key={`${res.key}_${res.index}`}
                 elevation={0}
                 expanded={open === res.index}
               >
@@ -126,31 +127,30 @@ export function Sidebar(props: Props) {
                   </AccordionSummary>
                 </ListItemButton>
                 <AccordionDetails className="py-1">
-                  <List className="p-0 m-0" key={i}>
+                  <List className="p-0 m-0" key={`${res.key}_${res.index}`}>
                     {res.children
                       .filter((res) => !res.hide)
-                      .map((res) => (
-                        <ListItemButton
-                          key={res.title}
-                          onClick={() => push(res.path)}
-                          className={
-                            pathName === res.path
-                              ? "hover:bg-black dark:bg-white dark:text-black bg-black text-white  my-1  rounded-lg"
-                              : "hover:bg-black hover:text-white  my-1  rounded-lg"
-                          }
-                        >
-                          {res.title}
-                        </ListItemButton>
+                      .map((res, i) => (
+                        <Link key={`${res.key}_${res.index}`} href={res.path}>
+                          <ListItemButton
+                            className={
+                              pathName === res.path
+                                ? "hover:bg-black dark:bg-white dark:text-black bg-black text-white  my-1  rounded-lg"
+                                : "hover:bg-black hover:text-white  my-1  rounded-lg"
+                            }
+                          >
+                            {res.title}
+                          </ListItemButton>
+                        </Link>
                       ))}
                   </List>
                 </AccordionDetails>
               </Accordion>
             )
           )}
-
-        <ListItemButton onClick={() => replace("/logout")}>
-          Logout
-        </ListItemButton>
+        <Link href={"/logout"}>
+          <ListItemButton>Logout</ListItemButton>
+        </Link>
       </List>
     </Card>
   );

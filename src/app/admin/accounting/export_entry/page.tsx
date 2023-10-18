@@ -5,6 +5,7 @@ import prisma from "@rms/prisma/prisma";
 
 import ExportEntryDataTable from "@rms/widgets/table/export-entry-table ";
 import { getUserStatus } from "@rms/service/user-service";
+import { getConfigId } from "@rms/lib/config";
 type CommonInclude = {
   currency: true;
 
@@ -124,6 +125,8 @@ export default async function Entry(props: {
     type?: $Enums.DigitType;
   };
 }) {
+  const config_id = await getConfigId();
+
   var debit: $Enums.EntryType | undefined = undefined,
     type: $Enums.DigitType | undefined = undefined,
     two_digit_id: number | undefined = undefined,
@@ -167,18 +170,30 @@ export default async function Entry(props: {
       .toDate(),
   ];
   const two_digits = await prisma.two_Digit.findMany({
-      where: { status: await getUserStatus() },
+      where: {
+        config_id,
+        status: await getUserStatus(),
+      },
     }),
     three_digits = await prisma.three_Digit.findMany({
-      where: { status: await getUserStatus() },
+      where: {
+        config_id,
+        status: await getUserStatus(),
+      },
       include: { two_digit: true },
     }),
     more_digits = await prisma.more_Than_Four_Digit.findMany({
-      where: { status: await getUserStatus() },
+      where: {
+        config_id,
+        status: await getUserStatus(),
+      },
       include: { three_digit: true },
     }),
     accounts = await prisma.account_Entry.findMany({
-      where: { status: await getUserStatus() },
+      where: {
+        config_id,
+        status: await getUserStatus(),
+      },
     });
 
   var entries: Prisma.EntryGetPayload<{
@@ -189,6 +204,7 @@ export default async function Entry(props: {
     entries = await prisma.entry
       .findMany({
         where: {
+          config_id,
           id,
           to_date: {
             gte: date[0],
@@ -286,6 +302,7 @@ export default async function Entry(props: {
     entries = await prisma.entry
       .findMany({
         where: {
+          config_id,
           id,
           to_date: {
             gte: date[0],
@@ -345,6 +362,7 @@ export default async function Entry(props: {
     entries = await prisma.entry
       .findMany({
         where: {
+          config_id,
           id,
           to_date: {
             gte: date[0],
@@ -384,6 +402,7 @@ export default async function Entry(props: {
     entries = await prisma.entry
       .findMany({
         where: {
+          config_id,
           id,
           to_date: {
             gte: date[0],
@@ -419,16 +438,20 @@ export default async function Entry(props: {
   }
 
   const config = await prisma.config.findFirst({
+    where: {
+      id: config_id,
+    },
     select: {
       logo: true,
       name: true,
     },
   });
 
+  const currencies = await prisma.currency.findMany({ where: { config_id } });
   return (
     <div>
       <ExportEntryDataTable
-        currencies={await prisma.currency.findMany()}
+        currencies={currencies}
         config={config}
         data={entries}
         date={date}

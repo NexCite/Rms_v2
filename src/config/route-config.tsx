@@ -150,14 +150,14 @@ export default function GetRoutes(permissions: $Enums.UserPermission[]) {
           index: 3,
           title: "Account",
           path: "/admin/trading/accounts/account",
-          key: "View_Accounts",
-          addKey: "Add_Account",
+          key: "View_Account",
+          addKey: "Add_Accounts",
         },
         {
           index: 3,
           title: "Account",
           path: "/admin/trading/accounts/account",
-          key: "View_Accounts",
+          key: "View_Traders",
           addKey: "Add_Account",
         },
         {

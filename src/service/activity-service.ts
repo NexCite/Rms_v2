@@ -31,12 +31,13 @@ export async function confirmActivity({
     { id, status }
   );
 }
-export async function getActivities(id?: number) {
+export async function getActivities(id?: number, config_id?: number) {
   return handlerServiceAction(
     async () => {
       var result = await fetch(process.env["APEX_URL"], {
         body: JSON.stringify({
           key: process.env["APEX_KEY"],
+
           id,
         }),
         method: "POST",

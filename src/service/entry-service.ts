@@ -14,8 +14,9 @@ export async function createEntry(
   }
 ) {
   return handlerServiceAction(
-    async (auth) => {
+    async (auth, config_id) => {
       props.user_id = auth.id;
+      props.config_id = config_id;
       if (activity) activity.status = ActivityStatus.Provided;
 
       await Promise.all([
@@ -36,9 +37,10 @@ export async function updateEntry(
   props: Prisma.EntryUncheckedUpdateInput
 ) {
   return handlerServiceAction(
-    async (auth) => {
+    async (auth, config_id) => {
       props.user_id = auth.id;
-      await prisma.entry.update({ data: props, where: { id: id } });
+      props.config_id = config_id;
+      await prisma.entry.update({ data: props, where: { id: id, config_id } });
       return;
     },
     "Edit_Entry",
@@ -48,16 +50,16 @@ export async function updateEntry(
 }
 export async function deleteEntry(id: number) {
   return handlerServiceAction(
-    async (auth) => {
-      return await prisma.entry.delete({ where: { id: id } });
+    async (auth, config_id) => {
+      return await prisma.entry.delete({ where: { id: id, config_id } });
 
       // if (auth.type === "Admin") {
       //   await prisma.subEntry.deleteMany({ where: { entry_id: id } });
       //   await prisma.media.deleteMany({ where: { entry_id: id } });
-      //   return await prisma.entry.delete({ where: { id: id } });
+      //   return await prisma.entry.delete({ where: { id: id,config_id } });
       // } else
       //   return await prisma.entry.update({
-      //     where: { id: id },
+      //     where: { id: id,config_id },
       //     data: { status: "Deleted", user_id: id },
       //   });
     },

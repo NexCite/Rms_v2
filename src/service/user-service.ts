@@ -11,18 +11,20 @@ import prisma from "@rms/prisma/prisma";
 import { cookies } from "next/headers";
 
 export async function createUser(
-  params: Prisma.UserCreateInput
+  props: Prisma.UserUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth) => {
-      params.password = hashPassword(params.password);
+    async (auth, config_id) => {
+      props.config_id = config_id;
 
-      await prisma.user.create({ data: params });
+      props.password = hashPassword(props.password);
+
+      await prisma.user.create({ data: props });
       return;
     },
     "Add_User",
     true,
-    params
+    props
   );
 }
 
@@ -38,24 +40,26 @@ export async function getUserType() {
 
 export async function updateUser(
   id: number,
-  params: Prisma.UserUpdateInput
+  props: Prisma.UserUncheckedUpdateInput
 ): Promise<ServiceActionModel<Prisma.UserUpdateInput>> {
   return handlerServiceAction(
-    async (auth) => {
-      if (params.password) {
-        params.password = hashPassword(params.password.toString());
+    async (auth, config_id) => {
+      props.config_id = config_id;
+
+      if (props.password) {
+        props.password = hashPassword(props.password.toString());
       }
-      if (params.type === "Admin") {
+      if (props.type === "Admin") {
         if (auth.type === "User") {
-          params.type = "User";
+          props.type = "User";
         }
       }
 
-      return await prisma.user.update({ data: params, where: { id } });
+      return await prisma.user.update({ data: props, where: { id } });
     },
     "Edit_User",
     true,
-    params
+    props
   );
 }
 
@@ -63,14 +67,14 @@ export async function deleteUserById(
   id: number
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth) => {
-      await prisma.user.delete({ where: { id: id } });
+    async (auth, config_id) => {
+      await prisma.user.delete({ where: { id: id, config_id } });
 
       // if (auth.type === "Admin") {
-      //   await prisma.user.delete({ where: { id: id } });
+      //   await prisma.user.delete({ where: { id: id,config_id } });
       // } else {
       //   await prisma.user.update({
-      //     where: { id: id },
+      //     where: { id: id,config_id },
       //     data: { status: "Deleted" },
       //   });
       // }

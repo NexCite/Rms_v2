@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { getConfigId } from "@rms/lib/config";
 import prisma from "@rms/prisma/prisma";
 import TradingTable from "@rms/widgets/table/trading-table";
 
@@ -6,6 +7,8 @@ export default async function page(props: {
   params: { node: "broker" | "trader" | "account" };
   searchParams: { id?: string };
 }) {
+  const config_id = await getConfigId();
+
   var value:
     | Prisma.AccountGetPayload<{
         include: {
@@ -26,6 +29,7 @@ export default async function page(props: {
           trader: true,
         },
         where: {
+          config_id,
           status: "Enable",
         },
       });
@@ -34,6 +38,7 @@ export default async function page(props: {
     case "broker":
       value = await prisma.broker.findMany({
         where: {
+          config_id,
           status: "Enable",
         },
       });
@@ -44,6 +49,7 @@ export default async function page(props: {
           broker: true,
         },
         where: {
+          config_id,
           status: "Enable",
         },
       });

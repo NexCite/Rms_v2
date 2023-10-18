@@ -205,6 +205,7 @@ type UserSelectCommon = Prisma.UserGetPayload<{
     id: true;
     permissions: true;
     type: true;
+    config_id: true;
   };
 }>;
 export type { UserSelectCommon };

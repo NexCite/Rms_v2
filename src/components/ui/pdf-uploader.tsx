@@ -34,7 +34,6 @@ const PDFUploader: React.FC<PDFUploaderProps> = ({ onUpload }) => {
 
   return (
     <label
-      htmlFor="fileInput"
       className="flex flex-col items-center justify-center bg-white border border-black hover:bg-gray-100 hover:border-blue-500 text-black font-bold py-6 px-4 rounded cursor-pointer"
       onDrop={handleDrop}
       onDragOver={(event) => event.preventDefault()}

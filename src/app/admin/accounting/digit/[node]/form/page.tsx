@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import BackButton from "@rms/components/ui/back-button";
 import { getUserInfo } from "@rms/lib/auth";
+import { getConfigId } from "@rms/lib/config";
 
 import prisma from "@rms/prisma/prisma";
 import { getUserStatus } from "@rms/service/user-service";
@@ -14,6 +15,8 @@ export default async function page(props: {
   params: { node: CommonNode };
   searchParams: { id?: string };
 }) {
+  const config_id = await getConfigId();
+
   const id = +props.searchParams.id;
   const isEditMode = id ? true : false;
   var value:
@@ -27,7 +30,7 @@ export default async function page(props: {
     case "two":
       if (isEditMode) {
         value = await prisma.two_Digit.findFirst({
-          where: { id, status: await getUserStatus() },
+          where: { config_id, id, status: await getUserStatus() },
         });
       }
 
@@ -36,27 +39,27 @@ export default async function page(props: {
     case "three":
       if (isEditMode) {
         value = await prisma.three_Digit.findFirst({
-          where: { id, status: await getUserStatus() },
+          where: { config_id, id, status: await getUserStatus() },
           include: {
             more_than_four_digit: true,
           },
         });
       }
       relation = await prisma.two_Digit.findMany({
-        where: { status: await getUserStatus() },
+        where: { config_id, status: await getUserStatus() },
       });
       break;
     case "more":
       if (isEditMode) {
         value = await prisma.more_Than_Four_Digit.findFirst({
-          where: { id, status: await getUserStatus() },
+          where: { config_id, id, status: await getUserStatus() },
           include: {
             three_digit: true,
           },
         });
       }
       relation = await prisma.three_Digit.findMany({
-        where: { status: await getUserStatus() },
+        where: { config_id, status: await getUserStatus() },
         include: {
           two_digit: true,
         },

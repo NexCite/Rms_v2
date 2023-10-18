@@ -30,11 +30,12 @@ export default async function page(props: {
   const user = await getUserInfo();
 
   if (isEditMode) {
-    value = await prisma.user.findUnique({
+    value = await prisma.user.findFirst({
       where: {
         id,
         status: user.type === "Admin" ? undefined : "Enable",
         type: user.type === "User" ? "User" : undefined,
+        config_id: user.config_id,
       },
       select: {
         username: true,

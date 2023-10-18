@@ -13,6 +13,7 @@ import {
 } from "@rms/service/digit-service";
 import { MaterialReactTable, type MRT_ColumnDef } from "material-react-table";
 import { useStore } from "@rms/hooks/toast-hook";
+import Link from "next/link";
 
 type Props = {
   node: CommonNode;
@@ -132,13 +133,11 @@ export default function DigitTable(props: Props) {
                 : "Edit_More_Than_Four_Digit"
             }
           >
-            <MenuItem
-              onClick={() => push(pathName + "/form?id=" + id)}
-              className="cursor-pointer"
-              disabled={isActive}
-            >
-              Edit
-            </MenuItem>
+            <Link href={pathName + "/form?id=" + id}>
+              <MenuItem className="cursor-pointer" disabled={isActive}>
+                Edit
+              </MenuItem>
+            </Link>
           </Authorized>,
           <Authorized
             key={2}

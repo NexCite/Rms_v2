@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import BackButton from "@rms/components/ui/back-button";
 import { getUserInfo } from "@rms/lib/auth";
+import { getConfigId } from "@rms/lib/config";
 import prisma from "@rms/prisma/prisma";
 import { getUserStatus } from "@rms/service/user-service";
 import EntryView from "@rms/widgets/view/entry-view";
@@ -10,6 +11,7 @@ export default async function page(props: {
   params: { id: string };
   searchParams: {};
 }) {
+  const config_id = await getConfigId();
   var id: number,
     entry: Prisma.EntryGetPayload<{
       include: {
@@ -30,8 +32,8 @@ export default async function page(props: {
     );
   } else if (props.params.id) {
     id = +props.params.id;
-    entry = await prisma.entry.findUnique({
-      where: { id },
+    entry = await prisma.entry.findFirst({
+      where: { id, config_id },
       include: {
         currency: true,
         media: true,

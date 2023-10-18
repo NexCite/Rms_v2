@@ -10,6 +10,7 @@ import Authorized from "@rms/components/ui/authorized";
 import { useStore } from "@rms/hooks/toast-hook";
 import { deleteAccount_Entry } from "@rms/service/account-entry-service";
 import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
+import Link from "next/link";
 type CommonAccountType = Prisma.Account_EntryGetPayload<{
   include: {
     more_than_four_digit: true;
@@ -233,13 +234,11 @@ export default function Account_EntryTable(props: Props) {
             },
           }) => [
             <Authorized permission="Edit_Account_Entry" key={1}>
-              <MenuItem
-                onClick={() => push(pathName + "/form?id=" + id)}
-                className="cursor-pointer"
-                disabled={isActive}
-              >
-                Edit
-              </MenuItem>
+              <Link href={pathName + "/form?id=" + id}>
+                <MenuItem className="cursor-pointer" disabled={isActive}>
+                  Edit
+                </MenuItem>
+              </Link>
             </Authorized>,
             <Authorized permission="Delete_Account_Entry" key={2}>
               <MenuItem

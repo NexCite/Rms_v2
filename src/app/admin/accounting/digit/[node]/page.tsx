@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import BackButton from "@rms/components/ui/back-button";
 import { getUserInfo } from "@rms/lib/auth";
+import { getConfigId } from "@rms/lib/config";
 import prisma from "@rms/prisma/prisma";
 import { getUserStatus } from "@rms/service/user-service";
 import DigitTable from "@rms/widgets/table/digit-table";
@@ -13,6 +14,8 @@ export default async function page(props: {
   params: { node: CommonNode };
   searchParams: {};
 }) {
+  const config_id = await getConfigId();
+
   if (CommonNode.filter((res) => res === props.params.node).length === 0)
     return (
       <>
@@ -34,6 +37,9 @@ export default async function page(props: {
   switch (props.params.node) {
     case "two":
       two = await prisma.two_Digit.findMany({
+        where: {
+          config_id,
+        },
         orderBy: { modified_date: "desc" },
       });
       break;
@@ -41,12 +47,18 @@ export default async function page(props: {
     case "three":
       three = await prisma.three_Digit.findMany({
         include: { two_digit: true },
+        where: {
+          config_id,
+        },
         orderBy: { modified_date: "desc" },
       });
       break;
     case "more":
       more = await prisma.more_Than_Four_Digit.findMany({
         include: { three_digit: true },
+        where: {
+          config_id,
+        },
         orderBy: { modified_date: "desc" },
       });
 

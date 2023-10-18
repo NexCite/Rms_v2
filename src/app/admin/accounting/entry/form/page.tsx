@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import BackButton from "@rms/components/ui/back-button";
+import { getConfigId } from "@rms/lib/config";
 import { Activity } from "@rms/models/CommonModel";
 import prisma from "@rms/prisma/prisma";
 import { getActivities } from "@rms/service/activity-service";
@@ -15,7 +16,7 @@ export default async function page(props: {
     entry: Prisma.EntryGetPayload<{ include: { media: true } }>,
     activity_id: number | undefined;
   var activity: Activity;
-
+  const config_id = await getConfigId();
   if (props.searchParams.id && !Number.isInteger(+props.searchParams.id)) {
     return (
       <>
@@ -26,8 +27,8 @@ export default async function page(props: {
     );
   } else if (props.searchParams.id) {
     id = +props.searchParams.id;
-    entry = await prisma.entry.findUnique({
-      where: { id: id },
+    entry = await prisma.entry.findFirst({
+      where: { id: id, config_id },
       include: {
         media: true,
       },
@@ -48,6 +49,7 @@ export default async function page(props: {
 
   const three_digit = await prisma.three_Digit.findMany({
     where: {
+      config_id,
       status: await getUserStatus(),
       two_digit: { status: await getUserStatus() },
     },
@@ -60,6 +62,7 @@ export default async function page(props: {
   });
   const more_than_four_digit = await prisma.more_Than_Four_Digit.findMany({
     where: {
+      config_id,
       status: await getUserStatus(),
       three_digit: { status: await getUserStatus() },
     },
@@ -71,12 +74,12 @@ export default async function page(props: {
     orderBy: { modified_date: "desc" },
   });
   const two_digits = await prisma.two_Digit.findMany({
-    where: { status: await getUserStatus() },
+    where: { config_id, status: await getUserStatus() },
 
     orderBy: { modified_date: "desc" },
   });
   const account_entry = await prisma.account_Entry.findMany({
-    where: { status: await getUserStatus() },
+    where: { config_id, status: await getUserStatus() },
     select: {
       username: true,
       type: true,
@@ -85,10 +88,13 @@ export default async function page(props: {
     orderBy: { modified_date: "desc" },
   });
   const currencies = await prisma.currency.findMany({
+    where: {
+      config_id,
+    },
     orderBy: { modified_date: "desc" },
   });
   if (activity_id) {
-    const result = await getActivities(activity_id);
+    const result = await getActivities(activity_id, config_id);
     activity = result.status !== 200 ? undefined : result.result;
   }
 

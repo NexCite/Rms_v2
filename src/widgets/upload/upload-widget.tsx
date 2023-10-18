@@ -1,7 +1,11 @@
 "use client";
 import LoadingButton from "@mui/lab/LoadingButton";
 import PDFUploader from "@rms/components/ui/pdf-uploader";
-import { removeMedia, uploadMedia } from "@rms/service/media-service";
+import {
+  removeMedia,
+  uploadLogo,
+  uploadMedia,
+} from "@rms/service/media-service";
 import Image from "next/image";
 import { useState, useTransition } from "react";
 import ImageUploading, { ImageListType } from "react-images-uploading";
@@ -10,6 +14,7 @@ type Props = {
   path?: string;
   onSave?: (e?: string) => void;
   isPdf?: boolean;
+  isLogo?: boolean;
 };
 
 export default function UploadWidget(props: Props) {
@@ -25,7 +30,9 @@ export default function UploadWidget(props: Props) {
       formData.append("file", imageList[0].file as any);
 
       setTransition(async () => {
-        var result = await uploadMedia(formData);
+        var result = props.isLogo
+          ? await uploadLogo(formData)
+          : await uploadMedia(formData);
         if (props.onSave) {
           setPath(result.result);
           props.onSave(result.result);

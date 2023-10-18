@@ -9,14 +9,19 @@ export async function createPaymentBox(
   id?: number
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth) => {
+    async (auth, config_id) => {
       if (id) {
-        await prisma.paymentBox.delete({ where: { id } });
+        await prisma.paymentBox.delete({ where: { id, config_id } });
       }
       await prisma.paymentBox.create({
-        data: { to_date: params.to_date, description: params.description },
+        data: {
+          to_date: params.to_date,
+          description: params.description,
+          config_id,
+        },
       });
 
+      params.client_boxes;
       await prisma.clientBox.createMany({
         data: params.client_boxes as any,
       });
@@ -42,13 +47,13 @@ export async function updatePaymentBox(
   params: Prisma.PaymentBoxUncheckedUpdateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth) => {
+    async (auth, config_id) => {
       // return await prisma.paymentBox.update({
       //   where: { id },
       //   data: params,
       // });
       await prisma.paymentBox.update({
-        where: { id },
+        where: { id, config_id },
         data: { to_date: params.to_date, description: params.description },
       });
 
@@ -76,11 +81,8 @@ export async function deletePaymentBoxById(
   id: number
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth) => {
-      if (auth.type === "Admin") {
-        await prisma.paymentBox.delete({ where: { id } });
-      }
-      return;
+    async (auth, config_id) => {
+      await prisma.paymentBox.delete({ where: { id, config_id } });
     },
     "Delete_Payment_Box",
     true,

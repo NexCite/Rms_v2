@@ -36,12 +36,16 @@ export default function ConfigWidget() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values) {
     setTransition(async () => {
-      const req = await createConfig(values as any);
+      const res = await createConfig(values);
+      console.log(res);
+      store.OpenAlert({ ...res });
 
-      store.OpenAlert({ ...req });
-      replace("/login");
+      if (res.status === 200) replace("/login");
+      Object.keys(res.errors ?? []).map((e) => {
+        form.setError(e as any, res[e]);
+      });
     });
   }
 
@@ -180,6 +184,7 @@ export default function ConfigWidget() {
               name="logo"
               render={({ field, fieldState }) => (
                 <UploadWidget
+                  isLogo
                   onSave={(e) => {
                     form.setValue("logo", e ?? "");
                     form.clearErrors("logo");

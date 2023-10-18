@@ -1,7 +1,6 @@
 "use server";
-import { Prisma, Status } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { handlerServiceAction } from "@rms/lib/handler";
-import { getMediaType } from "@rms/lib/media";
 import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 
@@ -9,12 +8,14 @@ export async function createPayment(
   props: Prisma.PaymentUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth) => {
+    async (auth, config_id) => {
       props.user_id = auth.id;
+      props.config_id = config_id;
 
-      var invoice = await prisma.invoice.findUnique({
+      var invoice = await prisma.invoice.findFirst({
         where: {
           id: props.invoice_id,
+          config_id,
           payments: { every: { status: "Enable" } },
         },
         select: {
@@ -61,11 +62,13 @@ export async function updatePayment(
   props: Prisma.PaymentUncheckedUpdateInput
 ) {
   return handlerServiceAction(
-    async (auth) => {
+    async (auth, config_id) => {
       props.user_id = auth.id;
+      props.config_id = config_id;
 
-      var invoice = await prisma.invoice.findUnique({
+      var invoice = await prisma.invoice.findFirst({
         where: {
+          config_id,
           id: +props.invoice_id,
           payments: { every: { status: "Enable" } },
         },
@@ -90,9 +93,10 @@ export async function updatePayment(
           );
         }
       } else {
-        var invoice = await prisma.invoice.findUnique({
+        var invoice = await prisma.invoice.findFirst({
           where: {
             id: +props.invoice_id,
+            config_id,
           },
           select: {
             amount: true,
@@ -108,7 +112,7 @@ export async function updatePayment(
       }
 
       var payment = await prisma.payment.findFirst({
-        where: { id },
+        where: { id, config_id },
         include: {
           media: {
             select: { path: true, title: true, type: true, status: true },
@@ -117,7 +121,7 @@ export async function updatePayment(
       });
 
       await prisma.payment.update({
-        where: { id: payment.id },
+        where: { id: payment.id, config_id },
         data: props,
       });
 
@@ -203,14 +207,14 @@ export async function deletePaymentById(
   id: number
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth) => {
-      await prisma.payment.delete({ where: { id: id } });
+    async (auth, config_id) => {
+      await prisma.payment.delete({ where: { id: id, config_id } });
 
       // if (auth.type === "Admin") {
-      //   await prisma.payment.delete({ where: { id: id } });
+      //   await prisma.payment.delete({ where: { id: id,config_id } });
       // } else {
       //   await prisma.payment.update({
-      //     where: { id: id },
+      //     where: { id: id,config_id },
       //     data: { status: "Deleted" },
       //   });
       // }

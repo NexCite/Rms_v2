@@ -3,6 +3,7 @@ import prisma from "@rms/prisma/prisma";
 import moment from "moment";
 
 import EntryDataTable from "@rms/widgets/table/entry-table";
+import { getConfigId } from "@rms/lib/config";
 
 export default async function Entry(props: {
   params: {};
@@ -19,6 +20,8 @@ export default async function Entry(props: {
     type?: $Enums.DigitType;
   };
 }) {
+  const config_id = await getConfigId();
+
   var debit: $Enums.EntryType | undefined = undefined,
     type: $Enums.DigitType | undefined = undefined,
     two_digit_id: number | undefined = undefined,
@@ -65,18 +68,18 @@ export default async function Entry(props: {
       .toDate(),
   ];
   const two_digits = await prisma.two_Digit.findMany({
-      where: {},
+      where: { config_id },
     }),
     three_digits = await prisma.three_Digit.findMany({
-      where: {},
+      where: { config_id },
       include: { two_digit: true },
     }),
     more_digits = await prisma.more_Than_Four_Digit.findMany({
-      where: {},
+      where: { config_id },
       include: { three_digit: true },
     }),
     accounts = await prisma.account_Entry.findMany({
-      where: {},
+      where: { config_id },
     });
 
   var entries: Prisma.EntryGetPayload<{
@@ -96,9 +99,7 @@ export default async function Entry(props: {
   }>[] = [];
   if (id) {
     entries = await prisma.entry.findMany({
-      where: {
-        id,
-      },
+      where: { config_id, id },
       orderBy: {
         to_date: "desc",
       },
@@ -119,6 +120,7 @@ export default async function Entry(props: {
     entries = await prisma.entry
       .findMany({
         where: {
+          config_id,
           id,
           to_date: {
             gte: date[0],
@@ -211,6 +213,7 @@ export default async function Entry(props: {
     entries = await prisma.entry
       .findMany({
         where: {
+          config_id,
           id,
           to_date: {
             gte: date[0],
@@ -280,6 +283,7 @@ export default async function Entry(props: {
     entries = await prisma.entry
       .findMany({
         where: {
+          config_id,
           id,
           to_date: {
             gte: date[0],
@@ -329,6 +333,7 @@ export default async function Entry(props: {
     entries = await prisma.entry
       .findMany({
         where: {
+          config_id,
           id,
           to_date: {
             gte: date[0],

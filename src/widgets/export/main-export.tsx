@@ -15,7 +15,7 @@ import {
 } from "@rms/components/ui/tabs";
 import { Button } from "@rms/components/ui/button";
 import { useRouter } from "next/navigation";
-import { IconButton } from "@mui/material";
+import { IconButton, Modal } from "@mui/material";
 
 type Props = {
   config: {
@@ -47,6 +47,7 @@ export default function MainExport(props: Props) {
   const { back } = useRouter();
   const handlePdf = useCallback(async () => {
     const actionDiv = document.getElementById("export-pdf");
+
     actionDiv.style.display = "none";
 
     print();
@@ -54,41 +55,43 @@ export default function MainExport(props: Props) {
     actionDiv.style.display = "block";
   }, []);
   return (
-    <Style>
-      <Tabs defaultValue="1">
-        <div id="export-pdf">
-          <div id="action">
-            <IconButton
-              onClick={() => {
-                back();
-              }}
-            >
-              <AiOutlineClose />
-            </IconButton>
+    <Modal open={true}>
+      <Style>
+        <Tabs defaultValue="1">
+          <div id="export-pdf">
+            <div id="action">
+              <IconButton
+                onClick={() => {
+                  back();
+                }}
+              >
+                <AiOutlineClose />
+              </IconButton>
 
-            <Button className="bg-black" color="dark" onClick={handlePdf}>
-              Export
-            </Button>
+              <Button className="bg-black" color="dark" onClick={handlePdf}>
+                Export
+              </Button>
+            </div>
+            <TabsList id="export-tabs">
+              <TabsTrigger value="1">Design 1</TabsTrigger>
+              <TabsTrigger value="2">Design 2</TabsTrigger>
+              <TabsTrigger value="3">Design 3</TabsTrigger>
+            </TabsList>
           </div>
-          <TabsList id="export-tabs">
-            <TabsTrigger value="1">Design 1</TabsTrigger>
-            <TabsTrigger value="2">Design 2</TabsTrigger>
-            <TabsTrigger value="3">Design 3</TabsTrigger>
-          </TabsList>
-        </div>
-        <TabsContent value="1" className="mt-5">
-          <Tab1 {...props} />
-        </TabsContent>
+          <TabsContent value="1" className="mt-5">
+            <Tab1 {...props} />
+          </TabsContent>
 
-        <TabsContent value="2" className="mt-5">
-          <Tab2 {...props} />
-        </TabsContent>
+          <TabsContent value="2" className="mt-5">
+            <Tab2 {...props} />
+          </TabsContent>
 
-        <TabsContent value="3" className="mt-5">
-          <Tab3 {...props} />
-        </TabsContent>
-      </Tabs>
-    </Style>
+          <TabsContent value="3" className="mt-5">
+            <Tab3 {...props} />
+          </TabsContent>
+        </Tabs>
+      </Style>
+    </Modal>
   );
 }
 const Style = styled.div`

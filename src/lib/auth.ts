@@ -1,10 +1,6 @@
-import { $Enums, Prisma, Status, UserType } from "@prisma/client";
+import { $Enums } from "@prisma/client";
 import GetRoutes from "@rms/config/route-config";
-import {
-  CommonKeys,
-  CommonRouteKeys,
-  UserSelectCommon,
-} from "@rms/models/CommonModel";
+import { UserSelectCommon } from "@rms/models/CommonModel";
 import HttpStatusCode from "@rms/models/HttpStatusCode";
 import prisma from "@rms/prisma/prisma";
 import { sign, verify } from "jsonwebtoken";
@@ -37,6 +33,7 @@ export async function getUserInfo(): Promise<UserSelectCommon | undefined> {
           id: true,
           permissions: true,
           type: true,
+          config_id: true,
         },
       },
     },

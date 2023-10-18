@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { getConfigId } from "@rms/lib/config";
 import prisma from "@rms/prisma/prisma";
 import CategoryTable from "@rms/widgets/table/category-table";
 
@@ -7,16 +8,19 @@ export default async function page(props: {
   searchParams: { id?: string };
 }) {
   var value: Prisma.CategoryGetPayload<{}>[] | Prisma.CategoryGetPayload<{}>[];
+  const config_id = await getConfigId();
 
   switch (props.params.node) {
     case "category":
       value = await prisma.category.findMany({
+        where: { config_id },
         orderBy: { modified_date: "desc" },
       });
       break;
 
     case "sub_category":
       value = await prisma.subCategory.findMany({
+        where: { config_id },
         orderBy: { modified_date: "desc" },
       });
       break;

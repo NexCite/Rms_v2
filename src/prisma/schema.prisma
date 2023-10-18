@@ -12,14 +12,41 @@ datasource db {
 }
 
 model Config {
-  id           Int    @id @default(autoincrement())
-  name         String
-  logo         String @default("")
-  phone_number String @default("")
-  email        String @default("")
+  id   Int    @id @default(autoincrement())
+  name String @unique
 
-  password String
-  username String
+  logo         String @default("")
+  phone_number String @unique
+  email        String @unique
+
+  password             String
+  username             String                 @unique
+  users                User[]
+  invoices             Invoice[]
+  accounts             Account[]
+  account_entries      Account_Entry[]
+  brokers              Broker[]
+  employees            Employee[]
+  traders              Trader[]
+  logs                 Log[]
+  auths                Auth[]
+  payments             Payment[]
+  media                Media[]
+  currencies           Currency[]
+  categories           Category[]
+  sub_categories       SubCategory[]
+  two_digits           Two_Digit[]
+  three_digits         Three_Digit[]
+  more_than_four_digit More_Than_Four_Digit[]
+  entries              Entry[]
+  sub_entries          SubEntry[]
+  payment_boxes        PaymentBox[]
+  coverage_boxes       CoverageBox[]
+  expensive_boxes      ExpensiveBox[]
+  pl_boxes             P_LBox[]
+  agent_boxes          AgentBox[]
+
+  ClientBox ClientBox[]
 }
 
 model User {
@@ -27,14 +54,14 @@ model User {
   first_name   String
   last_name    String
   password     String   @default("")
-  phone_number String   @unique
+  phone_number String
   gender       Gender
   address1     String   @default("")
   address2     String   @default("")
   country      String   @default("")
   email        String   @default("")
   status       Status   @default(Enable)
-  username     String   @unique
+  username     String
   path         String[]
   auth         Auth[]
   brokers      Broker[]
@@ -58,13 +85,17 @@ model User {
   permissions          UserPermission[]
   sub_categories       SubCategory[]
   categories           Category[]
+  config_id            Int?
+  config               Config?                @relation(fields: [config_id], references: [id])
+
+  @@unique([id, username, config_id, phone_number], name: "unique_combination")
 }
 
 model Employee {
   id            Int      @id @default(autoincrement())
   first_name    String
   last_name     String
-  phone_number  String   @unique
+  phone_number  String
   gender        Gender
   address1      String   @default("")
   address2      String   @default("")
@@ -73,16 +104,20 @@ model Employee {
   status        Status   @default(Enable)
   create_date   DateTime @default(now())
   modified_date DateTime @default(now()) @updatedAt
-  username      String   @unique
+  username      String
   user_id       Int
   user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  config_id     Int?
+  config        Config?  @relation(fields: [config_id], references: [id])
+
+  @@unique([username, id, config_id], name: "unique_combination")
 }
 
 model Trader {
   id            Int       @id @default(autoincrement())
   first_name    String
   last_name     String
-  phone_number  String    @unique
+  phone_number  String
   gender        Gender
   address1      String    @default("")
   address2      String    @default("")
@@ -93,17 +128,21 @@ model Trader {
   status        Status    @default(Enable)
   create_date   DateTime  @default(now())
   modified_date DateTime  @default(now()) @updatedAt
-  username      String    @unique
+  username      String
   accounts      Account[]
   broker        Broker?   @relation(fields: [broker_id], references: [id], onDelete: Cascade)
   user          User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  config_id     Int?
+  config        Config?   @relation(fields: [config_id], references: [id])
+
+  @@unique([username, id, config_id, phone_number], name: "unique_combination")
 }
 
 model Broker {
   id            Int       @id
   first_name    String
   last_name     String
-  phone_number  String    @unique
+  phone_number  String
   gender        Gender
   address1      String    @default("")
   address2      String    @default("")
@@ -113,10 +152,14 @@ model Broker {
   status        Status    @default(Enable)
   create_date   DateTime  @default(now())
   modified_date DateTime  @default(now()) @updatedAt
-  username      String    @unique
+  username      String
   user          User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   traders       Trader[]
   invoices      Invoice[]
+  config_id     Int?
+  config        Config?   @relation(fields: [config_id], references: [id])
+
+  @@unique([id, username, config_id, phone_number], name: "unique_combination")
 }
 
 model Log {
@@ -125,9 +168,13 @@ model Log {
   page        String?
   action      Action
   body        String?
-  user_id     Int
+  user_id     Int?
   error       String?
-  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user        User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  config_id   Int?
+  config      Config?  @relation(fields: [config_id], references: [id])
+
+  @@unique([id, config_id], name: "unique_combination")
 }
 
 enum Action {
@@ -140,17 +187,21 @@ enum Action {
 model Auth {
   id          Int      @id @default(autoincrement())
   user_id     Int
-  token       String   @unique()
+  token       String
   user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   status      Status
   create_date DateTime @default(now())
+  config_id   Int?
+  config      Config?  @relation(fields: [config_id], references: [id])
+
+  @@unique([token, id, config_id], name: "unique_combination")
 }
 
 model Account {
   id            Int       @id
   create_date   DateTime  @default(now())
   modified_date DateTime  @default(now()) @updatedAt
-  username      String    @unique()
+  username      String
   currency_id   Int
   trader_id     Int?
   status        Status    @default(Enable)
@@ -159,6 +210,10 @@ model Account {
   trader        Trader?   @relation(fields: [trader_id], references: [id], onDelete: Cascade)
   currency      Currency  @relation(fields: [currency_id], references: [id], onDelete: Cascade)
   invoices      Invoice[]
+  config_id     Int?
+  config        Config?   @relation(fields: [config_id], references: [id])
+
+  @@unique([username, id, config_id], name: "unique_combination")
 }
 
 model Invoice {
@@ -184,6 +239,10 @@ model Invoice {
   media           Media?
   debit_credit    DebitCreditType @default(Debit)
   sub_category    SubCategory     @relation(fields: [sub_category_id], references: [id], onDelete: Cascade)
+  config_id       Int?
+  config          Config?         @relation(fields: [config_id], references: [id])
+
+  @@unique([id, config_id], name: "unique_combination")
 }
 
 model Payment {
@@ -202,6 +261,10 @@ model Payment {
   media         Media?
   invoice       Invoice     @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
   invoice_id    Int
+  config_id     Int?
+  config        Config?     @relation(fields: [config_id], references: [id])
+
+  @@unique([id, config_id], name: "unique_combination")
 }
 
 model Media {
@@ -212,21 +275,26 @@ model Media {
   modified_date DateTime  @default(now()) @updatedAt
   type          MediaType
   path          String
+  file_name     String
   status        Status    @default(Enable)
-  invoice_id    Int?      @unique()
-  payment_id    Int?      @unique()
-  entry_id      Int?      @unique()
+  invoice_id    Int?      @unique
+  payment_id    Int?      @unique
+  entry_id      Int?      @unique
 
   invoice Invoice? @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
   entry   Entry?   @relation(fields: [entry_id], references: [id], onDelete: Cascade)
 
-  payment Payment? @relation(fields: [payment_id], references: [id], onDelete: Cascade)
+  payment   Payment? @relation(fields: [payment_id], references: [id], onDelete: Cascade)
+  config_id Int?
+  config    Config?  @relation(fields: [config_id], references: [id])
+
+  @@unique([id, config_id, invoice_id, payment_id, entry_id], name: "unique_combination")
 }
 
 model Currency {
   id            Int       @id @default(autoincrement())
-  name          String    @unique
-  symbol        String    @unique
+  name          String
+  symbol        String
   accounts      Account[]
   invoices      Invoice[]
   status        Status?   @default(Enable)
@@ -235,18 +303,26 @@ model Currency {
   modified_date DateTime  @default(now()) @updatedAt
   user_id       Int?
   user          User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  config_id     Int?
+  config        Config?   @relation(fields: [config_id], references: [id])
+
+  @@unique([id, config_id, name, symbol], name: "unique_combination")
 }
 
 model Category {
   id             Int           @id @default(autoincrement())
-  name           String        @unique
+  name           String
   sub_categories SubCategory[]
   create_date    DateTime      @default(now())
   modified_date  DateTime      @default(now()) @updatedAt
   status         Status?       @default(Enable)
   user_id        Int?
 
-  user User? @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user      User?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  config_id Int?
+  config    Config? @relation(fields: [config_id], references: [id])
+
+  @@unique([id, config_id, name], name: "unique_combination")
 }
 
 model SubCategory {
@@ -260,7 +336,11 @@ model SubCategory {
   user_id       Int?
   status        Status?   @default(Enable)
 
-  user User? @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user      User?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  config_id Int?
+  config    Config? @relation(fields: [config_id], references: [id])
+
+  @@unique([id, config_id, name, category_id], name: "unique_combination")
 }
 
 enum SubCategoryType {
@@ -278,6 +358,9 @@ enum Gender {
 enum MediaType {
   Image
   Pdf
+  Logo
+  File
+  Video
 }
 
 enum Status {
@@ -314,8 +397,8 @@ enum DigitType {
 }
 
 model Two_Digit {
-  id              Int             @id @unique
-  name            String          @unique
+  id              Int             @id
+  name            String
   create_date     DateTime        @default(now())
   modified_date   DateTime        @default(now()) @updatedAt
   three_digit     Three_Digit[]
@@ -327,11 +410,15 @@ model Two_Digit {
 
   type         DigitType?
   debit_credit DebitCreditType?
+  config_id    Int?
+  config       Config?          @relation(fields: [config_id], references: [id])
+
+  @@unique([id, config_id, name], name: "unique_combination")
 }
 
 model Three_Digit {
-  id                   Int                    @id @unique @default(autoincrement())
-  name                 String                 @unique
+  id                   Int                    @id @default(autoincrement())
+  name                 String
   create_date          DateTime               @default(now())
   modified_date        DateTime               @default(now()) @updatedAt
   more_than_four_digit More_Than_Four_Digit[]
@@ -346,12 +433,16 @@ model Three_Digit {
   sub_entries SubEntry[]
   user_id     Int?
   user        User?      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  config_id   Int?
+  config      Config?    @relation(fields: [config_id], references: [id])
+
+  @@unique([id, config_id, name, two_digit_id], name: "unique_combination")
 }
 
 model More_Than_Four_Digit {
-  id Int @id @unique
+  id Int @id
 
-  name            String           @unique
+  name            String
   create_date     DateTime         @default(now())
   modified_date   DateTime         @default(now()) @updatedAt
   account_entries Account_Entry[]
@@ -363,12 +454,16 @@ model More_Than_Four_Digit {
   sub_entries     SubEntry[]
   user_id         Int?
 
-  user User? @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user      User?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  config_id Int?
+  config    Config? @relation(fields: [config_id], references: [id])
+
+  @@unique([id, config_id, name, three_digit_id], name: "unique_combination")
 }
 
 model Account_Entry {
-  id                      Int                   @id @unique
-  username                String                @unique
+  id                      Int                   @id
+  username                String
   first_name              String
   last_name               String
   phone_number            String                @default("")
@@ -391,10 +486,14 @@ model Account_Entry {
   user                    User?                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
   ref_entries             SubEntry[]            @relation("reference")
   type                    Account_Entry_Type?
+  config_id               Int?
+  config                  Config?               @relation(fields: [config_id], references: [id])
+
+  @@unique([id, config_id, username], name: "unique_combination")
 }
 
 model Entry {
-  id            Int        @id @unique @default(autoincrement())
+  id            Int        @id @default(autoincrement())
   title         String
   description   String
   note          String     @default("")
@@ -408,6 +507,10 @@ model Entry {
   currency      Currency   @relation(fields: [currency_id], references: [id], onDelete: Cascade)
   user_id       Int?
   user          User?      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  config_id     Int?
+  config        Config?    @relation(fields: [config_id], references: [id])
+
+  @@unique([id, config_id], name: "unique_combination")
 }
 
 model SubEntry {
@@ -427,6 +530,10 @@ model SubEntry {
   type                    EntryType             @default(Debit)
   entry_id                Int
   entry                   Entry                 @relation(fields: [entry_id], references: [id], onDelete: Cascade)
+  config_id               Int?
+  config                  Config?               @relation(fields: [config_id], references: [id])
+
+  @@unique([id, config_id, entry_id], name: "unique_combination")
 }
 
 enum EntryType {
@@ -561,6 +668,10 @@ model PaymentBox {
   agent_boxes    AgentBox[]
   p_l            P_LBox[]
   expensive_box  ExpensiveBox[]
+  config_id      Int?
+  config         Config?        @relation(fields: [config_id], references: [id])
+
+  @@unique([id, config_id], name: "unique_combination")
 }
 
 model CoverageBox {
@@ -571,6 +682,10 @@ model CoverageBox {
   closed_p_l     Float
   payment_box_id Int
   payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id])
+  config_id      Int?
+  config         Config?    @relation(fields: [config_id], references: [id])
+
+  @@unique([id, config_id, payment_box_id], name: "unique_combination")
 }
 
 model ClientBox {
@@ -584,6 +699,10 @@ model ClientBox {
 
   payment_box_id Int
   payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id])
+  config_id      Int?
+  config         Config?    @relation(fields: [config_id], references: [id])
+
+  @@unique([id, config_id, payment_box_id], name: "unique_combination")
 }
 
 model AgentBox {
@@ -593,6 +712,10 @@ model AgentBox {
 
   payment_box_id Int
   payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id])
+  config_id      Int?
+  config         Config?    @relation(fields: [config_id], references: [id])
+
+  @@unique([id, config_id, payment_box_id], name: "unique_combination")
 }
 
 model P_LBox {
@@ -602,6 +725,10 @@ model P_LBox {
 
   payment_box_id Int
   payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id])
+  config_id      Int?
+  config         Config?    @relation(fields: [config_id], references: [id])
+
+  @@unique([id, config_id, payment_box_id], name: "unique_combination")
 }
 
 model ExpensiveBox {
@@ -611,4 +738,8 @@ model ExpensiveBox {
 
   payment_box_id Int
   payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id])
+  config_id      Int?
+  config         Config?    @relation(fields: [config_id], references: [id])
+
+  @@unique([id, config_id, payment_box_id], name: "unique_combination")
 }

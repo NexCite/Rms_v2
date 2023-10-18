@@ -28,6 +28,7 @@ import { deleteEntry } from "@rms/service/entry-service";
 import dayjs from "dayjs";
 import moment from "moment";
 import { Activity } from "@rms/models/CommonModel";
+import Link from "next/link";
 
 type CommonEntryType = Prisma.EntryGetPayload<{
   include: {
@@ -233,7 +234,7 @@ export default function EntryDataTable(props: Props) {
             ?.sort((a, b) => a.type.length - b.type.length)
             .forEach((e, i) =>
               s.push(
-                <tr key={e.id + "" + i}>
+                <tr key={i}>
                   <td align="center">
                     {originalRow.row.original.currency.symbol}
                     {FormatNumberWithFixed(e.amount)}
@@ -548,25 +549,21 @@ export default function EntryDataTable(props: Props) {
               original: { id, title },
             },
           }) => [
-            <Authorized permission="Edit_Entry" key={1}>
-              <MenuItem
-                onClick={() => push(pathName + "/form?id=" + id)}
-                className="cursor-pointer"
-                disabled={isActive}
-              >
-                Edit
-              </MenuItem>
+            <Authorized permission="Edit_Entry" key={213213}>
+              <Link href={pathName + "/form?id=" + id}>
+                <MenuItem className="cursor-pointer" disabled={isActive}>
+                  Edit
+                </MenuItem>
+              </Link>
             </Authorized>,
-            <Authorized permission="View_Entry" key={2}>
-              <MenuItem
-                onClick={() => push(pathName + "/" + id)}
-                className="cursor-pointer"
-                disabled={isActive}
-              >
-                View
-              </MenuItem>
+            <Authorized permission="View_Entry" key={324234}>
+              <Link href={pathName + "/" + id}>
+                <MenuItem className="cursor-pointer" disabled={isActive}>
+                  View
+                </MenuItem>
+              </Link>
             </Authorized>,
-            <Authorized permission="Delete_Entry" key={3}>
+            <Authorized permission="Delete_Entry" key={432523523}>
               <MenuItem
                 disabled={isActive}
                 className="cursor-pointer"

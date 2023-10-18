@@ -8,7 +8,10 @@ export async function createCurrency(
   props: Prisma.CurrencyUncheckedCreateInput
 ) {
   return handlerServiceAction(
-    async (auth) => {
+    async (auth, config_id) => {
+      props.config_id = config_id;
+      props.user_id = auth.id;
+
       await prisma.currency.create({ data: props });
     },
     "Add_Currency",
@@ -22,8 +25,13 @@ export async function updateCurrency(
   props: Prisma.CurrencyUncheckedUpdateInput
 ) {
   return handlerServiceAction(
-    async (auth) => {
-      await prisma.currency.update({ where: { id: id }, data: props });
+    async (auth, config_id) => {
+      props.config_id = config_id;
+      props.user_id = auth.id;
+      await prisma.currency.update({
+        where: { id: id },
+        data: props,
+      });
     },
     "Edit_Currency",
     true,
@@ -33,15 +41,15 @@ export async function updateCurrency(
 
 export async function deleteCurrency(id: number) {
   return handlerServiceAction(
-    async (auth) => {
-      return await prisma.currency.delete({ where: { id: id } });
+    async (auth, config_id) => {
+      return await prisma.currency.delete({ where: { id: id, config_id } });
       // if (auth.type === "Admin") {
       //   await prisma.entry.deleteMany({ where: { currency_id: id } });
       //   await prisma.invoice.deleteMany({ where: { currency_id: id } });
-      //   return await prisma.currency.delete({ where: { id: id } });
+      //   return await prisma.currency.delete({ where: { id: id,config_id } });
       // } else
       //   return await prisma.entry.update({
-      //     where: { id: id },
+      //     where: { id: id,config_id },
       //     data: { status: "Deleted", user_id: auth.id },
       //   });
     },

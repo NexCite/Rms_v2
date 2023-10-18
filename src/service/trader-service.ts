@@ -11,7 +11,9 @@ export async function createTrader(
   props: Prisma.TraderUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction<void>(
-    async (auth) => {
+    async (auth, config_id) => {
+      props.config_id = config_id;
+      props.user_id = auth.id;
       await prisma.trader.create({ data: props });
       return;
     },
@@ -26,7 +28,9 @@ export async function updateTrader(
   props: Prisma.TraderUncheckedUpdateInput
 ): Promise<ServiceActionModel<Prisma.TraderUpdateInput>> {
   return handlerServiceAction<Prisma.TraderUpdateInput>(
-    async (auth) => {
+    async (auth, config_id) => {
+      props.config_id = config_id;
+      props.user_id = auth.id;
       return await prisma.trader.update({
         where: { id },
         data: props,
@@ -42,14 +46,14 @@ export async function deleteTraderById(
   id: number
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction<void>(
-    async (auth) => {
-      await prisma.trader.delete({ where: { id: id } });
+    async (auth, config_id) => {
+      await prisma.trader.delete({ where: { id: id, config_id } });
 
       // if (auth.type === "Admin")
-      //   await prisma.trader.delete({ where: { id: id } });
+      //   await prisma.trader.delete({ where: { id: id,config_id } });
       // else
       //   await prisma.trader.update({
-      //     where: { id: id },
+      //     where: { id: id,config_id },
       //     data: { status: "Deleted", user_id: id },
       //   });
 

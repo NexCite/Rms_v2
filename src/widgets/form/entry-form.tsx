@@ -183,6 +183,10 @@ export default function EntryForm(props: Props) {
                 path: media.path,
                 title: media.title,
                 type: "Pdf",
+                file_name: (() => {
+                  var filename = media.path.split("/");
+                  return filename[filename.length - 1];
+                })(),
               },
             }
           : undefined,
@@ -270,9 +274,9 @@ export default function EntryForm(props: Props) {
       {loadingUi ? (
         <Loading />
       ) : (
-        <Card>
+        <Card className="">
           {props.activity && (
-            <div className=" entry-form-size:absolute top-[80px] flex  end-[2%] entry-form-size:max-w-xs  w-full    max-h-full ">
+            <div className="  entry-form-size:absolute top-[80px]   end-[2%] entry-form-size:max-w-xs  w-full    ">
               <Accordion
                 defaultExpanded
                 variant="outlined"
@@ -308,12 +312,6 @@ export default function EntryForm(props: Props) {
                         </Typography>
                       </div>
 
-                      <div className="flex justify-between items-center">
-                        <Typography className="text-xl">Client Id</Typography>
-                        <Typography className="text-xl">
-                          {props.activity.client.id}
-                        </Typography>
-                      </div>
                       <div className="flex justify-between items-center">
                         <Typography className="text-xl">Account Id</Typography>
                         <Typography className="text-xl">
@@ -404,6 +402,7 @@ export default function EntryForm(props: Props) {
                     {...field}
                     InputLabelProps={{ shrink: true }}
                     required
+                    value={field.value}
                     error={Boolean(fieldState.error)}
                     label="Title"
                     size="small"
@@ -428,7 +427,7 @@ export default function EntryForm(props: Props) {
                     label="Description"
                     size="small"
                     fullWidth
-                    defaultValue={field.value}
+                    value={field.value}
                     helperText={fieldState?.error?.message}
                   />
                 )}
@@ -448,7 +447,7 @@ export default function EntryForm(props: Props) {
                     label="Note"
                     size="small"
                     fullWidth
-                    defaultValue={field.value}
+                    value={field.value}
                     helperText={fieldState?.error?.message}
                   />
                 )}
@@ -469,7 +468,7 @@ export default function EntryForm(props: Props) {
                         : false
                     )}
                     isOptionEqualToValue={(e) => e.value === field.value}
-                    defaultValue={(() => {
+                    value={(() => {
                       const currnecy = props.currencies.find(
                         (res) => res.id === field.value
                       );
@@ -516,7 +515,7 @@ export default function EntryForm(props: Props) {
                             helperText: fieldState?.error?.message,
                           },
                         }}
-                        defaultValue={dayjs(field.value)}
+                        value={dayjs(field.value)}
                         onChange={(e) => {
                           field.onChange(e?.toDate());
                         }}

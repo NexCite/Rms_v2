@@ -10,6 +10,7 @@ import { deleteCategoryById } from "@rms/service/category-service";
 import { deleteSubCategoryById } from "@rms/service/sub-category-service";
 import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
 import { useStore } from "@rms/hooks/toast-hook";
+import Link from "next/link";
 
 type Props =
   | {
@@ -109,13 +110,11 @@ export default function CategoryTable(props: Props) {
           },
         }) => [
           <Authorized permission="Edit_Currency" key={1}>
-            <MenuItem
-              onClick={() => push(pathName + "/form?id=" + id)}
-              className="cursor-pointer"
-              disabled={isActive}
-            >
-              Edit
-            </MenuItem>
+            <Link href={pathName + "/form?id=" + id}>
+              <MenuItem className="cursor-pointer" disabled={isActive}>
+                Edit
+              </MenuItem>
+            </Link>
           </Authorized>,
 
           <Authorized permission="Delete_Currency" key={3}>

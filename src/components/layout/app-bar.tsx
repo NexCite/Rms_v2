@@ -1,12 +1,13 @@
 "use client";
-import React, { useMemo, useTransition } from "react";
-import { Sidebar } from "./side-bar";
-import RouteModel from "@rms/models/RouteModel";
-import { usePathname, useRouter } from "next/navigation";
-import Authorized from "@rms/components/ui/authorized";
+import { Button } from "@mui/material";
 import { $Enums } from "@prisma/client";
+import Authorized from "@rms/components/ui/authorized";
+import RouteModel from "@rms/models/RouteModel";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import React, { useMemo, useTransition } from "react";
 import BackButton from "../ui/back-button";
-import LoadingButton from "@mui/lab/LoadingButton";
+import { Sidebar } from "./side-bar";
 type Props = {
   children: React.ReactNode;
   routes: RouteModel[];
@@ -72,24 +73,19 @@ export default function AppBar(props: Props) {
 
             {!path.includes("form") && (
               <Authorized permission={permission}>
-                <LoadingButton
-                  variant="contained"
-                  className={
-                    isPadding
-                      ? ""
-                      : "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
-                  }
-                  disableElevation
-                  loading={isPadding}
-                  type="button"
-                  onClick={() =>
-                    setPadding(async () => {
-                      push(path + "/form");
-                    })
-                  }
-                >
-                  Add
-                </LoadingButton>
+                <Link href={path + "/form"}>
+                  <Button
+                    variant="contained"
+                    className={
+                      isPadding
+                        ? ""
+                        : "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
+                    }
+                    type="button"
+                  >
+                    Add
+                  </Button>
+                </Link>
               </Authorized>
             )}
           </div>

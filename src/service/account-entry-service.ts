@@ -4,14 +4,15 @@ import { handlerServiceAction } from "@rms/lib/handler";
 import prisma from "@rms/prisma/prisma";
 
 export async function createAccount_Entry(
-  data: Prisma.Account_EntryUncheckedCreateInput,
+  props: Prisma.Account_EntryUncheckedCreateInput,
   node: $Enums.Account_Entry_Type
 ) {
   return handlerServiceAction(
-    async (auth) => {
-      data.user_id = auth.id;
+    async (auth, config_id) => {
+      props.user_id = auth.id;
+      props.config_id = config_id;
 
-      await prisma.account_Entry.create({ data });
+      await prisma.account_Entry.create({ data: props });
       return;
     },
     node === "Client"
@@ -21,20 +22,24 @@ export async function createAccount_Entry(
       : "Add_Entry_Supplier",
 
     true,
-    data
+    props
   );
 }
 
 export async function updateAccount_Entry(
   id: number,
-  data: Prisma.Account_EntryUncheckedUpdateInput,
+  props: Prisma.Account_EntryUncheckedUpdateInput,
   node: $Enums.Account_Entry_Type
 ) {
   return handlerServiceAction(
-    async (auth) => {
-      data.user_id = auth.id;
+    async (auth, config_id) => {
+      props.user_id = auth.id;
+      props.config_id = config_id;
 
-      return await prisma.account_Entry.update({ where: { id }, data: data });
+      return await prisma.account_Entry.update({
+        where: { id, config_id },
+        data: props,
+      });
     },
     node === "Client"
       ? "Edit_Entry_Client"
@@ -42,7 +47,7 @@ export async function updateAccount_Entry(
       ? "Edit_Entry_IB"
       : "Edit_Entry_Supplier",
     true,
-    data
+    props
   );
 }
 export async function deleteAccount_Entry(
@@ -50,15 +55,15 @@ export async function deleteAccount_Entry(
   node: $Enums.Account_Entry_Type
 ) {
   return handlerServiceAction(
-    async (auth) => {
-      await prisma.account_Entry.delete({ where: { id: id } });
+    async (auth, config_id) => {
+      await prisma.account_Entry.delete({ where: { id: id, config_id } });
 
       // if (auth.type === "Admin") {
-      //   await prisma.account_Entry.delete({ where: { id: id } });
+      //   await prisma.account_Entry.delete({ where: { id: id,config_id } });
       // } else {
       //   await prisma.account_Entry.update({
-      //     where: { id: id },
-      //     data: { status: "Deleted", user_id: auth.id },
+      //     where: { id: id,config_id },
+      //     props: { status: "Deleted", user_id: auth.id },
       //   });
       // }
 

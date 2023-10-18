@@ -3,12 +3,14 @@ import { useRouter } from "next/navigation";
 import React, { useTransition } from "react";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@mui/material";
+import LoadingButton from "@mui/lab/LoadingButton";
 type Props = {};
 export default function BackButton(props: Props) {
   const { back } = useRouter();
   const [isPadding, setPadding] = useTransition();
   return (
-    <Button
+    <LoadingButton
+      loading={isPadding}
       id="back-btn"
       disableElevation
       variant="outlined"
@@ -20,6 +22,6 @@ export default function BackButton(props: Props) {
       }
     >
       <ChevronLeft className="h-4 w-4" />
-    </Button>
+    </LoadingButton>
   );
 }

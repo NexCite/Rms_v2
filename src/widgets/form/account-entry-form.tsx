@@ -150,7 +150,7 @@ export default function Account_EntryForm(props: {
         }
       });
     },
-    [back, store, props.account, form]
+    [back, store, props.account, form, props.node]
   );
   return (
     <>

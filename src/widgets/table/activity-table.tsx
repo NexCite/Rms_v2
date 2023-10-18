@@ -17,6 +17,7 @@ import { Activity, ActivityStatus } from "@rms/models/CommonModel";
 import { confirmActivity } from "@rms/service/activity-service";
 import moment from "moment";
 import { FormatNumberWithFixed } from "@rms/lib/global";
+import Link from "next/link";
 
 type Props = {
   data: Activity[];
@@ -112,7 +113,7 @@ export default function ActivityTable(props: Props) {
         accessorKey: "create_date",
 
         header: "Create Date",
-        accessorFn: (e) => moment(e.create_date).fromNow() as any,
+        accessorFn: (e) => new Date(e.create_date).toLocaleDateString(),
         muiTableHeadCellProps: {
           align: "center",
         },
@@ -124,7 +125,7 @@ export default function ActivityTable(props: Props) {
         accessorKey: "last_modified_date",
 
         header: "Modified Date",
-        accessorFn: (e) => moment(e.last_modified_date).fromNow() as any,
+        accessorFn: (e) => new Date(e.last_modified_date).toLocaleDateString(),
         muiTableHeadCellProps: {
           align: "center",
         },
@@ -150,15 +151,11 @@ export default function ActivityTable(props: Props) {
           },
         }) => [
           <Authorized key={1} permission={"Edit_Activity"}>
-            <MenuItem
-              onClick={() =>
-                push("/admin/accounting/entry" + "/form?activity_id=" + id)
-              }
-              className="cursor-pointer"
-              disabled={isActive}
-            >
-              Edit
-            </MenuItem>
+            <Link href={"/admin/accounting/entry" + "/form?activity_id=" + id}>
+              <MenuItem className="cursor-pointer" disabled={isActive}>
+                Edit
+              </MenuItem>
+            </Link>
           </Authorized>,
           <Authorized key={2} permission={"Delete_Activity"}>
             <MenuItem

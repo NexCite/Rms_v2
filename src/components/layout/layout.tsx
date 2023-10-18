@@ -14,22 +14,10 @@ interface Props {
   };
 }
 export default function Layout(props: Props) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = useCallback(() => {
-    scrollRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-      inline: "nearest",
-    });
-  }, [scrollRef]);
-
   return (
     <AppBar routes={props.route} config={props.config}>
       <main className="w-full">
-        <div className="p-3" ref={scrollRef}>
-          {props.children}
-        </div>
+        <div className="p-3">{props.children}</div>
       </main>
     </AppBar>
   );
