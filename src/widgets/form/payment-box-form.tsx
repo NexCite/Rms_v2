@@ -16,6 +16,7 @@ import dayjs from "dayjs";
 import { z } from "zod";
 import {
   Alert,
+  AlertTitle,
   Autocomplete,
   Card,
   CardContent,
@@ -27,8 +28,10 @@ import {
 } from "@mui/material";
 import {
   createPaymentBox,
+  deletePaymentBoxById,
   updatePaymentBox,
 } from "@rms/service/payment-box-service";
+import Loading from "@rms/components/ui/loading";
 
 interface BoxesTypes {
   clients: Prisma.ClientBoxGetPayload<{}>[];
@@ -41,9 +44,18 @@ interface BoxesTypes {
 interface Props {
   id?: number;
   isEditMode?: boolean;
-  value: Prisma.PaymentBoxGetPayload<{}>;
+  value: Prisma.PaymentBoxGetPayload<{
+    select: {
+      agent_boxes: true;
+      client_boxes: true;
+      p_l: true;
+      coverage_boxes: true;
+      expensive_box: true;
+      to_date: true;
+      description: true;
+    };
+  }>;
   paymentBoxes: Prisma.PaymentBoxGetPayload<{}>[];
-  relations?: BoxesTypes;
 }
 
 interface PaymentBoxType extends BoxesTypes {
@@ -54,109 +66,64 @@ interface PaymentBoxType extends BoxesTypes {
 export default function PaymentBoxForm(props: Props) {
   const [isPadding, setTransition] = useTransition();
   const { back } = useRouter();
-  const [forms, setForms] = useState<PaymentBoxType>({
-    description: props.value?.description,
-    to_date: new Date(),
-    clients: [],
-    coverage: [],
-    agents: [],
-    p_l: [],
-    expensive: [],
-  });
 
   const formSchema = z.object({
     description: z.string().min(3),
     to_date: z.date(),
-
-    coverage: z.object({
-      createMany: z.object({
-        data: z
-          .array(
-            z.object({
-              amount: z.number().min(0),
-              starting_float: z.number().min(0),
-              current_float: z.number().min(0),
-              closed_p_l: z.number().min(0),
-              payment_box_id: z
-                .number()
-                .or(z.string().regex(/^\d+$/).transform(Number)),
-            })
-          )
-          .min(1),
-      }),
-    }),
-    clients: z.object({
-      createMany: z.object({
-        data: z
-          .array(
-            z.object({
-              manger: z
-                .string()
-                .min(1, { message: "Manager must be at least 1 characters" }),
-              starting_float: z.number().min(0),
-              current_float: z.number().min(0),
-              p_l: z.number().min(0),
-              commission: z.number().min(0),
-              swap: z.number().min(0),
-              payment_box_id: z
-                .number()
-                .or(z.string().regex(/^\d+$/).transform(Number)),
-            })
-          )
-          .min(1),
-      }),
-    }),
-    agents: z.object({
-      createMany: z.object({
-        data: z
-          .array(
-            z.object({
-              name: z
-                .string()
-                .min(1, { message: "Name must be at least 1 characters" }),
-              commission: z.number().min(0),
-              payment_box_id: z
-                .number()
-                .or(z.string().regex(/^\d+$/).transform(Number)),
-            })
-          )
-          .min(1),
-      }),
-    }),
-    p_l: z.object({
-      createMany: z.object({
-        data: z
-          .array(
-            z.object({
-              name: z
-                .string()
-                .min(1, { message: "Name must be at least 1 characters" }),
-              p_l: z.number().min(0),
-              payment_box_id: z
-                .number()
-                .or(z.string().regex(/^\d+$/).transform(Number)),
-            })
-          )
-          .min(1),
-      }),
-    }),
-    expensive: z.object({
-      createMany: z.object({
-        data: z
-          .array(
-            z.object({
-              name: z
-                .string()
-                .min(1, { message: "Name must be at least 1 characters" }),
-              expensive: z.number().min(0),
-              payment_box_id: z
-                .number()
-                .or(z.string().regex(/^\d+$/).transform(Number)),
-            })
-          )
-          .min(1),
-      }),
-    }),
+    coverage: z
+      .array(
+        z.object({
+          account: z.string(),
+          starting_float: z.number().min(0),
+          current_float: z.number().min(0),
+          closed_p_l: z.number().min(0),
+        })
+      )
+      .min(1),
+    clients: z
+      .array(
+        z.object({
+          manger: z
+            .string()
+            .min(1, { message: "Manager must be at least 1 characters" }),
+          starting_float: z.number().min(0),
+          current_float: z.number().min(0),
+          p_l: z.number().min(0),
+          commission: z.number().min(0),
+          swap: z.number().min(0),
+        })
+      )
+      .min(1),
+    agents: z
+      .array(
+        z.object({
+          name: z
+            .string()
+            .min(1, { message: "Name must be at least 1 characters" }),
+          commission: z.number().min(0),
+        })
+      )
+      .min(1),
+    p_l: z
+      .array(
+        z.object({
+          name: z
+            .string()
+            .min(1, { message: "Name must be at least 1 characters" }),
+          p_l: z.number().min(0),
+        })
+      )
+      .min(1),
+    expensive: z
+      .array(
+        z.object({
+          name: z
+            .string()
+            .min(1, { message: "Name must be at least 1 characters" }),
+          expensive: z.number().min(0),
+        })
+      )
+      .min(1),
   });
 
   const [errors, setErrors] = useState<{ index?: number; message: string }[]>(
@@ -166,902 +133,997 @@ export default function PaymentBoxForm(props: Props) {
   const { createAlert } = useAlertHook();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: props.value,
+    defaultValues: {
+      description: props.value?.description || "",
+      to_date: props.value?.to_date || dayjs(),
+      clients: props.value?.client_boxes || [],
+      agents: props.value?.agent_boxes || [],
+      coverage: props.value?.coverage_boxes || [],
+      expensive: props.value?.expensive_box || [],
+      p_l: props.value?.p_l || [],
+    } as any,
   });
 
-  useEffect(() => {
-    if (props.isEditMode) {
-      setForms(props.value as any);
-    }
-  }, [props.isEditMode, props.value]);
+  const handleSubmit = useCallback(
+    (values) => {
+      var formsData = {
+        description: values.description,
+        to_date: values.to_date,
+        client_boxes: values.clients,
+        expensive_box: values.expensive,
+        p_l: values.p_l,
+        agent_boxes: values.agents,
+        coverage_boxes: values.coverage,
+      };
 
-  const handleSubmit = useCallback(() => {
-    var formsData = {
-      ...forms,
-      client_boxes: forms.clients,
-      expensive_box: forms.expensive,
-      p_l: forms.p_l,
-      agent_boxes: forms.agents,
-      coverage_boxes: forms.coverage,
-    };
+      const result = formSchema.safeParse(formsData);
+      // form.clearErrors([
+      //   "description",
+      // ]);
 
-    // var m: PaymentBoxType = forms;
-    // m = {
-    //   description: forms.description,
-    //   title: forms.title,
-    //   to_date: forms.to_date,
-    //   note: forms.note,
-    //   currency_id: forms.currency_id,
-    //   sub_entries: props.isEditMode
-    //     ? undefined
-    //     : {
-    //         createMany: {
-    //           data: forms.sub_entries.map((res) => ({
-    //             amount: res.amount,
-    //             status: res.status,
-    //             type: res.type,
-    //             account_entry_id:
-    //               res.account_entry_id === 0 ? undefined : res.account_entry_id,
-    //             two_digit_id:
-    //               res.two_digit_id === 0 ? undefined : res.two_digit_id,
-    //             three_digit_id:
-    //               res.three_digit_id === 0 ? undefined : res.three_digit_id,
-    //             more_than_four_digit_id:
-    //               res.more_than_four_digit_id === 0
-    //                 ? undefined
-    //                 : res.more_than_four_digit_id,
-    //             reference_id:
-    //               res.reference_id === 0 ? undefined : res.reference_id,
-    //           })),
-    //         },
-    //       },
-    // };
-    // const result = formSchema.safeParse(m);
-    // form.clearErrors([
-    //   "currency_id",
-    //   "description",
-    //   "description",
-    //   "note",
-    //   "title",
-    // ]);
+      const error = [];
 
-    const error = [];
-    // if (forms.coverage.data.length < 1) {
-    //   return setErrors(
-    //     error.concat([{ message: "SubEntry must be not empty" }])
-    //   );
-    // }
-
-    // if (result.success === false) {
-    //   return Object.keys(result.error.formErrors.fieldErrors).map((res) => {
-    //     form.setError(res as any, {
-    //       message: result.error.formErrors.fieldErrors[res][0],
-    //     });
-    //   });
-    // } else if (error.length > 0) {
-    //   return;
-    // } else {
-    //   form.clearErrors([
-    //     "currency_id",
-    //     "description",
-    //     "description",
-    //     "note",
-    //     "title",
-    //   ]);
-
-    setTransition(async () => {
-      if (props.isEditMode) {
-        const result = await updatePaymentBox(props.id, formsData as any);
-        createAlert(result);
-        if (result.status === 200) {
-          back();
+      values.agents.forEach((element, i) => {
+        if (!element.commission || !element.name) {
+          error.push({
+            message: "Make sure to fill all fields for agent boxes",
+            index: i + 1,
+          });
         }
-      } else {
-        const result = await createPaymentBox(formsData as any);
-        createAlert(result);
-        if (result.status === 200) {
-          back();
+      });
+
+      values.clients.forEach((element, i) => {
+        if (
+          !element.commission ||
+          !element.current_float ||
+          !element.p_l ||
+          !element.manger ||
+          !element.starting_float ||
+          !element.swap
+        ) {
+          error.push({
+            message: "Make sure to fill all fields for client boxes",
+            index: i + 1,
+          });
         }
+      });
+
+      values.coverage.forEach((element, i) => {
+        if (
+          !element.account ||
+          !element.closed_p_l ||
+          !element.starting_float ||
+          !element.current_float
+        ) {
+          error.push({
+            message: "Make sure to fill all fields for coverage boxes",
+            index: i + 1,
+          });
+        }
+      });
+
+      values.expensive.forEach((element, i) => {
+        if (!element.expensive || !element.name) {
+          error.push({
+            message: "Make sure to fill all fields for expensive boxes",
+            index: i + 1,
+          });
+        }
+      });
+
+      values.p_l.forEach((element, i) => {
+        if (!element.p_l || !element.name) {
+          error.push({
+            message: "Make sure to fill all fields for p_l boxes",
+            index: i + 1,
+          });
+        }
+      });
+
+      if (error.length > 0) {
+        setErrors(errors.concat(error));
+        return;
       }
-    });
-    // }
-  }, [props, forms, formSchema, back, form, createAlert]);
+
+      // if (result.success === false) {
+      //   return Object.keys(result.error.formErrors.fieldErrors).map((res) => {
+      //     form.setError(res as any, {
+      //       message: result.error.formErrors.fieldErrors[res][0],
+      //     });
+      //   });
+      // } else if (error.length > 0) {
+      //   return;
+      // } else {
+      //   form.clearErrors([
+      //     "description",
+      //   ]);
+
+      setTransition(async () => {
+        if (props.id) {
+          [
+            "p_l",
+            "expensive_box",
+            "client_boxes",
+            "coverage_boxes",
+            "agent_boxes",
+          ].forEach((item) => {
+            formsData[item].map((element) => {
+              element["payment_box_id"] = props.id;
+            });
+          });
+        }
+
+        if (props.isEditMode) {
+          const result = await updatePaymentBox(props.id, formsData as any);
+          createAlert(result);
+          if (result.status === 200) {
+            back();
+          }
+        } else {
+          const result = await createPaymentBox(formsData as any);
+          createAlert(result);
+          if (result.status === 200) {
+            back();
+          }
+        }
+      });
+      // }
+    },
+    [props, formSchema, back, form]
+  );
+
+  const [loadingUi, setLoadingUi] = useState(true);
+  useEffect(() => {
+    setLoadingUi(false);
+  }, [props.value]);
 
   return (
-    <form className="max-w-[450px] m-auto" noValidate>
-      <Card>
-        {errors.length > 0 && (
-          <Alert severity="error">
-            {errors.map((res) => (
-              <h4 key={res.index}>
-                {res.message} Payment Box{" "}
-                {res.index && <span>{res.index}</span>}
-              </h4>
-            ))}
-          </Alert>
-        )}
-        <CardHeader
-          title={
-            <div className="flex justify-between items-center flex-row">
-              <Typography variant="h5">Payment Box Form</Typography>
-              <LoadingButton
-                onClick={(e) => {
-                  handleSubmit();
-                }}
-                variant="contained"
-                className="hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white w-[150px]"
-                disableElevation
-                loading={isPadding}
-              >
-                Save
-              </LoadingButton>
-            </div>
-          }
-        ></CardHeader>
-        <Divider />
-        <CardContent className="flex gap-5 flex-col">
-          <Controller
-            control={form.control}
-            name="description"
-            render={({ field, fieldState }) => (
-              <TextField
-                required
-                {...field}
-                multiline
-                minRows={3}
-                maxRows={5}
-                error={Boolean(fieldState.error)}
-                label="Description"
-                size="small"
-                fullWidth
-                defaultValue={field.value}
-                helperText={fieldState?.error?.message}
-                onChange={(e) => {
-                  setForms((prev) => ({
-                    ...prev,
-                    description: e.target.value,
-                  }));
-                }}
-              />
-            )}
-          />
-          <Controller
-            control={form.control}
-            name={"to_date" as any}
-            render={({ field, fieldState }) => (
-              <FormControl {...field} size="small">
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DatePicker
-                    minDate={dayjs().subtract(7, "day")}
-                    label="Date"
-                    maxDate={dayjs()}
-                    slotProps={{
-                      textField: {
-                        size: "small",
-                        required: true,
-                        error: Boolean(fieldState?.error),
-                        helperText: fieldState?.error?.message,
-                      },
-                    }}
-                    value={dayjs(forms.to_date)}
-                    onChange={(e) => {
-                      setForms((prev) => ({
-                        ...prev,
-                        to_date: e?.toDate(),
-                      }));
-                    }}
-                  />
-                </LocalizationProvider>
-              </FormControl>
-            )}
-          />
-
-          {/* ************Client Boxes start************ */}
-          <div style={{ margin: "0px 0px 0px" }}>
-            <h1 className="text-2xl">Clients</h1>
-          </div>
-          <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
-          {forms?.clients?.map((res, i) => (
-            <div className="mb-5 " key={i}>
-              <div className="flex justify-between items-center">
-                <h1>Client Box: {i + 1}</h1>
-                <Button
-                  onClick={() => {
-                    setErrors([]);
-
-                    setForms((prev) => ({
-                      ...prev,
-                      clients: prev.clients.filter((res, ii) => i !== ii),
-                    }));
-                  }}
-                  size="sm"
-                  className="bg-black"
-                  color="dark"
-                  type="button"
+    <form
+      className="max-w-[450px] m-auto"
+      noValidate
+      onSubmit={form.handleSubmit(handleSubmit)}
+    >
+      {loadingUi ? (
+        <Loading />
+      ) : (
+        <Card>
+          <CardHeader
+            title={
+              <div className="flex justify-between items-center flex-row">
+                <Typography variant="h5">Payment Box Form</Typography>
+                <LoadingButton
+                  type="submit"
+                  variant="contained"
+                  className={
+                    isPadding
+                      ? ""
+                      : "hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white w-[150px]"
+                  }
+                  disableElevation
+                  loading={isPadding}
                 >
-                  <X size="15" />
-                </Button>
+                  Save
+                </LoadingButton>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+            }
+          ></CardHeader>
+          <Divider />
+          <CardContent className="flex gap-5 flex-col">
+            <Controller
+              control={form.control}
+              name="description"
+              render={({ field, fieldState }) => (
                 <TextField
-                  size="small"
-                  type="text"
-                  label="Manger"
-                  defaultValue={res.manger}
+                  {...field}
                   required
-                  onChange={(e) => {
-                    forms.clients[i].manger = e.target.value;
-
-                    setForms((prev) => ({
-                      ...prev,
-                      clients: prev.clients,
-                    }));
-                  }}
-                />
-                <TextField
+                  multiline
+                  minRows={3}
+                  maxRows={5}
+                  error={Boolean(fieldState.error)}
+                  label="Description"
                   size="small"
-                  type="number"
-                  label="Swap"
-                  defaultValue={res.swap}
-                  required
-                  onChange={(e) => {
-                    if (Number.isNaN(e.target.value)) {
-                      forms.clients[i].swap = 1;
-                    } else {
-                      forms.clients[i].swap = +e.target.value;
-                    }
-
-                    setForms((prev) => ({
-                      ...prev,
-                      clients: prev.clients,
-                    }));
-                  }}
-                  helperText={`${FormatNumberWithFixed(res.swap ?? 0)}`}
+                  fullWidth
+                  value={field.value}
+                  helperText={fieldState?.error?.message}
                 />
-                <TextField
-                  size="small"
-                  type="number"
-                  label="Starting Float"
-                  defaultValue={res.starting_float}
-                  required
-                  onChange={(e) => {
-                    if (Number.isNaN(e.target.value)) {
-                      forms.clients[i].starting_float = 1;
-                    } else {
-                      forms.clients[i].starting_float = +e.target.value;
-                    }
-
-                    setForms((prev) => ({
-                      ...prev,
-                      clients: prev.clients,
-                    }));
-                  }}
-                  helperText={`${FormatNumberWithFixed(
-                    res.starting_float ?? 0
-                  )}`}
-                />
-                <TextField
-                  size="small"
-                  type="number"
-                  label="Current Float"
-                  defaultValue={res.current_float}
-                  required
-                  onChange={(e) => {
-                    if (Number.isNaN(e.target.value)) {
-                      forms.clients[i].current_float = 1;
-                    } else {
-                      forms.clients[i].current_float = +e.target.value;
-                    }
-
-                    setForms((prev) => ({
-                      ...prev,
-                      clients: prev.clients,
-                    }));
-                  }}
-                  helperText={`${FormatNumberWithFixed(
-                    res.current_float ?? 0
-                  )}`}
-                />
-                <TextField
-                  size="small"
-                  type="number"
-                  label="P_L"
-                  defaultValue={res.p_l}
-                  required
-                  onChange={(e) => {
-                    if (Number.isNaN(e.target.value)) {
-                      forms.clients[i].p_l = 1;
-                    } else {
-                      forms.clients[i].p_l = +e.target.value;
-                    }
-
-                    setForms((prev) => ({
-                      ...prev,
-                      clients: prev.clients,
-                    }));
-                  }}
-                  helperText={`${FormatNumberWithFixed(res.p_l ?? 0)}`}
-                />
-                <TextField
-                  size="small"
-                  type="number"
-                  label="Commission"
-                  defaultValue={res.p_l}
-                  required
-                  onChange={(e) => {
-                    if (Number.isNaN(e.target.value)) {
-                      forms.clients[i].commission = 1;
-                    } else {
-                      forms.clients[i].commission = +e.target.value;
-                    }
-
-                    setForms((prev) => ({
-                      ...prev,
-                      clients: prev.clients,
-                    }));
-                  }}
-                  helperText={`${FormatNumberWithFixed(res.commission ?? 0)}`}
-                />
-
-                <Autocomplete
-                  disablePortal
-                  size="small"
-                  onChange={(e, v) => {
-                    forms.clients[i].payment_box_id = v?.value;
-                    setForms((prev) => ({
-                      ...prev,
-                      clients: prev.clients,
-                    }));
-                  }}
-                  options={props.paymentBoxes.map((res) => ({
-                    label: `(${res.id}) ${res.description.substring(0, 10)}`,
-                    value: res.id,
-                  }))}
-                  renderInput={(params) => (
-                    <TextField {...params} label="Payment Box" />
-                  )}
-                />
-              </div>
-              {i !== forms.clients.length - 1 && (
-                <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
               )}
-            </div>
-          ))}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              marginTop: 10,
-            }}
-          >
-            <Button
-              type="button"
-              className="bg-black"
-              color="dark"
-              onClick={() => {
-                setForms((prev) => ({
-                  ...prev,
-                  clients: prev.clients.concat({
-                    starting_float: 0,
-                    current_float: 0,
-                    p_l: 0,
-                    commission: 0,
-                    swap: 0,
-                    manger: "",
-                    payment_box_id: undefined,
-                  } as any),
-                }));
-              }}
-            >
-              <PlusSquare />
-            </Button>
-          </div>
-          {/* ************Client Boxes End************ */}
-
-          {/* ************Expensive Boxes start************ */}
-          <div style={{ margin: "0px 0px 0px" }}>
-            <h1 className="text-2xl">Expensive</h1>
-          </div>
-          <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
-          {forms?.expensive?.map((res, i) => (
-            <div className="mb-5 " key={i}>
-              <div className="flex justify-between items-center">
-                <h1>Expensive Box: {i + 1}</h1>
-                <Button
-                  onClick={() => {
-                    setErrors([]);
-
-                    setForms((prev) => ({
-                      ...prev,
-                      expensive: prev.expensive.filter((res, ii) => i !== ii),
-                    }));
-                  }}
-                  size="sm"
-                  className="bg-black"
-                  color="dark"
-                  type="button"
-                >
-                  <X size="15" />
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-                <TextField
-                  size="small"
-                  type="number"
-                  label="Expensive"
-                  defaultValue={res.expensive}
-                  required
-                  onChange={(e) => {
-                    if (Number.isNaN(e.target.value)) {
-                      forms.expensive[i].expensive = 1;
-                    } else {
-                      forms.expensive[i].expensive = +e.target.value;
-                    }
-
-                    setForms((prev) => ({
-                      ...prev,
-                      expensive: prev.expensive,
-                    }));
-                  }}
-                  helperText={`${FormatNumberWithFixed(res.expensive ?? 0)}`}
-                />
-                <TextField
-                  size="small"
-                  type="text"
-                  label="Name"
-                  defaultValue={res.name}
-                  required
-                  onChange={(e) => {
-                    forms.expensive[i].name = e.target.value;
-
-                    setForms((prev) => ({
-                      ...prev,
-                      expensive: prev.expensive,
-                    }));
-                  }}
-                />
-                <Autocomplete
-                  disablePortal
-                  size="small"
-                  onChange={(e, v) => {
-                    forms.expensive[i].payment_box_id = v?.value;
-                    setForms((prev) => ({
-                      ...prev,
-                      expensive: prev.expensive,
-                    }));
-                  }}
-                  options={props.paymentBoxes.map((res) => ({
-                    label: `(${res.id}) ${res.description.substring(0, 10)}`,
-                    value: res.id,
-                  }))}
-                  renderInput={(params) => (
-                    <TextField {...params} label="Payment Box" />
-                  )}
-                />
-              </div>
-              {i !== forms.expensive.length - 1 && (
-                <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
+            />
+            <Controller
+              control={form.control}
+              name={"to_date" as any}
+              render={({ field, fieldState }) => (
+                <FormControl {...field} size="small">
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      minDate={dayjs().subtract(7, "day")}
+                      label="Date"
+                      slotProps={{
+                        textField: {
+                          size: "small",
+                          required: true,
+                          error: Boolean(fieldState?.error),
+                          helperText: fieldState?.error?.message,
+                        },
+                      }}
+                      defaultValue={dayjs(field.value)}
+                      onChange={(e) => {
+                        field.onChange(e?.toDate());
+                      }}
+                    />
+                  </LocalizationProvider>
+                </FormControl>
               )}
+            />
+
+            {/* ************Client Boxes start************ */}
+            <div style={{ margin: "0px 0px 0px" }}>
+              <h1 className="text-2xl">Clients</h1>
             </div>
-          ))}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              marginTop: 10,
-            }}
-          >
-            <Button
-              type="button"
-              className="bg-black"
-              color="dark"
-              onClick={() => {
-                setForms((prev) => ({
-                  ...prev,
-                  expensive: prev.expensive.concat({
-                    expensive: 0,
-                    name: "",
-                    payment_box_id: undefined,
-                  } as any),
-                }));
+            <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
+            <Controller
+              control={form.control}
+              name="clients"
+              render={({ field, fieldState }) => {
+                return (
+                  <>
+                    {Boolean(fieldState.error?.message) && (
+                      <Alert variant="outlined" severity="error">
+                        <AlertTitle>
+                          {fieldState.error.message.replaceAll("#space#", "\n")}
+                        </AlertTitle>
+                      </Alert>
+                    )}
+
+                    {field.value?.map((res, i) => (
+                      <div className="mb-5 " key={i}>
+                        <div className="flex justify-between items-center">
+                          <h1>Client Box: {i + 1}</h1>
+                          <Button
+                            onClick={() => {
+                              field.onChange(
+                                field.value.filter((res, ii) => i !== ii)
+                              );
+                            }}
+                            size="sm"
+                            className="bg-black"
+                            color="dark"
+                            type="button"
+                          >
+                            <X size="15" />
+                          </Button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            type="text"
+                            label="Manger"
+                            value={res.manger}
+                            required
+                            onChange={(e) => {
+                              field.value[i].manger = e.target.value;
+
+                              field.onChange(field.value);
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "manger")
+                            )}
+                          />
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            type="number"
+                            label="Swap"
+                            value={res.swap}
+                            required
+                            onChange={(e) => {
+                              if (Number.isNaN(e.target.value)) {
+                                field.value[i].swap = 1;
+                              } else {
+                                field.value[i].swap = +e.target.value;
+                              }
+
+                              field.onChange(field.value);
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "swap")
+                            )}
+                            helperText={`${FormatNumberWithFixed(
+                              res.swap ?? 0
+                            )}  ${checkBoxesError(fieldState, i, "swap")}`}
+                          />
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            type="number"
+                            label="Starting Float"
+                            value={res.starting_float}
+                            required
+                            onChange={(e) => {
+                              if (Number.isNaN(e.target.value)) {
+                                field.value[i].starting_float = 1;
+                              } else {
+                                field.value[i].starting_float = +e.target.value;
+                              }
+
+                              field.onChange(field.value);
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "starting_float")
+                            )}
+                            helperText={`${FormatNumberWithFixed(
+                              res.starting_float ?? 0
+                            )}  ${checkBoxesError(
+                              fieldState,
+                              i,
+                              "starting_float"
+                            )}`}
+                          />
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            type="number"
+                            label="Current Float"
+                            value={res.current_float}
+                            required
+                            onChange={(e) => {
+                              if (Number.isNaN(e.target.value)) {
+                                field.value[i].current_float = 1;
+                              } else {
+                                field.value[i].current_float = +e.target.value;
+                              }
+
+                              field.onChange(field.value);
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "current_float")
+                            )}
+                            helperText={`${FormatNumberWithFixed(
+                              res.current_float ?? 0
+                            )}  ${checkBoxesError(
+                              fieldState,
+                              i,
+                              "current_float"
+                            )}`}
+                          />
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            type="number"
+                            label="P_L"
+                            value={res.p_l}
+                            required
+                            onChange={(e) => {
+                              if (Number.isNaN(e.target.value)) {
+                                field.value[i].p_l = 1;
+                              } else {
+                                field.value[i].p_l = +e.target.value;
+                              }
+
+                              field.onChange(field.value);
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "p_l")
+                            )}
+                            helperText={`${FormatNumberWithFixed(
+                              res.p_l ?? 0
+                            )}  ${checkBoxesError(fieldState, i, "p_l")}`}
+                          />
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            type="number"
+                            label="Commission"
+                            value={res.commission}
+                            required
+                            onChange={(e) => {
+                              if (Number.isNaN(e.target.value)) {
+                                field.value[i].commission = 1;
+                              } else {
+                                field.value[i].commission = +e.target.value;
+                              }
+
+                              field.onChange(field.value);
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "commission")
+                            )}
+                            helperText={`${FormatNumberWithFixed(
+                              res.commission ?? 0
+                            )}  ${checkBoxesError(
+                              fieldState,
+                              i,
+                              "commission"
+                            )}`}
+                          />
+                        </div>
+                        {/* {i !== forms.clients.length - 1 && (
+                          <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
+                        )} */}
+                      </div>
+                    ))}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        marginTop: 10,
+                      }}
+                    >
+                      <Button
+                        type="button"
+                        className="bg-black"
+                        color="dark"
+                        onClick={() => {
+                          form.setValue(
+                            "clients",
+                            form.watch("clients").concat([
+                              {
+                                starting_float: 1,
+                                current_float: 1,
+                                p_l: 1,
+                                commission: 1,
+                                swap: 1,
+                                manger: "",
+                              },
+                            ])
+                          );
+                        }}
+                      >
+                        <PlusSquare />
+                      </Button>
+                    </div>
+                  </>
+                );
               }}
-            >
-              <PlusSquare />
-            </Button>
-          </div>
-          {/* ************Expensive Boxes End************ */}
+            />
+            {/* ************Client Boxes End************ */}
 
-          {/* ************P_L Boxes start************ */}
-          <div style={{ margin: "0px 0px 0px" }}>
-            <h1 className="text-2xl">P_L</h1>
-          </div>
-          <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
-          {forms?.p_l?.map((res, i) => (
-            <div className="mb-5 " key={i}>
-              <div className="flex justify-between items-center">
-                <h1>P_L Box: {i + 1}</h1>
-                <Button
-                  onClick={() => {
-                    setErrors([]);
-
-                    setForms((prev) => ({
-                      ...prev,
-                      p_l: prev.p_l.filter((res, ii) => i !== ii),
-                    }));
-                  }}
-                  size="sm"
-                  className="bg-black"
-                  color="dark"
-                  type="button"
-                >
-                  <X size="15" />
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-                <TextField
-                  size="small"
-                  type="text"
-                  label="Name"
-                  defaultValue={res.name}
-                  required
-                  onChange={(e) => {
-                    forms.p_l[i].name = e.target.value;
-
-                    setForms((prev) => ({
-                      ...prev,
-                      p_l: prev.p_l,
-                    }));
-                  }}
-                />
-                <TextField
-                  size="small"
-                  type="number"
-                  label="P_l"
-                  defaultValue={res.p_l}
-                  required
-                  onChange={(e) => {
-                    if (Number.isNaN(e.target.value)) {
-                      forms.p_l[i].p_l = 1;
-                    } else {
-                      forms.p_l[i].p_l = +e.target.value;
-                    }
-
-                    setForms((prev) => ({
-                      ...prev,
-                      p_l: prev.p_l,
-                    }));
-                  }}
-                  helperText={`${FormatNumberWithFixed(res.p_l ?? 0)}`}
-                />
-                <Autocomplete
-                  disablePortal
-                  size="small"
-                  onChange={(e, v) => {
-                    forms.p_l[i].payment_box_id = v?.value;
-                    setForms((prev) => ({
-                      ...prev,
-                      p_l: prev.p_l,
-                    }));
-                  }}
-                  options={props.paymentBoxes.map((res) => ({
-                    label: `(${res.id}) ${res.description.substring(0, 10)}`,
-                    value: res.id,
-                  }))}
-                  renderInput={(params) => (
-                    <TextField {...params} label="Payment Box" />
-                  )}
-                />
-              </div>
-              {i !== forms.p_l.length - 1 && (
-                <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
-              )}
+            {/* ************Expensive Boxes start************ */}
+            <div style={{ margin: "0px 0px 0px" }}>
+              <h1 className="text-2xl">Expensive</h1>
             </div>
-          ))}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              marginTop: 10,
-            }}
-          >
-            <Button
-              type="button"
-              className="bg-black"
-              color="dark"
-              onClick={() => {
-                setForms((prev) => ({
-                  ...prev,
-                  p_l: prev.p_l.concat({
-                    p_l: 0,
-                    name: "",
-                    payment_box_id: undefined,
-                  } as any),
-                }));
+            <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
+            <Controller
+              control={form.control}
+              name="expensive"
+              render={({ field, fieldState }) => {
+                return (
+                  <>
+                    {Boolean(fieldState.error?.message) && (
+                      <Alert variant="outlined" severity="error">
+                        <AlertTitle>
+                          {fieldState.error.message.replaceAll("#space#", "\n")}
+                        </AlertTitle>
+                      </Alert>
+                    )}
+
+                    {field.value?.map((res, i) => (
+                      <div className="mb-5 " key={i}>
+                        <div className="flex justify-between items-center">
+                          <h1>Expensive Box: {i + 1}</h1>
+                          <Button
+                            onClick={() => {
+                              field.onChange(
+                                field.value.filter((res, ii) => i !== ii)
+                              );
+                            }}
+                            size="sm"
+                            className="bg-black"
+                            color="dark"
+                            type="button"
+                          >
+                            <X size="15" />
+                          </Button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+                          <TextField
+                            size="small"
+                            type="text"
+                            label="Name"
+                            value={res.name}
+                            required
+                            onChange={(e) => {
+                              field.value[i].name = e.target.value;
+
+                              field.onChange(field.value);
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "name")
+                            )}
+                          />
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            type="number"
+                            label="Expensive"
+                            value={res.expensive}
+                            required
+                            onChange={(e) => {
+                              if (Number.isNaN(e.target.value)) {
+                                field.value[i].expensive = 1;
+                              } else {
+                                field.value[i].expensive = +e.target.value;
+                              }
+
+                              field.onChange(field.value);
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "expensive")
+                            )}
+                            helperText={`${FormatNumberWithFixed(
+                              res.expensive ?? 0
+                            )}  ${checkBoxesError(fieldState, i, "expensive")}`}
+                          />
+                        </div>
+                        {/* {i !== forms.expensive.length - 1 && (
+                          <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
+                        )} */}
+                      </div>
+                    ))}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        marginTop: 10,
+                      }}
+                    >
+                      <Button
+                        type="button"
+                        className="bg-black"
+                        color="dark"
+                        onClick={() => {
+                          form.setValue(
+                            "expensive",
+                            form.watch("expensive").concat([
+                              {
+                                expensive: 1,
+                                name: "",
+                              },
+                            ])
+                          );
+                        }}
+                      >
+                        <PlusSquare />
+                      </Button>
+                    </div>
+                  </>
+                );
               }}
-            >
-              <PlusSquare />
-            </Button>
-          </div>
-          {/* ************P_L Boxes End************ */}
+            />
+            {/* ************Expensive Boxes End************ */}
 
-          {/* ************Agent Boxes start************ */}
-          <div style={{ margin: "0px 0px 0px" }}>
-            <h1 className="text-2xl">Agents</h1>
-          </div>
-          <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
-          {forms?.agents?.map((res, i) => (
-            <div className="mb-5 " key={i}>
-              <div className="flex justify-between items-center">
-                <h1>Agent Box: {i + 1}</h1>
-                <Button
-                  onClick={() => {
-                    setErrors([]);
-
-                    setForms((prev) => ({
-                      ...prev,
-                      agents: prev.agents.filter((res, ii) => i !== ii),
-                    }));
-                  }}
-                  size="sm"
-                  className="bg-black"
-                  color="dark"
-                  type="button"
-                >
-                  <X size="15" />
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-                <TextField
-                  size="small"
-                  type="text"
-                  label="Name"
-                  defaultValue={res.name}
-                  required
-                  onChange={(e) => {
-                    forms.agents[i].name = e.target.value;
-
-                    setForms((prev) => ({
-                      ...prev,
-                      agents: prev.agents,
-                    }));
-                  }}
-                />
-                <TextField
-                  size="small"
-                  type="number"
-                  label="Commission"
-                  defaultValue={res.commission}
-                  required
-                  onChange={(e) => {
-                    if (Number.isNaN(e.target.value)) {
-                      forms.agents[i].commission = 1;
-                    } else {
-                      forms.agents[i].commission = +e.target.value;
-                    }
-
-                    setForms((prev) => ({
-                      ...prev,
-                      agents: prev.agents,
-                    }));
-                  }}
-                  helperText={`${FormatNumberWithFixed(res.commission ?? 0)}`}
-                />
-                <Autocomplete
-                  disablePortal
-                  size="small"
-                  onChange={(e, v) => {
-                    forms.agents[i].payment_box_id = v?.value;
-                    setForms((prev) => ({
-                      ...prev,
-                      agents: prev.agents,
-                    }));
-                  }}
-                  options={props.paymentBoxes.map((res) => ({
-                    label: `(${res.id}) ${res.description.substring(0, 10)}`,
-                    value: res.id,
-                  }))}
-                  renderInput={(params) => (
-                    <TextField {...params} label="Payment Box" />
-                  )}
-                />
-              </div>
-              {i !== forms.agents.length - 1 && (
-                <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
-              )}
+            {/* ************P_L Boxes start************ */}
+            <div style={{ margin: "0px 0px 0px" }}>
+              <h1 className="text-2xl">P_L</h1>
             </div>
-          ))}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              marginTop: 10,
-            }}
-          >
-            <Button
-              type="button"
-              className="bg-black"
-              color="dark"
-              onClick={() => {
-                setForms((prev) => ({
-                  ...prev,
-                  agents: prev.agents.concat({
-                    commission: 0,
-                    name: "",
-                    payment_box_id: undefined,
-                  } as any),
-                }));
+            <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
+            <Controller
+              control={form.control}
+              name="p_l"
+              render={({ field, fieldState }) => {
+                return (
+                  <>
+                    {Boolean(fieldState.error?.message) && (
+                      <Alert variant="outlined" severity="error">
+                        <AlertTitle>
+                          {fieldState.error.message.replaceAll("#space#", "\n")}
+                        </AlertTitle>
+                      </Alert>
+                    )}
+
+                    {field.value?.map((res, i) => (
+                      <div className="mb-5 " key={i}>
+                        <div className="flex justify-between items-center">
+                          <h1>P_L Box: {i + 1}</h1>
+                          <Button
+                            onClick={() => {
+                              field.onChange(
+                                field.value.filter((res, ii) => i !== ii)
+                              );
+                            }}
+                            size="sm"
+                            className="bg-black"
+                            color="dark"
+                            type="button"
+                          >
+                            <X size="15" />
+                          </Button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            type="text"
+                            label="Name"
+                            placeholder="name"
+                            value={res.name}
+                            required
+                            onChange={(e) => {
+                              field.value[i].name = e.target.value;
+
+                              field.onChange(field.value);
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "name")
+                            )}
+                          />
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            type="number"
+                            label="P_l"
+                            value={res.p_l}
+                            required
+                            onChange={(e) => {
+                              if (Number.isNaN(e.target.value)) {
+                                field.value[i].p_l = 1;
+                              } else {
+                                field.value[i].p_l = +e.target.value;
+                              }
+
+                              field.onChange(field.value);
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "p_l")
+                            )}
+                            helperText={`${FormatNumberWithFixed(
+                              res.p_l ?? 0
+                            )}  ${checkBoxesError(fieldState, i, "p_l")}`}
+                          />
+                        </div>
+                        {/* {i !== forms.p_l.length - 1 && (
+                          <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
+                        )} */}
+                      </div>
+                    ))}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        marginTop: 10,
+                      }}
+                    >
+                      <Button
+                        type="button"
+                        className="bg-black"
+                        color="dark"
+                        onClick={() => {
+                          form.setValue(
+                            "p_l",
+                            form.watch("p_l").concat([
+                              {
+                                p_l: 1,
+                                name: "",
+                              },
+                            ])
+                          );
+                        }}
+                      >
+                        <PlusSquare />
+                      </Button>
+                    </div>
+                  </>
+                );
               }}
-            >
-              <PlusSquare />
-            </Button>
-          </div>
-          {/* ************Agent Boxes End************ */}
+            />
+            {/* ************P_L Boxes End************ */}
 
-          {/* ************Coverage Boxes start************ */}
-          <div style={{ margin: "0px 0px 0px" }}>
-            <h1 className="text-2xl">Coverage</h1>
-          </div>
-          <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
-          {forms?.coverage?.map((res, i) => (
-            <div className="mb-5 " key={i}>
-              <div className="flex justify-between items-center">
-                <h1>Client Box: {i + 1}</h1>
-                <Button
-                  onClick={() => {
-                    setErrors([]);
-
-                    setForms((prev) => ({
-                      ...prev,
-                      coverage: prev.coverage.filter((res, ii) => i !== ii),
-                    }));
-                  }}
-                  size="sm"
-                  className="bg-black"
-                  color="dark"
-                  type="button"
-                >
-                  <X size="15" />
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-                <TextField
-                  size="small"
-                  type="text"
-                  label="Account"
-                  defaultValue={res.account}
-                  required
-                  onChange={(e) => {
-                    forms.coverage[i].account = e.target.value;
-
-                    setForms((prev) => ({
-                      ...prev,
-                      coverage: prev.coverage,
-                    }));
-                  }}
-                />
-                <TextField
-                  size="small"
-                  type="number"
-                  label="Starting Float"
-                  defaultValue={res.starting_float}
-                  required
-                  onChange={(e) => {
-                    if (Number.isNaN(e.target.value)) {
-                      forms.coverage[i].starting_float = 1;
-                    } else {
-                      forms.coverage[i].starting_float = +e.target.value;
-                    }
-
-                    setForms((prev) => ({
-                      ...prev,
-                      coverage: prev.coverage,
-                    }));
-                  }}
-                  helperText={`${FormatNumberWithFixed(
-                    res.starting_float ?? 0
-                  )}`}
-                />
-                <TextField
-                  size="small"
-                  type="number"
-                  label="Current Float"
-                  defaultValue={res.current_float}
-                  required
-                  onChange={(e) => {
-                    if (Number.isNaN(e.target.value)) {
-                      forms.coverage[i].current_float = 1;
-                    } else {
-                      forms.coverage[i].current_float = +e.target.value;
-                    }
-
-                    setForms((prev) => ({
-                      ...prev,
-                      coverage: prev.coverage,
-                    }));
-                  }}
-                  helperText={`${FormatNumberWithFixed(
-                    res.current_float ?? 0
-                  )}`}
-                />
-                <TextField
-                  size="small"
-                  type="number"
-                  label="Closed P_l"
-                  defaultValue={res.closed_p_l}
-                  required
-                  onChange={(e) => {
-                    if (Number.isNaN(e.target.value)) {
-                      forms.coverage[i].closed_p_l = 1;
-                    } else {
-                      forms.coverage[i].closed_p_l = +e.target.value;
-                    }
-
-                    setForms((prev) => ({
-                      ...prev,
-                      coverage: prev.coverage,
-                    }));
-                  }}
-                  helperText={`${FormatNumberWithFixed(res.closed_p_l ?? 0)}`}
-                />
-                <Autocomplete
-                  disablePortal
-                  size="small"
-                  onChange={(e, v) => {
-                    forms.coverage[i].payment_box_id = v?.value;
-                    setForms((prev) => ({
-                      ...prev,
-                      coverage: prev.coverage,
-                    }));
-                  }}
-                  options={props.paymentBoxes.map((res) => ({
-                    label: `(${res.id}) ${res.description.substring(0, 10)}`,
-                    value: res.id,
-                  }))}
-                  renderInput={(params) => (
-                    <TextField {...params} label="Payment Box" />
-                  )}
-                />
-              </div>
-              {i !== forms.coverage.length - 1 && (
-                <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
-              )}
+            {/* ************Agent Boxes start************ */}
+            <div style={{ margin: "0px 0px 0px" }}>
+              <h1 className="text-2xl">Agents</h1>
             </div>
-          ))}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              marginTop: 10,
-            }}
-          >
-            <Button
-              type="button"
-              className="bg-black"
-              color="dark"
-              onClick={() => {
-                setForms((prev) => ({
-                  ...prev,
-                  coverage: prev.coverage.concat({
-                    starting_float: 0,
-                    current_float: 0,
-                    closed_p_l: 0,
-                    account: "",
-                    payment_box_id: undefined,
-                  } as any),
-                }));
+            <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
+            <Controller
+              control={form.control}
+              name="agents"
+              render={({ field, fieldState }) => {
+                return (
+                  <>
+                    {Boolean(fieldState.error?.message) && (
+                      <Alert variant="outlined" severity="error">
+                        <AlertTitle>
+                          {fieldState.error.message.replaceAll("#space#", "\n")}
+                        </AlertTitle>
+                      </Alert>
+                    )}
+                    {field.value?.map((res, i) => (
+                      <div className="mb-5 " key={i}>
+                        <div className="flex justify-between items-center">
+                          <h1>Agent Box: {i + 1}</h1>
+                          <Button
+                            onClick={() => {
+                              field.onChange(
+                                field.value.filter((res, ii) => i !== ii)
+                              );
+                            }}
+                            size="sm"
+                            className="bg-black"
+                            color="dark"
+                            type="button"
+                          >
+                            <X size="15" />
+                          </Button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            type="text"
+                            label="Name"
+                            value={res.name}
+                            required
+                            onChange={(e) => {
+                              field.value[i].name = e.target.value;
+
+                              field.onChange(field.value);
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "name")
+                            )}
+                          />
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            type="number"
+                            label="Commission"
+                            value={res.commission}
+                            required
+                            onChange={(e) => {
+                              if (Number.isNaN(e.target.value)) {
+                                field.value[i].commission = 1;
+                              } else {
+                                field.value[i].commission = +e.target.value;
+                              }
+
+                              field.onChange(field.value);
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "commission")
+                            )}
+                            helperText={`${FormatNumberWithFixed(
+                              res.commission ?? 0
+                            )}  ${checkBoxesError(
+                              fieldState,
+                              i,
+                              "commission"
+                            )}`}
+                          />
+                        </div>
+                        {/* {i !== forms.agents.length - 1 && (
+                          <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
+                        )} */}
+                      </div>
+                    ))}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        marginTop: 10,
+                      }}
+                    >
+                      <Button
+                        type="button"
+                        className="bg-black"
+                        color="dark"
+                        onClick={() => {
+                          form.setValue(
+                            "agents",
+                            form.watch("agents").concat([
+                              {
+                                commission: 1,
+                                name: "",
+                              },
+                            ])
+                          );
+                        }}
+                      >
+                        <PlusSquare />
+                      </Button>
+                    </div>
+                  </>
+                );
               }}
-            >
-              <PlusSquare />
-            </Button>
-          </div>
-          {/* ************Coverage Boxes End************ */}
-        </CardContent>
-      </Card>
+            />
+            {/* ************Agent Boxes End************ */}
+
+            {/* ************Coverage Boxes start************ */}
+            <div style={{ margin: "0px 0px 0px" }}>
+              <h1 className="text-2xl">Coverage</h1>
+            </div>
+            <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
+            <Controller
+              control={form.control}
+              name="coverage"
+              render={({ field, fieldState }) => {
+                return (
+                  <>
+                    {Boolean(fieldState.error?.message) && (
+                      <Alert variant="outlined" severity="error">
+                        <AlertTitle>
+                          {fieldState.error.message.replaceAll("#space#", "\n")}
+                        </AlertTitle>
+                      </Alert>
+                    )}
+                    {field.value?.map((res, i) => (
+                      <div className="mb-5 " key={i}>
+                        <div className="flex justify-between items-center">
+                          <h1>Coverage Box: {i + 1}</h1>
+                          <Button
+                            onClick={() => {
+                              field.onChange(
+                                field.value.filter((res, ii) => i !== ii)
+                              );
+                            }}
+                            size="sm"
+                            className="bg-black"
+                            color="dark"
+                            type="button"
+                          >
+                            <X size="15" />
+                          </Button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            type="text"
+                            label="Account"
+                            value={res.account}
+                            required
+                            onChange={(e) => {
+                              field.value[i].account = e.target.value;
+
+                              field.onChange(field.value);
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "account")
+                            )}
+                          />
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            type="number"
+                            label="Starting Float"
+                            value={res.starting_float}
+                            required
+                            onChange={(e) => {
+                              if (Number.isNaN(e.target.value)) {
+                                field.value[i].starting_float = 1;
+                              } else {
+                                field.value[i].starting_float = +e.target.value;
+                              }
+
+                              field.onChange(field.value);
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "starting_float")
+                            )}
+                            helperText={`${FormatNumberWithFixed(
+                              res.starting_float ?? 0
+                            )}  ${checkBoxesError(
+                              fieldState,
+                              i,
+                              "starting_float"
+                            )}`}
+                          />
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            type="number"
+                            label="Current Float"
+                            value={res.current_float}
+                            required
+                            onChange={(e) => {
+                              if (Number.isNaN(e.target.value)) {
+                                field.value[i].current_float = 1;
+                              } else {
+                                field.value[i].current_float = +e.target.value;
+                              }
+
+                              field.onChange(field.value);
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "current_float")
+                            )}
+                            helperText={`${FormatNumberWithFixed(
+                              res.current_float ?? 0
+                            )}  ${checkBoxesError(
+                              fieldState,
+                              i,
+                              "current_float"
+                            )}`}
+                          />
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            type="number"
+                            label="Closed P_l"
+                            value={res.closed_p_l}
+                            required
+                            onChange={(e) => {
+                              if (Number.isNaN(e.target.value)) {
+                                field.value[i].closed_p_l = 1;
+                              } else {
+                                field.value[i].closed_p_l = +e.target.value;
+                              }
+
+                              field.onChange(field.value);
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "closed_p_l")
+                            )}
+                            helperText={`${FormatNumberWithFixed(
+                              res.closed_p_l ?? 0
+                            )}  ${checkBoxesError(
+                              fieldState,
+                              i,
+                              "closed_p_l"
+                            )}`}
+                          />
+                        </div>
+                        {/* {i !== forms.coverage.length - 1 && (
+                          <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
+                        )} */}
+                      </div>
+                    ))}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        marginTop: 10,
+                      }}
+                    >
+                      <Button
+                        type="button"
+                        className="bg-black"
+                        color="dark"
+                        onClick={() => {
+                          form.setValue(
+                            "coverage",
+                            form.watch("coverage").concat([
+                              {
+                                starting_float: 1,
+                                current_float: 1,
+                                closed_p_l: 1,
+                                account: "",
+                              },
+                            ])
+                          );
+                        }}
+                      >
+                        <PlusSquare />
+                      </Button>
+                    </div>
+                  </>
+                );
+              }}
+            />
+            {/* ************Coverage Boxes End************ */}
+          </CardContent>
+        </Card>
+      )}
     </form>
   );
+}
+
+function checkBoxesError(props: any, index: number, name: string) {
+  if (Boolean(props.error)) {
+    if (Boolean(props.error))
+      switch (Boolean(props.error.message)) {
+        case true:
+          if (Boolean(props.error[index]))
+            return props.error[index][name]?.message ?? "";
+
+        default:
+          if (Boolean(props.error[index]))
+            return props.error[index][name]?.message ?? "";
+      }
+  }
+
+  return "";
 }

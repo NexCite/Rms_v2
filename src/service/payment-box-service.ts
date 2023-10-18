@@ -5,33 +5,23 @@ import { Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
 
 export async function createPaymentBox(
-  params: Prisma.PaymentBoxUncheckedCreateInput,
-  id?: number
+  params: Prisma.PaymentBoxUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth, config_id) => {
-      if (id) {
-        await prisma.paymentBox.delete({ where: { id, config_id } });
-      }
+    async (auth) => {
       await prisma.paymentBox.create({
         data: {
+          config_id,
           to_date: params.to_date,
           description: params.description,
-          config_id,
+          agent_boxes: { createMany: { data: params.agent_boxes as any } },
+          client_boxes: { createMany: { data: params.client_boxes as any } },
+          expensive_box: { createMany: { data: params.expensive_box as any } },
+          p_l: { createMany: { data: params.p_l as any } },
+          coverage_boxes: {
+            createMany: { data: params.coverage_boxes as any },
+          },
         },
-      });
-
-      params.client_boxes;
-      await prisma.clientBox.createMany({
-        data: params.client_boxes as any,
-      });
-      await prisma.expensiveBox.createMany({
-        data: params.expensive_box as any,
-      });
-      await prisma.p_LBox.createMany({ data: params.p_l as any });
-      await prisma.agentBox.createMany({ data: params.agent_boxes as any });
-      await prisma.coverageBox.createMany({
-        data: params.coverage_boxes as any,
       });
 
       return;
@@ -48,25 +38,34 @@ export async function updatePaymentBox(
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
     async (auth, config_id) => {
-      // return await prisma.paymentBox.update({
-      //   where: { id },
-      //   data: params,
-      // });
-      await prisma.paymentBox.update({
-        where: { id, config_id },
-        data: { to_date: params.to_date, description: params.description },
-      });
+      await prisma.agentBox.deleteMany({ where: { payment_box_id: id } });
+      await prisma.clientBox.deleteMany({ where: { payment_box_id: id } });
+      await prisma.coverageBox.deleteMany({ where: { payment_box_id: id } });
+      await prisma.expensiveBox.deleteMany({ where: { payment_box_id: id } });
+      await prisma.p_LBox.deleteMany({ where: { payment_box_id: id } });
 
-      await prisma.clientBox.updateMany({
+      await prisma.agentBox.createMany({
+        data: params.agent_boxes as any,
+      });
+      await prisma.clientBox.createMany({
         data: params.client_boxes as any,
       });
-      await prisma.expensiveBox.updateMany({
+      await prisma.coverageBox.createMany({
+        data: params.coverage_boxes as any,
+      });
+      await prisma.expensiveBox.createMany({
         data: params.expensive_box as any,
       });
-      await prisma.p_LBox.updateMany({ data: params.p_l as any });
-      await prisma.agentBox.updateMany({ data: params.agent_boxes as any });
-      await prisma.coverageBox.updateMany({
-        data: params.coverage_boxes as any,
+      await prisma.p_LBox.createMany({
+        data: params.p_l as any,
+      });
+
+      await prisma.paymentBox.update({
+        where: { id, config_id },
+        data: {
+          to_date: params.to_date,
+          description: params.description,
+        },
       });
 
       return;
@@ -82,7 +81,22 @@ export async function deletePaymentBoxById(
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
     async (auth, config_id) => {
-      await prisma.paymentBox.delete({ where: { id, config_id } });
+      if (auth.type === "Admin") {
+        await prisma.paymentBox.delete({
+          where: {
+            id,
+            config_id,
+          },
+          include: {
+            agent_boxes: true,
+            client_boxes: true,
+            p_l: true,
+            coverage_boxes: true,
+            expensive_box: true,
+          },
+        });
+      }
+      return;
     },
     "Delete_Payment_Box",
     true,

@@ -682,7 +682,7 @@ model CoverageBox {
   current_float  Float
   closed_p_l     Float
   payment_box_id Int
-  payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id])
+  payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id], onDelete: Cascade)
   config_id      Int?
   config         Config?    @relation(fields: [config_id], references: [id])
 
@@ -699,7 +699,7 @@ model ClientBox {
   swap           Float
 
   payment_box_id Int
-  payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id])
+  payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id], onDelete: Cascade)
   config_id      Int?
   config         Config?    @relation(fields: [config_id], references: [id])
 
@@ -712,7 +712,7 @@ model AgentBox {
   commission Float
 
   payment_box_id Int
-  payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id])
+  payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id], onDelete: Cascade)
   config_id      Int?
   config         Config?    @relation(fields: [config_id], references: [id])
 
@@ -725,7 +725,7 @@ model P_LBox {
   p_l  Float
 
   payment_box_id Int
-  payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id])
+  payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id], onDelete: Cascade)
   config_id      Int?
   config         Config?    @relation(fields: [config_id], references: [id])
 
@@ -738,7 +738,7 @@ model ExpensiveBox {
   expensive Float
 
   payment_box_id Int
-  payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id])
+  payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id], onDelete: Cascade)
   config_id      Int?
   config         Config?    @relation(fields: [config_id], references: [id])
 
