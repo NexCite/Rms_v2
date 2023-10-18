@@ -115,7 +115,7 @@ export default async function Entry(props: {
   searchParams: {
     from_date?: string;
     to_date?: string;
-
+    include_reference?: string;
     id?: string;
     two_digit_id?: string;
     three_digit_id?: string;
@@ -431,7 +431,11 @@ export default async function Entry(props: {
       );
     });
   }
-  if (account_id && (two_digit_id || three_digit_id || more_digit_id)) {
+  if (
+    account_id &&
+    (two_digit_id || three_digit_id || more_digit_id) &&
+    props.searchParams.include_reference !== "true"
+  ) {
     entries = entries.filter(
       (res) => res.sub_entries.filter((res) => res.reference_id).length === 0
     );
@@ -454,6 +458,9 @@ export default async function Entry(props: {
         currencies={currencies}
         config={config}
         data={entries}
+        include_reference={
+          props.searchParams.include_reference === "true" ? true : false
+        }
         date={date}
         account_id={account_id}
         debit={debit}

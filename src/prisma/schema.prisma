@@ -488,8 +488,9 @@ model Account_Entry {
   type                    Account_Entry_Type?
   config_id               Int?
   config                  Config?               @relation(fields: [config_id], references: [id])
+  info                    String?
 
-  @@unique([id, config_id, username], name: "unique_combination")
+  @@unique([id, config_id], name: "unique_combination")
 }
 
 model Entry {

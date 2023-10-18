@@ -1,22 +1,15 @@
 "use client";
 
-import { Prisma } from "@prisma/client";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useMemo, useTransition } from "react";
 
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import Authorized from "@rms/components/ui/authorized";
-import {
-  deleteMoreDigit,
-  deleteThreeDigit,
-  deleteTwoDigit,
-} from "@rms/service/digit-service";
-import { MaterialReactTable, type MRT_ColumnDef } from "material-react-table";
 import { useStore } from "@rms/hooks/toast-hook";
+import { FormatNumberWithFixed } from "@rms/lib/global";
 import { Activity, ActivityStatus } from "@rms/models/CommonModel";
 import { confirmActivity } from "@rms/service/activity-service";
-import moment from "moment";
-import { FormatNumberWithFixed } from "@rms/lib/global";
+import { MaterialReactTable, type MRT_ColumnDef } from "material-react-table";
 import Link from "next/link";
 
 type Props = {
@@ -24,11 +17,9 @@ type Props = {
 };
 
 export default function ActivityTable(props: Props) {
-  const pathName = usePathname();
   const [isActive, setActiveTransition] = useTransition();
 
   const store = useStore();
-  const { push } = useRouter();
 
   const columns = useMemo<MRT_ColumnDef<Activity>[]>(
     () => [
@@ -53,6 +44,10 @@ export default function ActivityTable(props: Props) {
             {original.id}
           </div>
         ),
+      },
+      {
+        accessorKey: "type",
+        header: "Type",
       },
       {
         accessorKey: "amount",

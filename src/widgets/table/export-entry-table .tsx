@@ -1,6 +1,7 @@
 "use client";
 import React, {
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -20,6 +21,7 @@ import {
   Autocomplete,
   Card,
   Divider,
+  Switch,
   TextField,
   Typography,
 } from "@mui/material";
@@ -30,6 +32,7 @@ import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
 import moment from "moment";
 import Image from "next/image";
 import { usePDF } from "react-to-pdf";
+import Loading from "@rms/components/ui/loading";
 
 export default function ExportEntryDataTable(props: Props) {
   const [isPadding, setTransition] = useTransition();
@@ -40,6 +43,7 @@ export default function ExportEntryDataTable(props: Props) {
     more_digit_id: props.more_digit_id,
     account_id: props.account_id,
     type: props.type,
+    include_reference: props.include_reference,
 
     debit: props.debit,
     id: props.id,
@@ -66,7 +70,9 @@ export default function ExportEntryDataTable(props: Props) {
               search.three_digit_id
             }&account_id=${search.account_id}&type=${search.type}&id=${
               search.id
-            }&debit=${search.debit}`,
+            }&debit=${search.debit}&include_reference=${
+              search.include_reference
+            }`,
           {}
         );
       });
@@ -409,7 +415,14 @@ export default function ExportEntryDataTable(props: Props) {
 
   const titleRef = useRef<HTMLHeadingElement>();
   const { toPDF, targetRef } = usePDF();
-  return (
+  const [loadingUi, setLoadingUi] = useState(true);
+  useEffect(() => {
+    setLoadingUi(false);
+  }, []);
+
+  return loadingUi ? (
+    <Loading />
+  ) : (
     <Style>
       <Card>
         <form
@@ -540,6 +553,7 @@ export default function ExportEntryDataTable(props: Props) {
               <TextField {...params} label="More Four Digits" />
             )}
           />
+
           <Autocomplete
             disablePortal
             disabled={search.id !== undefined}
@@ -569,6 +583,27 @@ export default function ExportEntryDataTable(props: Props) {
             renderInput={(params) => <TextField {...params} label="Accounts" />}
           />
 
+          <div className="flex items-center w-full ">
+            <div>
+              <label htmlFor="switch">Include Reffrence</label>
+              <Switch
+                name="switch"
+                onChange={(e, f) => {
+                  setSearch((prev) => ({ ...prev, include_reference: f }));
+                }}
+                sx={{
+                  "&.MuiSwitch-root .MuiSwitch-switchBase": {
+                    color: "black",
+                  },
+
+                  "&.MuiSwitch-root .Mui-checked": {
+                    color: "black",
+                  },
+                }}
+                checked={search.include_reference}
+              />
+            </div>
+          </div>
           <LoadingButton
             variant="contained"
             className="hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white"
@@ -824,6 +859,7 @@ type Props = {
     logo: string;
     name: string;
   };
+  include_reference?: boolean;
   date?: [Date, Date];
   id?: number;
   two_digit_id?: number;
