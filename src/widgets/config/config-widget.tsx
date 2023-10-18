@@ -39,7 +39,6 @@ export default function ConfigWidget() {
   function onSubmit(values) {
     setTransition(async () => {
       const res = await createConfig(values);
-      console.log(res);
       store.OpenAlert({ ...res });
 
       if (res.status === 200) replace("/login");

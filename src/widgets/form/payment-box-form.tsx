@@ -1,23 +1,9 @@
 "use client";
-import React, { useCallback, useEffect, useState, useTransition } from "react";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { createEntry, updateEntry } from "@rms/service/entry-service";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { FormatNumberWithFixed } from "@rms/lib/global";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
-import { Button } from "@rms/components/ui/button";
 import LoadingButton from "@mui/lab/LoadingButton";
-import useAlertHook from "@rms/hooks/alert-hooks";
-import { PlusSquare, X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { Prisma } from "@prisma/client";
-import dayjs from "dayjs";
-import { z } from "zod";
 import {
   Alert,
   AlertTitle,
-  Autocomplete,
   Card,
   CardContent,
   CardHeader,
@@ -26,12 +12,23 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { Prisma } from "@prisma/client";
+import { Button } from "@rms/components/ui/button";
+import Loading from "@rms/components/ui/loading";
+import useAlertHook from "@rms/hooks/alert-hooks";
+import { FormatNumberWithFixed } from "@rms/lib/global";
 import {
   createPaymentBox,
-  deletePaymentBoxById,
   updatePaymentBox,
 } from "@rms/service/payment-box-service";
-import Loading from "@rms/components/ui/loading";
+import dayjs from "dayjs";
+import { PlusSquare, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState, useTransition } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
 
 interface BoxesTypes {
   clients: Prisma.ClientBoxGetPayload<{}>[];

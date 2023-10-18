@@ -6,6 +6,7 @@ import { handlerServiceAction } from "@rms/lib/handler";
 import prisma from "@rms/prisma/prisma";
 import { confirmActivity } from "./activity-service";
 import { ActivityStatus } from "@rms/models/CommonModel";
+import { copyMediaTemp } from "./media-service";
 export async function createEntry(
   props: Prisma.EntryUncheckedCreateInput,
   activity?: {
@@ -17,6 +18,11 @@ export async function createEntry(
     async (auth, config_id) => {
       props.user_id = auth.id;
       props.config_id = config_id;
+
+      if (props.media) {
+        props.media.create.path = await copyMediaTemp(props.media.create.path);
+      }
+
       if (activity) activity.status = ActivityStatus.Provided;
 
       await Promise.all([

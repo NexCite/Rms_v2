@@ -1,11 +1,8 @@
 "use client";
 import LoadingButton from "@mui/lab/LoadingButton";
 import PDFUploader from "@rms/components/ui/pdf-uploader";
-import {
-  removeMedia,
-  uploadLogo,
-  uploadMedia,
-} from "@rms/service/media-service";
+import { deleteMedia, uploadMediaTemp } from "@rms/service/media-service";
+
 import Image from "next/image";
 import { useState, useTransition } from "react";
 import ImageUploading, { ImageListType } from "react-images-uploading";
@@ -30,12 +27,15 @@ export default function UploadWidget(props: Props) {
       formData.append("file", imageList[0].file as any);
 
       setTransition(async () => {
-        var result = props.isLogo
-          ? await uploadLogo(formData)
-          : await uploadMedia(formData);
+        var result = await uploadMediaTemp(formData);
+        console.log(result);
+
+        if (result === "error") {
+          return alert("Contact Support");
+        }
         if (props.onSave) {
-          setPath(result.result);
-          props.onSave(result.result);
+          setPath(result);
+          props.onSave(result);
         }
       });
     }
@@ -62,7 +62,7 @@ export default function UploadWidget(props: Props) {
 
                       setTransition(async () => {
                         if (path) {
-                          await removeMedia(path);
+                          await path;
                           if (props.onSave) {
                             props.onSave();
                           }
@@ -85,9 +85,9 @@ export default function UploadWidget(props: Props) {
                       const formData = new FormData();
                       formData.append("file", e);
                       setTransition(async () => {
-                        await uploadMedia(formData).then((res) => {
-                          setPath(res.result);
-                          props.onSave(res.result);
+                        await uploadMediaTemp(formData).then((res) => {
+                          setPath(res);
+                          props.onSave(res);
                         });
                       });
                     });
@@ -118,7 +118,7 @@ export default function UploadWidget(props: Props) {
 
                         setTransition(async () => {
                           if (path) {
-                            await removeMedia(path);
+                            await deleteMedia(path);
                             if (props.onSave) {
                               props.onSave();
                             }

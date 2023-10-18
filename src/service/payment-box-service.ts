@@ -8,7 +8,7 @@ export async function createPaymentBox(
   params: Prisma.PaymentBoxUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth) => {
+    async (auth, config_id) => {
       await prisma.paymentBox.create({
         data: {
           config_id,

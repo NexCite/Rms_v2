@@ -19,6 +19,7 @@ export async function handlerServiceAction<T>(
         id: true;
         permissions: true;
         type: true;
+        config_id: true;
       };
     }>,
     config_id?: number

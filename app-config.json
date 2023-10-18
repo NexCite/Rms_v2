@@ -1,0 +1,6 @@
+{
+  "media": {
+    "path": "/{config_id}/{type}/{year}/{month}/{day}",
+    "temp_path": "/temp/{type}/{year}/{month}/{day}"
+  }
+}
