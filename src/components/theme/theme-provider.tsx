@@ -11,19 +11,6 @@ import {
 } from "@mui/material/styles";
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
-  const theme = createTheme({
-    components: {},
-    palette: {
-      background: {
-        default: "rgb(255 255 255 / var(--tw-text-opacity)) !important",
-      },
-
-      primary: {
-        main: "rgb(255 255 255 / var(--tw-text-opacity)) !important",
-      },
-    },
-  });
-
   const [styledComponentsStyleSheet] = React.useState(
     () => new ServerStyleSheet()
   );
@@ -37,9 +24,7 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
 
   return (
     <StyleSheetManager sheet={styledComponentsStyleSheet.instance}>
-      <NextThemesProvider {...props}>
-        <MUIThemeProvider theme={theme}>{children}</MUIThemeProvider>
-      </NextThemesProvider>
+      <NextThemesProvider {...props}>{children}</NextThemesProvider>
     </StyleSheetManager>
   );
 }

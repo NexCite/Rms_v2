@@ -61,7 +61,10 @@ export default function DigitForm(props: Props) {
     switch (props.node) {
       case "two":
         return z.object({
-          id: z.number().min(2).or(z.string().regex(/^\d+$/).transform(Number)),
+          id: z
+            .number()
+            .min(2)
+            .or(z.string().min(2).regex(/^\d+$/).transform(Number)),
           type: z
             .enum([
               DigitType.Assets,
@@ -82,7 +85,10 @@ export default function DigitForm(props: Props) {
         });
       case "three":
         return z.object({
-          id: z.number().min(3).or(z.string().regex(/^\d+$/).transform(Number)),
+          id: z
+            .number()
+            .min(3)
+            .or(z.string().min(3).regex(/^\d+$/).transform(Number)),
           name: z
             .string()
             .min(1, { message: "Name must be at least 1  character" }),
@@ -107,7 +113,10 @@ export default function DigitForm(props: Props) {
 
       case "more":
         return z.object({
-          id: z.number().min(4).or(z.string().regex(/^\d+$/).transform(Number)),
+          id: z
+            .number()
+            .min(4)
+            .or(z.string().min(4).regex(/^\d+$/).transform(Number)),
           name: z
             .string()
             .min(1, { message: "Name must be at least 1  character" }),

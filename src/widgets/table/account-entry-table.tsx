@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useMemo, useTransition } from "react";
 
 import styled from "@emotion/styled";
@@ -30,7 +30,6 @@ export default function Account_EntryTable(props: Props) {
 
   const store = useStore();
 
-  const { push } = useRouter();
   const columns = useMemo<MRT_ColumnDef<CommonAccountType>[]>(
     () => [
       {
@@ -95,6 +94,17 @@ export default function Account_EntryTable(props: Props) {
       {
         accessorKey: "last_name",
         header: "Last Name",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+      },
+      {
+        accessorKey: "info",
+        header: "Info",
         muiTableHeadCellProps: {
           align: "center",
         },

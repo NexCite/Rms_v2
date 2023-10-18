@@ -463,7 +463,7 @@ model More_Than_Four_Digit {
 
 model Account_Entry {
   id                      Int                   @id
-  username                String
+  username                String                @default("")
   first_name              String
   last_name               String
   phone_number            String                @default("")
