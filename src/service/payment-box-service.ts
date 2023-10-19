@@ -15,7 +15,7 @@ export async function createPaymentBox(
           to_date: params.to_date,
           description: params.description,
           agent_boxes: { createMany: { data: params.agent_boxes as any } },
-          client_boxes: { createMany: { data: params.client_boxes as any } },
+          manager_boxes: { createMany: { data: params.manager_boxes as any } },
           expensive_box: { createMany: { data: params.expensive_box as any } },
           p_l: { createMany: { data: params.p_l as any } },
           coverage_boxes: {
@@ -39,7 +39,7 @@ export async function updatePaymentBox(
   return handlerServiceAction(
     async (auth, config_id) => {
       await prisma.agentBox.deleteMany({ where: { payment_box_id: id } });
-      await prisma.clientBox.deleteMany({ where: { payment_box_id: id } });
+      await prisma.managerBox.deleteMany({ where: { payment_box_id: id } });
       await prisma.coverageBox.deleteMany({ where: { payment_box_id: id } });
       await prisma.expensiveBox.deleteMany({ where: { payment_box_id: id } });
       await prisma.p_LBox.deleteMany({ where: { payment_box_id: id } });
@@ -47,8 +47,8 @@ export async function updatePaymentBox(
       await prisma.agentBox.createMany({
         data: params.agent_boxes as any,
       });
-      await prisma.clientBox.createMany({
-        data: params.client_boxes as any,
+      await prisma.managerBox.createMany({
+        data: params.manager_boxes as any,
       });
       await prisma.coverageBox.createMany({
         data: params.coverage_boxes as any,
@@ -89,7 +89,7 @@ export async function deletePaymentBoxById(
           },
           include: {
             agent_boxes: true,
-            client_boxes: true,
+            manager_boxes: true,
             p_l: true,
             coverage_boxes: true,
             expensive_box: true,
