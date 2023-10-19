@@ -143,11 +143,11 @@ function Tab2(props: Props) {
   }, [props.entry.sub_entries, props.entry.currency.symbol]);
   return (
     <Style2 className="font-mono">
-      <div className={"bg-center flex items-center"}>
+      <div className={"bg-center flex items-center gap-5"}>
         <Image
-          src={`/api/media/${props.config.logo}`}
-          width={80}
-          height={80}
+          src={`/api/media${props.config.logo}`}
+          width={60}
+          height={60}
           style={{ borderRadius: "50%" }}
           alt="logo"
         />
@@ -167,6 +167,9 @@ function Tab2(props: Props) {
       <div className="flex justify-between items-center">
         <h2>Date: {props.entry.to_date.toLocaleDateString()}</h2>
         <h2 dir="auto">التاريخ: {props.entry.to_date.toLocaleDateString()}</h2>
+      </div>
+      <div className="flex justify-start" dir="auto">
+        <p>{props.entry.title}</p>
       </div>
       <div className="flex justify-center" dir="auto">
         <p>{props.entry.description}</p>
@@ -212,11 +215,11 @@ function Tab3(props: Props) {
   }, [props.entry.currency.symbol, props.entry.sub_entries]);
   return (
     <Style2 className="font-mono">
-      <div className={"bg-center flex items-center"}>
+      <div className={"bg-center flex items-center gap-5"}>
         <Image
-          src={`/api/media/${props.config.logo}`}
-          width={80}
-          height={80}
+          src={`/api/media${props.config.logo}`}
+          width={60}
+          height={60}
           style={{ borderRadius: "50%" }}
           alt="logo"
         />
@@ -236,6 +239,9 @@ function Tab3(props: Props) {
       <div className="flex justify-between items-center">
         <h2>Date: {props.entry.to_date.toLocaleDateString()}</h2>
         <h2 dir="auto">التاريخ: {props.entry.to_date.toLocaleDateString()}</h2>
+      </div>
+      <div className="flex justify-start" dir="auto">
+        <p>{props.entry.title}</p>
       </div>
       <div className="flex justify-center" dir="auto">
         <p>{props.entry.description}</p>
@@ -284,10 +290,10 @@ function Tab1(props: Props) {
     <Style1 className="font-mono">
       <div id="pdf">
         <div className="flex items-center justify-between">
-          <div className={"bg-center flex items-center"}>
+          <div className={"bg-center flex items-center gap-5"}>
             <Image
-              src={`/api/media/${props.config.logo}`}
-              width={80}
+              src={`/api/media${props.config.logo}`}
+              width={60}
               height={80}
               style={{ borderRadius: "50%" }}
               alt="logo"

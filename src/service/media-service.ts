@@ -1,10 +1,6 @@
 "use server";
 
-import HttpStatusCode from "@rms/models/HttpStatusCode";
-import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
-import { revalidatePath } from "next/cache";
-import AppConfig from "../../app-config.json";
 import {
   existsSync,
   mkdirSync,
@@ -12,10 +8,11 @@ import {
   unlinkSync,
   writeFileSync,
 } from "fs";
+import AppConfig from "../../app-config.json";
 
-import path from "path";
-import { handlerServiceAction } from "@rms/lib/handler";
 import { getConfigId } from "@rms/lib/config";
+import { handlerServiceAction } from "@rms/lib/handler";
+import path from "path";
 
 async function streamToBytes(readableStream: any) {
   const chunks = [];
@@ -57,13 +54,12 @@ export async function uploadMediaTemp(fromData: FormData) {
       .replace("{month}", date.getMonth() + 1 + "")
       .replace("{day}", date.getDate() + "");
     const dir = path.join(process.cwd(), "..", filePath.replace("{name}", ""));
-    console.log(filePath);
+
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true });
     }
     const fullPath = dir + "/" + fileName;
     writeFileSync(fullPath, buffer);
-    console.log();
     return filePath + "/" + fileName;
   } catch (e) {
     console.log(e);
@@ -72,11 +68,10 @@ export async function uploadMediaTemp(fromData: FormData) {
 }
 export async function readMedia(filePath: string) {
   const config_id = await getConfigId();
-  console.log(filePath, "hello");
 
   if (
     !filePath.startsWith(`/${config_id}`) &&
-    !(filePath.startsWith("/temp") || filePath.startsWith("temp/"))
+    (filePath.startsWith("/temp") || filePath.startsWith("temp/"))
   ) {
     return;
   }
@@ -93,20 +88,31 @@ export async function readMedia(filePath: string) {
   };
 }
 
-export async function copyMediaTemp(filePath: string) {
-  const config_id = await getConfigId();
+export async function copyMediaTemp(tempFilePath: string, config_id?: number) {
+  const config = await getConfigId();
+  const paths = tempFilePath.split("/");
+  const fileName = paths[paths.length - 1];
 
-  const dir = path.join(process.cwd(), "..", filePath);
+  paths.pop();
+  const tempFolderPath = paths.join("/");
+  const newFolderPath = tempFolderPath.replace(
+    "temp",
+    config ? config + "" : config_id + ""
+  );
 
-  var newPath = filePath.replace("temp", config_id + "");
-  const newDir = path.join(process.cwd(), "..", newPath);
-  var tempFile = readFileSync(dir);
+  const tempDir = path.join(process.cwd(), "..", tempFolderPath);
+  const newDir = path.join(process.cwd(), "..", newFolderPath);
 
-  writeFileSync(newDir, tempFile);
+  if (!existsSync(newDir)) {
+    mkdirSync(newDir, { recursive: true });
+  }
 
-  unlinkSync(dir);
+  const readOldPathFile = readFileSync(tempDir + "/" + fileName);
+  writeFileSync(newDir + "/" + fileName, readOldPathFile);
 
-  return newPath;
+  unlinkSync(tempDir + "/" + fileName);
+
+  return newFolderPath + "/" + fileName;
 }
 export async function deleteMedia(filePath: string) {
   const dir = path.join(process.cwd(), "..", filePath);

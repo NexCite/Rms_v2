@@ -88,29 +88,12 @@ export default function EntryView(props: Props) {
           )}
         </LoadingButton>
 
-        <LoadingButton
-          onClick={() => push(pathName + "/form?id=" + props.entry.id)}
-          className={
-            isPadding
-              ? ""
-              : "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
-          }
-          loading={isPadding}
-        >
-          Edit
-        </LoadingButton>
-
-        <LoadingButton
-          onClick={() => push(pathName + "/export")}
-          className={
-            isPadding
-              ? ""
-              : "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
-          }
-          loading={isPadding}
-        >
-          Export
-        </LoadingButton>
+        <Link href={`/admin/accounting/entry/form?id=${props.entry.id}`}>
+          <Button>Edit</Button>
+        </Link>
+        <Link href={pathName + "/export"}>
+          <Button>Export</Button>
+        </Link>
       </div>
       <Table>
         <TableHead>

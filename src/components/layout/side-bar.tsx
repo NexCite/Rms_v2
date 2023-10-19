@@ -41,7 +41,7 @@ export function Sidebar(props: Props) {
     <Card className="h-full w-full rounded-none flex flex-col">
       <div className="flex flex-col p-3 ">
         <Image
-          src={`/api/media/${props.config.logo}`}
+          src={`/api/media${props.config.logo}`}
           alt={props.config.name}
           width={80}
           height={80}

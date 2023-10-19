@@ -4,10 +4,12 @@ import { $Enums } from "@prisma/client";
 import Authorized from "@rms/components/ui/authorized";
 import RouteModel from "@rms/models/RouteModel";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import React, { useMemo, useTransition } from "react";
+import { usePathname } from "next/navigation";
+import React, { useMemo } from "react";
 import BackButton from "../ui/back-button";
 import { Sidebar } from "./side-bar";
+
+import AppConfig from "../../../app-config.json";
 type Props = {
   children: React.ReactNode;
   routes: RouteModel[];
@@ -48,8 +50,6 @@ export default function AppBar(props: Props) {
         Number.isInteger(parseInt(splitPath[splitPath.length - 1])))
     );
   }, [path]);
-  const { push } = useRouter();
-  const [isPadding, setPadding] = useTransition();
 
   return (
     <>
@@ -71,15 +71,17 @@ export default function AppBar(props: Props) {
               <h1 className="text-3xl">{subRouteTitle}</h1>
             </div>
 
-            {!path.includes("form") && (
+            {AppConfig.ignore.add_app_bar.filter((res) => {
+              var reg = new RegExp(res);
+
+              return reg.test(path);
+            }).length === 0 && (
               <Authorized permission={permission}>
                 <Link href={path + "/form"}>
                   <Button
                     variant="contained"
                     className={
-                      isPadding
-                        ? ""
-                        : "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
+                      "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
                     }
                     type="button"
                   >

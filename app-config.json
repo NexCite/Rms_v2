@@ -2,5 +2,8 @@
   "media": {
     "path": "/{config_id}/{type}/{year}/{month}/{day}",
     "temp_path": "/temp/{type}/{year}/{month}/{day}"
+  },
+  "ignore": {
+    "add_app_bar": [".+\\/accounting\\/entry\\/1$", "form"]
   }
 }

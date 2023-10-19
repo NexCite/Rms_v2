@@ -13,7 +13,6 @@ export async function GET(
   if (context.params[""]) {
     if (context.params[""].join("/")) {
       var result = (await readMedia(context.params[""].join("/"))) as any;
-      console.log(result);
 
       if (!result) {
         return NextResponse.error();

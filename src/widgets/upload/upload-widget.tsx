@@ -28,7 +28,6 @@ export default function UploadWidget(props: Props) {
 
       setTransition(async () => {
         var result = await uploadMediaTemp(formData);
-        console.log(result);
 
         if (result === "error") {
           return alert("Contact Support");

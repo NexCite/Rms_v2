@@ -3,10 +3,8 @@ import { $Enums, Prisma } from "@prisma/client";
 import { handlerServiceAction } from "@rms/lib/handler";
 import { hashPassword } from "@rms/lib/hash";
 import { CommonRouteKeys } from "@rms/models/CommonModel";
-import HttpStatusCode from "@rms/models/HttpStatusCode";
-import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
-import { revalidatePath } from "next/cache";
+import { copyMediaTemp } from "./media-service";
 
 export async function createConfig(
   params: Prisma.ConfigUncheckedCreateInput & {
@@ -16,25 +14,23 @@ export async function createConfig(
 ) {
   return handlerServiceAction(async () => {
     params.password = hashPassword(params.password);
-    console.log("hello");
-    const mediaPath = params.logo.split("/");
+
     const result = await prisma.config.create({
       data: {
         name: params.name,
         password: params.password,
         username: params.username,
         email: params.email,
-        logo: params.logo,
+        logo: "",
         phone_number: params.phone_number,
-        media: {
-          create: {
-            file_name: mediaPath[mediaPath.length - 1],
-            path: params.logo,
-            title: `${params.name} Logo`,
-            type: "Image",
-          },
-        },
       },
+    });
+
+    const newPath = await copyMediaTemp(params.logo, result.id);
+
+    await prisma.config.update({
+      where: { id: result.id },
+      data: { logo: newPath },
     });
     await prisma.user.create({
       data: {

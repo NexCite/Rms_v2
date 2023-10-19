@@ -19,7 +19,7 @@ export default async function page() {
     <div className="m-auto max-w-max hadow-sm border p-5 ">
       <div className="flex gap-6  s ">
         <Image
-          src={`/api/media/${config.logo}`}
+          src={`/api/media${config.logo}`}
           alt={config.name}
           width={100}
           height={100}
