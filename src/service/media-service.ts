@@ -71,7 +71,8 @@ export async function readMedia(filePath: string) {
 
   if (
     !filePath.startsWith(`/${config_id}`) &&
-    (filePath.startsWith("/temp") || filePath.startsWith("temp/"))
+    (filePath.startsWith("/assets/temp") ||
+      filePath.startsWith("/assets/temp/"))
   ) {
     return;
   }
