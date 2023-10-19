@@ -892,7 +892,9 @@ export default function EntryForm(props: Props) {
                   onClick={() => {
                     form.setValue(
                       "sub_entries",
-                      form.watch("sub_entries").concat([{ amount: 1 }])
+                      form
+                        .watch("sub_entries")
+                        .concat([{ amount: 1, type: $Enums.EntryType.Debit }])
                     );
                   }}
                 >
