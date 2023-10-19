@@ -31,7 +31,7 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
 interface BoxesTypes {
-  clients: Prisma.ClientBoxGetPayload<{}>[];
+  manager: Prisma.ManagerBoxGetPayload<{}>[];
   coverage: Prisma.CoverageBoxGetPayload<{}>[];
   agents: Prisma.AgentBoxGetPayload<{}>[];
   p_l: Prisma.P_LBoxGetPayload<{}>[];
@@ -44,7 +44,7 @@ interface Props {
   value: Prisma.PaymentBoxGetPayload<{
     select: {
       agent_boxes: true;
-      client_boxes: true;
+      manager_boxes: true;
       p_l: true;
       coverage_boxes: true;
       expensive_box: true;
@@ -67,60 +67,50 @@ export default function PaymentBoxForm(props: Props) {
   const formSchema = z.object({
     description: z.string().min(3),
     to_date: z.date(),
-    coverage: z
-      .array(
-        z.object({
-          account: z.string(),
-          starting_float: z.number().min(0),
-          current_float: z.number().min(0),
-          closed_p_l: z.number().min(0),
-        })
-      )
-      .min(1),
-    clients: z
-      .array(
-        z.object({
-          manger: z
-            .string()
-            .min(1, { message: "Manager must be at least 1 characters" }),
-          starting_float: z.number().min(0),
-          current_float: z.number().min(0),
-          p_l: z.number().min(0),
-          commission: z.number().min(0),
-          swap: z.number().min(0),
-        })
-      )
-      .min(1),
-    agents: z
-      .array(
-        z.object({
-          name: z
-            .string()
-            .min(1, { message: "Name must be at least 1 characters" }),
-          commission: z.number().min(0),
-        })
-      )
-      .min(1),
-    p_l: z
-      .array(
-        z.object({
-          name: z
-            .string()
-            .min(1, { message: "Name must be at least 1 characters" }),
-          p_l: z.number().min(0),
-        })
-      )
-      .min(1),
-    expensive: z
-      .array(
-        z.object({
-          name: z
-            .string()
-            .min(1, { message: "Name must be at least 1 characters" }),
-          expensive: z.number().min(0),
-        })
-      )
-      .min(1),
+    coverage: z.array(
+      z.object({
+        account: z.string(),
+        starting_float: z.number().min(0),
+        current_float: z.number().min(0),
+        closed_p_l: z.number().min(0),
+      })
+    ),
+    managers: z.array(
+      z.object({
+        manger: z
+          .string()
+          .min(1, { message: "Manager must be at least 1 characters" }),
+        starting_float: z.number().min(0),
+        current_float: z.number().min(0),
+        p_l: z.number().min(0),
+        commission: z.number().min(0),
+        swap: z.number().min(0),
+      })
+    ),
+    agents: z.array(
+      z.object({
+        name: z
+          .string()
+          .min(1, { message: "Name must be at least 1 characters" }),
+        commission: z.number().min(0),
+      })
+    ),
+    p_l: z.array(
+      z.object({
+        name: z
+          .string()
+          .min(1, { message: "Name must be at least 1 characters" }),
+        p_l: z.number().min(0),
+      })
+    ),
+    expensive: z.array(
+      z.object({
+        name: z
+          .string()
+          .min(1, { message: "Name must be at least 1 characters" }),
+        expensive: z.number().min(0),
+      })
+    ),
   });
 
   const [errors, setErrors] = useState<{ index?: number; message: string }[]>(
@@ -132,11 +122,12 @@ export default function PaymentBoxForm(props: Props) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       description: props.value?.description || "",
-      to_date: props.value?.to_date || dayjs(),
-      clients: props.value?.client_boxes || [],
+      to_date: props.value?.to_date || new Date(),
+      managers: props.value?.manager_boxes || [],
       agents: props.value?.agent_boxes || [],
       coverage: props.value?.coverage_boxes || [],
       expensive: props.value?.expensive_box || [],
+
       p_l: props.value?.p_l || [],
     } as any,
   });
@@ -146,7 +137,7 @@ export default function PaymentBoxForm(props: Props) {
       var formsData = {
         description: values.description,
         to_date: values.to_date,
-        client_boxes: values.clients,
+        manager_boxes: values.clients,
         expensive_box: values.expensive,
         p_l: values.p_l,
         agent_boxes: values.agents,
@@ -240,7 +231,7 @@ export default function PaymentBoxForm(props: Props) {
           [
             "p_l",
             "expensive_box",
-            "client_boxes",
+            "manager_boxes",
             "coverage_boxes",
             "agent_boxes",
           ].forEach((item) => {
@@ -305,61 +296,65 @@ export default function PaymentBoxForm(props: Props) {
             }
           ></CardHeader>
           <Divider />
-          <CardContent className="flex gap-5 flex-col">
-            <Controller
-              control={form.control}
-              name="description"
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  required
-                  multiline
-                  minRows={3}
-                  maxRows={5}
-                  error={Boolean(fieldState.error)}
-                  label="Description"
-                  size="small"
-                  fullWidth
-                  value={field.value}
-                  helperText={fieldState?.error?.message}
-                />
-              )}
-            />
-            <Controller
-              control={form.control}
-              name={"to_date" as any}
-              render={({ field, fieldState }) => (
-                <FormControl {...field} size="small">
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      minDate={dayjs().subtract(7, "day")}
-                      label="Date"
-                      slotProps={{
-                        textField: {
-                          size: "small",
-                          required: true,
-                          error: Boolean(fieldState?.error),
-                          helperText: fieldState?.error?.message,
-                        },
-                      }}
-                      defaultValue={dayjs(field.value)}
-                      onChange={(e) => {
-                        field.onChange(e?.toDate());
-                      }}
-                    />
-                  </LocalizationProvider>
-                </FormControl>
-              )}
-            />
+          <CardContent className="flex gap-2 flex-col">
+            <div className="flex gap-3 flex-col">
+              <Controller
+                control={form.control}
+                name="description"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    required
+                    multiline
+                    minRows={3}
+                    maxRows={5}
+                    error={Boolean(fieldState.error)}
+                    label="Description"
+                    size="small"
+                    InputLabelProps={{ shrink: true }}
+                    fullWidth
+                    value={field.value}
+                    helperText={fieldState?.error?.message}
+                  />
+                )}
+              />
+              <Controller
+                control={form.control}
+                name={"to_date"}
+                render={({ field, fieldState }) => (
+                  <FormControl {...field} size="small">
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DatePicker
+                        minDate={dayjs().subtract(7, "day")}
+                        label="Date"
+                        slotProps={{
+                          textField: {
+                            InputLabelProps: { shrink: true },
+                            size: "small",
+                            required: true,
+                            error: Boolean(fieldState?.error),
+                            helperText: fieldState?.error?.message,
+                          },
+                        }}
+                        defaultValue={dayjs(field.value)}
+                        onChange={(e) => {
+                          field.onChange(e?.toDate());
+                        }}
+                      />
+                    </LocalizationProvider>
+                  </FormControl>
+                )}
+              />
+            </div>
 
-            {/* ************Client Boxes start************ */}
+            {/* ************Manager Boxes start************ */}
             <div style={{ margin: "0px 0px 0px" }}>
-              <h1 className="text-2xl">Clients</h1>
+              <h1 className="text-2xl">Manager</h1>
             </div>
             <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
             <Controller
               control={form.control}
-              name="clients"
+              name="managers"
               render={({ field, fieldState }) => {
                 return (
                   <>
@@ -372,9 +367,9 @@ export default function PaymentBoxForm(props: Props) {
                     )}
 
                     {field.value?.map((res, i) => (
-                      <div className="mb-5 " key={i}>
+                      <div key={i}>
                         <div className="flex justify-between items-center">
-                          <h1>Client Box: {i + 1}</h1>
+                          <h1>Manager Box: {i + 1}</h1>
                           <Button
                             onClick={() => {
                               field.onChange(
@@ -390,7 +385,7 @@ export default function PaymentBoxForm(props: Props) {
                           </Button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-1 mt-5">
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
@@ -553,14 +548,14 @@ export default function PaymentBoxForm(props: Props) {
                         color="dark"
                         onClick={() => {
                           form.setValue(
-                            "clients",
-                            form.watch("clients").concat([
+                            "managers",
+                            form.watch("managers").concat([
                               {
-                                starting_float: 1,
-                                current_float: 1,
-                                p_l: 1,
-                                commission: 1,
-                                swap: 1,
+                                starting_float: 0,
+                                current_float: 0,
+                                p_l: 0,
+                                commission: 0,
+                                swap: 0,
                                 manger: "",
                               },
                             ])
@@ -574,7 +569,7 @@ export default function PaymentBoxForm(props: Props) {
                 );
               }}
             />
-            {/* ************Client Boxes End************ */}
+            {/* ************Manager Boxes End************ */}
 
             {/* ************Expensive Boxes start************ */}
             <div style={{ margin: "0px 0px 0px" }}>
@@ -596,7 +591,7 @@ export default function PaymentBoxForm(props: Props) {
                     )}
 
                     {field.value?.map((res, i) => (
-                      <div className="mb-5 " key={i}>
+                      <div key={i}>
                         <div className="flex justify-between items-center">
                           <h1>Expensive Box: {i + 1}</h1>
                           <Button
@@ -614,11 +609,12 @@ export default function PaymentBoxForm(props: Props) {
                           </Button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-1 mt-5">
                           <TextField
                             size="small"
                             type="text"
                             label="Name"
+                            InputLabelProps={{ shrink: true }}
                             value={res.name}
                             required
                             onChange={(e) => {
@@ -675,7 +671,7 @@ export default function PaymentBoxForm(props: Props) {
                             "expensive",
                             form.watch("expensive").concat([
                               {
-                                expensive: 1,
+                                expensive: 0,
                                 name: "",
                               },
                             ])
@@ -711,7 +707,7 @@ export default function PaymentBoxForm(props: Props) {
                     )}
 
                     {field.value?.map((res, i) => (
-                      <div className="mb-5 " key={i}>
+                      <div key={i}>
                         <div className="flex justify-between items-center">
                           <h1>P_L Box: {i + 1}</h1>
                           <Button
@@ -729,7 +725,7 @@ export default function PaymentBoxForm(props: Props) {
                           </Button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-1 mt-5">
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
@@ -792,7 +788,7 @@ export default function PaymentBoxForm(props: Props) {
                             "p_l",
                             form.watch("p_l").concat([
                               {
-                                p_l: 1,
+                                p_l: 0,
                                 name: "",
                               },
                             ])
@@ -827,7 +823,7 @@ export default function PaymentBoxForm(props: Props) {
                       </Alert>
                     )}
                     {field.value?.map((res, i) => (
-                      <div className="mb-5 " key={i}>
+                      <div key={i}>
                         <div className="flex justify-between items-center">
                           <h1>Agent Box: {i + 1}</h1>
                           <Button
@@ -845,7 +841,7 @@ export default function PaymentBoxForm(props: Props) {
                           </Button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-1 mt-5">
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
@@ -911,7 +907,7 @@ export default function PaymentBoxForm(props: Props) {
                             "agents",
                             form.watch("agents").concat([
                               {
-                                commission: 1,
+                                commission: 0,
                                 name: "",
                               },
                             ])
@@ -946,7 +942,7 @@ export default function PaymentBoxForm(props: Props) {
                       </Alert>
                     )}
                     {field.value?.map((res, i) => (
-                      <div className="mb-5 " key={i}>
+                      <div key={i}>
                         <div className="flex justify-between items-center">
                           <h1>Coverage Box: {i + 1}</h1>
                           <Button
@@ -964,7 +960,7 @@ export default function PaymentBoxForm(props: Props) {
                           </Button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-1 mt-5">
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
@@ -1084,9 +1080,9 @@ export default function PaymentBoxForm(props: Props) {
                             "coverage",
                             form.watch("coverage").concat([
                               {
-                                starting_float: 1,
-                                current_float: 1,
-                                closed_p_l: 1,
+                                starting_float: 0,
+                                current_float: 0,
+                                closed_p_l: 0,
                                 account: "",
                               },
                             ])

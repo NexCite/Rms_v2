@@ -46,7 +46,7 @@ model Config {
   pl_boxes             P_LBox[]
   agent_boxes          AgentBox[]
 
-  ClientBox ClientBox[]
+  ClientBox ManagerBox[]
 }
 
 model User {
@@ -665,7 +665,7 @@ model PaymentBox {
   modified_date  DateTime       @default(now()) @updatedAt
   to_date        DateTime       @default(now())
   coverage_boxes CoverageBox[]
-  client_boxes   ClientBox[]
+  manager_boxes  ManagerBox[]
   agent_boxes    AgentBox[]
   p_l            P_LBox[]
   expensive_box  ExpensiveBox[]
@@ -689,7 +689,7 @@ model CoverageBox {
   @@unique([id, config_id, payment_box_id], name: "unique_combination")
 }
 
-model ClientBox {
+model ManagerBox {
   id             Int    @id @default(autoincrement())
   manger         String
   starting_float Float

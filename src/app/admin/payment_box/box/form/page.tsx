@@ -14,7 +14,7 @@ export default async function page(props: {
   var value: Prisma.PaymentBoxGetPayload<{
     select: {
       agent_boxes: true;
-      client_boxes: true;
+      manager_boxes: true;
       p_l: true;
       coverage_boxes: true;
       expensive_box: true;
@@ -32,7 +32,7 @@ export default async function page(props: {
       where: { config_id, id },
       select: {
         agent_boxes: true,
-        client_boxes: true,
+        manager_boxes: true,
         p_l: true,
         coverage_boxes: true,
         expensive_box: true,
