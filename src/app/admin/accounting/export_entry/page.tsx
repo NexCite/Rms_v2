@@ -423,22 +423,18 @@ export default async function Entry(props: {
   if (account_id) {
     entries = entries.filter((res) => {
       return (
-        res.sub_entries.filter(
-          (res) =>
-            res.account_entry_id === account_id ||
-            res.reference_id === account_id
-        ).length > 0
+        res.sub_entries.filter((res) => {
+          if (props.searchParams.include_reference !== "true") {
+            return (
+              res.account_entry_id === account_id ||
+              res.reference_id === account_id
+            );
+          } else {
+            return res.account_entry_id === account_id;
+          }
+        }).length > 0
       );
     });
-  }
-  if (
-    account_id &&
-    (two_digit_id || three_digit_id || more_digit_id) &&
-    props.searchParams.include_reference !== "true"
-  ) {
-    entries = entries.filter(
-      (res) => res.sub_entries.filter((res) => res.reference_id).length === 0
-    );
   }
 
   const config = await prisma.config.findFirst({

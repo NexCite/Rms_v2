@@ -195,7 +195,7 @@ export default function GetRoutes(permissions: $Enums.UserPermission[]) {
       children: [
         {
           index: 0,
-          title: "Payment Box",
+          title: "Box",
           path: "/admin/payment_box/box",
           key: "View_Payment_Box",
           addKey: "Add_Payment_Box",

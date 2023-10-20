@@ -21,6 +21,7 @@ import Link from "next/link";
 
 type Props = {
   routers: RouteModel[];
+  menu: React.ReactNode;
   config: {
     logo: string;
     name: string;
@@ -39,7 +40,7 @@ export function Sidebar(props: Props) {
 
   return (
     <Card className="h-full w-full rounded-none flex flex-col">
-      <div className="flex flex-col p-3 ">
+      <div className="flex  p-3  flex-row justify-between items-center">
         <Image
           src={`/api/media${props.config.logo}`}
           alt={props.config.name}
@@ -47,6 +48,7 @@ export function Sidebar(props: Props) {
           height={80}
           className="rounded-full w-12 h-12 mb-1"
         />
+        {props.menu}
       </div>
       <Divider />
       <List>

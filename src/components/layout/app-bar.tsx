@@ -1,15 +1,16 @@
 "use client";
-import { Button } from "@mui/material";
+import { Button, IconButton } from "@mui/material";
 import { $Enums } from "@prisma/client";
 import Authorized from "@rms/components/ui/authorized";
 import RouteModel from "@rms/models/RouteModel";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import BackButton from "../ui/back-button";
 import { Sidebar } from "./side-bar";
 
 import AppConfig from "../../../app-config.json";
+import { MenuIcon } from "lucide-react";
 type Props = {
   children: React.ReactNode;
   routes: RouteModel[];
@@ -20,6 +21,8 @@ type Props = {
 };
 export default function AppBar(props: Props) {
   var path = usePathname();
+  const [show, setShow] = useState(true);
+
   const { subRouteTitle, permission } = useMemo(() => {
     const routes = props.routes.find((res) =>
       res.children.find((res) => path.startsWith(res.path))
@@ -55,18 +58,33 @@ export default function AppBar(props: Props) {
     <>
       <aside
         id="cta-button-sidebar"
-        className="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
+        className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform ${
+          show ? "-translate-x-full sm:translate-x-0" : " -translate-x-full "
+        } `}
         aria-label="Sidebar"
       >
         <div className="h-full border border-gray-200  overflow-y-auto bg-gray-50 dark:bg-gray-800">
-          <Sidebar config={props.config} routers={props.routes} />
+          <Sidebar
+            menu={
+              <IconButton onClick={(e) => setShow(!show)}>
+                <MenuIcon />
+              </IconButton>
+            }
+            config={props.config}
+            routers={props.routes}
+          />
         </div>
       </aside>
 
-      <div className="    sm:ml-64 flex flex-col ">
+      <div className={`  ${show ? "sm:ml-64" : ""}   flex flex-col `}>
         {subRouteTitle && (
           <div className="flex justify-between items-center  border dark:border-gray-700 p-3">
             <div className="flex items-center gap-4">
+              {!canGoBack && !show && (
+                <IconButton onClick={(e) => setShow(!show)}>
+                  <MenuIcon />
+                </IconButton>
+              )}
               {canGoBack && <BackButton />}
               <h1 className="text-3xl">{subRouteTitle}</h1>
             </div>

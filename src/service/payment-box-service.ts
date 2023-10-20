@@ -7,6 +7,7 @@ import prisma from "@rms/prisma/prisma";
 export async function createPaymentBox(
   params: Prisma.PaymentBoxUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
+  console.log(params);
   return handlerServiceAction(
     async (auth, config_id) => {
       await prisma.paymentBox.create({
@@ -86,13 +87,6 @@ export async function deletePaymentBoxById(
           where: {
             id,
             config_id,
-          },
-          include: {
-            agent_boxes: true,
-            manager_boxes: true,
-            p_l: true,
-            coverage_boxes: true,
-            expensive_box: true,
           },
         });
       }

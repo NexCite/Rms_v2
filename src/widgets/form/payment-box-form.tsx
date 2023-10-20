@@ -17,7 +17,9 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Prisma } from "@prisma/client";
 import { Button } from "@rms/components/ui/button";
 import Loading from "@rms/components/ui/loading";
+import { useToast } from "@rms/components/ui/use-toast";
 import useAlertHook from "@rms/hooks/alert-hooks";
+import { useStore } from "@rms/hooks/toast-hook";
 import { FormatNumberWithFixed } from "@rms/lib/global";
 import {
   createPaymentBox,
@@ -117,7 +119,7 @@ export default function PaymentBoxForm(props: Props) {
     []
   );
 
-  const { createAlert } = useAlertHook();
+  const store = useStore();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -137,7 +139,7 @@ export default function PaymentBoxForm(props: Props) {
       var formsData = {
         description: values.description,
         to_date: values.to_date,
-        manager_boxes: values.clients,
+        manager_boxes: values.managers,
         expensive_box: values.expensive,
         p_l: values.p_l,
         agent_boxes: values.agents,
@@ -150,68 +152,6 @@ export default function PaymentBoxForm(props: Props) {
       // ]);
 
       const error = [];
-
-      values.agents.forEach((element, i) => {
-        if (!element.commission || !element.name) {
-          error.push({
-            message: "Make sure to fill all fields for agent boxes",
-            index: i + 1,
-          });
-        }
-      });
-
-      values.clients.forEach((element, i) => {
-        if (
-          !element.commission ||
-          !element.current_float ||
-          !element.p_l ||
-          !element.manger ||
-          !element.starting_float ||
-          !element.swap
-        ) {
-          error.push({
-            message: "Make sure to fill all fields for client boxes",
-            index: i + 1,
-          });
-        }
-      });
-
-      values.coverage.forEach((element, i) => {
-        if (
-          !element.account ||
-          !element.closed_p_l ||
-          !element.starting_float ||
-          !element.current_float
-        ) {
-          error.push({
-            message: "Make sure to fill all fields for coverage boxes",
-            index: i + 1,
-          });
-        }
-      });
-
-      values.expensive.forEach((element, i) => {
-        if (!element.expensive || !element.name) {
-          error.push({
-            message: "Make sure to fill all fields for expensive boxes",
-            index: i + 1,
-          });
-        }
-      });
-
-      values.p_l.forEach((element, i) => {
-        if (!element.p_l || !element.name) {
-          error.push({
-            message: "Make sure to fill all fields for p_l boxes",
-            index: i + 1,
-          });
-        }
-      });
-
-      if (error.length > 0) {
-        setErrors(errors.concat(error));
-        return;
-      }
 
       // if (result.success === false) {
       //   return Object.keys(result.error.formErrors.fieldErrors).map((res) => {
@@ -243,13 +183,13 @@ export default function PaymentBoxForm(props: Props) {
 
         if (props.isEditMode) {
           const result = await updatePaymentBox(props.id, formsData as any);
-          createAlert(result);
+          store.OpenAlert(result);
           if (result.status === 200) {
             back();
           }
         } else {
           const result = await createPaymentBox(formsData as any);
-          createAlert(result);
+          store.OpenAlert(result);
           if (result.status === 200) {
             back();
           }

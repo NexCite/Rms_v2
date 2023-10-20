@@ -1,13 +1,24 @@
-import { getUserInfo } from "@rms/lib/auth";
 import { getConfigId } from "@rms/lib/config";
 import prisma from "@rms/prisma/prisma";
-import { getUserStatus } from "@rms/service/user-service";
-import AccountEntryTable from "@rms/widgets/table/account-entry-table";
+
+import BoxTable from "@rms/widgets/table/box-table";
 
 export default async function page() {
   const config_id = await getConfigId();
 
-  const accounts = await prisma.paymentBox.findMany({ where: { config_id } });
+  const result = await prisma.paymentBox.findMany({
+    where: { config_id },
+    include: {
+      agent_boxes: true,
+      coverage_boxes: true,
+      expensive_box: true,
+      manager_boxes: true,
+      p_l: true,
+    },
+    orderBy: {
+      to_date: "desc",
+    },
+  });
 
-  return <div>{/* <AccountEntryTable /> */}</div>;
+  return <div>{<BoxTable boxes={result} />}</div>;
 }
