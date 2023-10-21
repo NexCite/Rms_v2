@@ -18,7 +18,7 @@ type Props = {
 
 export default function UserTable(props: Props) {
   const pathName = usePathname();
-  const [isActive, setActiveTransition] = useTransition();
+  const [isPadding, setPadding] = useTransition();
 
   const store = useStore();
 
@@ -196,6 +196,7 @@ export default function UserTable(props: Props) {
         <CardHeader title={<Typography variant="h5">User Table</Typography>} />
 
         <MaterialReactTable
+          state={{ showProgressBars: isPadding }}
           columns={columns}
           data={props.users}
           enableRowActions
@@ -206,7 +207,7 @@ export default function UserTable(props: Props) {
           }) => [
             <Authorized permission="Edit_Currency" key={1}>
               <Link href={pathName + "/form?id=" + id}>
-                <MenuItem className="cursor-pointer" disabled={isActive}>
+                <MenuItem className="cursor-pointer" disabled={isPadding}>
                   Edit
                 </MenuItem>
               </Link>
@@ -214,14 +215,14 @@ export default function UserTable(props: Props) {
 
             <Authorized permission="Delete_Currency" key={3}>
               <MenuItem
-                disabled={isActive}
+                disabled={isPadding}
                 className="cursor-pointer"
                 onClick={() => {
                   const isConfirm = confirm(
                     `Do You sure you want to delete ${username} id:${id} `
                   );
                   if (isConfirm) {
-                    setActiveTransition(async () => {
+                    setPadding(async () => {
                       const result = await deleteUserById(id);
 
                       store.OpenAlert(result);
@@ -229,7 +230,7 @@ export default function UserTable(props: Props) {
                   }
                 }}
               >
-                {isActive ? <> deleting...</> : "Delete"}
+                {isPadding ? <> deleting...</> : "Delete"}
               </MenuItem>
             </Authorized>,
           ]}

@@ -46,7 +46,7 @@ type Props =
 
 export default function TradingTable(props: Props) {
   const pathName = usePathname();
-  const [isActive, setActiveTransition] = useTransition();
+  const [isPadding, setPadding] = useTransition();
 
   const [globalFilter, setGlobalFilter] = useState("");
 
@@ -76,21 +76,21 @@ export default function TradingTable(props: Props) {
                       <DropdownMenuItem
                         onClick={() => push(pathName + "/form?id=" + id)}
                         className="cursor-pointer"
-                        disabled={isActive}
+                        disabled={isPadding}
                       >
                         Edit
                       </DropdownMenuItem>
                     </Authorized>
                     <Authorized permission="Delete_Trader">
                       <DropdownMenuItem
-                        disabled={isActive}
+                        disabled={isPadding}
                         className="cursor-pointer"
                         onClick={() => {
                           const isConfirm = confirm(
                             `Do You sure you want to delete ${username} id:${id} `
                           );
                           if (isConfirm) {
-                            setActiveTransition(async () => {
+                            setPadding(async () => {
                               var result;
 
                               switch (props.node) {
@@ -113,7 +113,7 @@ export default function TradingTable(props: Props) {
                           }
                         }}
                       >
-                        {isActive ? <> deleting...</> : "Delete"}
+                        {isPadding ? <> deleting...</> : "Delete"}
                       </DropdownMenuItem>
                     </Authorized>
                   </DropdownMenuGroup>

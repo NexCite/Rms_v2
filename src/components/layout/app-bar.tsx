@@ -79,7 +79,7 @@ export default function AppBar(props: Props) {
       <div className={`  ${show ? "sm:ml-64" : ""}   flex flex-col `}>
         {subRouteTitle && (
           <div className="flex justify-between items-center  border dark:border-gray-700 p-3">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 justify-start">
               {!canGoBack && !show && (
                 <IconButton onClick={(e) => setShow(!show)}>
                   <MenuIcon />

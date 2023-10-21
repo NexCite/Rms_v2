@@ -58,7 +58,7 @@ export default function UserFormComponent(props: Props) {
     return z.object({
       username: z
         .string()
-        .min(3, { message: "Username must be at least 3 characters" }),
+        .min(4, { message: "Username must be at least 3 characters" }),
       password: props.value ? z.string().min(4).optional() : z.string().min(4),
       first_name: z
         .string()

@@ -17,7 +17,7 @@ type Props = {
 };
 
 export default function ActivityTable(props: Props) {
-  const [isActive, setActiveTransition] = useTransition();
+  const [isPadding, setPadding] = useTransition();
 
   const store = useStore();
 
@@ -138,6 +138,7 @@ export default function ActivityTable(props: Props) {
       />
 
       <MaterialReactTable
+        state={{ showProgressBars: isPadding }}
         enableRowActions
         columns={columns}
         renderRowActionMenuItems={({
@@ -147,21 +148,21 @@ export default function ActivityTable(props: Props) {
         }) => [
           <Authorized key={1} permission={"Edit_Activity"}>
             <Link href={"/admin/accounting/entry" + "/form?activity_id=" + id}>
-              <MenuItem className="cursor-pointer" disabled={isActive}>
+              <MenuItem className="cursor-pointer" disabled={isPadding}>
                 Edit
               </MenuItem>
             </Link>
           </Authorized>,
           <Authorized key={2} permission={"Delete_Activity"}>
             <MenuItem
-              disabled={isActive}
+              disabled={isPadding}
               className="cursor-pointer"
               onClick={() => {
                 const isConfirm = confirm(
                   `Do You sure you want to delete ${description} id:${id} `
                 );
                 if (isConfirm) {
-                  setActiveTransition(async () => {
+                  setPadding(async () => {
                     var result = await confirmActivity({
                       id: id,
                       status: ActivityStatus.Closed,
@@ -171,7 +172,7 @@ export default function ActivityTable(props: Props) {
                 }
               }}
             >
-              {isActive ? <> deleting...</> : "Delete"}
+              {isPadding ? <> deleting...</> : "Delete"}
             </MenuItem>
           </Authorized>,
         ]}

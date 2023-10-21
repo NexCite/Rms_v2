@@ -27,7 +27,7 @@ type CommonNode = "two" | "three" | "more";
 
 export default function DigitTable(props: Props) {
   const pathName = usePathname();
-  const [isActive, setActiveTransition] = useTransition();
+  const [isPadding, setPadding] = useTransition();
 
   const store = useStore();
   const { push } = useRouter();
@@ -116,6 +116,7 @@ export default function DigitTable(props: Props) {
       />
 
       <MaterialReactTable
+        state={{ showProgressBars: isPadding }}
         enableRowActions
         columns={columns}
         renderRowActionMenuItems={({
@@ -134,7 +135,7 @@ export default function DigitTable(props: Props) {
             }
           >
             <Link href={pathName + "/form?id=" + id}>
-              <MenuItem className="cursor-pointer" disabled={isActive}>
+              <MenuItem className="cursor-pointer" disabled={isPadding}>
                 Edit
               </MenuItem>
             </Link>
@@ -150,14 +151,14 @@ export default function DigitTable(props: Props) {
             }
           >
             <MenuItem
-              disabled={isActive}
+              disabled={isPadding}
               className="cursor-pointer"
               onClick={() => {
                 const isConfirm = confirm(
                   `Do You sure you want to delete ${username} id:${id} `
                 );
                 if (isConfirm) {
-                  setActiveTransition(async () => {
+                  setPadding(async () => {
                     const result =
                       props.node === "two"
                         ? await deleteTwoDigit(id)
@@ -170,7 +171,7 @@ export default function DigitTable(props: Props) {
                 }
               }}
             >
-              {isActive ? <> deleting...</> : "Delete"}
+              {isPadding ? <> deleting...</> : "Delete"}
             </MenuItem>
           </Authorized>,
         ]}

@@ -562,7 +562,7 @@ export default function ExportEntryDataTable(props: Props) {
             defaultValue={
               defaultValue.account
                 ? {
-                    label: `${defaultValue.account.id} ${defaultValue.account.username}`,
+                    label: `(${defaultValue.account.id}) ${defaultValue.account.username}`,
                     value: defaultValue.account.id,
                     group: defaultValue.account.type,
                   }
@@ -632,6 +632,7 @@ export default function ExportEntryDataTable(props: Props) {
         </form>
         <div ref={targetRef}>
           <MaterialReactTable
+            state={{ showProgressBars: isPadding }}
             columns={columns}
             data={entries}
             enablePagination={false}
@@ -733,6 +734,7 @@ export default function ExportEntryDataTable(props: Props) {
               return (
                 <>
                   <MaterialReactTable
+                    state={{ showProgressBars: isPadding }}
                     muiTableContainerProps={{ sx: { margin: 0 } }}
                     enablePagination={false}
                     enableFilters={false}

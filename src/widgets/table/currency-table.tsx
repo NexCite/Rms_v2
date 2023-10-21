@@ -17,7 +17,7 @@ type Props = {
 
 export default function CurrencyTable(props: Props) {
   const pathName = usePathname();
-  const [isActive, setActiveTransition] = useTransition();
+  const [isPadding, setPadding] = useTransition();
   const store = useStore();
 
   const { push } = useRouter();
@@ -81,6 +81,7 @@ export default function CurrencyTable(props: Props) {
         />
 
         <MaterialReactTable
+          state={{ showProgressBars: isPadding }}
           enableRowActions
           columns={columns}
           renderRowActionMenuItems={({
@@ -90,7 +91,7 @@ export default function CurrencyTable(props: Props) {
           }) => [
             <Authorized permission="Edit_Currency" key={1}>
               <Link href={pathName + "/form?id=" + id}>
-                <MenuItem className="cursor-pointer" disabled={isActive}>
+                <MenuItem className="cursor-pointer" disabled={isPadding}>
                   Edit
                 </MenuItem>
               </Link>
@@ -98,14 +99,14 @@ export default function CurrencyTable(props: Props) {
 
             <Authorized permission="Delete_Currency" key={3}>
               <MenuItem
-                disabled={isActive}
+                disabled={isPadding}
                 className="cursor-pointer"
                 onClick={() => {
                   const isConfirm = confirm(
                     `Do You sure you want to delete ${name} id:${id} `
                   );
                   if (isConfirm) {
-                    setActiveTransition(async () => {
+                    setPadding(async () => {
                       const result = await deleteCurrency(id);
 
                       store.OpenAlert(result);
@@ -113,7 +114,7 @@ export default function CurrencyTable(props: Props) {
                   }
                 }}
               >
-                {isActive ? <> deleting...</> : "Delete"}
+                {isPadding ? <> deleting...</> : "Delete"}
               </MenuItem>
             </Authorized>,
           ]}

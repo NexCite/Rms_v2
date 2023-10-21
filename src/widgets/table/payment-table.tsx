@@ -37,7 +37,7 @@ type Props = {
 
 export default function PaymentTable(props: Props) {
   const pathName = usePathname();
-  const [isActive, setActiveTransition] = useTransition();
+  const [isPadding, setPadding] = useTransition();
 
   const [globalFilter, setGlobalFilter] = useState("");
 
@@ -65,21 +65,21 @@ export default function PaymentTable(props: Props) {
                     <DropdownMenuItem
                       onClick={() => push(pathName + "/form?id=" + id)}
                       className="cursor-pointer"
-                      disabled={isActive}
+                      disabled={isPadding}
                     >
                       Edit
                     </DropdownMenuItem>
                   </Authorized>
                   <Authorized permission="Delete_Payment">
                     <DropdownMenuItem
-                      disabled={isActive}
+                      disabled={isPadding}
                       className="cursor-pointer"
                       onClick={() => {
                         const isConfirm = confirm(
                           `Do You sure you want to delete payment id:${id} `
                         );
                         if (isConfirm) {
-                          setActiveTransition(async () => {
+                          setPadding(async () => {
                             const result = await deletePaymentById(id);
 
                             store.OpenAlert(result);
@@ -87,7 +87,7 @@ export default function PaymentTable(props: Props) {
                         }
                       }}
                     >
-                      {isActive ? <> deleting...</> : "Delete"}
+                      {isPadding ? <> deleting...</> : "Delete"}
                     </DropdownMenuItem>
                   </Authorized>
                 </DropdownMenuGroup>

@@ -90,7 +90,11 @@ export default function LogTable(props: Props) {
           }
         />
 
-        <MaterialReactTable columns={columns} data={props.data} />
+        <MaterialReactTable
+          // state={{ showProgressBars: isPadding }}
+          columns={columns}
+          data={props.data}
+        />
       </Card>
     </div>
   );

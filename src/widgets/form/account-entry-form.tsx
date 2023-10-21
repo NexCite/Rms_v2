@@ -49,7 +49,7 @@ export default function Account_EntryForm(props: {
     return z
       .object({
         id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
-        username: z.string().optional().nullable(),
+        username: z.string().min(3),
         first_name: z
           .string()
           .min(1, { message: "Name must be at least 1  character" }),
@@ -63,7 +63,7 @@ export default function Account_EntryForm(props: {
         type: z
           .enum(Object.keys($Enums.Account_Entry_Type) as any)
           .default(props.node),
-        info: z.string().optional(),
+        info: z.string().optional().nullable(),
         country: z.string(),
         address1: z.string().optional(),
         email: z.string().optional(),
@@ -191,6 +191,7 @@ export default function Account_EntryForm(props: {
                 render={({ field, fieldState }) => (
                   <>
                     <TextField
+                      required
                       {...field}
                       value={field.value}
                       InputLabelProps={{ shrink: true }}

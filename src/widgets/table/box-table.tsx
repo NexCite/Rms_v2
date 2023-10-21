@@ -27,7 +27,7 @@ type Props = {
 
 export default function BoxTable(props: Props) {
   const pathName = usePathname();
-  const [isActive, setActiveTransition] = useTransition();
+  const [isPadding, setPadding] = useTransition();
   const store = useStore();
 
   const columns = useMemo<MRT_ColumnDef<CommonPayload>[]>(
@@ -228,6 +228,7 @@ export default function BoxTable(props: Props) {
         <CardHeader title={<Typography variant="h5">Box Table</Typography>} />
 
         <MaterialReactTable
+          state={{ showProgressBars: isPadding }}
           enableRowActions
           columns={columns}
           renderRowActionMenuItems={({
@@ -237,7 +238,7 @@ export default function BoxTable(props: Props) {
           }) => [
             <Authorized permission="Edit_Payment_Box" key={1}>
               <Link href={pathName + "/form?id=" + id}>
-                <MenuItem className="cursor-pointer" disabled={isActive}>
+                <MenuItem className="cursor-pointer" disabled={isPadding}>
                   Edit
                 </MenuItem>
               </Link>
@@ -245,14 +246,14 @@ export default function BoxTable(props: Props) {
 
             <Authorized permission="Delete_Payment_Box" key={3}>
               <MenuItem
-                disabled={isActive}
+                disabled={isPadding}
                 className="cursor-pointer"
                 onClick={() => {
                   const isConfirm = confirm(
                     `Do You sure you want to delete ${to_date.toDateString()} id:${id} `
                   );
                   if (isConfirm) {
-                    setActiveTransition(async () => {
+                    setPadding(async () => {
                       const result = await deletePaymentBoxById(id);
 
                       store.OpenAlert(result);
@@ -260,7 +261,7 @@ export default function BoxTable(props: Props) {
                   }
                 }}
               >
-                {isActive ? <> deleting...</> : "Delete"}
+                {isPadding ? <> deleting...</> : "Delete"}
               </MenuItem>
             </Authorized>,
           ]}

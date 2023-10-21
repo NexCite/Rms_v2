@@ -37,7 +37,7 @@ type Props = {
 
 export default function InvoiceTable(props: Props) {
   const pathName = usePathname();
-  const [isActive, setActiveTransition] = useTransition();
+  const [isPadding, setPadding] = useTransition();
 
   const [globalFilter, setGlobalFilter] = useState("");
 
@@ -67,21 +67,21 @@ export default function InvoiceTable(props: Props) {
                     <DropdownMenuItem
                       onClick={() => push(pathName + "/form?id=" + id)}
                       className="cursor-pointer"
-                      disabled={isActive}
+                      disabled={isPadding}
                     >
                       Edit
                     </DropdownMenuItem>
                   </Authorized>
                   <Authorized permission="Delete_Invoice">
                     <DropdownMenuItem
-                      disabled={isActive}
+                      disabled={isPadding}
                       className="cursor-pointer"
                       onClick={() => {
                         const isConfirm = confirm(
                           `Do You sure you want to delete invoice id:${id} `
                         );
                         if (isConfirm) {
-                          setActiveTransition(async () => {
+                          setPadding(async () => {
                             const result = await deleteInvoiceById(id);
 
                             store.OpenAlert(result);
@@ -89,7 +89,7 @@ export default function InvoiceTable(props: Props) {
                         }
                       }}
                     >
-                      {isActive ? <> deleting...</> : "Delete"}
+                      {isPadding ? <> deleting...</> : "Delete"}
                     </DropdownMenuItem>
                   </Authorized>
                 </DropdownMenuGroup>

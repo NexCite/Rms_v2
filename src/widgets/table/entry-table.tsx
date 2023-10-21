@@ -81,8 +81,8 @@ type Props = {
 };
 
 export default function EntryDataTable(props: Props) {
-  const [isPadding, setTransition] = useTransition();
-  const [isActive, setActiveTransition] = useTransition();
+  const [isPadding, setIsPadding] = useTransition();
+  const [isActive, setActive] = useTransition();
 
   const [search, setSearch] = useState({
     two_digit_id: props.two_digit_id,
@@ -107,7 +107,7 @@ export default function EntryDataTable(props: Props) {
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
 
-      setTransition(() => {
+      setIsPadding(() => {
         replace(
           pathName +
             `?from_date=${selectDate?.from?.getTime()}&to_date=${selectDate?.to?.getTime()}&two_digit_id=${
@@ -248,7 +248,8 @@ export default function EntryDataTable(props: Props) {
                             <tr>
                               <td>
                                 Reference To: ({e.reference_id}){" "}
-                                {e.reference?.username ?? ""}
+                                {e.reference?.first_name}{" "}
+                                {e.reference?.last_name}
                               </td>
 
                               <td colSpan={2}>
@@ -259,7 +260,8 @@ export default function EntryDataTable(props: Props) {
                                 {e.two_digit?.name ?? ""}
                                 {e.three_digit?.name ?? ""}
                                 {e.more_than_four_digit?.name ?? ""}
-                                {e.account_entry?.username ?? ""}
+                                {e.account_entry?.first_name}{" "}
+                                {e.reference?.last_name}
                               </td>
                             </tr>
                           </tbody>
@@ -272,7 +274,7 @@ export default function EntryDataTable(props: Props) {
                           {e?.account_entry_id ?? ""}) {e.two_digit?.name ?? ""}
                           {e.three_digit?.name ?? ""}
                           {e.more_than_four_digit?.name ?? ""}
-                          {e.account_entry?.username ?? ""}
+                          {e.account_entry?.first_name} {e.reference?.last_name}
                         </>
                       )}
                     </td>
@@ -297,7 +299,8 @@ export default function EntryDataTable(props: Props) {
                                 {e.two_digit?.name ?? ""}
                                 {e.three_digit?.name ?? ""}
                                 {e.more_than_four_digit?.name ?? ""}
-                                {e.account_entry?.username ?? ""}
+                                {e.account_entry?.first_name}{" "}
+                                {e.reference?.last_name}
                               </td>
                             </tr>
                           </tbody>
@@ -310,7 +313,7 @@ export default function EntryDataTable(props: Props) {
                           {e?.account_entry_id ?? ""}) {e.two_digit?.name ?? ""}
                           {e.three_digit?.name ?? ""}
                           {e.more_than_four_digit?.name ?? ""}
-                          {e.account_entry?.username ?? ""}
+                          {e.account_entry?.first_name} {e.reference?.last_name}
                         </>
                       )}
                     </td>
@@ -498,7 +501,7 @@ export default function EntryDataTable(props: Props) {
               defaultValue={
                 defaultValue.account
                   ? {
-                      label: `${defaultValue.account.id} ${defaultValue.account.username}`,
+                      label: `(${defaultValue.account.id}) ${defaultValue.account.username}`,
                       value: defaultValue.account.id,
                       group: defaultValue.account.type,
                     }
@@ -551,14 +554,14 @@ export default function EntryDataTable(props: Props) {
           }) => [
             <Authorized permission="Edit_Entry" key={213213}>
               <Link href={pathName + "/form?id=" + id}>
-                <MenuItem className="cursor-pointer" disabled={isActive}>
+                <MenuItem className="cursor-pointer" disabled={isPadding}>
                   Edit
                 </MenuItem>
               </Link>
             </Authorized>,
             <Authorized permission="View_Entry" key={324234}>
               <Link href={pathName + "/" + id}>
-                <MenuItem className="cursor-pointer" disabled={isActive}>
+                <MenuItem className="cursor-pointer" disabled={isPadding}>
                   View
                 </MenuItem>
               </Link>
@@ -572,7 +575,7 @@ export default function EntryDataTable(props: Props) {
                     `Do You sure you want to delete ${title} id:${id} `
                   );
                   if (isConfirm) {
-                    setActiveTransition(async () => {
+                    setActive(async () => {
                       const result = await deleteEntry(id);
 
                       store.OpenAlert(result);

@@ -24,7 +24,7 @@ type Props =
 
 export default function CategoryTable(props: Props) {
   const pathName = usePathname();
-  const [isActive, setActiveTransition] = useTransition();
+  const [isPadding, setPadding] = useTransition();
 
   const store = useStore();
   const { push } = useRouter();
@@ -102,6 +102,7 @@ export default function CategoryTable(props: Props) {
         }
       ></CardHeader>
       <MaterialReactTable
+        state={{ showProgressBars: isPadding }}
         enableRowActions
         columns={columns}
         renderRowActionMenuItems={({
@@ -111,7 +112,7 @@ export default function CategoryTable(props: Props) {
         }) => [
           <Authorized permission="Edit_Currency" key={1}>
             <Link href={pathName + "/form?id=" + id}>
-              <MenuItem className="cursor-pointer" disabled={isActive}>
+              <MenuItem className="cursor-pointer" disabled={isPadding}>
                 Edit
               </MenuItem>
             </Link>
@@ -119,14 +120,14 @@ export default function CategoryTable(props: Props) {
 
           <Authorized permission="Delete_Currency" key={3}>
             <MenuItem
-              disabled={isActive}
+              disabled={isPadding}
               className="cursor-pointer"
               onClick={() => {
                 const isConfirm = confirm(
                   `Do You sure you want to delete ${name} id:${id} `
                 );
                 if (isConfirm) {
-                  setActiveTransition(async () => {
+                  setPadding(async () => {
                     var result;
                     if (props.node === "category") {
                       result = await deleteCategoryById(id);
@@ -139,7 +140,7 @@ export default function CategoryTable(props: Props) {
                 }
               }}
             >
-              {isActive ? <> deleting...</> : "Delete"}
+              {isPadding ? <> deleting...</> : "Delete"}
             </MenuItem>
           </Authorized>,
         ]}
