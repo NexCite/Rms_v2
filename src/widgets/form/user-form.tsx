@@ -138,7 +138,7 @@ export default function UserFormComponent(props: Props) {
   );
   return (
     <form
-      className=""
+      className="mb-32"
       autoComplete="off"
       noValidate
       onSubmit={form.handleSubmit(handleSubmit)}
@@ -296,12 +296,65 @@ export default function UserFormComponent(props: Props) {
               <Autocomplete
                 disablePortal
                 onChange={(e, v) => {
-                  field.onChange(v);
+                  field.onChange(v.map((res) => res.value));
                 }}
                 multiple
-                defaultValue={field.value}
+                groupBy={(e) =>
+                  (() => {
+                    var result = e.label.split("_");
+                    if (result.length > 1) {
+                      return result[0] === "View"
+                        ? "View"
+                        : result[0] === "Edit"
+                        ? "Edit"
+                        : "Delete";
+                    } else {
+                      return "Pages";
+                    }
+                  })()
+                }
+                getOptionLabel={(e) => e.label}
+                defaultValue={field?.value
+                  ?.sort((a, b) => a.localeCompare(b))
+                  .map((res) => ({
+                    group: (() => {
+                      var result = res.split("_");
+
+                      if (result.length > 1) {
+                        return result[0] === "View"
+                          ? "View"
+                          : result[0] === "Edit"
+                          ? "Edit"
+                          : "Delete";
+                      } else {
+                        return "Pages";
+                      }
+                    })(),
+                    value: res,
+                    label: res,
+                  }))}
                 size="small"
-                options={Object.keys($Enums.UserPermission)}
+                isOptionEqualToValue={(e) =>
+                  Object.keys($Enums.UserPermission).includes(e.value)
+                }
+                options={Object.keys($Enums.UserPermission)
+                  .sort((a, b) => a.localeCompare(b))
+                  .map((res) => ({
+                    label: res,
+                    value: res,
+                    group: (() => {
+                      var result = res.split("_");
+                      if (result.length > 1) {
+                        return result[0] === "View"
+                          ? "View"
+                          : result[0] === "Edit"
+                          ? "Edit"
+                          : "Delete";
+                      } else {
+                        return "Pages";
+                      }
+                    })(),
+                  }))}
                 renderInput={(params) => (
                   <TextField
                     {...params}
