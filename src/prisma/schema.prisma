@@ -40,13 +40,15 @@ model Config {
   more_than_four_digit More_Than_Four_Digit[]
   entries              Entry[]
   sub_entries          SubEntry[]
-  payment_boxes        PaymentBox[]
+  equities             Equity[]
   coverage_boxes       CoverageBox[]
   expensive_boxes      ExpensiveBox[]
   pl_boxes             P_LBox[]
   agent_boxes          AgentBox[]
 
-  ClientBox ManagerBox[]
+  ClientBox     ManagerBox[]
+  CreditBox     CreditBox[]
+  AdjustmentBox AdjustmentBox[]
 }
 
 model User {
@@ -549,6 +551,11 @@ enum UserPermission {
   Add_Payment_Box
   Edit_Payment_Box
   Delete_Payment_Box
+  View_Equity
+  View_Equities
+  Add_Equity
+  Edit_Equity
+  Delete_Equity
   Add_Account_Entry
   Edit_Account_Entry
   Delete_Account_Entry
@@ -658,36 +665,38 @@ enum Account_Entry_Type {
   Supplier
 }
 
-model PaymentBox {
-  id             Int            @id @default(autoincrement())
-  status         Status         @default(Enable)
-  description    String
-  create_date    DateTime       @default(now())
-  modified_date  DateTime       @default(now()) @updatedAt
-  to_date        DateTime       @default(now())
-  coverage_boxes CoverageBox[]
-  manager_boxes  ManagerBox[]
-  agent_boxes    AgentBox[]
-  p_l            P_LBox[]
-  expensive_box  ExpensiveBox[]
-  config_id      Int?
-  config         Config?        @relation(fields: [config_id], references: [id], onDelete: Cascade)
+model Equity {
+  id               Int             @id @default(autoincrement())
+  status           Status          @default(Enable)
+  description      String
+  create_date      DateTime        @default(now())
+  modified_date    DateTime        @default(now()) @updatedAt
+  to_date          DateTime        @default(now())
+  coverage_boxes   CoverageBox[]
+  manager_boxes    ManagerBox[]
+  agent_boxes      AgentBox[]
+  p_l              P_LBox[]
+  expensive_box    ExpensiveBox[]
+  config_id        Int?
+  config           Config?         @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  credit_boxes     CreditBox[]
+  adjustment_boxes AdjustmentBox[]
 
   @@unique([id, config_id], name: "unique_combination")
 }
 
 model CoverageBox {
-  id             Int        @id @default(autoincrement())
+  id             Int     @id @default(autoincrement())
   account        String
   starting_float Float
   current_float  Float
   closed_p_l     Float
-  payment_box_id Int
-  payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id], onDelete: Cascade)
+  equity_id Int
+  payment_box    Equity  @relation(fields: [equity_id], references: [id], onDelete: Cascade)
   config_id      Int?
-  config         Config?    @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  config         Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
-  @@unique([id, config_id, payment_box_id], name: "unique_combination")
+  @@unique([id, config_id, equity_id], name: "unique_combination")
 }
 
 model ManagerBox {
@@ -699,12 +708,12 @@ model ManagerBox {
   commission     Float
   swap           Float
 
-  payment_box_id Int
-  payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id], onDelete: Cascade)
+  equity_id Int
+  payment_box    Equity  @relation(fields: [equity_id], references: [id], onDelete: Cascade)
   config_id      Int?
-  config         Config?    @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  config         Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
-  @@unique([id, config_id, payment_box_id], name: "unique_combination")
+  @@unique([id, config_id, equity_id], name: "unique_combination")
 }
 
 model AgentBox {
@@ -712,12 +721,12 @@ model AgentBox {
   name       String
   commission Float
 
-  payment_box_id Int
-  payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id], onDelete: Cascade)
+  equity_id Int
+  payment_box    Equity  @relation(fields: [equity_id], references: [id], onDelete: Cascade)
   config_id      Int?
-  config         Config?    @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  config         Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
-  @@unique([id, config_id, payment_box_id], name: "unique_combination")
+  @@unique([id, config_id, equity_id], name: "unique_combination")
 }
 
 model P_LBox {
@@ -725,12 +734,12 @@ model P_LBox {
   name String
   p_l  Float
 
-  payment_box_id Int
-  payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id], onDelete: Cascade)
+  equity_id Int
+  payment_box    Equity  @relation(fields: [equity_id], references: [id], onDelete: Cascade)
   config_id      Int?
-  config         Config?    @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  config         Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
-  @@unique([id, config_id, payment_box_id], name: "unique_combination")
+  @@unique([id, config_id, equity_id], name: "unique_combination")
 }
 
 model ExpensiveBox {
@@ -738,10 +747,36 @@ model ExpensiveBox {
   name      String
   expensive Float
 
-  payment_box_id Int
-  payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id], onDelete: Cascade)
+  equity_id Int
+  payment_box    Equity  @relation(fields: [equity_id], references: [id], onDelete: Cascade)
   config_id      Int?
-  config         Config?    @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  config         Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
-  @@unique([id, config_id, payment_box_id], name: "unique_combination")
+  @@unique([id, config_id, equity_id], name: "unique_combination")
+}
+
+model CreditBox {
+  id     Int    @id @default(autoincrement())
+  name   String
+  credit Float
+
+  equity_id Int
+  payment_box    Equity  @relation(fields: [equity_id], references: [id], onDelete: Cascade)
+  config_id      Int?
+  config         Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
+
+  @@unique([id, config_id, equity_id], name: "unique_combination")
+}
+
+model AdjustmentBox {
+  id         Int    @id @default(autoincrement())
+  name       String
+  adjustment Float
+
+  equity_id Int
+  payment_box    Equity  @relation(fields: [equity_id], references: [id], onDelete: Cascade)
+  config_id      Int?
+  config         Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
+
+  @@unique([id, config_id, equity_id], name: "unique_combination")
 }

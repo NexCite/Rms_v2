@@ -10,15 +10,17 @@ import { useStore } from "@rms/hooks/toast-hook";
 import { FormatNumberWithFixed } from "@rms/lib/global";
 import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
 import Link from "next/link";
-import { deletePaymentBoxById } from "@rms/service/payment-box-service";
+import { deleteEquityById } from "@rms/service/equity-service";
 
-type CommonPayload = Prisma.PaymentBoxGetPayload<{
+type CommonPayload = Prisma.EquityGetPayload<{
   include: {
     agent_boxes: true;
     coverage_boxes: true;
     expensive_box: true;
     manager_boxes: true;
     p_l: true;
+    adjustment_boxes: true;
+    credit_boxes: true;
   };
 }>;
 type Props = {
@@ -173,7 +175,44 @@ export default function BoxTable(props: Props) {
           return `$${FormatNumberWithFixed(expensive)}`;
         },
       },
+      {
+        accessorKey: "adjustment_boxes",
+        header: "Total Adjustments",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
 
+        accessorFn(originalRow) {
+          var adjustment = 0;
+          originalRow.adjustment_boxes.map((res, i) => {
+            adjustment += res.adjustment;
+          });
+
+          return `$${FormatNumberWithFixed(adjustment)}`;
+        },
+      },
+      {
+        accessorKey: "credit_boxes",
+        header: "Total Credites",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+
+        accessorFn(originalRow) {
+          var credit = 0;
+          originalRow.credit_boxes.map((res, i) => {
+            credit += res.credit;
+          });
+
+          return `$${FormatNumberWithFixed(credit)}`;
+        },
+      },
       {
         accessorKey: "total",
         header: "Total",
@@ -214,10 +253,22 @@ export default function BoxTable(props: Props) {
                 /[$,]/g,
                 ""
               )
+            ),
+            adjustment = parseFloat(
+              (props.row.getAllCells()[9].getValue() as string).replace(
+                /[$,]/g,
+                ""
+              )
+            ),
+            credit = parseFloat(
+              (props.row.getAllCells()[10].getValue() as string).replace(
+                /[$,]/g,
+                ""
+              )
             );
 
-          console.log(coverage, manager, agent, p_l, expensive);
-          const total = coverage - manager + agent + p_l - expensive;
+          const total =
+            coverage - manager + agent + p_l - expensive - adjustment - credit;
 
           return (
             <div
@@ -225,10 +276,7 @@ export default function BoxTable(props: Props) {
                 total >= 0 ? "bg-green-400" : "bg-red-400"
               } font-bold p-1 border rounded-md`}
             >
-              $
-              {FormatNumberWithFixed(
-                coverage - manager + agent + p_l - expensive
-              )}
+              ${FormatNumberWithFixed(total)}
             </div>
           );
         },
@@ -240,7 +288,9 @@ export default function BoxTable(props: Props) {
   return (
     <div className="w-full">
       <Card>
-        <CardHeader title={<Typography variant="h5">Box Table</Typography>} />
+        <CardHeader
+          title={<Typography variant="h5">Equities Table</Typography>}
+        />
 
         <MaterialReactTable
           state={{ showProgressBars: isPadding }}
@@ -251,21 +301,21 @@ export default function BoxTable(props: Props) {
               original: { id, to_date },
             },
           }) => [
-            <Authorized permission="Edit_Payment_Box" key={1}>
+            <Authorized permission="Edit_Equity" key={1}>
               <Link href={pathName + "/form?id=" + id}>
                 <MenuItem className="cursor-pointer" disabled={isPadding}>
                   Edit
                 </MenuItem>
               </Link>
             </Authorized>,
-            <Authorized permission="View_Payment_Box" key={2}>
+            <Authorized permission="View_Equity" key={2}>
               <Link href={pathName + "/" + id}>
                 <MenuItem className="cursor-pointer" disabled={isPadding}>
                   View
                 </MenuItem>
               </Link>
             </Authorized>,
-            <Authorized permission="Delete_Payment_Box" key={3}>
+            <Authorized permission="Delete_Equity" key={3}>
               <MenuItem
                 disabled={isPadding}
                 className="cursor-pointer"
@@ -275,7 +325,7 @@ export default function BoxTable(props: Props) {
                   );
                   if (isConfirm) {
                     setPadding(async () => {
-                      const result = await deletePaymentBoxById(id);
+                      const result = await deleteEquityById(id);
 
                       store.OpenAlert(result);
                     });

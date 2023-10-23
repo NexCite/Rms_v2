@@ -17,14 +17,9 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Prisma } from "@prisma/client";
 import { Button } from "@rms/components/ui/button";
 import Loading from "@rms/components/ui/loading";
-import { useToast } from "@rms/components/ui/use-toast";
-import useAlertHook from "@rms/hooks/alert-hooks";
 import { useStore } from "@rms/hooks/toast-hook";
 import { FormatNumberWithFixed } from "@rms/lib/global";
-import {
-  createPaymentBox,
-  updatePaymentBox,
-} from "@rms/service/payment-box-service";
+import { createEquity, updateEquity } from "@rms/service/equity-service";
 import dayjs from "dayjs";
 import { PlusSquare, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -43,7 +38,7 @@ interface BoxesTypes {
 interface Props {
   id?: number;
   isEditMode?: boolean;
-  value: Prisma.PaymentBoxGetPayload<{
+  value: Prisma.EquityGetPayload<{
     select: {
       agent_boxes: true;
       manager_boxes: true;
@@ -52,17 +47,14 @@ interface Props {
       expensive_box: true;
       to_date: true;
       description: true;
+      adjustment_boxes: true;
+      credit_boxes: true;
     };
   }>;
-  paymentBoxes: Prisma.PaymentBoxGetPayload<{}>[];
+  Equities: Prisma.EquityGetPayload<{}>[];
 }
 
-interface PaymentBoxType extends BoxesTypes {
-  description: string;
-  to_date: Date;
-}
-
-export default function PaymentBoxForm(props: Props) {
+export default function EquityForm(props: Props) {
   const [isPadding, setTransition] = useTransition();
   const { back } = useRouter();
 
@@ -113,6 +105,22 @@ export default function PaymentBoxForm(props: Props) {
         expensive: z.number(),
       })
     ),
+    credit: z.array(
+      z.object({
+        name: z
+          .string()
+          .min(1, { message: "Name must be at least 1 characters" }),
+        credit: z.number(),
+      })
+    ),
+    adjustment: z.array(
+      z.object({
+        name: z
+          .string()
+          .min(1, { message: "Name must be at least 1 characters" }),
+        adjustment: z.number(),
+      })
+    ),
   });
 
   const store = useStore();
@@ -125,6 +133,8 @@ export default function PaymentBoxForm(props: Props) {
       agents: props.value?.agent_boxes || [],
       coverage: props.value?.coverage_boxes || [],
       expensive: props.value?.expensive_box || [],
+      credit: props.value?.credit_boxes || [],
+      adjustment: props.value?.adjustment_boxes || [],
 
       p_l: props.value?.p_l || [],
     } as any,
@@ -140,51 +150,35 @@ export default function PaymentBoxForm(props: Props) {
         p_l: values.p_l,
         agent_boxes: values.agents,
         coverage_boxes: values.coverage,
+        adjustment_boxes: values.adjustment,
+        credit_boxes: values.credit,
       };
 
-      const result = formSchema.safeParse(formsData);
-      // form.clearErrors([
-      //   "description",
-      // ]);
-
-      const error = [];
-
-      // if (result.success === false) {
-      //   return Object.keys(result.error.formErrors.fieldErrors).map((res) => {
-      //     form.setError(res as any, {
-      //       message: result.error.formErrors.fieldErrors[res][0],
-      //     });
-      //   });
-      // } else if (error.length > 0) {
-      //   return;
-      // } else {
-      //   form.clearErrors([
-      //     "description",
-      //   ]);
-
       setTransition(async () => {
-        if (props.id) {
-          [
-            "p_l",
-            "expensive_box",
-            "manager_boxes",
-            "coverage_boxes",
-            "agent_boxes",
-          ].forEach((item) => {
-            formsData[item].map((element) => {
-              element["payment_box_id"] = props.id;
-            });
-          });
-        }
+        // if (props.id) {
+        //   [
+        //     "p_l",
+        //     "expensive_box",
+        //     "manager_boxes",
+        //     "coverage_boxes",
+        //     "agent_boxes",
+        //     "adjustment_boxes",
+        //     "credit_boxes",
+        //   ].forEach((item) => {
+        //     formsData[item].map((element) => {
+        //       element["payment_box_id"] = props.id;
+        //     });
+        //   });
+        // }
 
         if (props.isEditMode) {
-          const result = await updatePaymentBox(props.id, formsData as any);
+          const result = await updateEquity(props.id, formsData as any);
           store.OpenAlert(result);
           if (result.status === 200) {
             back();
           }
         } else {
-          const result = await createPaymentBox(formsData as any);
+          const result = await createEquity(formsData as any);
           store.OpenAlert(result);
           if (result.status === 200) {
             back();
@@ -200,6 +194,17 @@ export default function PaymentBoxForm(props: Props) {
   useEffect(() => {
     setLoadingUi(false);
   }, [props.value]);
+
+  const handleInput = useCallback((value: any, onChange: any) => {
+    if (/^-?\d*\.?\d*$/.test(value)) {
+      const parsedValue = parseFloat(value);
+      if (!isNaN(parsedValue)) {
+        onChange(parsedValue);
+      } else {
+        onChange(value === "" || value === "-" ? 0 : parsedValue);
+      }
+    }
+  }, []);
 
   return (
     <form
@@ -282,6 +287,181 @@ export default function PaymentBoxForm(props: Props) {
                 )}
               />
             </div>
+            {/* ************Coverage Boxes Start************ */}
+
+            <div style={{ margin: "0px 0px 0px" }}>
+              <h1 className="text-2xl">Coverage</h1>
+            </div>
+            <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
+
+            <Controller
+              control={form.control}
+              name="coverage"
+              render={({ field, fieldState }) => {
+                return (
+                  <>
+                    {Boolean(fieldState.error?.message) && (
+                      <Alert variant="outlined" severity="error">
+                        <AlertTitle>
+                          {fieldState.error.message.replaceAll("#space#", "\n")}
+                        </AlertTitle>
+                      </Alert>
+                    )}
+                    {field.value?.map((res, i) => (
+                      <div key={i}>
+                        <div className="flex justify-between items-center">
+                          <h1>Coverage Box: {i + 1}</h1>
+                          <Button
+                            onClick={() => {
+                              field.onChange(
+                                field.value.filter((res, ii) => i !== ii)
+                              );
+                            }}
+                            size="sm"
+                            className="bg-black"
+                            color="dark"
+                            type="button"
+                          >
+                            <X size="15" />
+                          </Button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-1 mt-5">
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            type="text"
+                            label="Account"
+                            value={res.account}
+                            required
+                            onChange={(e) => {
+                              field.value[i].account = e.target.value;
+                              field.onChange(field.value);
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "account")
+                            )}
+                          />
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            inputProps={{
+                              inputMode: "numeric",
+                              pattern: "-?[0-9]*",
+                            }}
+                            label="Starting Float"
+                            value={res.starting_float}
+                            required
+                            onChange={(e) => {
+                              handleInput(e.target.value, (e: number) => {
+                                field.value[i].starting_float = e;
+                                field.onChange(field.value);
+                              });
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "starting_float")
+                            )}
+                            helperText={`${FormatNumberWithFixed(
+                              res.starting_float ?? 0
+                            )}  ${checkBoxesError(
+                              fieldState,
+                              i,
+                              "starting_float"
+                            )}`}
+                          />
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            inputProps={{
+                              inputMode: "numeric",
+                              pattern: "-?[0-9]*",
+                            }}
+                            label="Current Float"
+                            value={res.current_float}
+                            required
+                            onChange={(e) => {
+                              handleInput(e.target.value, (e: number) => {
+                                field.value[i].current_float = e;
+                                field.onChange(field.value);
+                              });
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "current_float")
+                            )}
+                            helperText={`${FormatNumberWithFixed(
+                              res.current_float ?? 0
+                            )}  ${checkBoxesError(
+                              fieldState,
+                              i,
+                              "current_float"
+                            )}`}
+                          />
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            inputProps={{
+                              inputMode: "numeric",
+                              pattern: "-?[0-9]*",
+                            }}
+                            label="Closed P_l"
+                            value={res.closed_p_l}
+                            required
+                            onChange={(e) => {
+                              handleInput(e.target.value, (e: number) => {
+                                field.value[i].closed_p_l = e;
+                                field.onChange(field.value);
+                              });
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "closed_p_l")
+                            )}
+                            helperText={`${FormatNumberWithFixed(
+                              res.closed_p_l ?? 0
+                            )}  ${checkBoxesError(
+                              fieldState,
+                              i,
+                              "closed_p_l"
+                            )}`}
+                          />
+                        </div>
+                        {/* {i !== forms.coverage.length - 1 && (
+                          <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
+                        )} */}
+                      </div>
+                    ))}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        marginTop: 10,
+                      }}
+                    >
+                      <Button
+                        type="button"
+                        className="bg-black"
+                        color="dark"
+                        onClick={() => {
+                          form.setValue(
+                            "coverage",
+                            form.watch("coverage").concat([
+                              {
+                                starting_float: 0,
+                                current_float: 0,
+                                closed_p_l: 0,
+                                account: "",
+                              },
+                            ])
+                          );
+                        }}
+                      >
+                        <PlusSquare />
+                      </Button>
+                    </div>
+                  </>
+                );
+              }}
+            />
+            {/* ************Coverage Boxes End************ */}
 
             {/* ************Manager Boxes start************ */}
             <div style={{ margin: "0px 0px 0px" }}>
@@ -331,51 +511,28 @@ export default function PaymentBoxForm(props: Props) {
                             required
                             onChange={(e) => {
                               field.value[i].manger = e.target.value;
-
                               field.onChange(field.value);
                             }}
                             error={Boolean(
                               checkBoxesError(fieldState, i, "manger")
                             )}
                           />
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            type="number"
-                            label="Swap"
-                            value={res.swap}
-                            required
-                            onChange={(e) => {
-                              if (Number.isNaN(e.target.value)) {
-                                field.value[i].swap = 1;
-                              } else {
-                                field.value[i].swap = +e.target.value;
-                              }
 
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "swap")
-                            )}
-                            helperText={`${FormatNumberWithFixed(
-                              res.swap ?? 0
-                            )}  ${checkBoxesError(fieldState, i, "swap")}`}
-                          />
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
-                            type="number"
+                            inputProps={{
+                              inputMode: "numeric",
+                              pattern: "-?[0-9]*",
+                            }}
                             label="Starting Float"
                             value={res.starting_float}
                             required
                             onChange={(e) => {
-                              if (Number.isNaN(e.target.value)) {
-                                field.value[i].starting_float = 1;
-                              } else {
-                                field.value[i].starting_float = +e.target.value;
-                              }
-
-                              field.onChange(field.value);
+                              handleInput(e.target.value, (e: number) => {
+                                field.value[i].starting_float = e;
+                                field.onChange(field.value);
+                              });
                             }}
                             error={Boolean(
                               checkBoxesError(fieldState, i, "starting_float")
@@ -391,18 +548,19 @@ export default function PaymentBoxForm(props: Props) {
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
-                            type="number"
+                            inputProps={{
+                              inputMode: "numeric",
+                              pattern: "-?[0-9]*",
+                            }}
                             label="Current Float"
                             value={res.current_float}
                             required
                             onChange={(e) => {
-                              if (Number.isNaN(e.target.value)) {
-                                field.value[i].current_float = 1;
-                              } else {
-                                field.value[i].current_float = +e.target.value;
-                              }
-
-                              field.onChange(field.value);
+                              handleInput(e.target.value, (e: number) => {
+                                console.log(e);
+                                field.value[i].current_float = e;
+                                field.onChange(field.value);
+                              });
                             }}
                             error={Boolean(
                               checkBoxesError(fieldState, i, "current_float")
@@ -418,18 +576,18 @@ export default function PaymentBoxForm(props: Props) {
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
-                            type="number"
+                            inputProps={{
+                              inputMode: "numeric",
+                              pattern: "-?[0-9]*",
+                            }}
                             label="P_L"
                             value={res.p_l}
                             required
                             onChange={(e) => {
-                              if (Number.isNaN(e.target.value)) {
-                                field.value[i].p_l = 1;
-                              } else {
-                                field.value[i].p_l = +e.target.value;
-                              }
-
-                              field.onChange(field.value);
+                              handleInput(e.target.value, (e: number) => {
+                                field.value[i].p_l = e;
+                                field.onChange(field.value);
+                              });
                             }}
                             error={Boolean(
                               checkBoxesError(fieldState, i, "p_l")
@@ -441,18 +599,18 @@ export default function PaymentBoxForm(props: Props) {
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
-                            type="number"
+                            inputProps={{
+                              inputMode: "numeric",
+                              pattern: "-?[0-9]*",
+                            }}
                             label="Commission"
                             value={res.commission}
                             required
                             onChange={(e) => {
-                              if (Number.isNaN(e.target.value)) {
-                                field.value[i].commission = 1;
-                              } else {
-                                field.value[i].commission = +e.target.value;
-                              }
-
-                              field.onChange(field.value);
+                              handleInput(e.target.value, (e: number) => {
+                                field.value[i].commission = e;
+                                field.onChange(field.value);
+                              });
                             }}
                             error={Boolean(
                               checkBoxesError(fieldState, i, "commission")
@@ -464,6 +622,29 @@ export default function PaymentBoxForm(props: Props) {
                               i,
                               "commission"
                             )}`}
+                          />
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            inputProps={{
+                              inputMode: "numeric",
+                              pattern: "-?[0-9]*",
+                            }}
+                            label="Swap"
+                            value={res.swap}
+                            required
+                            onChange={(e) => {
+                              handleInput(e.target.value, (e: number) => {
+                                field.value[i].swap = e;
+                                field.onChange(field.value);
+                              });
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "swap")
+                            )}
+                            helperText={`${FormatNumberWithFixed(
+                              res.swap ?? 0
+                            )}  ${checkBoxesError(fieldState, i, "swap")}`}
                           />
                         </div>
                         {/* {i !== forms.clients.length - 1 && (
@@ -555,7 +736,6 @@ export default function PaymentBoxForm(props: Props) {
                             required
                             onChange={(e) => {
                               field.value[i].name = e.target.value;
-
                               field.onChange(field.value);
                             }}
                             error={Boolean(
@@ -565,18 +745,18 @@ export default function PaymentBoxForm(props: Props) {
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
-                            type="number"
+                            inputProps={{
+                              inputMode: "numeric",
+                              pattern: "-?[0-9]*",
+                            }}
                             label="Expensive"
                             value={res.expensive}
                             required
                             onChange={(e) => {
-                              if (Number.isNaN(e.target.value)) {
-                                field.value[i].expensive = 1;
-                              } else {
-                                field.value[i].expensive = +e.target.value;
-                              }
-
-                              field.onChange(field.value);
+                              handleInput(e.target.value, (e: number) => {
+                                field.value[i].expensive = e;
+                                field.onChange(field.value);
+                              });
                             }}
                             error={Boolean(
                               checkBoxesError(fieldState, i, "expensive")
@@ -672,7 +852,6 @@ export default function PaymentBoxForm(props: Props) {
                             required
                             onChange={(e) => {
                               field.value[i].name = e.target.value;
-
                               field.onChange(field.value);
                             }}
                             error={Boolean(
@@ -682,18 +861,18 @@ export default function PaymentBoxForm(props: Props) {
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
-                            type="number"
+                            inputProps={{
+                              inputMode: "numeric",
+                              pattern: "-?[0-9]*",
+                            }}
                             label="P_l"
                             value={res.p_l}
                             required
                             onChange={(e) => {
-                              if (Number.isNaN(e.target.value)) {
-                                field.value[i].p_l = 1;
-                              } else {
-                                field.value[i].p_l = +e.target.value;
-                              }
-
-                              field.onChange(field.value);
+                              handleInput(e.target.value, (e: number) => {
+                                field.value[i].p_l = e;
+                                field.onChange(field.value);
+                              });
                             }}
                             error={Boolean(
                               checkBoxesError(fieldState, i, "p_l")
@@ -787,7 +966,6 @@ export default function PaymentBoxForm(props: Props) {
                             required
                             onChange={(e) => {
                               field.value[i].name = e.target.value;
-
                               field.onChange(field.value);
                             }}
                             error={Boolean(
@@ -797,18 +975,18 @@ export default function PaymentBoxForm(props: Props) {
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
-                            type="number"
+                            inputProps={{
+                              inputMode: "numeric",
+                              pattern: "-?[0-9]*",
+                            }}
                             label="Commission"
                             value={res.commission}
                             required
                             onChange={(e) => {
-                              if (Number.isNaN(e.target.value)) {
-                                field.value[i].commission = 1;
-                              } else {
-                                field.value[i].commission = +e.target.value;
-                              }
-
-                              field.onChange(field.value);
+                              handleInput(e.target.value, (e: number) => {
+                                field.value[i].commission = e;
+                                field.onChange(field.value);
+                              });
                             }}
                             error={Boolean(
                               checkBoxesError(fieldState, i, "commission")
@@ -859,14 +1037,15 @@ export default function PaymentBoxForm(props: Props) {
             />
             {/* ************Agent Boxes End************ */}
 
-            {/* ************Coverage Boxes start************ */}
+            {/* ************Adjustment Boxes start************ */}
+
             <div style={{ margin: "0px 0px 0px" }}>
-              <h1 className="text-2xl">Coverage</h1>
+              <h1 className="text-2xl">Adjustment</h1>
             </div>
             <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
             <Controller
               control={form.control}
-              name="coverage"
+              name="adjustment"
               render={({ field, fieldState }) => {
                 return (
                   <>
@@ -880,7 +1059,7 @@ export default function PaymentBoxForm(props: Props) {
                     {field.value?.map((res, i) => (
                       <div key={i}>
                         <div className="flex justify-between items-center">
-                          <h1>Coverage Box: {i + 1}</h1>
+                          <h1>Adjustment Box: {i + 1}</h1>
                           <Button
                             onClick={() => {
                               field.onChange(
@@ -901,101 +1080,46 @@ export default function PaymentBoxForm(props: Props) {
                             InputLabelProps={{ shrink: true }}
                             size="small"
                             type="text"
-                            label="Account"
-                            value={res.account}
+                            label="Name"
+                            value={res.name}
                             required
                             onChange={(e) => {
-                              field.value[i].account = e.target.value;
-
+                              field.value[i].name = e.target.value;
                               field.onChange(field.value);
                             }}
                             error={Boolean(
-                              checkBoxesError(fieldState, i, "account")
+                              checkBoxesError(fieldState, i, "name")
                             )}
                           />
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
-                            type="number"
-                            label="Starting Float"
-                            value={res.starting_float}
+                            inputProps={{
+                              inputMode: "numeric",
+                              pattern: "-?[0-9]*",
+                            }}
+                            label="Adjustment"
+                            value={res.adjustment}
                             required
                             onChange={(e) => {
-                              if (Number.isNaN(e.target.value)) {
-                                field.value[i].starting_float = 1;
-                              } else {
-                                field.value[i].starting_float = +e.target.value;
-                              }
-
-                              field.onChange(field.value);
+                              handleInput(e.target.value, (e: number) => {
+                                field.value[i].adjustment = e;
+                                field.onChange(field.value);
+                              });
                             }}
                             error={Boolean(
-                              checkBoxesError(fieldState, i, "starting_float")
+                              checkBoxesError(fieldState, i, "adjustment")
                             )}
                             helperText={`${FormatNumberWithFixed(
-                              res.starting_float ?? 0
+                              res.adjustment ?? 0
                             )}  ${checkBoxesError(
                               fieldState,
                               i,
-                              "starting_float"
-                            )}`}
-                          />
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            type="number"
-                            label="Current Float"
-                            value={res.current_float}
-                            required
-                            onChange={(e) => {
-                              if (Number.isNaN(e.target.value)) {
-                                field.value[i].current_float = 1;
-                              } else {
-                                field.value[i].current_float = +e.target.value;
-                              }
-
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "current_float")
-                            )}
-                            helperText={`${FormatNumberWithFixed(
-                              res.current_float ?? 0
-                            )}  ${checkBoxesError(
-                              fieldState,
-                              i,
-                              "current_float"
-                            )}`}
-                          />
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            type="number"
-                            label="Closed P_l"
-                            value={res.closed_p_l}
-                            required
-                            onChange={(e) => {
-                              if (Number.isNaN(e.target.value)) {
-                                field.value[i].closed_p_l = 1;
-                              } else {
-                                field.value[i].closed_p_l = +e.target.value;
-                              }
-
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "closed_p_l")
-                            )}
-                            helperText={`${FormatNumberWithFixed(
-                              res.closed_p_l ?? 0
-                            )}  ${checkBoxesError(
-                              fieldState,
-                              i,
-                              "closed_p_l"
+                              "adjustment"
                             )}`}
                           />
                         </div>
-                        {/* {i !== forms.coverage.length - 1 && (
+                        {/* {i !== forms.agents.length - 1 && (
                           <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
                         )} */}
                       </div>
@@ -1013,13 +1137,11 @@ export default function PaymentBoxForm(props: Props) {
                         color="dark"
                         onClick={() => {
                           form.setValue(
-                            "coverage",
-                            form.watch("coverage").concat([
+                            "adjustment",
+                            form.watch("adjustment").concat([
                               {
-                                starting_float: 0,
-                                current_float: 0,
-                                closed_p_l: 0,
-                                account: "",
+                                adjustment: 0,
+                                name: "",
                               },
                             ])
                           );
@@ -1032,7 +1154,122 @@ export default function PaymentBoxForm(props: Props) {
                 );
               }}
             />
-            {/* ************Coverage Boxes End************ */}
+            {/* ************Adjustment Boxes End************ */}
+
+            {/* ************Credit Boxes start************ */}
+
+            <div style={{ margin: "0px 0px 0px" }}>
+              <h1 className="text-2xl">Credit</h1>
+            </div>
+            <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
+            <Controller
+              control={form.control}
+              name="credit"
+              render={({ field, fieldState }) => {
+                return (
+                  <>
+                    {Boolean(fieldState.error?.message) && (
+                      <Alert variant="outlined" severity="error">
+                        <AlertTitle>
+                          {fieldState.error.message.replaceAll("#space#", "\n")}
+                        </AlertTitle>
+                      </Alert>
+                    )}
+                    {field.value?.map((res, i) => (
+                      <div key={i}>
+                        <div className="flex justify-between items-center">
+                          <h1>Credit Box: {i + 1}</h1>
+                          <Button
+                            onClick={() => {
+                              field.onChange(
+                                field.value.filter((res, ii) => i !== ii)
+                              );
+                            }}
+                            size="sm"
+                            className="bg-black"
+                            color="dark"
+                            type="button"
+                          >
+                            <X size="15" />
+                          </Button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-1 mt-5">
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            type="text"
+                            label="Name"
+                            value={res.name}
+                            required
+                            onChange={(e) => {
+                              field.value[i].name = e.target.value;
+                              field.onChange(field.value);
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "name")
+                            )}
+                          />
+                          <TextField
+                            InputLabelProps={{ shrink: true }}
+                            size="small"
+                            inputProps={{
+                              inputMode: "numeric",
+                              pattern: "-?[0-9]*",
+                            }}
+                            label="Credit"
+                            value={res.credit}
+                            required
+                            onChange={(e) => {
+                              handleInput(e.target.value, (e: number) => {
+                                field.value[i].credit = e;
+                                field.onChange(field.value);
+                              });
+                            }}
+                            error={Boolean(
+                              checkBoxesError(fieldState, i, "credit")
+                            )}
+                            helperText={`${FormatNumberWithFixed(
+                              res.credit ?? 0
+                            )}  ${checkBoxesError(fieldState, i, "credit")}`}
+                          />
+                        </div>
+                        {/* {i !== forms.agents.length - 1 && (
+                          <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
+                        )} */}
+                      </div>
+                    ))}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        marginTop: 10,
+                      }}
+                    >
+                      <Button
+                        type="button"
+                        className="bg-black"
+                        color="dark"
+                        onClick={() => {
+                          form.setValue(
+                            "credit",
+                            form.watch("credit").concat([
+                              {
+                                credit: 0,
+                                name: "",
+                              },
+                            ])
+                          );
+                        }}
+                      >
+                        <PlusSquare />
+                      </Button>
+                    </div>
+                  </>
+                );
+              }}
+            />
+            {/* ************Credit Boxes End************ */}
           </CardContent>
         </Card>
       )}
