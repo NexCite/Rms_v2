@@ -243,14 +243,32 @@ export default function Account_EntryTable(props: Props) {
               original: { username, id },
             },
           }) => [
-            <Authorized permission="Edit_Account_Entry" key={1}>
+            <Authorized
+              permission={
+                props.node === "Client"
+                  ? "Edit_Entry_Client"
+                  : props.node === "IB"
+                  ? "Edit_Entry_IB"
+                  : "Edit_Entry_Supplier"
+              }
+              key={1}
+            >
               <Link href={pathName + "/form?id=" + id}>
                 <MenuItem className="cursor-pointer" disabled={isActive}>
                   Edit
                 </MenuItem>
               </Link>
             </Authorized>,
-            <Authorized permission="Delete_Account_Entry" key={2}>
+            <Authorized
+              permission={
+                props.node === "Client"
+                  ? "Delete_Entry_Client"
+                  : props.node === "IB"
+                  ? "Delete_Entry_IB"
+                  : "Delete_Entry_Supplier"
+              }
+              key={2}
+            >
               <MenuItem
                 disabled={isActive}
                 className="cursor-pointer"
