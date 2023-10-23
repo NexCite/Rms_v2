@@ -551,10 +551,6 @@ enum UserPermission {
   Add_Equity
   Edit_Equity
   Delete_Equity
-  Add_Account_Entry
-  Edit_Account_Entry
-  Delete_Account_Entry
-  View_Account_Entry
   View_Account_Entries
   Add_Two_Digit
   View_Export_Entry
@@ -579,9 +575,7 @@ enum UserPermission {
   View_Entry
   View_Entries
   Accounting
-  Accounting_Level
   Trading
-  Account_Entry
   Setting
   View_Invoice
   Edit_Invoice
