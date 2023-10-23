@@ -551,7 +551,6 @@ enum UserPermission {
   Add_Equity
   Edit_Equity
   Delete_Equity
-  View_Account_Entries
   Add_Two_Digit
   View_Export_Entry
   Edit_Two_Digit
