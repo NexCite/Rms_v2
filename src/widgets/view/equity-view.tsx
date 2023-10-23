@@ -134,7 +134,7 @@ export default function EquityView(props: Props) {
     <Style>
       <div className="border rounded-md p-3 flex gap-2 flex-col">
         <div className="flex flex-row-reverse gap-5">
-          <Authorized permission="Edit_Payment_Box">
+          <Authorized permission="Edit_Equity">
             <Link href={`/admin/payment_box/box/form?id=${props.equity.id}`}>
               <Button
                 variant="contained"
@@ -147,7 +147,7 @@ export default function EquityView(props: Props) {
               </Button>
             </Link>
           </Authorized>
-          <Authorized permission="Delete_Payment_Box">
+          <Authorized permission="Delete_Equity">
             <LoadingButton
               variant="contained"
               disableElevation

@@ -546,11 +546,6 @@ enum EntryType {
 
 enum UserPermission {
   PaymentBox
-  View_Payment_Box
-  View_Payment_Boxs
-  Add_Payment_Box
-  Edit_Payment_Box
-  Delete_Payment_Box
   View_Equity
   View_Equities
   Add_Equity
@@ -691,7 +686,7 @@ model CoverageBox {
   starting_float Float
   current_float  Float
   closed_p_l     Float
-  equity_id Int
+  equity_id      Int
   payment_box    Equity  @relation(fields: [equity_id], references: [id], onDelete: Cascade)
   config_id      Int?
   config         Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
@@ -708,10 +703,10 @@ model ManagerBox {
   commission     Float
   swap           Float
 
-  equity_id Int
-  payment_box    Equity  @relation(fields: [equity_id], references: [id], onDelete: Cascade)
-  config_id      Int?
-  config         Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  equity_id   Int
+  payment_box Equity  @relation(fields: [equity_id], references: [id], onDelete: Cascade)
+  config_id   Int?
+  config      Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id, equity_id], name: "unique_combination")
 }
@@ -721,10 +716,10 @@ model AgentBox {
   name       String
   commission Float
 
-  equity_id Int
-  payment_box    Equity  @relation(fields: [equity_id], references: [id], onDelete: Cascade)
-  config_id      Int?
-  config         Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  equity_id   Int
+  payment_box Equity  @relation(fields: [equity_id], references: [id], onDelete: Cascade)
+  config_id   Int?
+  config      Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id, equity_id], name: "unique_combination")
 }
@@ -734,10 +729,10 @@ model P_LBox {
   name String
   p_l  Float
 
-  equity_id Int
-  payment_box    Equity  @relation(fields: [equity_id], references: [id], onDelete: Cascade)
-  config_id      Int?
-  config         Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  equity_id   Int
+  payment_box Equity  @relation(fields: [equity_id], references: [id], onDelete: Cascade)
+  config_id   Int?
+  config      Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id, equity_id], name: "unique_combination")
 }
@@ -747,10 +742,10 @@ model ExpensiveBox {
   name      String
   expensive Float
 
-  equity_id Int
-  payment_box    Equity  @relation(fields: [equity_id], references: [id], onDelete: Cascade)
-  config_id      Int?
-  config         Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  equity_id   Int
+  payment_box Equity  @relation(fields: [equity_id], references: [id], onDelete: Cascade)
+  config_id   Int?
+  config      Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id, equity_id], name: "unique_combination")
 }
@@ -760,10 +755,10 @@ model CreditBox {
   name   String
   credit Float
 
-  equity_id Int
-  payment_box    Equity  @relation(fields: [equity_id], references: [id], onDelete: Cascade)
-  config_id      Int?
-  config         Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  equity_id   Int
+  payment_box Equity  @relation(fields: [equity_id], references: [id], onDelete: Cascade)
+  config_id   Int?
+  config      Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id, equity_id], name: "unique_combination")
 }
@@ -773,10 +768,10 @@ model AdjustmentBox {
   name       String
   adjustment Float
 
-  equity_id Int
-  payment_box    Equity  @relation(fields: [equity_id], references: [id], onDelete: Cascade)
-  config_id      Int?
-  config         Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  equity_id   Int
+  payment_box Equity  @relation(fields: [equity_id], references: [id], onDelete: Cascade)
+  config_id   Int?
+  config      Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id, equity_id], name: "unique_combination")
 }
