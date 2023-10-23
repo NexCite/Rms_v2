@@ -11,6 +11,7 @@ import { Sidebar } from "./side-bar";
 
 import AppConfig from "../../../app-config.json";
 import { MenuIcon } from "lucide-react";
+import { MdClose } from "react-icons/md";
 type Props = {
   children: React.ReactNode;
   routes: RouteModel[];
@@ -59,16 +60,18 @@ export default function AppBar(props: Props) {
       <aside
         id="cta-button-sidebar"
         className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform ${
-          show ? "-translate-x-full sm:translate-x-0" : " -translate-x-full "
+          show ? "sm:translate-x-0" : " -translate-x-full "
         } `}
         aria-label="Sidebar"
       >
         <div className="h-full border border-gray-200  overflow-y-auto bg-gray-50 dark:bg-gray-800">
           <Sidebar
             menu={
-              <IconButton onClick={(e) => setShow(!show)}>
-                <MenuIcon />
-              </IconButton>
+              <div className="sm:hidden">
+                <IconButton onClick={(e) => setShow(!show)}>
+                  <MdClose />
+                </IconButton>
+              </div>
             }
             config={props.config}
             routers={props.routes}
@@ -76,15 +79,18 @@ export default function AppBar(props: Props) {
         </div>
       </aside>
 
-      <div className={`  ${show ? "sm:ml-64" : ""}   flex flex-col `}>
+      <div className={`  ${show ? "sm:ml-64" : ""}   flex flex-col static  `}>
         {subRouteTitle && (
-          <div className="flex justify-between items-center  border dark:border-gray-700 p-3">
+          <div className="flex justify-between items-center  border dark:border-gray-700 p-3 static">
             <div className="flex items-center gap-4 justify-start">
-              {!canGoBack && !show && (
-                <IconButton onClick={(e) => setShow(!show)}>
-                  <MenuIcon />
-                </IconButton>
-              )}
+              <div>
+                {" "}
+                {
+                  <IconButton onClick={(e) => setShow(!show)}>
+                    <MenuIcon />
+                  </IconButton>
+                }
+              </div>
               {canGoBack && <BackButton />}
               <h1 className="text-3xl">{subRouteTitle}</h1>
             </div>

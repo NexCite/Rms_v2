@@ -6,7 +6,7 @@ import { handlerServiceAction } from "@rms/lib/handler";
 import prisma from "@rms/prisma/prisma";
 import { confirmActivity } from "./activity-service";
 import { ActivityStatus } from "@rms/models/CommonModel";
-import { copyMediaTemp } from "./media-service";
+import { copyMediaTemp, deleteMedia } from "./media-service";
 export async function createEntry(
   props: Prisma.EntryUncheckedCreateInput,
   activity?: {
@@ -46,6 +46,18 @@ export async function updateEntry(
     async (auth, config_id) => {
       props.user_id = auth.id;
       props.config_id = config_id;
+      const result = await prisma.entry.findUnique({
+        where: { config_id, id: id },
+        include: { media: true },
+      });
+      await prisma.subEntry.deleteMany({ where: { entry_id: id } });
+      await prisma.media.deleteMany({ where: { entry_id: id } });
+
+      try {
+        await deleteMedia(result.media.path);
+      } catch (e) {}
+      console.log(props);
+
       await prisma.entry.update({ data: props, where: { id: id, config_id } });
       return;
     },

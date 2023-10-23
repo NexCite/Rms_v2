@@ -30,7 +30,6 @@ export default function DigitTable(props: Props) {
   const [isPadding, setPadding] = useTransition();
 
   const store = useStore();
-  const { push } = useRouter();
 
   const columns = useMemo<MRT_ColumnDef<any>[]>(
     () =>
@@ -106,10 +105,10 @@ export default function DigitTable(props: Props) {
         title={
           <Typography variant="h5">
             {props.node === "two"
-              ? "Two Digit And More"
+              ? "Two Digit Or More"
               : props.node === "three"
-              ? "Tree Digit And More "
-              : "More Digit Then Four "}{" "}
+              ? "Tree Digit Or More "
+              : "Four Digit Or More "}{" "}
             Table
           </Typography>
         }

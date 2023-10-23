@@ -86,7 +86,7 @@ model User {
   sub_categories       SubCategory[]
   categories           Category[]
   config_id            Int?
-  config               Config?                @relation(fields: [config_id], references: [id])
+  config               Config?                @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, username, config_id, phone_number], name: "unique_combination")
 }
@@ -108,7 +108,7 @@ model Employee {
   user_id       Int
   user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   config_id     Int?
-  config        Config?  @relation(fields: [config_id], references: [id])
+  config        Config?  @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([username, id, config_id], name: "unique_combination")
 }
@@ -133,7 +133,7 @@ model Trader {
   broker        Broker?   @relation(fields: [broker_id], references: [id], onDelete: Cascade)
   user          User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   config_id     Int?
-  config        Config?   @relation(fields: [config_id], references: [id])
+  config        Config?   @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([username, id, config_id, phone_number], name: "unique_combination")
 }
@@ -157,7 +157,7 @@ model Broker {
   traders       Trader[]
   invoices      Invoice[]
   config_id     Int?
-  config        Config?   @relation(fields: [config_id], references: [id])
+  config        Config?   @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, username, config_id, phone_number], name: "unique_combination")
 }
@@ -172,7 +172,7 @@ model Log {
   error       String?
   user        User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
   config_id   Int?
-  config      Config?  @relation(fields: [config_id], references: [id])
+  config      Config?  @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id], name: "unique_combination")
 }
@@ -192,7 +192,7 @@ model Auth {
   status      Status
   create_date DateTime @default(now())
   config_id   Int?
-  config      Config?  @relation(fields: [config_id], references: [id])
+  config      Config?  @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([token, id, config_id], name: "unique_combination")
 }
@@ -211,7 +211,7 @@ model Account {
   currency      Currency  @relation(fields: [currency_id], references: [id], onDelete: Cascade)
   invoices      Invoice[]
   config_id     Int?
-  config        Config?   @relation(fields: [config_id], references: [id])
+  config        Config?   @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([username, id, config_id], name: "unique_combination")
 }
@@ -240,7 +240,7 @@ model Invoice {
   debit_credit    DebitCreditType @default(Debit)
   sub_category    SubCategory     @relation(fields: [sub_category_id], references: [id], onDelete: Cascade)
   config_id       Int?
-  config          Config?         @relation(fields: [config_id], references: [id])
+  config          Config?         @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id], name: "unique_combination")
 }
@@ -262,7 +262,7 @@ model Payment {
   invoice       Invoice     @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
   invoice_id    Int
   config_id     Int?
-  config        Config?     @relation(fields: [config_id], references: [id])
+  config        Config?     @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id], name: "unique_combination")
 }
@@ -286,7 +286,7 @@ model Media {
 
   payment   Payment? @relation(fields: [payment_id], references: [id], onDelete: Cascade)
   config_id Int?
-  config    Config?  @relation(fields: [config_id], references: [id])
+  config    Config?  @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id, invoice_id, payment_id, entry_id], name: "unique_combination")
 }
@@ -304,7 +304,7 @@ model Currency {
   user_id       Int?
   user          User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   config_id     Int?
-  config        Config?   @relation(fields: [config_id], references: [id])
+  config        Config?   @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id, name, symbol], name: "unique_combination")
 }
@@ -320,7 +320,7 @@ model Category {
 
   user      User?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   config_id Int?
-  config    Config? @relation(fields: [config_id], references: [id])
+  config    Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id, name], name: "unique_combination")
 }
@@ -338,7 +338,7 @@ model SubCategory {
 
   user      User?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   config_id Int?
-  config    Config? @relation(fields: [config_id], references: [id])
+  config    Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id, name, category_id], name: "unique_combination")
 }
@@ -411,7 +411,7 @@ model Two_Digit {
   type         DigitType?
   debit_credit DebitCreditType?
   config_id    Int?
-  config       Config?          @relation(fields: [config_id], references: [id])
+  config       Config?          @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id, name], name: "unique_combination")
 }
@@ -434,7 +434,7 @@ model Three_Digit {
   user_id     Int?
   user        User?      @relation(fields: [user_id], references: [id], onDelete: Cascade)
   config_id   Int?
-  config      Config?    @relation(fields: [config_id], references: [id])
+  config      Config?    @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id, name, two_digit_id], name: "unique_combination")
 }
@@ -456,7 +456,7 @@ model More_Than_Four_Digit {
 
   user      User?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   config_id Int?
-  config    Config? @relation(fields: [config_id], references: [id])
+  config    Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id, name, three_digit_id], name: "unique_combination")
 }
@@ -487,8 +487,8 @@ model Account_Entry {
   ref_entries             SubEntry[]            @relation("reference")
   type                    Account_Entry_Type?
   config_id               Int?
-  config                  Config?               @relation(fields: [config_id], references: [id])
-  info                    String?
+  config                  Config?               @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  info                    String?               @default("")
 
   @@unique([id, config_id], name: "unique_combination")
 }
@@ -509,7 +509,7 @@ model Entry {
   user_id       Int?
   user          User?      @relation(fields: [user_id], references: [id], onDelete: Cascade)
   config_id     Int?
-  config        Config?    @relation(fields: [config_id], references: [id])
+  config        Config?    @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id], name: "unique_combination")
 }
@@ -532,7 +532,7 @@ model SubEntry {
   entry_id                Int
   entry                   Entry                 @relation(fields: [entry_id], references: [id], onDelete: Cascade)
   config_id               Int?
-  config                  Config?               @relation(fields: [config_id], references: [id])
+  config                  Config?               @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id, entry_id], name: "unique_combination")
 }
@@ -545,6 +545,7 @@ enum EntryType {
 enum UserPermission {
   PaymentBox
   View_Payment_Box
+  View_Payment_Boxs
   Add_Payment_Box
   Edit_Payment_Box
   Delete_Payment_Box
@@ -670,7 +671,7 @@ model PaymentBox {
   p_l            P_LBox[]
   expensive_box  ExpensiveBox[]
   config_id      Int?
-  config         Config?        @relation(fields: [config_id], references: [id])
+  config         Config?        @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id], name: "unique_combination")
 }
@@ -684,7 +685,7 @@ model CoverageBox {
   payment_box_id Int
   payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id], onDelete: Cascade)
   config_id      Int?
-  config         Config?    @relation(fields: [config_id], references: [id])
+  config         Config?    @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id, payment_box_id], name: "unique_combination")
 }
@@ -701,7 +702,7 @@ model ManagerBox {
   payment_box_id Int
   payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id], onDelete: Cascade)
   config_id      Int?
-  config         Config?    @relation(fields: [config_id], references: [id])
+  config         Config?    @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id, payment_box_id], name: "unique_combination")
 }
@@ -714,7 +715,7 @@ model AgentBox {
   payment_box_id Int
   payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id], onDelete: Cascade)
   config_id      Int?
-  config         Config?    @relation(fields: [config_id], references: [id])
+  config         Config?    @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id, payment_box_id], name: "unique_combination")
 }
@@ -727,7 +728,7 @@ model P_LBox {
   payment_box_id Int
   payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id], onDelete: Cascade)
   config_id      Int?
-  config         Config?    @relation(fields: [config_id], references: [id])
+  config         Config?    @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id, payment_box_id], name: "unique_combination")
 }
@@ -740,7 +741,7 @@ model ExpensiveBox {
   payment_box_id Int
   payment_box    PaymentBox @relation(fields: [payment_box_id], references: [id], onDelete: Cascade)
   config_id      Int?
-  config         Config?    @relation(fields: [config_id], references: [id])
+  config         Config?    @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id, payment_box_id], name: "unique_combination")
 }

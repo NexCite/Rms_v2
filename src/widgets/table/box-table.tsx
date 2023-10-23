@@ -243,7 +243,13 @@ export default function BoxTable(props: Props) {
                 </MenuItem>
               </Link>
             </Authorized>,
-
+            <Authorized permission="View_Payment_Box" key={2}>
+              <Link href={pathName + "/" + id}>
+                <MenuItem className="cursor-pointer" disabled={isPadding}>
+                  View
+                </MenuItem>
+              </Link>
+            </Authorized>,
             <Authorized permission="Delete_Payment_Box" key={3}>
               <MenuItem
                 disabled={isPadding}

@@ -232,7 +232,7 @@ export default function Account_EntryTable(props: Props) {
     <Style>
       <Card>
         <CardHeader
-          title={<Typography variant="h5">{props.node}s Table</Typography>}
+          title={<Typography variant="h5">{props.node} Table</Typography>}
         />
         <MaterialReactTable
           columns={columns}

@@ -13,7 +13,9 @@ export default async function page(props: {
   searchParams: { id: string; activity_id: string };
 }) {
   var id: number,
-    entry: Prisma.EntryGetPayload<{ include: { media: true } }>,
+    entry: Prisma.EntryGetPayload<{
+      include: { media: true; sub_entries: true };
+    }>,
     activity_id: number | undefined;
   var activity: Activity;
   const config_id = await getConfigId();
@@ -31,6 +33,7 @@ export default async function page(props: {
       where: { id: id, config_id },
       include: {
         media: true,
+        sub_entries: true,
       },
     });
     if (!entry) {

@@ -424,7 +424,7 @@ export default async function Entry(props: {
     entries = entries.filter((res) => {
       return (
         res.sub_entries.filter((res) => {
-          if (props.searchParams.include_reference !== "true") {
+          if (props.searchParams.include_reference === "true") {
             return (
               res.account_entry_id === account_id ||
               res.reference_id === account_id
@@ -434,6 +434,10 @@ export default async function Entry(props: {
           }
         }).length > 0
       );
+    });
+  } else if (props.searchParams.include_reference !== "true") {
+    entries = entries.filter((res) => {
+      return res.sub_entries.filter((res) => res.reference_id).length === 0;
     });
   }
 

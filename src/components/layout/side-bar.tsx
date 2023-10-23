@@ -39,7 +39,7 @@ export function Sidebar(props: Props) {
   );
 
   return (
-    <Card className="h-full w-full rounded-none flex flex-col">
+    <Card className="h-full w-full rounded-none flex flex-col overflow-y-auto">
       <div className="flex  p-3  flex-row justify-between items-center">
         <Image
           src={`/api/media${props.config.logo}`}

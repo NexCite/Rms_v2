@@ -411,7 +411,7 @@ export default function ExportEntryDataTable(props: Props) {
     });
 
     return { entries, totalDebit, totalCredit, currencies };
-  }, [props.data, search]);
+  }, [props.data]);
 
   const titleRef = useRef<HTMLHeadingElement>();
   const { toPDF, targetRef } = usePDF();
@@ -651,7 +651,7 @@ export default function ExportEntryDataTable(props: Props) {
               <>
                 <div className="flex  items-center gap-4 p-5">
                   <Image
-                    src={"/api/media/" + props.config.logo}
+                    src={"/api/media" + props.config.logo}
                     width={60}
                     height={60}
                     alt="logo"

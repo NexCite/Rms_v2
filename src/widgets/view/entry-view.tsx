@@ -1,6 +1,5 @@
 "use client";
 import { Prisma } from "@prisma/client";
-import { Button } from "@rms/components/ui/button";
 import { FormatNumberWithFixed } from "@rms/lib/global";
 import { deleteEntry } from "@rms/service/entry-service";
 import moment from "moment";
@@ -10,6 +9,7 @@ import React, { useMemo, useTransition } from "react";
 import styled from "@emotion/styled";
 import { useStore } from "@rms/hooks/toast-hook";
 import {
+  Button,
   CircularProgress,
   Table,
   TableBody,
@@ -18,6 +18,7 @@ import {
   TableRow,
 } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
+import Authorized from "@rms/components/ui/authorized";
 
 type Props = {
   entry: Prisma.EntryGetPayload<{
@@ -38,7 +39,7 @@ type Props = {
 };
 
 export default function EntryView(props: Props) {
-  const { push } = useRouter();
+  const { back } = useRouter();
 
   const amount = useMemo(() => {
     var a = 0;
@@ -55,44 +56,60 @@ export default function EntryView(props: Props) {
   return (
     <Style className="card">
       <div className="mb-10 gap-5 justify-end flex">
-        <LoadingButton
-          className={
-            isPadding
-              ? ""
-              : "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
-          }
-          onClick={() => {
-            const isConfirm = confirm(
-              `Do You sure you want to delete ${props.entry.title} id:${props.entry.id} `
-            );
-            if (isConfirm) {
-              setPadding(async () => {
-                const result = await deleteEntry(props.entry.id);
-
-                store.OpenAlert({
-                  ...result,
-                  replace: "/admin/accounting/entry",
-                });
-              });
+        <Authorized permission="Delete_Entry">
+          <LoadingButton
+            variant="contained"
+            disableElevation
+            className={
+              "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
             }
-          }}
-          loading={isPadding}
-        >
-          {isPadding ? (
-            <>
-              {" "}
-              <CircularProgress sx={{ color: "black" }} />
-            </>
-          ) : (
-            "Delete"
-          )}
-        </LoadingButton>
+            onClick={() => {
+              const isConfirm = confirm(
+                `Do You sure you want to delete ${props.entry.title} id:${props.entry.id} `
+              );
+              if (isConfirm) {
+                setPadding(async () => {
+                  const result = await deleteEntry(props.entry.id);
 
-        <Link href={`/admin/accounting/entry/form?id=${props.entry.id}`}>
-          <Button>Edit</Button>
-        </Link>
+                  store.OpenAlert({
+                    ...result,
+                    replace: "/admin/accounting/entry",
+                  });
+                  if (result.status === 200) {
+                    back();
+                  }
+                });
+              }
+            }}
+            loading={isPadding}
+          >
+            Delete
+          </LoadingButton>
+        </Authorized>
+
+        <Authorized permission="Edit_Entry">
+          <Link href={`/admin/accounting/entry/form?id=${props.entry.id}`}>
+            <Button
+              variant="contained"
+              disableElevation
+              className={
+                "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
+              }
+            >
+              Edit
+            </Button>
+          </Link>
+        </Authorized>
         <Link href={pathName + "/export"}>
-          <Button>Export</Button>
+          <Button
+            variant="contained"
+            disableElevation
+            className={
+              "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
+            }
+          >
+            Export
+          </Button>
         </Link>
       </div>
       <Table>
