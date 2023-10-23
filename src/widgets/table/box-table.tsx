@@ -88,7 +88,7 @@ export default function BoxTable(props: Props) {
 
       {
         accessorKey: "manager_boxes",
-        header: "Total Manager",
+        header: "Total Clients",
         muiTableHeadCellProps: {
           align: "center",
         },
@@ -111,7 +111,7 @@ export default function BoxTable(props: Props) {
           });
 
           return `$${FormatNumberWithFixed(
-            starting_float - current_float + p_l + commission + swap
+            current_float - starting_float + p_l + commission + swap
           )}`;
         },
       },
@@ -185,23 +185,38 @@ export default function BoxTable(props: Props) {
         },
 
         Cell(props) {
-          const coverage = +(
-              props.row.getAllCells()[4].getValue() as string
-            ).replace("$", ""),
-            manager = +(
-              props.row.getAllCells()[5].getValue() as string
-            ).replace("$", ""),
-            agent = +(props.row.getAllCells()[6].getValue() as string).replace(
-              "$",
-              ""
+          const coverage = parseFloat(
+              (props.row.getAllCells()[4].getValue() as string).replace(
+                /[$,]/g,
+                ""
+              )
             ),
-            p_l = +(props.row.getAllCells()[7].getValue() as string).replace(
-              "$",
-              ""
+            manager = parseFloat(
+              (props.row.getAllCells()[5].getValue() as string).replace(
+                /[$,]/g,
+                ""
+              )
             ),
-            expensive = +(
-              props.row.getAllCells()[8].getValue() as string
-            ).replace("$", "");
+            agent = parseFloat(
+              (props.row.getAllCells()[6].getValue() as string).replace(
+                /[$,]/g,
+                ""
+              )
+            ),
+            p_l = parseFloat(
+              (props.row.getAllCells()[7].getValue() as string).replace(
+                /[$,]/g,
+                ""
+              )
+            ),
+            expensive = parseFloat(
+              (props.row.getAllCells()[8].getValue() as string).replace(
+                /[$,]/g,
+                ""
+              )
+            );
+
+          console.log(coverage, manager, agent, p_l, expensive);
           const total = coverage - manager + agent + p_l - expensive;
 
           return (

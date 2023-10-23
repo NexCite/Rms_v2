@@ -81,8 +81,8 @@ export default function PaymentBoxView(props: Props) {
     });
 
     manager_boxes =
-      starting_float_manager -
-      current_float_manager +
+      current_float_manager -
+      starting_float_manager +
       p_l_manager +
       commission_manager +
       swap_manager;
@@ -187,7 +187,7 @@ export default function PaymentBoxView(props: Props) {
           </CardContent>
         </Card>
         <Card variant="outlined">
-          <CardHeader title="Total Manager" />
+          <CardHeader title="Total Clients" />
           <CardContent className="mt-0 pt-0">
             <Typography variant="h5">
               ${FormatNumberWithFixed(manager_boxes)}
@@ -246,7 +246,6 @@ export default function PaymentBoxView(props: Props) {
               <TableBody>
                 {props.payment_box.coverage_boxes.map((res, i) => (
                   <TableRow key={i}>
-                    {res.id}
                     <TableCell align="center">{res.account}</TableCell>
                     <TableCell align="center">
                       ${FormatNumberWithFixed(res.starting_float)}

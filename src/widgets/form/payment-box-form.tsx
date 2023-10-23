@@ -72,9 +72,9 @@ export default function PaymentBoxForm(props: Props) {
     coverage: z.array(
       z.object({
         account: z.string(),
-        starting_float: z.number().min(0),
-        current_float: z.number().min(0),
-        closed_p_l: z.number().min(0),
+        starting_float: z.number(),
+        current_float: z.number(),
+        closed_p_l: z.number(),
       })
     ),
     managers: z.array(
@@ -82,11 +82,11 @@ export default function PaymentBoxForm(props: Props) {
         manger: z
           .string()
           .min(1, { message: "Manager must be at least 1 characters" }),
-        starting_float: z.number().min(0),
-        current_float: z.number().min(0),
-        p_l: z.number().min(0),
-        commission: z.number().min(0),
-        swap: z.number().min(0),
+        starting_float: z.number(),
+        current_float: z.number(),
+        p_l: z.number(),
+        commission: z.number(),
+        swap: z.number(),
       })
     ),
     agents: z.array(
@@ -94,7 +94,7 @@ export default function PaymentBoxForm(props: Props) {
         name: z
           .string()
           .min(1, { message: "Name must be at least 1 characters" }),
-        commission: z.number().min(0),
+        commission: z.number(),
       })
     ),
     p_l: z.array(
@@ -102,7 +102,7 @@ export default function PaymentBoxForm(props: Props) {
         name: z
           .string()
           .min(1, { message: "Name must be at least 1 characters" }),
-        p_l: z.number().min(0),
+        p_l: z.number(),
       })
     ),
     expensive: z.array(
@@ -110,14 +110,10 @@ export default function PaymentBoxForm(props: Props) {
         name: z
           .string()
           .min(1, { message: "Name must be at least 1 characters" }),
-        expensive: z.number().min(0),
+        expensive: z.number(),
       })
     ),
   });
-
-  const [errors, setErrors] = useState<{ index?: number; message: string }[]>(
-    []
-  );
 
   const store = useStore();
   const form = useForm<z.infer<typeof formSchema>>({
