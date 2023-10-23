@@ -205,7 +205,7 @@ export default function UserTable(props: Props) {
               original: { id, username },
             },
           }) => [
-            <Authorized permission="Edit_Currency" key={1}>
+            <Authorized permission="Edit_User" key={1}>
               <Link href={pathName + "/form?id=" + id}>
                 <MenuItem className="cursor-pointer" disabled={isPadding}>
                   Edit
@@ -213,7 +213,7 @@ export default function UserTable(props: Props) {
               </Link>
             </Authorized>,
 
-            <Authorized permission="Delete_Currency" key={3}>
+            <Authorized permission="Delete_User" key={3}>
               <MenuItem
                 disabled={isPadding}
                 className="cursor-pointer"
