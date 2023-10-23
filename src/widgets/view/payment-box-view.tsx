@@ -318,8 +318,8 @@ export default function PaymentBoxView(props: Props) {
                     <TableCell align="center">
                       $
                       {FormatNumberWithFixed(
-                        res.starting_float -
-                          res.current_float +
+                        res.current_float -
+                          res.starting_float +
                           res.p_l +
                           res.swap +
                           res.commission
