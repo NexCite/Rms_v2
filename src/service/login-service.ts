@@ -21,7 +21,12 @@ export async function createLogin(params: {
       var token = generateToken(user.username);
       cookies().set("rms-auth", token);
       cookies().set("rms-permissions", JSON.stringify(user.permissions));
-
+      await prisma.auth.updateMany({
+        where: {
+          user_id: user.id,
+        },
+        data: { status: "Disable" },
+      });
       await prisma.auth.create({
         data: { token: token, user_id: user.id, status: "Enable" },
       });
@@ -44,7 +49,7 @@ export async function deleteLogin(): Promise<ServiceActionModel<string>> {
     var result = await prisma.auth.findFirst({ where: { token: auth.value } });
     if (result) {
       await prisma.auth.update({
-        where: { id: result.id, status: "Accepted" },
+        where: { id: result.id },
         data: { status: "Disable" },
       });
     }

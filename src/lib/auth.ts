@@ -23,7 +23,7 @@ export async function getUserInfo(): Promise<UserSelectCommon | undefined> {
     return undefined;
   }
   const auth = await prisma.auth.findFirst({
-    where: { token: token.value },
+    where: { token: token.value, status: "Enable" },
     include: {
       user: {
         select: {

@@ -27,7 +27,6 @@ import { useStore } from "@rms/hooks/toast-hook";
 import { deleteEntry } from "@rms/service/entry-service";
 import dayjs from "dayjs";
 import moment from "moment";
-import { Activity } from "@rms/models/CommonModel";
 import Link from "next/link";
 
 type CommonEntryType = Prisma.EntryGetPayload<{
@@ -98,7 +97,7 @@ export default function EntryDataTable(props: Props) {
     to: props.date[1],
   });
 
-  const { replace, push } = useRouter();
+  const { replace } = useRouter();
   const store = useStore();
 
   const pathName = usePathname();

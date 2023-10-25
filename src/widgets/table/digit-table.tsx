@@ -31,41 +31,67 @@ export default function DigitTable(props: Props) {
 
   const store = useStore();
 
-  const columns = useMemo<MRT_ColumnDef<any>[]>(
+  const columns = useMemo<MRT_ColumnDef<any[]>>(
     () =>
-      [
-        {
-          accessorKey: "id",
-          header: "ID",
-          Cell: ({ row: { original } }) => (
-            <div
-              className={`text-center rounded-sm ${
-                original.status === "Deleted"
-                  ? "bg-red-500"
-                  : original.create_date.toLocaleTimeString() !==
-                    original.modified_date.toLocaleTimeString()
-                  ? "bg-yellow-400"
-                  : ""
-              }`}
-            >
-              {original.id}
-            </div>
-          ),
-        },
+      (
+        [
+          {
+            accessorKey: "id",
+            header: "ID",
+            muiTableHeadCellProps: {
+              align: "center",
+            },
+            muiTableBodyCellProps: {
+              align: "center",
+            },
+            Cell: ({ row: { original } }) => (
+              <div
+                className={`text-center rounded-sm ${
+                  original.status === "Deleted"
+                    ? "bg-red-500"
+                    : original.create_date.toLocaleTimeString() !==
+                      original.modified_date.toLocaleTimeString()
+                    ? "bg-yellow-400"
+                    : ""
+                }`}
+              >
+                {original.id}
+              </div>
+            ),
+          },
 
-        {
-          accessorKey: "name",
-          header: "Name",
-        },
-        {
-          accessorKey: "type",
-          header: "Type",
-        },
-        {
-          accessorKey: "debit_credit",
-          header: "Debit/Credit",
-        },
-      ]
+          {
+            accessorKey: "name",
+            header: "Name",
+            muiTableHeadCellProps: {
+              align: "center",
+            },
+            muiTableBodyCellProps: {
+              align: "center",
+            },
+          },
+          {
+            accessorKey: "type",
+            header: "Type",
+            muiTableHeadCellProps: {
+              align: "center",
+            },
+            muiTableBodyCellProps: {
+              align: "center",
+            },
+          },
+          {
+            accessorKey: "debit_credit",
+            header: "Debit/Credit",
+            muiTableHeadCellProps: {
+              align: "center",
+            },
+            muiTableBodyCellProps: {
+              align: "center",
+            },
+          },
+        ] as any
+      )
         .concat(
           props.node !== "two"
             ? ([
@@ -76,6 +102,12 @@ export default function DigitTable(props: Props) {
                     `(${p.two_digit?.id ?? ""}${p.three_digit?.id ?? ""}) ${
                       p.two_digit?.name ?? ""
                     }${p.three_digit?.name ?? ""}  `,
+                  muiTableHeadCellProps: {
+                    align: "center",
+                  },
+                  muiTableBodyCellProps: {
+                    align: "center",
+                  },
                 },
               ] as any)
             : []
@@ -84,16 +116,14 @@ export default function DigitTable(props: Props) {
           {
             accessorKey: "create_date",
             header: "Create Date",
-            columnDefType: "data",
-            id: "create_date",
+
             accessorFn: (p) => p.create_date?.toLocaleDateString(),
           },
 
           {
             accessorKey: "modified_date",
             header: "Modified Date",
-            columnDefType: "data",
-            id: "modified_date",
+
             accessorFn: (p) => p.modified_date?.toLocaleDateString(),
           },
         ] as any),
@@ -117,10 +147,10 @@ export default function DigitTable(props: Props) {
       <MaterialReactTable
         state={{ showProgressBars: isPadding }}
         enableRowActions
-        columns={columns}
+        columns={columns as any}
         renderRowActionMenuItems={({
           row: {
-            original: { id, username },
+            original: { id, name },
           },
         }) => [
           <Authorized
@@ -154,7 +184,7 @@ export default function DigitTable(props: Props) {
               className="cursor-pointer"
               onClick={() => {
                 const isConfirm = confirm(
-                  `Do You sure you want to delete ${username} id:${id} `
+                  `Do You sure you want to delete ${name} id:${id} `
                 );
                 if (isConfirm) {
                   setPadding(async () => {
