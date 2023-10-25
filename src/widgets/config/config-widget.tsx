@@ -1,50 +1,79 @@
 "use client";
-import { useTransition } from "react";
-
-import { zodResolver } from "@hookform/resolvers/zod";
-
-import LoadingButton from "@mui/lab/LoadingButton";
 import { Card, CardContent, CardHeader, TextField } from "@mui/material";
-import { useStore } from "@rms/hooks/toast-hook";
-import { createConfig } from "@rms/service/config-service";
-import { useRouter } from "next/navigation";
+import { createConfig, updateConfig } from "@rms/service/config-service";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import z from "zod";
+import LoadingButton from "@mui/lab/LoadingButton";
 import UploadWidget from "../upload/upload-widget";
-const formSchema = z.object({
-  name: z.string().min(3),
-  logo: z.string().min(3),
-  first_name: z.string().min(3),
-  last_name: z.string().min(3),
-  phone_number: z
-    .string()
-    .regex(
-      new RegExp(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/),
-      {
-        message: "Invalid phone number",
-      }
-    ),
-  email: z.string().email(),
-  username: z.string().min(4),
-  password: z.string().min(4),
-});
-export default function ConfigWidget() {
+import { useStore } from "@rms/hooks/toast-hook";
+import { useRouter } from "next/navigation";
+import { Prisma } from "@prisma/client";
+import { useTransition } from "react";
+import z from "zod";
+
+interface Props {
+  value: Prisma.ConfigGetPayload<{
+    select: {
+      name: true;
+      username: true;
+      logo: true;
+      email: true;
+      phone_number: true;
+    };
+  }>;
+  user: Prisma.UserGetPayload<{
+    select: {
+      first_name: true;
+      last_name: true;
+    };
+  }>;
+}
+
+export default function ConfigWidget(props: Props) {
+  const formSchema = z.object({
+    name: z.string().min(3),
+    logo: z.string().min(3),
+    first_name: z.string().min(3),
+    last_name: z.string().min(3),
+    phone_number: z
+      .string()
+      .regex(
+        new RegExp(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/),
+        {
+          message: "Invalid phone number",
+        }
+      ),
+    email: z.string().email(),
+    username: z.string().min(4),
+    password: props.value ? z.string().min(4).optional() : z.string().min(4),
+  });
+
   const [isPadding, setTransition] = useTransition();
   const store = useStore();
   const { replace } = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: { ...props.value, ...props.user },
   });
   function onSubmit(values) {
     setTransition(async () => {
-      const res = await createConfig(values);
-      store.OpenAlert({ ...res });
+      if (props.value) {
+        const res = await updateConfig(values);
+        store.OpenAlert({ ...res });
 
-      if (res.status === 200) replace("/login");
-      Object.keys(res.errors ?? []).map((e) => {
-        form.setError(e as any, res[e]);
-      });
+        Object.keys(res.errors ?? []).map((e) => {
+          form.setError(e as any, res[e]);
+        });
+      } else {
+        const res = await createConfig(values);
+        store.OpenAlert({ ...res });
+
+        if (res.status === 200) replace("/login");
+        Object.keys(res.errors ?? []).map((e) => {
+          form.setError(e as any, res[e]);
+        });
+      }
     });
   }
 
@@ -138,6 +167,7 @@ export default function ConfigWidget() {
                   error={Boolean(fieldState.error)}
                   helperText={fieldState.error?.message}
                   label={"Password"}
+                  autoComplete={props.value ? "new-password" : "off"}
                   placeholder="password"
                   type="password"
                   size="small"

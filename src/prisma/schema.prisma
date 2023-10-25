@@ -645,6 +645,14 @@ enum UserPermission {
   Delete_Entry_Supplier
   Edit_Entry_Supplier
   Add_Entry_Supplier
+  Human_Resources
+  Add_Employee
+  Edit_Employee
+  Delete_Employee
+  View_Employee
+  View_Employees
+  Edit_Config
+  View_Config
 }
 
 enum Account_Entry_Type {

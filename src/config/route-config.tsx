@@ -172,23 +172,23 @@ export default function GetRoutes(permissions: $Enums.UserPermission[]) {
       key: "Trading",
       path: "/admin/trading",
     },
-
     {
       index: 2,
       title: "Payment Box",
       icon: (
         <svg
+          className="w-6 h-6 text-gray-800 dark:text-white"
+          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-6 h-6"
+          viewBox="0 0 20 16"
         >
           <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25V13.5zm0 2.25h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25V18zm2.498-6.75h.007v.008h-.007v-.008zm0 2.25h.007v.008h-.007V13.5zm0 2.25h.007v.008h-.007v-.008zm0 2.25h.007v.008h-.007V18zm2.504-6.75h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V13.5zm0 2.25h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V18zm2.498-6.75h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V13.5zM8.25 6h7.5v2.25h-7.5V6zM12 2.25c-1.892 0-3.758.11-5.593.322C5.307 2.7 4.5 3.65 4.5 4.757V19.5a2.25 2.25 0 002.25 2.25h10.5a2.25 2.25 0 002.25-2.25V4.757c0-1.108-.806-2.057-1.907-2.185A48.507 48.507 0 0012 2.25z"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 2a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1M2 5h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm8 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"
           />
         </svg>
       ),
@@ -211,6 +211,38 @@ export default function GetRoutes(permissions: $Enums.UserPermission[]) {
       key: "PaymentBox",
       path: "/admin/payment_box",
     },
+    {
+      icon: (
+        <svg
+          className="w-6 h-6 text-gray-800 dark:text-white"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 18 20"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 4H1m3 4H1m3 4H1m3 4H1m6.071.286a3.429 3.429 0 1 1 6.858 0M4 1h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1Zm9 6.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z"
+          />
+        </svg>
+      ),
+      index: 3,
+      title: "Human Resources",
+      children: [
+        {
+          index: 0,
+          title: "Employees",
+          path: "/admin/human_resources/employee",
+          key: "View_Employees",
+          addKey: "Add_Employee",
+        },
+      ],
+      key: "Human_Resources",
+      path: "/admin/human_resources",
+    },
 
     {
       end: true,
@@ -231,7 +263,7 @@ export default function GetRoutes(permissions: $Enums.UserPermission[]) {
           <circle cx="12" cy="12" r="3" />
         </svg>
       ),
-      index: 3,
+      index: 4,
       title: "Setting",
       children: [
         {
@@ -274,6 +306,13 @@ export default function GetRoutes(permissions: $Enums.UserPermission[]) {
           path: "/admin/setting/category/sub_category",
           key: "View_SubCategories",
           addKey: "Add_SubCategory",
+        },
+        {
+          index: 6,
+          title: "Configuration",
+          path: "/admin/setting/configuration",
+          key: "View_Config",
+          addKey: "",
         },
       ],
 

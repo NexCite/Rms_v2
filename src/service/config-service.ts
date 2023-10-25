@@ -55,6 +55,60 @@ export async function createConfig(
     return "";
   }, "None");
 }
+
+export async function updateConfig(
+  params: Prisma.ConfigUncheckedUpdateInput & {
+    first_name: string;
+    last_name: string;
+  }
+) {
+  return handlerServiceAction(
+    async (auth, config_id) => {
+      const updateParams = {
+        name: params.name,
+        username: params.username,
+        email: params.email,
+        // logo: "",
+        phone_number: params.phone_number,
+      };
+
+      if (params.password) {
+        params.password = hashPassword(params.password as string);
+
+        updateParams["password"] = params.password;
+      }
+
+      await prisma.config.update({
+        where: { id: config_id },
+        data: updateParams,
+      });
+
+      // const newPath = await copyMediaTemp(params.logo, result.id);
+
+      // await prisma.config.update({
+      //   where: { id: result.id },
+      //   data: { logo: newPath },
+      // });
+
+      delete updateParams.name;
+
+      await prisma.user.update({
+        where: { id: auth.id, config_id },
+        data: {
+          ...updateParams,
+          first_name: params.first_name,
+          last_name: params.last_name,
+        },
+      });
+
+      return "";
+    },
+    "Edit_Config",
+    true,
+    params
+  );
+}
+
 export async function getConfig() {
   return handlerServiceAction(
     async (auth, config_id) => {

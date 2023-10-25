@@ -1,17 +1,16 @@
-import UserTableComponent from "@rms/widgets/table/user-table";
 import { Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
 import { getUserStatus } from "@rms/service/user-service";
 import { getConfigId } from "@rms/lib/config";
+import EmployeesTable from "@rms/widgets/table/employee-table";
 
 export default async function page() {
   const config_id = await getConfigId();
 
-  var value: Prisma.UserGetPayload<{}>[] = await prisma.user.findMany({
+  var value: Prisma.EmployeeGetPayload<{}>[] = await prisma.employee.findMany({
     where: {
       config_id,
       status: await getUserStatus(),
-      type: "User",
     },
     orderBy: {
       id: "desc",
@@ -20,7 +19,7 @@ export default async function page() {
 
   return (
     <div>
-      <UserTableComponent users={value} />
+      <EmployeesTable employees={value} />
     </div>
   );
 }
