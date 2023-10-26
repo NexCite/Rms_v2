@@ -10,6 +10,8 @@ import { deleteCurrency } from "@rms/service/currency-service";
 import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
 import { useStore } from "@rms/hooks/toast-hook";
 import Link from "next/link";
+import { FontRomanIcon } from "@radix-ui/react-icons";
+import { FormatNumberWithFixed } from "@rms/lib/global";
 
 type Props = {
   currencies: Prisma.CurrencyGetPayload<{}>[];
@@ -19,8 +21,6 @@ export default function CurrencyTable(props: Props) {
   const pathName = usePathname();
   const [isPadding, setPadding] = useTransition();
   const store = useStore();
-
-  const { push } = useRouter();
 
   const columns = useMemo<MRT_ColumnDef<Prisma.CurrencyGetPayload<{}>>[]>(
     () => [
@@ -46,7 +46,16 @@ export default function CurrencyTable(props: Props) {
           </div>
         ),
       },
-      { accessorKey: "name", header: "Name" },
+      {
+        accessorKey: "name",
+        header: "Name",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+      },
       {
         accessorKey: "symbol",
         header: "Symbol",
@@ -68,6 +77,29 @@ export default function CurrencyTable(props: Props) {
         },
         header: "Create Date",
         accessorFn: (e) => e.create_date.toLocaleDateString(),
+      },
+
+      {
+        accessorKey: "modified_date",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+        header: "Create Date",
+        accessorFn: (e) => e.modified_date.toLocaleDateString(),
+      },
+      {
+        accessorKey: "rate",
+        header: "Rate",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+        accessorFn: (e) => e.rate && FormatNumberWithFixed(e.rate),
       },
     ],
     []

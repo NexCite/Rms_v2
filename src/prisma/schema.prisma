@@ -94,23 +94,26 @@ model User {
 }
 
 model Employee {
-  id            Int      @id @default(autoincrement())
-  first_name    String
-  last_name     String
-  phone_number  String
-  gender        Gender
-  address1      String   @default("")
-  address2      String   @default("")
-  country       String   @default("")
-  email         String   @default("")
-  status        Status   @default(Enable)
-  create_date   DateTime @default(now())
-  modified_date DateTime @default(now()) @updatedAt
-  username      String
-  user_id       Int
-  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  config_id     Int?
-  config        Config?  @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  id               Int              @id @default(autoincrement())
+  first_name       String
+  last_name        String
+  phone_number     String
+  gender           Gender
+  address1         String           @default("")
+  address2         String           @default("")
+  country          String           @default("")
+  email            String           @default("")
+  status           Status           @default(Enable)
+  create_date      DateTime         @default(now())
+  modified_date    DateTime         @default(now()) @updatedAt
+  username         String
+  user_id          Int
+  user             User             @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  config_id        Int?
+  config           Config?          @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  attendances      Attendance[]
+  advance_payments AdvancePayment[]
+  vacation         Vacation[]
 
   @@unique([username, id, config_id], name: "unique_combination")
 }
@@ -286,27 +289,31 @@ model Media {
   invoice Invoice? @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
   entry   Entry?   @relation(fields: [entry_id], references: [id], onDelete: Cascade)
 
-  payment   Payment? @relation(fields: [payment_id], references: [id], onDelete: Cascade)
-  config_id Int?
-  config    Config?  @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  payment     Payment?     @relation(fields: [payment_id], references: [id], onDelete: Cascade)
+  config_id   Int?
+  config      Config?      @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  attendances Attendance[]
+  vacation    Vacation[]
 
   @@unique([id, config_id, invoice_id, payment_id, entry_id], name: "unique_combination")
 }
 
 model Currency {
-  id            Int       @id @default(autoincrement())
-  name          String
-  symbol        String
-  accounts      Account[]
-  invoices      Invoice[]
-  status        Status?   @default(Enable)
-  Entries       Entry[]
-  create_date   DateTime  @default(now())
-  modified_date DateTime  @default(now()) @updatedAt
-  user_id       Int?
-  user          User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  config_id     Int?
-  config        Config?   @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  id               Int              @id @default(autoincrement())
+  name             String
+  symbol           String
+  rate             Float?
+  accounts         Account[]
+  invoices         Invoice[]
+  status           Status?          @default(Enable)
+  Entries          Entry[]
+  create_date      DateTime         @default(now())
+  modified_date    DateTime         @default(now()) @updatedAt
+  user_id          Int?
+  user             User?            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  config_id        Int?
+  config           Config?          @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  advance_payments AdvancePayment[]
 
   @@unique([id, config_id, name, symbol], name: "unique_combination")
 }
@@ -497,6 +504,7 @@ model Account_Entry {
 
 model Entry {
   id            Int        @id @default(autoincrement())
+  rate          Float?
   title         String
   description   String
   note          String     @default("")
@@ -651,6 +659,21 @@ enum UserPermission {
   Delete_Employee
   View_Employee
   View_Employees
+  Add_Schedule
+  Edit_Schedule
+  Delete_Schedule
+  View_Schedule
+  View_Schedules
+  Add_Advance_Payment
+  Edit_Advance_Payment
+  Delete_Advance_Payment
+  View_Advance_Payment
+  View_Advance_Payments
+  Add_Vacation
+  Edit_Vacation
+  Delete_Vacation
+  View_Vacation
+  View_Vacations
   Edit_Config
   View_Config
 }
@@ -775,4 +798,62 @@ model AdjustmentBox {
   config      Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id, equity_id], name: "unique_combination")
+}
+
+model Schedule {
+  id            Int          @id @default(autoincrement())
+  create_date   DateTime     @default(now())
+  modified_date DateTime     @default(now()) @updatedAt
+  to_date       DateTime     @default(now())
+  attendance    Attendance[]
+}
+
+model Attendance {
+  id             Int       @id @default(autoincrement())
+  from_time      DateTime?
+  to_time        DateTime?
+  over_time_from DateTime?
+
+  over_time_to DateTime?
+  absent       Boolean   @default(false)
+  description  String    @default("")
+  media        Media?    @relation(fields: [media_id], references: [id], onDelete: Cascade)
+  media_id     Int?
+  employee     Employee  @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+  employee_id  Int
+  schedule     Schedule  @relation(fields: [schedule_id], references: [id])
+  schedule_id  Int
+}
+
+model AdvancePayment {
+  id            Int       @id @default(autoincrement())
+  to_date       DateTime?
+  create_date   DateTime  @default(now())
+  modified_date DateTime  @default(now()) @updatedAt
+  employee      Employee  @relation(fields: [employee_id], references: [id])
+  employee_id   Int
+  amount        Float
+  currency      Currency  @relation(fields: [currency_id], references: [id])
+  private       Boolean   @default(false)
+  currency_id   Int
+}
+
+model Vacation {
+  id          Int          @id @default(autoincrement())
+  from_date   DateTime?
+  to_date     DateTime?
+  status      Status       @default(Pending)
+  description String       @default("")
+  media       Media?       @relation(fields: [media_id], references: [id], onDelete: Cascade)
+  media_id    Int?
+  employee    Employee     @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+  employee_id Int
+  type        VacationType
+}
+
+enum VacationType {
+  Annual_Leave
+  Weekly_Leave
+  Monthly_Leave
+  Sickness_Leave
 }

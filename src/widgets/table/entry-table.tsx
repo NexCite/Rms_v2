@@ -203,16 +203,48 @@ export default function EntryDataTable(props: Props) {
         muiTableBodyCellProps: {
           align: "center",
         },
+
         header: "Amount",
-        accessorFn(originalRow) {
-          var amounts = originalRow?.sub_entries
+        Cell(originalRow) {
+          var amounts = originalRow.row.original?.sub_entries
             ?.filter((res) => res.type === "Debit")
             .map((res) => res.amount);
           var amount = 0;
           amounts?.forEach((e) => (amount += e));
-          return `${originalRow?.currency?.symbol}${FormatNumberWithFixed(
-            amount
-          )}`;
+          return originalRow.row.original.rate ? (
+            <table>
+              <thead>
+                <tr>
+                  <th>Rate</th>
+                  <th>Rate Amount</th>
+                  <th> Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    ${FormatNumberWithFixed(originalRow.row.original.rate)}
+                  </td>
+                  <td>
+                    {" "}
+                    ${" "}
+                    {FormatNumberWithFixed(
+                      amount / originalRow.row.original.rate
+                    )}
+                  </td>
+                  <td>
+                    {" "}
+                    {originalRow.row.original.currency.symbol}
+                    {FormatNumberWithFixed(amount)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          ) : (
+            `${
+              originalRow.row.original?.currency?.symbol
+            }${FormatNumberWithFixed(amount)}`
+          );
         },
       },
       {

@@ -111,10 +111,12 @@ export default function EquityView(props: Props) {
     });
     total =
       coverage_boxes -
-      manager_boxes +
+      manager_boxes -
       commission_boxes +
       p_l_boxes -
-      expensive_boxes;
+      expensive_boxes -
+      adjustment_boxes -
+      credit_boxes;
     return {
       coverage_boxes,
       manager_boxes,

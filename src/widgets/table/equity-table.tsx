@@ -268,7 +268,7 @@ export default function BoxTable(props: Props) {
             );
 
           const total =
-            coverage - manager + agent + p_l - expensive - adjustment - credit;
+            coverage - manager - agent + p_l - expensive - adjustment - credit;
 
           return (
             <div

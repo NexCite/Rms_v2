@@ -24,7 +24,10 @@ export async function createEntry(
       }
 
       if (activity) activity.status = ActivityStatus.Provided;
-
+      const currency = await prisma.currency.findUnique({
+        where: { id: props.currency_id, rate: { gt: 0 } },
+      });
+      props.rate = currency.rate;
       await Promise.all([
         prisma.entry.create({ data: props }),
         activity ? confirmActivity(activity) : undefined,
@@ -56,7 +59,6 @@ export async function updateEntry(
       try {
         await deleteMedia(result.media.path);
       } catch (e) {}
-      console.log(props);
 
       await prisma.entry.update({ data: props, where: { id: id, config_id } });
       return;

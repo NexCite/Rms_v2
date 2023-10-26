@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { $Enums, Prisma } from "@prisma/client";
 import { Button } from "@rms/components/ui/button";
 
-import { FormatNumberWithFixed } from "@rms/lib/global";
+import { FormatNumber, FormatNumberWithFixed } from "@rms/lib/global";
 import { createEntry, updateEntry } from "@rms/service/entry-service";
 import { PlusSquare, X } from "lucide-react";
 
@@ -31,7 +31,13 @@ import { useStore } from "@rms/hooks/toast-hook";
 import { Activity, ActivityStatus } from "@rms/models/CommonModel";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 import { Controller, useForm } from "react-hook-form";
 import { MdOutlineKeyboardArrowUp } from "react-icons/md";
 import { z } from "zod";
@@ -278,6 +284,16 @@ export default function EntryForm(props: Props) {
     setLoadingUi(false);
   }, []);
 
+  const currency = useMemo(() => {
+    var currency_id = form.watch("currency_id");
+    if (currency_id) {
+      const currency = props.currencies.find((res) => res.id === currency_id);
+      if (currency?.rate) {
+        return currency.rate;
+      }
+      return undefined;
+    }
+  }, [form.watch("currency_id")]);
   return (
     <form
       className="max-w-[450px] m-auto"
@@ -575,6 +591,11 @@ export default function EntryForm(props: Props) {
                   render={({ field, fieldState }) => {
                     return (
                       <>
+                        <div>
+                          {currency && (
+                            <h1>Rate: {FormatNumberWithFixed(currency, 0)}</h1>
+                          )}
+                        </div>
                         {Boolean(fieldState.error?.message) && (
                           <Alert variant="outlined" severity="error">
                             <AlertTitle>

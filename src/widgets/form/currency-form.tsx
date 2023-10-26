@@ -13,6 +13,7 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import { Card, CardContent, CardHeader, TextField } from "@mui/material";
 import { useStore } from "@rms/hooks/toast-hook";
 import { createCurrency, updateCurrency } from "@rms/service/currency-service";
+import { FormatNumberWithFixed } from "@rms/lib/global";
 type Props = { value: Prisma.CurrencyGetPayload<{}> };
 export default function CurrencyForm(props: Props) {
   const [isPadding, setTransition] = useTransition();
@@ -25,6 +26,12 @@ export default function CurrencyForm(props: Props) {
       symbol: z
         .string()
         .min(1, { message: "Symbol must be at least 1  character" }),
+      rate: z
+        .number()
+        .min(2)
+        .or(z.string().min(2).regex(/^\d+$/).transform(Number))
+        .optional()
+        .nullable(),
     });
   }, []);
 
@@ -89,6 +96,7 @@ export default function CurrencyForm(props: Props) {
                 );
               }}
             />
+
             <Controller
               name="symbol"
               control={form.control}
@@ -105,6 +113,39 @@ export default function CurrencyForm(props: Props) {
                     {...field}
                     InputLabelProps={{ shrink: true }}
                   />
+                );
+              }}
+            />
+            <Controller
+              name="rate"
+              control={form.control}
+              render={({ field, fieldState }) => {
+                return (
+                  <>
+                    {" "}
+                    <TextField
+                      type="number"
+                      size="small"
+                      label="Rate"
+                      placeholder="rate"
+                      InputProps={{
+                        inputProps: {
+                          min: 0,
+                        },
+                      }}
+                      fullWidth
+                      error={Boolean(fieldState.error)}
+                      helperText={` ${
+                        field.value && field.value.toString() !== "0"
+                          ? FormatNumberWithFixed(
+                              parseFloat(field.value.toString()) ?? 0
+                            )
+                          : ""
+                      } ${fieldState.error?.message ?? ""}`}
+                      {...field}
+                      InputLabelProps={{ shrink: true }}
+                    />
+                  </>
                 );
               }}
             />
