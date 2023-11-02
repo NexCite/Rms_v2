@@ -670,6 +670,7 @@ enum UserPermission {
   View_Advance_Payment
   View_Advance_Payments
   Add_Vacation
+  Update_Vaction_Status
   Edit_Vacation
   Delete_Vacation
   View_Vacation
@@ -813,16 +814,15 @@ model Attendance {
   from_time      DateTime?
   to_time        DateTime?
   over_time_from DateTime?
-
-  over_time_to DateTime?
-  absent       Boolean   @default(false)
-  description  String    @default("")
-  media        Media?    @relation(fields: [media_id], references: [id], onDelete: Cascade)
-  media_id     Int?
-  employee     Employee  @relation(fields: [employee_id], references: [id], onDelete: Cascade)
-  employee_id  Int
-  schedule     Schedule  @relation(fields: [schedule_id], references: [id])
-  schedule_id  Int
+  over_time_to   DateTime?
+  absent         Boolean   @default(false)
+  description    String    @default("")
+  media          Media?    @relation(fields: [media_id], references: [id], onDelete: Cascade)
+  media_id       Int?
+  employee       Employee  @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+  employee_id    Int
+  schedule       Schedule  @relation(fields: [schedule_id], references: [id])
+  schedule_id    Int
 }
 
 model AdvancePayment {
