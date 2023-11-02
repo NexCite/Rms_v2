@@ -7,7 +7,6 @@ import prisma from "@rms/prisma/prisma";
 export async function createEquity(
   params: Prisma.EquityUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
-  console.log(params);
   return handlerServiceAction(
     async (auth, config_id) => {
       await prisma.equity.create({

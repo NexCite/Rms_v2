@@ -17,6 +17,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Prisma } from "@prisma/client";
 import { Button } from "@rms/components/ui/button";
 import Loading from "@rms/components/ui/loading";
+import NumericFormatCustom from "@rms/components/ui/text-field-number";
 import { useStore } from "@rms/hooks/toast-hook";
 import { FormatNumberWithFixed } from "@rms/lib/global";
 import { createEquity, updateEquity } from "@rms/service/equity-service";
@@ -64,9 +65,24 @@ export default function EquityForm(props: Props) {
     coverage: z.array(
       z.object({
         account: z.string(),
-        starting_float: z.number(),
-        current_float: z.number(),
-        closed_p_l: z.number(),
+        starting_float: z.number().or(
+          z
+            .string()
+            .regex(/^-?\d+(\.\d{1,2})?$/)
+            .transform(Number)
+        ),
+        current_float: z.number().or(
+          z
+            .string()
+            .regex(/^-?\d+(\.\d{1,2})?$/)
+            .transform(Number)
+        ),
+        closed_p_l: z.number().or(
+          z
+            .string()
+            .regex(/^-?\d+(\.\d{1,2})?$/)
+            .transform(Number)
+        ),
       })
     ),
     managers: z.array(
@@ -74,11 +90,36 @@ export default function EquityForm(props: Props) {
         manger: z
           .string()
           .min(1, { message: "Manager must be at least 1 characters" }),
-        starting_float: z.number(),
-        current_float: z.number(),
-        p_l: z.number(),
-        commission: z.number(),
-        swap: z.number(),
+        starting_float: z.number().or(
+          z
+            .string()
+            .regex(/^-?\d+(\.\d{1,2})?$/)
+            .transform(Number)
+        ),
+        current_float: z.number().or(
+          z
+            .string()
+            .regex(/^-?\d+(\.\d{1,2})?$/)
+            .transform(Number)
+        ),
+        p_l: z.number().or(
+          z
+            .string()
+            .regex(/^-?\d+(\.\d{1,2})?$/)
+            .transform(Number)
+        ),
+        commission: z.number().or(
+          z
+            .string()
+            .regex(/^-?\d+(\.\d{1,2})?$/)
+            .transform(Number)
+        ),
+        swap: z.number().or(
+          z
+            .string()
+            .regex(/^-?\d+(\.\d{1,2})?$/)
+            .transform(Number)
+        ),
       })
     ),
     agents: z.array(
@@ -86,7 +127,12 @@ export default function EquityForm(props: Props) {
         name: z
           .string()
           .min(1, { message: "Name must be at least 1 characters" }),
-        commission: z.number(),
+        commission: z.number().or(
+          z
+            .string()
+            .regex(/^-?\d+(\.\d{1,2})?$/)
+            .transform(Number)
+        ),
       })
     ),
     p_l: z.array(
@@ -94,7 +140,12 @@ export default function EquityForm(props: Props) {
         name: z
           .string()
           .min(1, { message: "Name must be at least 1 characters" }),
-        p_l: z.number(),
+        p_l: z.number().or(
+          z
+            .string()
+            .regex(/^-?\d+(\.\d{1,2})?$/)
+            .transform(Number)
+        ),
       })
     ),
     expensive: z.array(
@@ -102,7 +153,12 @@ export default function EquityForm(props: Props) {
         name: z
           .string()
           .min(1, { message: "Name must be at least 1 characters" }),
-        expensive: z.number(),
+        expensive: z.number().or(
+          z
+            .string()
+            .regex(/^-?\d+(\.\d{1,2})?$/)
+            .transform(Number)
+        ),
       })
     ),
     credit: z.array(
@@ -110,7 +166,12 @@ export default function EquityForm(props: Props) {
         name: z
           .string()
           .min(1, { message: "Name must be at least 1 characters" }),
-        credit: z.number(),
+        credit: z.number().or(
+          z
+            .string()
+            .regex(/^-?\d+(\.\d{1,2})?$/)
+            .transform(Number)
+        ),
       })
     ),
     adjustment: z.array(
@@ -118,7 +179,12 @@ export default function EquityForm(props: Props) {
         name: z
           .string()
           .min(1, { message: "Name must be at least 1 characters" }),
-        adjustment: z.number(),
+        adjustment: z.number().or(
+          z
+            .string()
+            .regex(/^-?\d+(\.\d{1,2})?$/)
+            .transform(Number)
+        ),
       })
     ),
   });
@@ -196,14 +262,7 @@ export default function EquityForm(props: Props) {
   }, [props.value]);
 
   const handleInput = useCallback((value: any, onChange: any) => {
-    if (/^-?\d*\.?\d*$/.test(value)) {
-      const parsedValue = parseFloat(value);
-      if (!isNaN(parsedValue)) {
-        onChange(parsedValue);
-      } else {
-        onChange(value === "" || value === "-" ? 0 : parsedValue);
-      }
-    }
+    onChange(value);
   }, []);
 
   return (
@@ -266,7 +325,6 @@ export default function EquityForm(props: Props) {
                   <FormControl {...field} size="small">
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DatePicker
-                        minDate={dayjs().subtract(7, "day")}
                         label="Date"
                         slotProps={{
                           textField: {
@@ -326,7 +384,7 @@ export default function EquityForm(props: Props) {
                           </Button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-1 mt-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
@@ -345,25 +403,21 @@ export default function EquityForm(props: Props) {
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
-                            inputProps={{
-                              inputMode: "numeric",
-                              pattern: "-?[0-9]*",
+                            InputProps={{
+                              inputComponent: NumericFormatCustom as any,
                             }}
                             label="Starting Float"
                             value={res.starting_float}
                             required
                             onChange={(e) => {
-                              handleInput(e.target.value, (e: number) => {
-                                field.value[i].starting_float = e;
-                                field.onChange(field.value);
-                              });
+                              field.value[i].starting_float = e.target
+                                .value as any;
+                              field.onChange(field.value);
                             }}
                             error={Boolean(
                               checkBoxesError(fieldState, i, "starting_float")
                             )}
-                            helperText={`${FormatNumberWithFixed(
-                              res.starting_float ?? 0
-                            )}  ${checkBoxesError(
+                            helperText={`${checkBoxesError(
                               fieldState,
                               i,
                               "starting_float"
@@ -372,25 +426,21 @@ export default function EquityForm(props: Props) {
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
-                            inputProps={{
-                              inputMode: "numeric",
-                              pattern: "-?[0-9]*",
-                            }}
                             label="Current Float"
                             value={res.current_float}
+                            InputProps={{
+                              inputComponent: NumericFormatCustom as any,
+                            }}
                             required
                             onChange={(e) => {
-                              handleInput(e.target.value, (e: number) => {
-                                field.value[i].current_float = e;
-                                field.onChange(field.value);
-                              });
+                              field.value[i].current_float = e.target
+                                .value as any;
+                              field.onChange(field.value);
                             }}
                             error={Boolean(
                               checkBoxesError(fieldState, i, "current_float")
                             )}
-                            helperText={`${FormatNumberWithFixed(
-                              res.current_float ?? 0
-                            )}  ${checkBoxesError(
+                            helperText={`  ${checkBoxesError(
                               fieldState,
                               i,
                               "current_float"
@@ -399,25 +449,20 @@ export default function EquityForm(props: Props) {
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
-                            inputProps={{
-                              inputMode: "numeric",
-                              pattern: "-?[0-9]*",
-                            }}
                             label="Closed P_l"
                             value={res.closed_p_l}
+                            InputProps={{
+                              inputComponent: NumericFormatCustom as any,
+                            }}
                             required
                             onChange={(e) => {
-                              handleInput(e.target.value, (e: number) => {
-                                field.value[i].closed_p_l = e;
-                                field.onChange(field.value);
-                              });
+                              field.value[i].closed_p_l = e.target.value as any;
+                              field.onChange(field.value);
                             }}
                             error={Boolean(
                               checkBoxesError(fieldState, i, "closed_p_l")
                             )}
-                            helperText={`${FormatNumberWithFixed(
-                              res.closed_p_l ?? 0
-                            )}  ${checkBoxesError(
+                            helperText={`${checkBoxesError(
                               fieldState,
                               i,
                               "closed_p_l"
@@ -501,7 +546,7 @@ export default function EquityForm(props: Props) {
                           </Button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-1 mt-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
@@ -521,25 +566,21 @@ export default function EquityForm(props: Props) {
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
-                            inputProps={{
-                              inputMode: "numeric",
-                              pattern: "-?[0-9]*",
-                            }}
                             label="Starting Float"
                             value={res.starting_float}
+                            InputProps={{
+                              inputComponent: NumericFormatCustom as any,
+                            }}
                             required
                             onChange={(e) => {
-                              handleInput(e.target.value, (e: number) => {
-                                field.value[i].starting_float = e;
-                                field.onChange(field.value);
-                              });
+                              field.value[i].starting_float = e.target
+                                .value as any;
+                              field.onChange(field.value);
                             }}
                             error={Boolean(
                               checkBoxesError(fieldState, i, "starting_float")
                             )}
-                            helperText={`${FormatNumberWithFixed(
-                              res.starting_float ?? 0
-                            )}  ${checkBoxesError(
+                            helperText={`  ${checkBoxesError(
                               fieldState,
                               i,
                               "starting_float"
@@ -548,26 +589,21 @@ export default function EquityForm(props: Props) {
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
-                            inputProps={{
-                              inputMode: "numeric",
-                              pattern: "-?[0-9]*",
-                            }}
                             label="Current Float"
                             value={res.current_float}
+                            InputProps={{
+                              inputComponent: NumericFormatCustom as any,
+                            }}
                             required
                             onChange={(e) => {
-                              handleInput(e.target.value, (e: number) => {
-                                console.log(e);
-                                field.value[i].current_float = e;
-                                field.onChange(field.value);
-                              });
+                              field.value[i].current_float = e.target
+                                .value as any;
+                              field.onChange(field.value);
                             }}
                             error={Boolean(
                               checkBoxesError(fieldState, i, "current_float")
                             )}
-                            helperText={`${FormatNumberWithFixed(
-                              res.current_float ?? 0
-                            )}  ${checkBoxesError(
+                            helperText={` ${checkBoxesError(
                               fieldState,
                               i,
                               "current_float"
@@ -576,48 +612,42 @@ export default function EquityForm(props: Props) {
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
-                            inputProps={{
-                              inputMode: "numeric",
-                              pattern: "-?[0-9]*",
-                            }}
                             label="P_L"
                             value={res.p_l}
+                            InputProps={{
+                              inputComponent: NumericFormatCustom as any,
+                            }}
                             required
                             onChange={(e) => {
-                              handleInput(e.target.value, (e: number) => {
-                                field.value[i].p_l = e;
-                                field.onChange(field.value);
-                              });
+                              field.value[i].p_l = e.target.value as any;
+                              field.onChange(field.value);
                             }}
                             error={Boolean(
                               checkBoxesError(fieldState, i, "p_l")
                             )}
-                            helperText={`${FormatNumberWithFixed(
-                              res.p_l ?? 0
-                            )}  ${checkBoxesError(fieldState, i, "p_l")}`}
+                            helperText={`  ${checkBoxesError(
+                              fieldState,
+                              i,
+                              "p_l"
+                            )}`}
                           />
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
-                            inputProps={{
-                              inputMode: "numeric",
-                              pattern: "-?[0-9]*",
-                            }}
                             label="Commission"
                             value={res.commission}
+                            InputProps={{
+                              inputComponent: NumericFormatCustom as any,
+                            }}
                             required
                             onChange={(e) => {
-                              handleInput(e.target.value, (e: number) => {
-                                field.value[i].commission = e;
-                                field.onChange(field.value);
-                              });
+                              field.value[i].commission = e.target.value as any;
+                              field.onChange(field.value);
                             }}
                             error={Boolean(
                               checkBoxesError(fieldState, i, "commission")
                             )}
-                            helperText={`${FormatNumberWithFixed(
-                              res.commission ?? 0
-                            )}  ${checkBoxesError(
+                            helperText={` ${checkBoxesError(
                               fieldState,
                               i,
                               "commission"
@@ -626,25 +656,24 @@ export default function EquityForm(props: Props) {
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
-                            inputProps={{
-                              inputMode: "numeric",
-                              pattern: "-?[0-9]*",
-                            }}
                             label="Swap"
                             value={res.swap}
+                            InputProps={{
+                              inputComponent: NumericFormatCustom as any,
+                            }}
                             required
                             onChange={(e) => {
-                              handleInput(e.target.value, (e: number) => {
-                                field.value[i].swap = e;
-                                field.onChange(field.value);
-                              });
+                              field.value[i].swap = e.target.value as any;
+                              field.onChange(field.value);
                             }}
                             error={Boolean(
                               checkBoxesError(fieldState, i, "swap")
                             )}
-                            helperText={`${FormatNumberWithFixed(
-                              res.swap ?? 0
-                            )}  ${checkBoxesError(fieldState, i, "swap")}`}
+                            helperText={`  ${checkBoxesError(
+                              fieldState,
+                              i,
+                              "swap"
+                            )}`}
                           />
                         </div>
                         {/* {i !== forms.clients.length - 1 && (
@@ -726,7 +755,7 @@ export default function EquityForm(props: Props) {
                           </Button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-1 mt-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
                           <TextField
                             size="small"
                             type="text"
@@ -745,25 +774,24 @@ export default function EquityForm(props: Props) {
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
-                            inputProps={{
-                              inputMode: "numeric",
-                              pattern: "-?[0-9]*",
-                            }}
                             label="Expensive"
                             value={res.expensive}
+                            InputProps={{
+                              inputComponent: NumericFormatCustom as any,
+                            }}
                             required
                             onChange={(e) => {
-                              handleInput(e.target.value, (e: number) => {
-                                field.value[i].expensive = e;
-                                field.onChange(field.value);
-                              });
+                              field.value[i].expensive = e.target.value as any;
+                              field.onChange(field.value);
                             }}
                             error={Boolean(
                               checkBoxesError(fieldState, i, "expensive")
                             )}
-                            helperText={`${FormatNumberWithFixed(
-                              res.expensive ?? 0
-                            )}  ${checkBoxesError(fieldState, i, "expensive")}`}
+                            helperText={` ${checkBoxesError(
+                              fieldState,
+                              i,
+                              "expensive"
+                            )}`}
                           />
                         </div>
                         {/* {i !== forms.expensive.length - 1 && (
@@ -841,7 +869,7 @@ export default function EquityForm(props: Props) {
                           </Button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-1 mt-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
@@ -861,25 +889,24 @@ export default function EquityForm(props: Props) {
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
-                            inputProps={{
-                              inputMode: "numeric",
-                              pattern: "-?[0-9]*",
-                            }}
                             label="P_l"
                             value={res.p_l}
+                            InputProps={{
+                              inputComponent: NumericFormatCustom as any,
+                            }}
                             required
                             onChange={(e) => {
-                              handleInput(e.target.value, (e: number) => {
-                                field.value[i].p_l = e;
-                                field.onChange(field.value);
-                              });
+                              field.value[i].p_l = e.target.value as any;
+                              field.onChange(field.value);
                             }}
                             error={Boolean(
                               checkBoxesError(fieldState, i, "p_l")
                             )}
-                            helperText={`${FormatNumberWithFixed(
-                              res.p_l ?? 0
-                            )}  ${checkBoxesError(fieldState, i, "p_l")}`}
+                            helperText={` ${checkBoxesError(
+                              fieldState,
+                              i,
+                              "p_l"
+                            )}`}
                           />
                         </div>
                         {/* {i !== forms.p_l.length - 1 && (
@@ -956,7 +983,7 @@ export default function EquityForm(props: Props) {
                           </Button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-1 mt-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
@@ -975,25 +1002,20 @@ export default function EquityForm(props: Props) {
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
-                            inputProps={{
-                              inputMode: "numeric",
-                              pattern: "-?[0-9]*",
-                            }}
                             label="Commission"
                             value={res.commission}
+                            InputProps={{
+                              inputComponent: NumericFormatCustom as any,
+                            }}
                             required
                             onChange={(e) => {
-                              handleInput(e.target.value, (e: number) => {
-                                field.value[i].commission = e;
-                                field.onChange(field.value);
-                              });
+                              field.value[i].commission = e.target.value as any;
+                              field.onChange(field.value);
                             }}
                             error={Boolean(
                               checkBoxesError(fieldState, i, "commission")
                             )}
-                            helperText={`${FormatNumberWithFixed(
-                              res.commission ?? 0
-                            )}  ${checkBoxesError(
+                            helperText={`  ${checkBoxesError(
                               fieldState,
                               i,
                               "commission"
@@ -1075,7 +1097,7 @@ export default function EquityForm(props: Props) {
                           </Button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-1 mt-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
@@ -1094,25 +1116,20 @@ export default function EquityForm(props: Props) {
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
-                            inputProps={{
-                              inputMode: "numeric",
-                              pattern: "-?[0-9]*",
-                            }}
                             label="Adjustment"
                             value={res.adjustment}
+                            InputProps={{
+                              inputComponent: NumericFormatCustom as any,
+                            }}
                             required
                             onChange={(e) => {
-                              handleInput(e.target.value, (e: number) => {
-                                field.value[i].adjustment = e;
-                                field.onChange(field.value);
-                              });
+                              field.value[i].adjustment = e.target.value as any;
+                              field.onChange(field.value);
                             }}
                             error={Boolean(
                               checkBoxesError(fieldState, i, "adjustment")
                             )}
-                            helperText={`${FormatNumberWithFixed(
-                              res.adjustment ?? 0
-                            )}  ${checkBoxesError(
+                            helperText={` ${checkBoxesError(
                               fieldState,
                               i,
                               "adjustment"
@@ -1194,7 +1211,7 @@ export default function EquityForm(props: Props) {
                           </Button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-1 mt-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
@@ -1213,25 +1230,24 @@ export default function EquityForm(props: Props) {
                           <TextField
                             InputLabelProps={{ shrink: true }}
                             size="small"
-                            inputProps={{
-                              inputMode: "numeric",
-                              pattern: "-?[0-9]*",
-                            }}
                             label="Credit"
                             value={res.credit}
+                            InputProps={{
+                              inputComponent: NumericFormatCustom as any,
+                            }}
                             required
                             onChange={(e) => {
-                              handleInput(e.target.value, (e: number) => {
-                                field.value[i].credit = e;
-                                field.onChange(field.value);
-                              });
+                              field.value[i].credit = e.target.value as any;
+                              field.onChange(field.value);
                             }}
                             error={Boolean(
                               checkBoxesError(fieldState, i, "credit")
                             )}
-                            helperText={`${FormatNumberWithFixed(
-                              res.credit ?? 0
-                            )}  ${checkBoxesError(fieldState, i, "credit")}`}
+                            helperText={`  ${checkBoxesError(
+                              fieldState,
+                              i,
+                              "credit"
+                            )}`}
                           />
                         </div>
                         {/* {i !== forms.agents.length - 1 && (

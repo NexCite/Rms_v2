@@ -11,6 +11,7 @@ import { FormatNumberWithFixed } from "@rms/lib/global";
 import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
 import Link from "next/link";
 import { deleteEquityById } from "@rms/service/equity-service";
+import TestCFhart from "@rms/app/test";
 
 type CommonPayload = Prisma.EquityGetPayload<{
   include: {

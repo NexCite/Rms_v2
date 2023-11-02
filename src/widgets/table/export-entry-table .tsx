@@ -124,11 +124,11 @@ export default function ExportEntryDataTable(props: Props) {
       {
         accessorKey: "amount" as any,
         header: "Amount",
-        accessorFn(originalRow) {
+        Cell({ row: { original } }) {
           var debitAmout = 0;
           var creditAmount = 0;
 
-          originalRow?.subEntries.map((res) => {
+          original.subEntries.map((res) => {
             if (res.type === "Debit") {
               debitAmout += res.amount;
             } else {
@@ -136,9 +136,41 @@ export default function ExportEntryDataTable(props: Props) {
             }
           });
 
-          return `${originalRow?.currency}${FormatNumberWithFixed(
-            debitAmout > creditAmount ? debitAmout : creditAmount
-          )}`;
+          return original.rate ? (
+            <table>
+              <thead>
+                <tr>
+                  <th>Rate</th>
+                  <th>Rate Amount</th>
+                  <th> Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{FormatNumberWithFixed(original.rate)}</td>
+                  <td>
+                    $
+                    {FormatNumberWithFixed(
+                      debitAmout > creditAmount
+                        ? debitAmout
+                        : creditAmount / original.rate
+                    )}
+                  </td>
+                  <td>
+                    {" "}
+                    {original.currency}
+                    {FormatNumberWithFixed(
+                      debitAmout > creditAmount ? debitAmout : creditAmount
+                    )}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          ) : (
+            `${original?.currency}${FormatNumberWithFixed(
+              debitAmout > creditAmount ? debitAmout : creditAmount
+            )}`
+          );
         },
         muiTableHeadCellProps: {
           align: "center",
@@ -307,6 +339,7 @@ export default function ExportEntryDataTable(props: Props) {
         currency: entry.currency.symbol,
         date: entry.to_date,
         subEntries: [],
+        rate: entry.rate,
 
         title: entry.title,
         id: entry.id,
@@ -317,6 +350,7 @@ export default function ExportEntryDataTable(props: Props) {
 
       entry.sub_entries.forEach((subEntry) => {
         var amount = 0;
+
         if (account_id && !two_digit_id && !three_digit_id && !more_digit_id) {
           if (account_id === subEntry.account_entry_id) {
             amount = subEntry.amount;
@@ -792,19 +826,36 @@ export default function ExportEntryDataTable(props: Props) {
                         },
                       },
                     ]}
-                    data={props.currencies.map((res) => ({
-                      currncy: res.symbol,
-                      debit: FormatNumberWithFixed(totalDebit[res.symbol] ?? 0),
-                      credit: FormatNumberWithFixed(
-                        totalCredit[res.symbol] ?? 0
-                      ),
-                      total: FormatNumberWithFixed(
-                        Math.abs(
-                          (totalDebit[res.symbol] ?? 0) -
-                            (totalCredit[res.symbol] ?? 0)
-                        )
-                      ),
-                    }))}
+                    data={props.currencies
+                      .filter((res) => {
+                        return totalCredit[res.symbol] === undefined &&
+                          totalDebit[res.symbol] === undefined
+                          ? false
+                          : true;
+                      })
+                      .map((res) => ({
+                        currncy: res.symbol,
+                        debit: FormatNumberWithFixed(
+                          totalDebit[res.symbol] ?? 0
+                        ),
+                        credit: FormatNumberWithFixed(
+                          totalCredit[res.symbol] ?? 0
+                        ),
+                        total: `${
+                          (totalDebit[res.symbol] ?? 0) >
+                          (totalCredit[res.symbol] ?? 0)
+                            ? "Debit"
+                            : (totalDebit[res.symbol] ?? 0) ===
+                              (totalCredit[res.symbol] ?? 0)
+                            ? ""
+                            : "Credit"
+                        }  ${FormatNumberWithFixed(
+                          Math.abs(
+                            (totalDebit[res.symbol] ?? 0) -
+                              (totalCredit[res.symbol] ?? 0)
+                          )
+                        )}`,
+                      }))}
                   />
                 </>
               );
@@ -821,6 +872,7 @@ type CommonEntryType = {
 
   id: number;
   amount: number;
+  rate?: number;
   currency: string;
   date: Date;
   subEntries: Prisma.SubEntryGetPayload<{

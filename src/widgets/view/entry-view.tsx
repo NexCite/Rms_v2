@@ -117,6 +117,12 @@ export default function EntryView(props: Props) {
           <TableRow>
             <TableCell>Debit</TableCell>
             <TableCell>Credit</TableCell>
+            {props.entry.rate && (
+              <>
+                <TableCell>Rate</TableCell>
+                <TableCell>Rate Amount</TableCell>
+              </>
+            )}
             <TableCell>Amount</TableCell>
           </TableRow>
         </TableHead>
@@ -150,6 +156,17 @@ export default function EntryView(props: Props) {
                   </TableCell>
                 </>
               )}
+              {props.entry.rate && (
+                <>
+                  <TableCell>
+                    {FormatNumberWithFixed(props.entry.rate)}
+                  </TableCell>
+                  <TableCell>
+                    ${FormatNumberWithFixed(res.amount / props.entry.rate)}
+                  </TableCell>
+                </>
+              )}
+
               <TableCell>
                 {props.entry.currency.symbol}
                 {FormatNumberWithFixed(res.amount)}

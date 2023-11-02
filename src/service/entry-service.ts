@@ -27,7 +27,9 @@ export async function createEntry(
       const currency = await prisma.currency.findUnique({
         where: { id: props.currency_id, rate: { gt: 0 } },
       });
-      props.rate = currency.rate;
+      if (currency) {
+        props.rate = currency.rate;
+      }
       await Promise.all([
         prisma.entry.create({ data: props }),
         activity ? confirmActivity(activity) : undefined,
