@@ -223,11 +223,10 @@ export default function EntryDataTable(props: Props) {
               <tbody>
                 <tr>
                   <td>
-                    ${FormatNumberWithFixed(originalRow.row.original.rate)}
+                    {FormatNumberWithFixed(originalRow.row.original.rate)}
                   </td>
                   <td>
-                    {" "}
-                    ${" "}
+                    $
                     {FormatNumberWithFixed(
                       amount / originalRow.row.original.rate
                     )}

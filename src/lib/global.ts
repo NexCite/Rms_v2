@@ -4,5 +4,6 @@ export function FormatNumber(data: number) {
 export function FormatNumberWithFixed(data: number, digit?: number) {
   digit = digit ?? 2;
 
-  return data.toFixed(digit).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+  if (data?.toFixed)
+    return data?.toFixed(digit).replace(/\d(?=(\d{3})+\.)/g, "$&,");
 }

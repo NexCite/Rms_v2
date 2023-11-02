@@ -139,7 +139,10 @@ function Tab2(props: Props) {
         a += e.amount;
       }
     });
-    return props.entry.currency.symbol + FormatNumberWithFixed(a);
+    return {
+      amountStr: props.entry.currency.symbol + FormatNumberWithFixed(a),
+      amount: a,
+    };
   }, [props.entry.sub_entries, props.entry.currency.symbol]);
   return (
     <Style2 className="font-mono">
@@ -174,8 +177,18 @@ function Tab2(props: Props) {
       <div className="flex justify-center" dir="auto">
         <p>{props.entry.description}</p>
       </div>
+      {props.entry.rate && (
+        <h1 className="w-full text-[10pt] mt-10" dir="ltr">
+          Rate : ${props.entry.rate}
+        </h1>
+      )}
+      {props.entry.rate && (
+        <h1 className="w-full text-[10pt] mt-10" dir="ltr">
+          Amount Rate : ${amount.amount / props.entry.rate}
+        </h1>
+      )}
       <h1 className="w-full text-[10pt] mt-10" dir="ltr">
-        Amount: {amount}
+        Amount: {amount.amountStr}
       </h1>
       <div>
         <div className="flex justify-around mt-10 gap-20">
@@ -211,8 +224,11 @@ function Tab3(props: Props) {
         a += e.amount;
       }
     });
-    return props.entry.currency.symbol + FormatNumberWithFixed(a);
-  }, [props.entry.currency.symbol, props.entry.sub_entries]);
+    return {
+      amountStr: props.entry.currency.symbol + FormatNumberWithFixed(a),
+      amount: a,
+    };
+  }, [props.entry.sub_entries, props.entry.currency.symbol]);
   return (
     <Style2 className="font-mono">
       <div className={"bg-center flex items-center gap-5"}>
@@ -246,8 +262,18 @@ function Tab3(props: Props) {
       <div className="flex justify-center" dir="auto">
         <p>{props.entry.description}</p>
       </div>
+      {props.entry.rate && (
+        <h1 className="w-full text-[10pt] mt-10" dir="ltr">
+          Rate : ${props.entry.rate}
+        </h1>
+      )}
+      {props.entry.rate && (
+        <h1 className="w-full text-[10pt] mt-10" dir="ltr">
+          Amount Rate : ${amount.amount / props.entry.rate}
+        </h1>
+      )}
       <h1 className="w-full text-[10pt] mt-10" dir="ltr">
-        Amount: {amount}
+        Amount: {amount.amountStr}
       </h1>
       <div>
         <div className="flex justify-around mt-10 gap-20">
@@ -284,8 +310,11 @@ function Tab1(props: Props) {
         a += e.amount;
       }
     });
-    return props.entry.currency.symbol + FormatNumberWithFixed(a);
-  }, [props.entry.currency.symbol, props.entry.sub_entries]);
+    return {
+      amountStr: props.entry.currency.symbol + FormatNumberWithFixed(a),
+      amount: a,
+    };
+  }, [props.entry.sub_entries, props.entry.currency.symbol]);
   return (
     <Style1 className="font-mono">
       <div id="pdf">
@@ -325,10 +354,26 @@ function Tab1(props: Props) {
           {props.entry.description}
         </h1>
 
-        <h1 className="flex items-center gap-10">
-          <span style={{ fontSize: "17pt" }}>Amount:</span>
-          <span style={{ fontSize: "16pt", fontWeight: "bold" }}>{amount}</span>
-        </h1>
+        <div className="flex justify-between items-center">
+          <h1 className="flex items-center gap-10">
+            <span style={{ fontSize: "17pt" }}>Amount:</span>
+            <span style={{ fontSize: "16pt", fontWeight: "bold" }}>
+              {amount.amountStr}
+            </span>
+          </h1>
+          <h1 className="flex items-center gap-10">
+            <span style={{ fontSize: "17pt" }}>Amount Rate:</span>
+            <span style={{ fontSize: "16pt", fontWeight: "bold" }}>
+              ${amount.amount / props.entry.rate}
+            </span>
+          </h1>
+          <h1 className="flex items-center gap-10">
+            <span style={{ fontSize: "17pt" }}>Rate :</span>
+            <span style={{ fontSize: "16pt", fontWeight: "bold" }}>
+              {props.entry.rate}
+            </span>
+          </h1>
+        </div>
 
         <div>
           <div className="flex justify-around mt-20 gap-20">

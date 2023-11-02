@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { $Enums, Prisma } from "@prisma/client";
 import { Button } from "@rms/components/ui/button";
 
-import { FormatNumber, FormatNumberWithFixed } from "@rms/lib/global";
+import { FormatNumberWithFixed } from "@rms/lib/global";
 import { createEntry, updateEntry } from "@rms/service/entry-service";
 import { PlusSquare, X } from "lucide-react";
 
@@ -27,6 +27,7 @@ import {
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import Loading from "@rms/components/ui/loading";
+import NumericFormatCustom from "@rms/components/ui/text-field-number";
 import { useStore } from "@rms/hooks/toast-hook";
 import { Activity, ActivityStatus } from "@rms/models/CommonModel";
 import dayjs from "dayjs";
@@ -106,7 +107,12 @@ export default function EntryForm(props: Props) {
               $Enums.DebitCreditType.Debit,
               $Enums.DebitCreditType.Credit,
             ]),
-            amount: z.number().min(0.01),
+            amount: z.number().or(
+              z
+                .string()
+                .regex(/^-?\d+(\.\d{1,2})?$/)
+                .transform(Number)
+            ),
             account_entry_id: z.number().optional().nullable(),
             three_digit_id: z.number().optional().nullable(),
             two_digit_id: z.number().optional().nullable(),
@@ -169,12 +175,28 @@ export default function EntryForm(props: Props) {
             : undefined,
         },
   });
-
+  const { totalCredit, totalDebit, totalUnkown } = useMemo(() => {
+    var totalDebit = 0,
+      totalCredit = 0,
+      totalUnkown = 0;
+    form.watch("sub_entries").map((res) => {
+      switch (res.type) {
+        case "Credit":
+          totalCredit += res.amount;
+          break;
+        case "Debit":
+          totalDebit += res.amount;
+          break;
+        default:
+          totalUnkown += res.amount;
+          break;
+      }
+    });
+    return { totalDebit, totalCredit, totalUnkown };
+  }, [form.watch("sub_entries")]);
   const handleSubmit = useCallback(
     (values) => {
-      console.log(values);
       var m: Prisma.EntryUncheckedCreateInput;
-      console.log(values);
       m = {
         description: values.description,
         title: values.title,
@@ -184,7 +206,7 @@ export default function EntryForm(props: Props) {
         sub_entries: {
           createMany: {
             data: values.sub_entries.map((res) => ({
-              amount: res.amount,
+              amount: parseFloat(res.amount + ""),
               status: "Enable",
               type: res.type,
               account_entry_id:
@@ -289,7 +311,7 @@ export default function EntryForm(props: Props) {
     if (currency_id) {
       const currency = props.currencies.find((res) => res.id === currency_id);
       if (currency?.rate) {
-        return currency.rate;
+        return { rate: currency.rate, symbol: currency.symbol };
       }
       return undefined;
     }
@@ -591,11 +613,6 @@ export default function EntryForm(props: Props) {
                   render={({ field, fieldState }) => {
                     return (
                       <>
-                        <div>
-                          {currency && (
-                            <h1>Rate: {FormatNumberWithFixed(currency, 0)}</h1>
-                          )}
-                        </div>
                         {Boolean(fieldState.error?.message) && (
                           <Alert variant="outlined" severity="error">
                             <AlertTitle>
@@ -606,7 +623,39 @@ export default function EntryForm(props: Props) {
                             </AlertTitle>
                           </Alert>
                         )}
+                        <div>
+                          <div className="flex flex-wrap gap-5 justify-between mb-5">
+                            <h1>
+                              Total Debit:{" "}
+                              {FormatNumberWithFixed(
+                                parseFloat(totalDebit + "")
+                              )}
+                            </h1>
+                            <h1>
+                              Total Credit:{" "}
+                              {FormatNumberWithFixed(
+                                parseFloat(totalCredit + "")
+                              )}
+                            </h1>
+                            <h1>
+                              Total Unkown:{" "}
+                              {FormatNumberWithFixed(
+                                parseFloat(totalUnkown + "")
+                              )}
+                            </h1>
 
+                            {currency && (
+                              <h1>
+                                Rate:{" "}
+                                {FormatNumberWithFixed(
+                                  currency?.rate,
+                                  2
+                                ).replace(".00", "")}
+                              </h1>
+                            )}
+                          </div>
+                          <Divider />
+                        </div>
                         {field.value?.map((res, i) => (
                           <div className="mb-5 " key={i}>
                             <div className="flex justify-between items-center">
@@ -630,25 +679,20 @@ export default function EntryForm(props: Props) {
                               <TextField
                                 InputLabelProps={{ shrink: true }}
                                 size="small"
-                                type="number"
                                 label="Amount"
                                 value={res.amount}
                                 required
+                                InputProps={{
+                                  inputComponent: NumericFormatCustom as any,
+                                }}
                                 onChange={(e) => {
-                                  if (Number.isNaN(e.target.value)) {
-                                    field.value[i].amount = 1;
-                                  } else {
-                                    field.value[i].amount = +e.target.value;
-                                  }
-
+                                  field.value[i].amount = e.target.value as any;
                                   field.onChange(field.value);
                                 }}
                                 error={Boolean(
                                   checkSubEntriesError(fieldState, i, "amount")
                                 )}
-                                helperText={`${FormatNumberWithFixed(
-                                  res.amount ?? 0
-                                )}  ${checkSubEntriesError(
+                                helperText={` ${checkSubEntriesError(
                                   fieldState,
                                   i,
                                   "amount"

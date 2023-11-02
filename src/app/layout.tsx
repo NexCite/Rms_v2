@@ -46,8 +46,8 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="absolute bottom-0 right-5 z-20">
-            <h1>version {v}</h1>
+          <div className="absolute bottom-1 right-10 z-20    text-black">
+            <h1 className="text-black">version {v}</h1>
           </div>
 
           {children}
