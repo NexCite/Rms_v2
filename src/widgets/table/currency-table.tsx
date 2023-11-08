@@ -7,7 +7,7 @@ import { useMemo, useTransition } from "react";
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import Authorized from "@rms/components/ui/authorized";
 import { deleteCurrency } from "@rms/service/currency-service";
-import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
+import { MaterialReactTable, MRT_ColumnDef } from "material-react-table";
 import { useStore } from "@rms/hooks/toast-hook";
 import Link from "next/link";
 import { FontRomanIcon } from "@radix-ui/react-icons";

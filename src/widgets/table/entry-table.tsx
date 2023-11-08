@@ -2,7 +2,7 @@
 import React, { useCallback, useMemo, useState, useTransition } from "react";
 
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { LocalizationProvider } from "@mui/x-date-pickers";
 import { MaterialReactTable, type MRT_ColumnDef } from "material-react-table";
 
 import { $Enums, Prisma } from "@prisma/client";
@@ -399,21 +399,25 @@ export default function EntryDataTable(props: Props) {
 
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
-                maxDate={dayjs(selectDate.to)}
                 slotProps={{ textField: { size: "small" } }}
                 label="From Date"
                 defaultValue={dayjs(selectDate.from)}
                 onChange={(e) => {
-                  setSelectDate((prev) => ({ ...prev, from: e?.toDate() }));
+                  setSelectDate((prev) => ({
+                    ...prev,
+                    from: e.startOf("D").toDate(),
+                  }));
                 }}
               />
               <DatePicker
-                minDate={dayjs(selectDate.from)}
                 slotProps={{ textField: { size: "small" } }}
                 label="To Date"
                 defaultValue={dayjs(selectDate.to)}
                 onChange={(e) => {
-                  setSelectDate((prev) => ({ ...prev, from: e?.toDate() }));
+                  setSelectDate((prev) => ({
+                    ...prev,
+                    from: e.endOf("D").toDate(),
+                  }));
                 }}
               />
             </LocalizationProvider>

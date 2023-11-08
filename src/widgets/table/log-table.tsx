@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { Card, CardHeader, Typography } from "@mui/material";
-import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
+import { MaterialReactTable, MRT_ColumnDef } from "material-react-table";
 import moment from "moment";
 
 type Props = {

@@ -8,7 +8,7 @@ import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import Authorized from "@rms/components/ui/authorized";
 import { deleteCategoryById } from "@rms/service/category-service";
 import { deleteSubCategoryById } from "@rms/service/sub-category-service";
-import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
+import { MaterialReactTable, MRT_ColumnDef } from "material-react-table";
 import { useStore } from "@rms/hooks/toast-hook";
 import Link from "next/link";
 

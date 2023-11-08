@@ -21,6 +21,7 @@ import {
   CardHeader,
   Divider,
   FormControl,
+  Switch,
   TextField,
   Typography,
 } from "@mui/material";
@@ -96,6 +97,7 @@ export default function EntryForm(props: Props) {
 
   const formSchema = z
     .object({
+      includeRate: z.boolean().default(props.entry?.rate ? true : false),
       title: z.string().min(3),
       description: z.string().min(3),
       note: z.string().optional(),
@@ -154,6 +156,8 @@ export default function EntryForm(props: Props) {
           note: props.entry?.note ?? undefined,
           title: props.entry?.title ?? undefined,
           currency_id: props.entry?.currency_id ?? undefined,
+
+          includeRate: props.entry?.rate ? true : false,
           sub_entries:
             props.entry?.sub_entries?.map((res) => ({
               amount: res.amount,
@@ -280,7 +284,7 @@ export default function EntryForm(props: Props) {
 
       setTransition(async () => {
         if (props.isEditMode) {
-          const result = await updateEntry(props.id, m);
+          const result = await updateEntry(props.id, m, values.includeRate);
           store.OpenAlert(result);
           if (result.status === 200) {
             back();
@@ -288,6 +292,8 @@ export default function EntryForm(props: Props) {
         } else {
           const result = await createEntry(
             m,
+            values.includeRate,
+
             props.activity
               ? { id: props.activity.id, status: ActivityStatus.Provided }
               : undefined
@@ -326,6 +332,7 @@ export default function EntryForm(props: Props) {
         <Loading />
       ) : (
         <Card className="">
+          {props.entry?.rate}
           {props.activity && (
             <div className="  entry-form-size:absolute top-[80px]   end-[2%] entry-form-size:max-w-xs  w-full    ">
               <Accordion
@@ -574,6 +581,25 @@ export default function EntryForm(props: Props) {
                     </LocalizationProvider>
                   </FormControl>
                 )}
+              />
+              <Controller
+                control={form.control}
+                name={"includeRate"}
+                render={({ field, fieldState }) =>
+                  currency?.rate ? (
+                    <FormControl {...field} size="small">
+                      <h1>Include Rage</h1>
+                      <Switch
+                        checked={field.value}
+                        onChange={(e, v) => {
+                          field.onChange(v);
+                        }}
+                      />
+                    </FormControl>
+                  ) : (
+                    <></>
+                  )
+                }
               />
 
               <div className="grid-cols-12">

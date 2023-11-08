@@ -9,6 +9,8 @@ import { ActivityStatus } from "@rms/models/CommonModel";
 import { copyMediaTemp, deleteMedia } from "./media-service";
 export async function createEntry(
   props: Prisma.EntryUncheckedCreateInput,
+  includeRate: boolean,
+
   activity?: {
     id: number;
     status?: ActivityStatus;
@@ -18,7 +20,10 @@ export async function createEntry(
     async (auth, config_id) => {
       props.user_id = auth.id;
       props.config_id = config_id;
-
+      if (!includeRate) {
+        props.rate = null;
+      }
+      delete (props as any).includeRate;
       if (props.media) {
         props.media.create.path = await copyMediaTemp(props.media.create.path);
       }
@@ -45,10 +50,19 @@ export async function createEntry(
 
 export async function updateEntry(
   id: number,
-  props: Prisma.EntryUncheckedUpdateInput
+  props: Prisma.EntryUncheckedUpdateInput,
+  includeRate?: boolean
 ) {
   return handlerServiceAction(
     async (auth, config_id) => {
+      console.log(includeRate);
+      if (!includeRate) {
+        props.rate = null;
+      }
+
+      delete (props as any).includeRate;
+      console.log(props.rate);
+
       props.user_id = auth.id;
       props.config_id = config_id;
       const result = await prisma.entry.findUnique({

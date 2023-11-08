@@ -1,14 +1,11 @@
 import { ThemeProvider } from "@rms/components/theme/theme-provider";
 import "./globals.css";
 
-import { Inter } from "next/font/google";
 import { env } from "process";
 import NextTopLoader from "nextjs-toploader";
 import prisma from "@rms/prisma/prisma";
 import { AlertProvider } from "@rms/hooks/toast-hook";
 import { getConfigId } from "@rms/lib/config";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export default async function RootLayout({
   children,
@@ -37,7 +34,7 @@ export default async function RootLayout({
         <link rel="icon" href={logo} />
         <title>Rms System</title>
       </head>
-      <body className={inter.className}>
+      <body>
         <NextTopLoader showSpinner={false} color="#090808" />
 
         <ThemeProvider

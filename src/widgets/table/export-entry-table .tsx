@@ -28,7 +28,7 @@ import {
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
+import { MaterialReactTable, MRT_ColumnDef } from "material-react-table";
 import moment from "moment";
 import Image from "next/image";
 import { usePDF } from "react-to-pdf";
@@ -327,125 +327,156 @@ export default function ExportEntryDataTable(props: Props) {
     };
   }, [props]);
 
-  const { entries, totalCredit, totalDebit } = useMemo(() => {
-    var totalDebit: Record<string, number> = {},
-      totalCredit: Record<string, number> = {},
-      currencies: { [k: string]: boolean } = {},
-      entries: CommonEntryType[] = [];
+  const { entries, totalCredit, totalDebit, totalCreditRate, totalDebitRate } =
+    useMemo(() => {
+      var totalDebit: Record<string, number> = {},
+        totalCredit: Record<string, number> = {},
+        currencies: { [k: string]: boolean } = {},
+        entries: CommonEntryType[] = [];
+      var totalDebitRate = 0,
+        totalCreditRate = 0;
 
-    props.data.forEach((entry) => {
-      const newEntry: CommonEntryType = {
-        amount: 0,
-        currency: entry.currency.symbol,
-        date: entry.to_date,
-        subEntries: [],
-        rate: entry.rate,
+      props.data.forEach((entry) => {
+        const newEntry: CommonEntryType = {
+          amount: 0,
+          currency: entry.currency.symbol,
+          date: entry.to_date,
+          subEntries: [],
+          rate: entry.rate,
 
-        title: entry.title,
-        id: entry.id,
-      };
+          title: entry.title,
+          id: entry.id,
+        };
 
-      const { three_digit_id, account_id, two_digit_id, more_digit_id } =
-        search;
+        const { three_digit_id, account_id, two_digit_id, more_digit_id } =
+          search;
 
-      entry.sub_entries.forEach((subEntry) => {
-        var amount = 0;
+        entry.sub_entries.forEach((subEntry) => {
+          var amount = 0;
 
-        if (account_id && !two_digit_id && !three_digit_id && !more_digit_id) {
-          if (account_id === subEntry.account_entry_id) {
-            amount = subEntry.amount;
-          }
-        }
-        if (search.two_digit_id) {
           if (
-            subEntry.two_digit_id === two_digit_id ||
-            subEntry.three_digit?.two_digit_id === two_digit_id ||
-            subEntry.more_than_four_digit?.three_digit?.two_digit_id ===
-              two_digit_id ||
-            subEntry.account_entry?.two_digit_id === two_digit_id ||
-            subEntry.account_entry?.three_digit?.two_digit_id ===
-              two_digit_id ||
-            subEntry.account_entry?.more_than_four_digit?.three_digit
-              ?.two_digit_id === two_digit_id ||
-            subEntry.reference?.two_digit_id === two_digit_id ||
-            subEntry.reference?.three_digit?.two_digit_id === two_digit_id ||
-            subEntry.reference?.more_than_four_digit?.three_digit
-              ?.two_digit_id === two_digit_id
+            account_id &&
+            !two_digit_id &&
+            !three_digit_id &&
+            !more_digit_id
           ) {
-            amount = subEntry.amount;
+            if (account_id === subEntry.account_entry_id) {
+              amount = subEntry.amount;
+            }
           }
-        } else if (three_digit_id) {
-          if (
-            subEntry.three_digit_id === three_digit_id ||
-            subEntry.more_than_four_digit?.three_digit_id === three_digit_id ||
-            subEntry.account_entry?.three_digit_id === three_digit_id ||
-            subEntry.account_entry?.more_than_four_digit?.three_digit_id ===
-              three_digit_id ||
-            subEntry.reference?.three_digit_id === three_digit_id ||
-            subEntry.reference?.more_than_four_digit?.three_digit_id ===
-              three_digit_id
-          ) {
-            amount = subEntry.amount;
+          if (search.two_digit_id) {
+            if (
+              subEntry.two_digit_id === two_digit_id ||
+              subEntry.three_digit?.two_digit_id === two_digit_id ||
+              subEntry.more_than_four_digit?.three_digit?.two_digit_id ===
+                two_digit_id ||
+              subEntry.account_entry?.two_digit_id === two_digit_id ||
+              subEntry.account_entry?.three_digit?.two_digit_id ===
+                two_digit_id ||
+              subEntry.account_entry?.more_than_four_digit?.three_digit
+                ?.two_digit_id === two_digit_id ||
+              subEntry.reference?.two_digit_id === two_digit_id ||
+              subEntry.reference?.three_digit?.two_digit_id === two_digit_id ||
+              subEntry.reference?.more_than_four_digit?.three_digit
+                ?.two_digit_id === two_digit_id
+            ) {
+              amount = subEntry.amount;
+            }
+          } else if (three_digit_id) {
+            if (
+              subEntry.three_digit_id === three_digit_id ||
+              subEntry.more_than_four_digit?.three_digit_id ===
+                three_digit_id ||
+              subEntry.account_entry?.three_digit_id === three_digit_id ||
+              subEntry.account_entry?.more_than_four_digit?.three_digit_id ===
+                three_digit_id ||
+              subEntry.reference?.three_digit_id === three_digit_id ||
+              subEntry.reference?.more_than_four_digit?.three_digit_id ===
+                three_digit_id
+            ) {
+              amount = subEntry.amount;
+            }
+          } else if (more_digit_id) {
+            if (
+              subEntry.more_than_four_digit_id === more_digit_id ||
+              subEntry.account_entry?.more_than_four_digit_id ===
+                more_digit_id ||
+              subEntry.reference?.more_than_four_digit_id === more_digit_id
+            ) {
+              amount = subEntry.amount;
+            }
           }
-        } else if (more_digit_id) {
-          if (
-            subEntry.more_than_four_digit_id === more_digit_id ||
-            subEntry.account_entry?.more_than_four_digit_id === more_digit_id ||
-            subEntry.reference?.more_than_four_digit_id === more_digit_id
-          ) {
-            amount = subEntry.amount;
-          }
-        }
 
-        if (amount === 0) {
-          if (subEntry.type === "Credit") {
-            if (totalDebit[entry.currency.symbol]) {
-              totalDebit[entry.currency.symbol] += subEntry.amount;
+          if (amount === 0) {
+            if (subEntry.type === "Credit") {
+              if (totalDebit[entry.currency.symbol]) {
+                totalDebit[entry.currency.symbol] += subEntry.amount;
+              } else {
+                if (!currencies[entry.currency.symbol]) {
+                  currencies[entry.currency.symbol] = true;
+                }
+                totalDebit[entry.currency.symbol] = subEntry.amount;
+              }
+              if (entry.rate) {
+                totalCreditRate += subEntry.amount / entry.rate;
+              }
+            } else if (totalCredit[entry.currency.symbol]) {
+              totalCredit[entry.currency.symbol] += subEntry.amount;
+              if (entry.rate) {
+                totalDebitRate += subEntry.amount / entry.rate;
+              }
             } else {
               if (!currencies[entry.currency.symbol]) {
                 currencies[entry.currency.symbol] = true;
               }
-              totalDebit[entry.currency.symbol] = subEntry.amount;
+              totalCredit[entry.currency.symbol] = subEntry.amount;
+              if (entry.rate) {
+                totalDebitRate += subEntry.amount / entry.rate;
+              }
             }
-          } else if (totalCredit[entry.currency.symbol]) {
-            totalCredit[entry.currency.symbol] += subEntry.amount;
           } else {
-            if (!currencies[entry.currency.symbol]) {
-              currencies[entry.currency.symbol] = true;
-            }
-            totalCredit[entry.currency.symbol] = subEntry.amount;
+            newEntry.amount = amount;
           }
-        } else {
-          newEntry.amount = amount;
-        }
 
-        if (two_digit_id === subEntry.two_digit_id) {
-          return;
-        }
-        if (three_digit_id === subEntry.three_digit_id) {
-          return;
-        }
-        if (more_digit_id === subEntry.more_than_four_digit_id) {
-          return;
-        }
-
-        if (account_id && !two_digit_id && !three_digit_id && !more_digit_id) {
-          if (account_id === subEntry.account_entry_id) {
-            return;
-          } else {
-            newEntry.subEntries.push(subEntry);
-
+          if (two_digit_id === subEntry.two_digit_id) {
             return;
           }
-        }
-        newEntry.subEntries.push(subEntry);
+          if (three_digit_id === subEntry.three_digit_id) {
+            return;
+          }
+          if (more_digit_id === subEntry.more_than_four_digit_id) {
+            return;
+          }
+
+          if (
+            account_id &&
+            !two_digit_id &&
+            !three_digit_id &&
+            !more_digit_id
+          ) {
+            if (account_id === subEntry.account_entry_id) {
+              return;
+            } else {
+              newEntry.subEntries.push(subEntry);
+
+              return;
+            }
+          }
+          newEntry.subEntries.push(subEntry);
+        });
+
+        entries.push(newEntry);
       });
 
-      entries.push(newEntry);
-    });
-
-    return { entries, totalDebit, totalCredit, currencies };
-  }, [props.data]);
+      return {
+        totalDebitRate,
+        totalCreditRate,
+        entries,
+        totalDebit,
+        totalCredit,
+        currencies,
+      };
+    }, [props.data]);
 
   const titleRef = useRef<HTMLHeadingElement>();
   const { toPDF, targetRef } = usePDF();
@@ -465,21 +496,25 @@ export default function ExportEntryDataTable(props: Props) {
         >
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
-              maxDate={dayjs(selectDate.to)}
               slotProps={{ textField: { size: "small" } }}
               label="From Date"
               defaultValue={dayjs(selectDate.from)}
               onChange={(e) => {
-                setSelectDate((prev) => ({ ...prev, from: e?.toDate() }));
+                setSelectDate((prev) => ({
+                  ...prev,
+                  from: e.startOf("D").toDate(),
+                }));
               }}
             />
             <DatePicker
-              minDate={dayjs(selectDate.from)}
               slotProps={{ textField: { size: "small" } }}
               label="To Date"
               defaultValue={dayjs(selectDate.to)}
               onChange={(e) => {
-                setSelectDate((prev) => ({ ...prev, from: e?.toDate() }));
+                setSelectDate((prev) => ({
+                  ...prev,
+                  from: e.endOf("D").toDate(),
+                }));
               }}
             />
           </LocalizationProvider>
@@ -825,6 +860,39 @@ export default function ExportEntryDataTable(props: Props) {
                           align: "center",
                         },
                       },
+                      {
+                        header: "Total Debit Rate",
+                        accessorKey: "totalDebitRate",
+                        muiTableHeadCellProps: {
+                          align: "center",
+                        },
+
+                        muiTableBodyCellProps: {
+                          align: "center",
+                        },
+                      },
+                      {
+                        header: "Total Credit Rate",
+                        accessorKey: "totalCreditRate",
+                        muiTableHeadCellProps: {
+                          align: "center",
+                        },
+
+                        muiTableBodyCellProps: {
+                          align: "center",
+                        },
+                      },
+                      {
+                        header: "Total Rate",
+                        accessorKey: "totalRate",
+                        muiTableHeadCellProps: {
+                          align: "center",
+                        },
+
+                        muiTableBodyCellProps: {
+                          align: "center",
+                        },
+                      },
                     ]}
                     data={props.currencies
                       .filter((res) => {
@@ -854,6 +922,21 @@ export default function ExportEntryDataTable(props: Props) {
                             (totalDebit[res.symbol] ?? 0) -
                               (totalCredit[res.symbol] ?? 0)
                           )
+                        )}`,
+                        totalCreditRate: `$${FormatNumberWithFixed(
+                          totalCreditRate
+                        )}`,
+                        totalDebitRate: `$${FormatNumberWithFixed(
+                          totalDebitRate
+                        )}`,
+                        totalRate: `${
+                          totalDebitRate == totalCreditRate
+                            ? ""
+                            : totalDebitRate > totalCreditRate
+                            ? "Debit"
+                            : "Credit"
+                        } $${FormatNumberWithFixed(
+                          Math.abs(totalDebitRate - totalCreditRate)
                         )}`,
                       }))}
                   />

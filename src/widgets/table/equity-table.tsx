@@ -8,7 +8,7 @@ import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import Authorized from "@rms/components/ui/authorized";
 import { useStore } from "@rms/hooks/toast-hook";
 import { FormatNumberWithFixed } from "@rms/lib/global";
-import MaterialReactTable, { MRT_ColumnDef } from "material-react-table";
+import { MaterialReactTable, MRT_ColumnDef } from "material-react-table";
 import Link from "next/link";
 import { deleteEquityById } from "@rms/service/equity-service";
 import TestCFhart from "@rms/app/test";
