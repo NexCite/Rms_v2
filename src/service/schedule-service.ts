@@ -3,16 +3,32 @@ import ServiceActionModel from "@rms/models/ServiceActionModel";
 import { handlerServiceAction } from "@rms/lib/handler";
 import { Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
+import moment from "moment";
 
 export async function createSchedule(
   params: Prisma.ScheduleUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
     async (auth, config_id) => {
+      const date = moment(params.to_date);
+
+      const result = await prisma.schedule.findFirst({
+        where: {
+          config_id,
+          to_date: {
+            gte: date.startOf("D").toDate(),
+            lte: date.endOf("D").toDate(),
+          },
+        },
+      });
+      if (result) {
+        throw new Error("Schedule already create in this datep");
+      }
+
       const schedule = await prisma.schedule.create({
         data: {
-          // config_id,
-          to_date: params.to_date,
+          config_id,
+          to_date: date.startOf("D").toDate(),
           // attendance: params.attendance as any,
           attendance: {
             createMany: {

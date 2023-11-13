@@ -9,5 +9,5 @@ export default interface RouteModel {
   hide: boolean;
   end?: boolean;
   children: RouteModel[];
-  addKey?: $Enums.UserPermission;
+  addKey?: $Enums.UserPermission | "None";
 }

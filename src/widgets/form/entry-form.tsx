@@ -273,10 +273,10 @@ export default function EntryForm(props: Props) {
           message: error
             .map(
               (res) =>
-                (res.index ? `\n SubEntry Index (${res.index}):` : "") +
-                ` ${res.message}`
+                (res.index ? `<div>SubEntry Index (${res.index}):` : "") +
+                ` ${res.message}</div>`
             )
-            .join("#space#"),
+            .join(""),
           type: "required",
         });
         return;
@@ -642,10 +642,11 @@ export default function EntryForm(props: Props) {
                         {Boolean(fieldState.error?.message) && (
                           <Alert variant="outlined" severity="error">
                             <AlertTitle>
-                              {fieldState.error.message.replaceAll(
-                                "#space#",
-                                "\n"
-                              )}
+                              <div
+                                dangerouslySetInnerHTML={{
+                                  __html: fieldState.error.message,
+                                }}
+                              ></div>
                             </AlertTitle>
                           </Alert>
                         )}

@@ -46,9 +46,13 @@ model Config {
   pl_boxes             P_LBox[]
   agent_boxes          AgentBox[]
 
-  ClientBox     ManagerBox[]
-  CreditBox     CreditBox[]
-  AdjustmentBox AdjustmentBox[]
+  client_boxes      ManagerBox[]
+  credit_boxes      CreditBox[]
+  adgjustment_boxes AdjustmentBox[]
+  schedule_configes ScheduleConfig[]
+  schedules         Schedule[]
+  vacations         Vacation[]
+  roles             Role[]
 }
 
 model User {
@@ -552,6 +556,14 @@ enum EntryType {
   Credit
 }
 
+model Role {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  config_id   Int
+  config      Config           @relation(fields: [config_id], references: [id])
+  permissions UserPermission[]
+}
+
 enum UserPermission {
   PaymentBox
   View_Equity
@@ -561,6 +573,8 @@ enum UserPermission {
   Delete_Equity
   Add_Two_Digit
   View_Export_Entry
+  View_Balance_Sheet
+
   Edit_Two_Digit
   Delete_Two_Digit
   View_Three_Digit
@@ -677,12 +691,29 @@ enum UserPermission {
   View_Vacations
   Edit_Config
   View_Config
+  View_Schedules_Config
+  Delete_Schedules_Config
+  View_Schedule_Config
+  Edit_Schedule_Config
+  Add_Schedule_Config
 }
 
 enum Account_Entry_Type {
   Client
   IB
   Supplier
+}
+
+model ScheduleConfig {
+  id             Int       @id @default(autoincrement())
+  from_time      DateTime?
+  to_time        DateTime?
+  from_over_time DateTime?
+  to_over_time   DateTime?
+  create_date    DateTime  @default(now())
+  modified_date  DateTime  @default(now()) @updatedAt
+  config_id      Int?
+  config         Config?   @relation(fields: [config_id], references: [id])
 }
 
 model Equity {
@@ -807,14 +838,16 @@ model Schedule {
   modified_date DateTime     @default(now()) @updatedAt
   to_date       DateTime     @default(now())
   attendance    Attendance[]
+  config_id     Int?
+  config        Config?      @relation(fields: [config_id], references: [id])
 }
 
 model Attendance {
   id             Int       @id @default(autoincrement())
   from_time      DateTime?
   to_time        DateTime?
-  over_time_from DateTime?
-  over_time_to   DateTime?
+  from_over_time DateTime?
+  to_over_time   DateTime?
   absent         Boolean   @default(false)
   description    String    @default("")
   media          Media?    @relation(fields: [media_id], references: [id], onDelete: Cascade)
@@ -849,6 +882,8 @@ model Vacation {
   employee    Employee     @relation(fields: [employee_id], references: [id], onDelete: Cascade)
   employee_id Int
   type        VacationType
+  config_id   Int?
+  config      Config?      @relation(fields: [config_id], references: [id])
 }
 
 enum VacationType {

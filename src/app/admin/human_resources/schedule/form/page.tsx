@@ -15,93 +15,53 @@ export default async function page(props: {
 
   const isEditMode = id ? true : false;
 
-  var employees: Prisma.EmployeeGetPayload<{
-    select: {
-      id: true;
-      username: true;
-      first_name: true;
-      last_name: true;
-      attendances: {
-        select: {
-          id: true;
-          from_time: true;
-          to_time: true;
-          over_time_from: true;
-          over_time_to: true;
-          media_id: true;
-          absent: true;
-          description: true;
-          media: {
-            select: {
-              id: true;
-              path: true;
-            };
-          };
-        };
-      };
-    };
-  }>[];
+  const scheduleConfig = await prisma.scheduleConfig.findFirst({
+    where: { config_id },
+  });
 
   const user = await getUserInfo();
-
-  if (isEditMode) {
-    employees = await prisma.employee.findMany({
-      where: {
-        // id,
-        status: user.type === "Admin" ? undefined : "Enable",
-        config_id,
-      },
-      select: {
-        id: true,
-        username: true,
-        first_name: true,
-        last_name: true,
-        attendances: {
-          where: {
-            schedule_id: id,
-          },
-          select: {
-            id: true,
-            employee_id: true,
-            media_id: true,
-            schedule_id: true,
-            from_time: true,
-            to_time: true,
-            over_time_from: true,
-            over_time_to: true,
-            absent: true,
-            description: true,
-            media: {
-              select: {
-                id: true,
-                path: true,
-              },
-            },
-          },
+  const schedule = isEditMode
+    ? await prisma.schedule.findUnique({
+        where: { id, config_id },
+        include: {
+          attendance: { include: { employee: true, media: true } },
         },
-      },
-    });
-  } else {
-    employees = (await prisma.employee.findMany({
-      where: {
-        // id,
-        status: user.type === "Admin" ? undefined : "Enable",
-        config_id,
-      },
-      select: {
-        id: true,
-        username: true,
-        first_name: true,
-        last_name: true,
-      },
-    })) as any;
-  }
+      })
+    : undefined;
 
-  console.log("employee:", employees[1].attendances);
+  const employees = (await prisma.employee.findMany({
+    where: {
+      // id,
+      status: user.type === "Admin" ? undefined : "Enable",
+      config_id,
+    },
+    select: {
+      id: true,
+      username: true,
+      first_name: true,
+      last_name: true,
+    },
+  })) as any;
+
+  const vactions = await prisma.vacation.findMany({
+    where: {
+      to_date: {
+        gte: new Date(),
+      },
+      config_id,
+    },
+  });
 
   return (
     <>
-      <ScheduleForm employees={employees} isEditMode={isEditMode} id={id} />
+      <ScheduleForm
+        schedule={schedule}
+        vactions={vactions}
+        scheduleConfig={scheduleConfig}
+        employees={employees}
+        isEditMode={isEditMode}
+        id={id}
+      />
     </>
   );
 }

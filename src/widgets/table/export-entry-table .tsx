@@ -526,14 +526,6 @@ export default function ExportEntryDataTable(props: Props) {
               search.more_digit_id !== undefined ||
               search.id !== undefined
             }
-            defaultValue={
-              defaultValue.two_digit
-                ? {
-                    label: `(${defaultValue.two_digit.id}) ${defaultValue.two_digit.name}`,
-                    value: defaultValue.two_digit.id,
-                  }
-                : undefined
-            }
             isOptionEqualToValue={(e) => e.value === defaultValue.two_digit?.id}
             onChange={(e, f) => {
               setSearch((prev) => ({

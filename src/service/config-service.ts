@@ -5,6 +5,7 @@ import { hashPassword } from "@rms/lib/hash";
 import { CommonRouteKeys } from "@rms/models/CommonModel";
 import prisma from "@rms/prisma/prisma";
 import { copyMediaTemp } from "./media-service";
+import { createScheuleConfig } from "./schedule-config-service";
 
 export async function createConfig(
   params: Prisma.ConfigUncheckedCreateInput & {
@@ -51,6 +52,7 @@ export async function createConfig(
         ) as $Enums.UserPermission[],
       },
     });
+    await createScheuleConfig(result.id);
 
     return "";
   }, "None");

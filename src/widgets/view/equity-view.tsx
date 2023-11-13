@@ -137,7 +137,7 @@ export default function EquityView(props: Props) {
       <div className="border rounded-md p-3 flex gap-2 flex-col">
         <div className="flex flex-row-reverse gap-5">
           <Authorized permission="Edit_Equity">
-            <Link href={`/admin/payment_box/box/form?id=${props.equity.id}`}>
+            <Link href={`/admin/payment_box/equity/form?id=${props.equity.id}`}>
               <Button
                 variant="contained"
                 disableElevation
@@ -206,7 +206,7 @@ export default function EquityView(props: Props) {
           </CardContent>
         </Card>
         <Card variant="outlined">
-          <CardHeader title="Total Commission" />
+          <CardHeader title="Total Paid" />
           <CardContent className="mt-0 pt-0">
             <Typography variant="h5">
               ${FormatNumberWithFixed(commission_boxes)}
@@ -246,9 +246,12 @@ export default function EquityView(props: Props) {
           </CardContent>
         </Card>
         <Card variant="outlined">
-          <CardHeader title="Total" />
+          <CardHeader title="NetProfit" />
           <CardContent className="mt-0 pt-0">
-            <Typography variant="h5">
+            <Typography
+              variant="h5"
+              style={{ color: total > 0 ? "green" : total === 0 ? "" : "red" }}
+            >
               ${FormatNumberWithFixed(total)}
             </Typography>
           </CardContent>
@@ -481,6 +484,42 @@ export default function EquityView(props: Props) {
       {props.equity.expensive_box.length > 0 && (
         <div className="border mt-10 p-5">
           <Typography variant="h4">Adjustments</Typography>
+          <Divider className="mt-5" />
+          <div className=" overflow-auto">
+            <Table className="overflow-x-auto w-full">
+              <TableHead>
+                <TableRow>
+                  <TableCell align="center">Name</TableCell>
+                  <TableCell align="center">Adjustment</TableCell>
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                {props.equity.adjustment_boxes.map((res, i) => (
+                  <TableRow key={i}>
+                    <TableCell align="center">{res.name}</TableCell>
+                    <TableCell align="center">
+                      ${FormatNumberWithFixed(res.adjustment)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+
+              <TableFooter>
+                <TableRow className="border-t ">
+                  <TableCell align="center">Total</TableCell>
+                  <TableCell align="center">
+                    ${FormatNumberWithFixed(adjustment_boxes)}
+                  </TableCell>
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </div>
+        </div>
+      )}
+      {props.equity.adjustment_boxes.length > 0 && (
+        <div className="border mt-10 p-5">
+          <Typography variant="h4">Adjustment</Typography>
           <Divider className="mt-5" />
           <div className=" overflow-auto">
             <Table className="overflow-x-auto w-full">
