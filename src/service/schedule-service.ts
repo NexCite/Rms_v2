@@ -22,7 +22,7 @@ export async function createSchedule(
         },
       });
       if (result) {
-        throw new Error("Schedule already create in this datep");
+        throw new Error("Schedule already create in this date");
       }
 
       const schedule = await prisma.schedule.create({

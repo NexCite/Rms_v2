@@ -6,7 +6,7 @@ import prisma from "@rms/prisma/prisma";
 import React from "react";
 
 export default async function page(props: {
-  params: { node: "employee" };
+  params: { node: "schedule" };
   searchParams: { id?: string };
 }) {
   const config_id = await getConfigId();

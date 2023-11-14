@@ -54,6 +54,13 @@ export default function VacationForm(props: Props) {
         .optional(),
       from_date: z.date(),
       to_date: z.date(),
+      media: z
+        .object({
+          path: z.string().optional(),
+          type: z.enum([$Enums.MediaType.Pdf]).default("Pdf").optional(),
+          title: z.string().optional(),
+        })
+        .optional(),
       // media_id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
       employee_id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
       type: z.enum(Object.keys($Enums.VacationType) as any),
@@ -62,7 +69,16 @@ export default function VacationForm(props: Props) {
 
   const form = useForm<z.infer<typeof validation>>({
     resolver: zodResolver(validation),
-    defaultValues: props.value,
+    defaultValues: {
+      ...props.value,
+      media: props.value?.media?.path
+        ? {
+            path: props.value.media?.path,
+            type: "Pdf",
+            title: props.value.media?.title,
+          }
+        : undefined,
+    },
   });
 
   const [media, setMedia] = useState<Prisma.MediaGetPayload<{}>>();
@@ -70,21 +86,23 @@ export default function VacationForm(props: Props) {
   const store = useStore();
   const handleSubmit = useCallback(
     (values: z.infer<any>) => {
-      // const result = validation.safeParse(values);
-
-      // values.media = media
-      //   ? {
-      //       create: {
-      //         path: media.path,
-      //         title: media.title,
-      //         type: "Pdf",
-      //       },
-      //     }
-      //   : undefined;
+      var media = values.media
+        ? {
+            create: {
+              path: values?.media.path,
+              title: values?.title,
+              type: "Pdf",
+              file_name: (() => {
+                var filename = values.media?.path?.split("/");
+                return filename[filename.length - 1];
+              })(),
+            },
+          }
+        : undefined;
 
       if (props.value) {
         setTransition(async () => {
-          var value2 = JSON.parse(JSON.stringify(values));
+          var value2 = JSON.parse(JSON.stringify({ ...values, media }));
 
           await updateVacation(props.value.id, value2).then((res) => {
             store.OpenAlert(res);
@@ -99,7 +117,7 @@ export default function VacationForm(props: Props) {
         });
       } else {
         setTransition(async () => {
-          var value2 = JSON.parse(JSON.stringify(values));
+          var value2 = JSON.parse(JSON.stringify({ ...values, media }));
 
           await createVacation(value2).then((res) => {
             store.OpenAlert(res);
@@ -171,6 +189,7 @@ export default function VacationForm(props: Props) {
                           helperText: fieldState?.error?.message,
                         },
                       }}
+                      defaultValue={dayjs(field.value)}
                       onChange={(e) => {
                         field.onChange(e?.toDate());
                       }}
@@ -198,6 +217,7 @@ export default function VacationForm(props: Props) {
                           helperText: fieldState?.error?.message,
                         },
                       }}
+                      defaultValue={dayjs(field.value)}
                       onChange={(e) => {
                         field.onChange(e?.toDate());
                       }}
@@ -289,7 +309,28 @@ export default function VacationForm(props: Props) {
             />
 
             <div className="grid-cols-12">
-              <UploadWidget
+              <Controller
+                control={form.control}
+                name="media"
+                render={({ field, fieldState }) => (
+                  <UploadWidget
+                    isPdf
+                    path={field.value?.path}
+                    onSave={(e) => {
+                      field.onChange(
+                        e
+                          ? {
+                              path: e,
+                              title: form.getValues("description"),
+                              type: "Pdf",
+                            }
+                          : undefined
+                      );
+                    }}
+                  />
+                )}
+              />
+              {/* <UploadWidget
                 isPdf
                 path={props.value?.media?.path}
                 onSave={(e) => {
@@ -297,7 +338,7 @@ export default function VacationForm(props: Props) {
                     e ? { path: e, title: e, type: "Pdf" } : (undefined as any)
                   );
                 }}
-              />
+              /> */}
             </div>
           </CardContent>
           <LoadingButton

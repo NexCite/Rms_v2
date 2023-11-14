@@ -5,7 +5,7 @@ import prisma from "@rms/prisma/prisma";
 import React from "react";
 
 export default async function page(props: {
-  params: { node: "employee" };
+  params: { node: "vacation" };
   searchParams: { id?: string };
 }) {
   const id = +props.searchParams.id;
@@ -18,7 +18,9 @@ export default async function page(props: {
     };
   }>[];
 
-  var value: Prisma.VacationGetPayload<{ include: { media: true } }>;
+  var value: Prisma.VacationGetPayload<{
+    include: { media: true };
+  }>;
 
   const user = await getUserInfo();
   employees = await prisma.employee.findMany({

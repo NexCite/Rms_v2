@@ -208,6 +208,7 @@ export default function ConfigWidget(props: Props) {
                 />
               )}
             />
+
             <Controller
               control={form.control}
               name="logo"
