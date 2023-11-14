@@ -3,7 +3,17 @@ import { Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
 import moment from "moment";
 import { getConfigId } from "@rms/lib/config";
-
+type CommonetType = Prisma.VacationGetPayload<{
+  include: {
+    employee: {
+      select: {
+        id: true;
+        first_name: true;
+        last_name: true;
+      };
+    };
+  };
+}>;
 export default async function page(props: {
   params: {};
   searchParams: {
@@ -14,7 +24,10 @@ export default async function page(props: {
 }) {
   const startDate = parseInt(props.searchParams.from_date);
   const endDate = parseInt(props.searchParams.to_date);
-  const status = props.searchParams.status;
+  const status = props.searchParams.status as
+    | "Accepted"
+    | "Pending"
+    | "Deleted";
 
   const config_id = await getConfigId();
 
@@ -27,40 +40,20 @@ export default async function page(props: {
       .toDate(),
   ];
 
-  var value: Prisma.VacationGetPayload<{
-    select: {
-      id: true;
-      to_date: true;
-      from_date: true;
-      description: true;
-      type: true;
-      employee: {
-        select: {
-          id: true;
-          first_name: true;
-          last_name: true;
-        };
-      };
-      status: true;
-    };
-  }>[];
+  var value: CommonetType[];
 
   value = await prisma.vacation.findMany({
     where: {
       config_id,
       status: (status || "Pending") as any,
       to_date: {
-        gte: date[0],
         lte: date[1],
       },
+      from_date: {
+        gte: date[0],
+      },
     },
-    select: {
-      id: true,
-      to_date: true,
-      from_date: true,
-      description: true,
-      status: true,
-      type: true,
+    include: {
       employee: {
         select: {
           id: true,
@@ -73,7 +66,11 @@ export default async function page(props: {
 
   return (
     <div>
-      <VacationTable vacations={value} date={date}></VacationTable>
+      <VacationTable
+        status={status}
+        vacations={value}
+        date={date}
+      ></VacationTable>
     </div>
   );
 }

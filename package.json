@@ -16,11 +16,11 @@
     "@emotion/styled": "^11.11.0",
     "@fontsource/roboto": "^5.0.8",
     "@hookform/resolvers": "^3.3.2",
-    "@mui/icons-material": "^5.14.16",
-    "@mui/lab": "^5.0.0-alpha.152",
-    "@mui/material": "^5.14.17",
+    "@mui/icons-material": "^5.14.18",
+    "@mui/lab": "^5.0.0-alpha.153",
+    "@mui/material": "^5.14.18",
     "@mui/x-date-pickers": "^6.18.1",
-    "@prisma/client": "^5.5.2",
+    "@prisma/client": "^5.6.0",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-aspect-ratio": "^1.0.3",
@@ -78,7 +78,7 @@
     "react-dom": "18.2.0",
     "react-drag-drop-files": "^2.3.10",
     "react-hook-form": "^7.48.2",
-    "react-icons": "^4.11.0",
+    "react-icons": "^4.12.0",
     "react-images-uploading": "^3.1.7",
     "react-number-format": "^5.3.1",
     "react-to-pdf": "^1.0.1",
@@ -96,6 +96,6 @@
     "@tauri-apps/cli": "^1.5.6",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/react-icons": "^3.0.0",
-    "prisma": "^5.5.2"
+    "prisma": "^5.6.0"
   }
 }

@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import { useCallback, useMemo, useState, useTransition } from "react";
-import styled from "@emotion/styled";
 import { Prisma } from "@prisma/client";
 import Authorized from "@rms/components/ui/authorized";
 import { useStore } from "@rms/hooks/toast-hook";
@@ -16,49 +15,34 @@ import { DateRange } from "react-day-picker";
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
 import Link from "next/link";
-
-type Props = {
-  date?: [Date, Date];
-  schedule: Prisma.ScheduleGetPayload<{
-    select: {
-      id: true;
-      to_date: true;
-      create_date: true;
-      modified_date: true;
-      attendance: {
-        select: {
-          id: true;
-          absent: true;
-          description: true;
-          employee: {
-            select: {
-              id: true;
-              first_name: true;
-              last_name: true;
-              email: true;
-            };
+type CommonType = Prisma.ScheduleGetPayload<{
+  include: {
+    attendance: {
+      include: {
+        employee: {
+          select: {
+            id: true;
+            first_name: true;
+            last_name: true;
+            email: true;
           };
-          from_time: true;
-          to_time: true;
-          to_over_time: true;
-          from_over_time: true;
-          schedule_id: true;
         };
       };
     };
-  }>[];
+  };
+}>;
+type Props = {
+  date?: [Date, Date];
+  schedule: CommonType[];
 };
 
 export default function ScheduleTable(props: Props) {
   const pathName = usePathname();
-  const [isPadding, setIsPadding] = useTransition();
-  const [padding, setPadding] = useTransition();
-
-  const [globalFilter, setGlobalFilter] = useState("");
+  const [isPadding, setTransition] = useTransition();
 
   const store = useStore();
 
-  const { push, replace } = useRouter();
+  const { replace } = useRouter();
 
   const [selectDate, setSelectDate] = useState<DateRange>({
     from: props.date[0],
@@ -69,7 +53,7 @@ export default function ScheduleTable(props: Props) {
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
 
-      setIsPadding(() => {
+      setTransition(() => {
         replace(
           pathName +
             `?from_date=${selectDate?.from?.getTime()}&to_date=${selectDate?.to?.getTime()}`,
@@ -80,103 +64,41 @@ export default function ScheduleTable(props: Props) {
     [selectDate, pathName, replace]
   );
 
-  const attendances = useMemo(() => {
-    let list = [];
-    console.log(props);
-
-    props.schedule.map((element) => {
-      list = list.concat(element.attendance);
-    });
-
-    return list;
-  }, [props]);
-
-  const columns = useMemo<
-    MRT_ColumnDef<
-      Prisma.AttendanceGetPayload<{
-        select: {
-          id: true;
-          absent: true;
-          description: true;
-          employee: {
-            select: {
-              id: true;
-              first_name: true;
-              last_name: true;
-              email: true;
-            };
-          };
-          from_time: true;
-          to_time: true;
-          from_over_time: true;
-          to_over_time;
-          schedule_id: true;
-        };
-      }>
-    >[]
-  >(
+  const columns = useMemo<MRT_ColumnDef<CommonType>[]>(
     () => [
       {
         accessorKey: "id",
+        header: "ID",
         muiTableHeadCellProps: {
           align: "center",
         },
         muiTableBodyCellProps: {
           align: "center",
         },
-        header: "Schedule ID",
-        accessorFn: (p) => p.schedule_id,
+        Cell: ({ row: { original } }) => (
+          <div
+            className={`text-center rounded-sm ${
+              original.create_date.toLocaleTimeString() !==
+              original.modified_date.toLocaleTimeString()
+                ? "bg-yellow-400"
+                : ""
+            }`}
+          >
+            {original.id}
+          </div>
+        ),
       },
       {
-        accessorKey: "employee",
-        header: "Employee",
-        columnDefType: "data",
-        id: "employee",
-        accessorFn: (p) => p.employee.first_name + p.employee.last_name,
-      },
-      {
-        header: "Absent",
+        accessorKey: "to_date",
         muiTableHeadCellProps: {
           align: "center",
         },
         muiTableBodyCellProps: {
           align: "center",
         },
-        Cell: ({ row: { original } }) => original.absent && <span>✅</span>,
-      },
-      {
-        accessorKey: "from_time",
-        header: "In Time",
+        header: "To Date",
         columnDefType: "data",
-        id: "from_time",
-        accessorFn: (p) => p.from_time?.toLocaleDateString(),
-      },
-      {
-        accessorKey: "to_time",
-        header: "Out Time",
-        columnDefType: "data",
-        id: "to_time",
-        accessorFn: (p) => p.to_time?.toLocaleDateString(),
-      },
-      {
-        accessorKey: "from_over_time",
-        header: "Overtime In",
-        columnDefType: "data",
-        id: "from_over_time",
-        accessorFn: (p) => p.from_over_time?.toLocaleDateString(),
-      },
-      {
-        accessorKey: "to_over_time",
-        header: "Overtime Out",
-        columnDefType: "data",
-        id: "to_over_time",
-        accessorFn: (p) => {
-          return p.to_over_time?.toLocaleDateString();
-        },
-      },
-      {
-        accessorKey: "description",
-        header: "Description",
+        accessorFn: ({ to_date }) => dayjs(to_date).format("DD-MM-YYYY"),
       },
     ],
     [store.OpenAlert, , store]
@@ -225,23 +147,23 @@ export default function ScheduleTable(props: Props) {
         </form>
 
         <MaterialReactTable
-          state={{ showProgressBars: isPadding }}
+          state={{ showLoadingOverlay: isPadding }}
           enableRowActions
-          columns={columns as any}
+          columns={columns}
           renderRowActionMenuItems={({
             row: {
-              original: { schedule_id },
+              original: { to_date, id },
             },
           }) => [
             <Authorized permission="Edit_Schedule" key={1}>
-              <Link href={pathName + "/form?id=" + schedule_id}>
+              <Link href={pathName + "/form?id=" + id}>
                 <MenuItem className="cursor-pointer" disabled={isPadding}>
                   Edit
                 </MenuItem>
               </Link>
             </Authorized>,
             <Authorized permission="View_Schedule" key={2}>
-              <Link href={pathName + "/" + schedule_id}>
+              <Link href={pathName + "/" + id}>
                 <MenuItem className="cursor-pointer" disabled={isPadding}>
                   View
                 </MenuItem>
@@ -253,11 +175,11 @@ export default function ScheduleTable(props: Props) {
                 className="cursor-pointer"
                 onClick={() => {
                   const isConfirm = confirm(
-                    `Do You sure you want to delete schedule id:${schedule_id} `
+                    `Do You sure you want to delete schedule id:${to_date.toLocaleDateString()} `
                   );
                   if (isConfirm) {
-                    setPadding(async () => {
-                      const result = await deleteScheduleById(schedule_id);
+                    setTransition(async () => {
+                      const result = await deleteScheduleById(id);
 
                       store.OpenAlert(result);
                     });
@@ -268,10 +190,9 @@ export default function ScheduleTable(props: Props) {
               </MenuItem>
             </Authorized>,
           ]}
-          data={attendances}
+          data={props.schedule}
         />
       </Card>
     </div>
   );
 }
-const Style = styled.div``;

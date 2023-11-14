@@ -9,7 +9,7 @@ import {
   useTransition,
 } from "react";
 import styled from "@emotion/styled";
-import { Prisma } from "@prisma/client";
+import { $Enums, Prisma } from "@prisma/client";
 import Authorized from "@rms/components/ui/authorized";
 import { useStore } from "@rms/hooks/toast-hook";
 import { useRouter } from "next/navigation";
@@ -31,26 +31,21 @@ import {
 import { MaterialReactTable, MRT_ColumnDef } from "material-react-table";
 import Link from "next/link";
 import { deleteVacationById } from "@rms/service/vacation-service";
-
+type CommonType = Prisma.VacationGetPayload<{
+  include: {
+    employee: {
+      select: {
+        id: true;
+        first_name: true;
+        last_name: true;
+      };
+    };
+  };
+}>;
 type Props = {
   date?: [Date, Date];
-  vacations: Prisma.VacationGetPayload<{
-    select: {
-      id: true;
-      to_date: true;
-      from_date: true;
-      description: true;
-      type: true;
-      employee: {
-        select: {
-          id: true;
-          first_name: true;
-          last_name: true;
-        };
-      };
-      status: true;
-    };
-  }>[];
+  vacations: CommonType[];
+  status: "Accepted" | "Pending" | "Deleted";
 };
 
 interface TabPanelProps {
@@ -85,88 +80,70 @@ function a11yProps(index: number) {
 }
 export default function VacationTable(props: Props) {
   const pathName = usePathname();
-  const [isPadding, setIsPadding] = useTransition();
-  const [padding, setPadding] = useTransition();
-
-  const [globalFilter, setGlobalFilter] = useState("");
+  const [isPadding, setTransition] = useTransition();
 
   const store = useStore();
 
   const { push, replace } = useRouter();
 
-  const [tabValue, setTabValue] = useState(1);
+  const [tabValue, setTabValue] = useState<"Accepted" | "Pending" | "Deleted">(
+    props.status
+  );
 
   const [selectDate, setSelectDate] = useState<DateRange>({
     from: props.date[0],
     to: props.date[1],
   });
-
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-
-    let status = "";
-    switch (newValue) {
-      case 0: {
-        status = "Accepted";
-        break;
+  const replaceUrlPath = useCallback(
+    (status?: string) => {
+      setTransition(() => {
+        replace(
+          pathName +
+            `?status=${status}&from_date=${selectDate?.from?.getTime()}&to_date=${selectDate?.to?.getTime()}`,
+          {}
+        );
+      });
+    },
+    [replace, pathName, selectDate]
+  );
+  const handleTabChange = useCallback(
+    (event: React.SyntheticEvent, newValue: number) => {
+      let status: "Accepted" | "Pending" | "Deleted";
+      switch (newValue) {
+        case 0: {
+          status = "Accepted";
+          break;
+        }
+        case 1: {
+          status = "Pending";
+          break;
+        }
+        case 2: {
+          status = "Deleted";
+          break;
+        }
       }
-      case 1: {
-        status = "Pending";
-        break;
-      }
-      case 2: {
-        status = "Deleted";
-        break;
-      }
-    }
+      setTabValue(status);
 
-    replaceUrlPath(status);
-  };
+      replaceUrlPath(status);
+    },
+    [replaceUrlPath]
+  );
 
   useEffect(() => {}, [tabValue]);
-
-  const replaceUrlPath = (status?: string) => {
-    replace(
-      pathName +
-        `?status=${
-          status || "Accepted"
-        }&from_date=${selectDate?.from?.getTime()}&to_date=${selectDate?.to?.getTime()}`,
-      {}
-    );
-  };
 
   const handleSubmit = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
 
-      setIsPadding(() => {
+      setTransition(() => {
         replaceUrlPath();
       });
     },
     [selectDate, pathName, replace]
   );
 
-  const columns = useMemo<
-    MRT_ColumnDef<
-      Prisma.VacationGetPayload<{
-        select: {
-          id: true;
-          to_date: true;
-          from_date: true;
-          description: true;
-          type: true;
-          employee: {
-            select: {
-              id: true;
-              first_name: true;
-              last_name: true;
-            };
-          };
-          status: true;
-        };
-      }>
-    >[]
-  >(
+  const columns = useMemo<MRT_ColumnDef<CommonType>[]>(
     () => [
       {
         header: "Status",
@@ -175,7 +152,13 @@ export default function VacationTable(props: Props) {
       {
         accessorKey: "id",
         header: "ID",
-        cell: ({ row: { original } }) => (
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+        Cell: ({ row: { original } }) => (
           <div
             className={`text-center rounded-sm ${
               original.status === "Deleted"
@@ -195,14 +178,26 @@ export default function VacationTable(props: Props) {
         header: "Employee",
         columnDefType: "data",
         id: "employee",
-        accessorFn: (p) => p.employee.first_name + p.employee.last_name,
+        accessorFn: (p) => p.employee?.first_name + p.employee?.last_name,
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
       {
         accessorKey: "from_date",
         header: "Date From",
         columnDefType: "data",
         id: "from_date",
-        accessorFn: (p) => p.from_date?.toLocaleDateString(),
+        accessorFn: (p) => dayjs(p.from_date).format("t"),
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
       {
         accessorKey: "to_date",
@@ -210,14 +205,32 @@ export default function VacationTable(props: Props) {
         columnDefType: "data",
         id: "to_date",
         accessorFn: (p) => p.to_date?.toLocaleDateString(),
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
       {
         accessorKey: "type",
         header: "Type",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
       {
         accessorKey: "description",
         header: "Description",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
     ],
     [store.OpenAlert, , store]
@@ -279,7 +292,12 @@ export default function VacationTable(props: Props) {
 
         <Box sx={{ width: "100%" }}>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <Tabs value={tabValue} onChange={handleTabChange}>
+            <Tabs
+              value={
+                tabValue === "Accepted" ? 0 : tabValue === "Pending" ? 1 : 2
+              }
+              onChange={handleTabChange}
+            >
               {/* {statusArray.slice().map((item, index) => ( */}
               <Tab label={"Accepted"} {...a11yProps(1)} />
               <Tab label={"Pending"} {...a11yProps(2)} />
@@ -289,7 +307,13 @@ export default function VacationTable(props: Props) {
           </Box>
 
           <MaterialReactTable
-            state={{ showProgressBars: isPadding }}
+            state={{
+              showProgressBars: false,
+              showSkeletons: false,
+
+              showLoadingOverlay: isPadding,
+              isLoading: false,
+            }}
             enableRowActions
             columns={columns as any}
             renderRowActionMenuItems={({
@@ -320,7 +344,7 @@ export default function VacationTable(props: Props) {
                       `Do You sure you want to delete vacation id:${id} `
                     );
                     if (isConfirm) {
-                      setPadding(async () => {
+                      setTransition(async () => {
                         const result = await deleteVacationById(id);
 
                         store.OpenAlert(result);
@@ -339,4 +363,3 @@ export default function VacationTable(props: Props) {
     </div>
   );
 }
-const Style = styled.div``;

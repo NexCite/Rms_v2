@@ -4,6 +4,22 @@ import moment from "moment";
 import ScheduleTable from "@rms/widgets/table/schedule-table";
 import { getConfigId } from "@rms/lib/config";
 
+type CommonType = Prisma.ScheduleGetPayload<{
+  include: {
+    attendance: {
+      include: {
+        employee: {
+          select: {
+            id: true;
+            first_name: true;
+            last_name: true;
+            email: true;
+          };
+        };
+      };
+    };
+  };
+}>;
 export default async function page(props: {
   params: {};
 
@@ -26,34 +42,7 @@ export default async function page(props: {
       .toDate(),
   ];
 
-  var value: Prisma.ScheduleGetPayload<{
-    select: {
-      id: true;
-      to_date: true;
-      create_date: true;
-      modified_date: true;
-      attendance: {
-        select: {
-          id: true;
-          absent: true;
-          description: true;
-          employee: {
-            select: {
-              id: true;
-              first_name: true;
-              last_name: true;
-              email: true;
-            };
-          };
-          from_time: true;
-          to_time: true;
-          to_over_time: true;
-          from_over_time: true;
-          schedule_id: true;
-        };
-      };
-    };
-  }>[];
+  var value: CommonType[];
 
   value = await prisma.schedule.findMany({
     where: {
@@ -63,16 +52,12 @@ export default async function page(props: {
         lte: date[1],
       },
     },
-    select: {
-      id: true,
-      to_date: true,
-      create_date: true,
-      modified_date: true,
+    orderBy: {
+      to_date: "desc",
+    },
+    include: {
       attendance: {
-        select: {
-          id: true,
-          absent: true,
-          description: true,
+        include: {
           employee: {
             select: {
               id: true,
@@ -81,17 +66,10 @@ export default async function page(props: {
               email: true,
             },
           },
-          from_time: true,
-          to_time: true,
-          to_over_time: true,
-          from_over_time: true,
-          schedule_id: true,
         },
       },
     },
   });
-
-  console.log(value);
 
   return (
     <div>

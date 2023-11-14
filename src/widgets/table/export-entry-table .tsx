@@ -513,7 +513,7 @@ export default function ExportEntryDataTable(props: Props) {
               onChange={(e) => {
                 setSelectDate((prev) => ({
                   ...prev,
-                  from: e.endOf("D").toDate(),
+                  to: e.endOf("D").toDate(),
                 }));
               }}
             />

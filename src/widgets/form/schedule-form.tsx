@@ -109,7 +109,7 @@ export default function ScheduleForm(props: Props) {
       }),
     []
   );
-
+  console.log(props.schedule);
   useEffect(() => {}, [props.employees]);
 
   const scheduleConfig = useMemo(() => {
@@ -125,17 +125,19 @@ export default function ScheduleForm(props: Props) {
           to_date: props.schedule.to_date,
           attendance: props.schedule.attendance.map((res) => {
             const vaction = props.vactions.find(
-              (res) => res.employee_id === res.id
+              (ress) => ress.employee_id === res.employee_id
             );
+
             return {
               username: res.employee?.username,
               absent: vaction ? true : false,
               description: vaction?.description,
               employee_id: res.employee_id,
-              from_time: res.absent ? null : scheduleConfig.from_time,
-              to_time: res.absent ? null : scheduleConfig.to_time,
-              from_over_time: res.absent ? null : scheduleConfig.from_over_time,
-              to_over_time: res.absent ? null : scheduleConfig.to_over_time,
+              from_time: res.absent ? null : res.from_time,
+              to_time: res.absent ? null : res.to_time,
+              from_over_time: res.absent ? null : res.from_over_time,
+              to_over_time: res.absent ? null : res.to_over_time,
+
               media: res.media
                 ? {
                     path: res.media.path,
@@ -149,7 +151,7 @@ export default function ScheduleForm(props: Props) {
       : {
           attendance: props.employees.map((res) => {
             const vaction = props.vactions.find(
-              (res) => res.employee_id === res.id
+              (ress) => ress.employee_id === res.id
             );
             return {
               absent: vaction ? true : false,
@@ -168,10 +170,17 @@ export default function ScheduleForm(props: Props) {
 
   const handleSubmit = useCallback(
     (values: z.infer<typeof formSchema>) => {
+      console.log(values.attendance);
       var formData = {
         to_date: values.to_date,
         attendance: [],
       };
+      formData.attendance = values.attendance.map((res) => ({
+        ...res,
+        username: undefined,
+      }));
+      formData.to_date = values.to_date;
+
       const error = [];
 
       values.attendance.map((res) => {
@@ -209,8 +218,9 @@ export default function ScheduleForm(props: Props) {
         });
         return;
       }
+
       setTransition(async () => {
-        if (props.isEditMode) {
+        if (props.schedule) {
           const result = await updateSchedule(props.id, formData as any);
           store.OpenAlert(result);
           if (result.status === 200) {

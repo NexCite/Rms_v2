@@ -2,16 +2,18 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { $Enums, Prisma } from "@prisma/client";
-import { Textarea } from "@rms/components/ui/textarea";
-import { Alert } from "@rms/components/ui/alert";
-import { createInvoice, updateInvoice } from "@rms/service/invoice-service";
+
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import UploadWidget from "../upload/upload-widget";
 import { useStore } from "@rms/hooks/toast-hook";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import {
+  DatePicker,
+  DateTimePicker,
+  LocalizationProvider,
+} from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import {
@@ -36,6 +38,7 @@ interface Props {
   employees?: Prisma.EmployeeGetPayload<{
     select: {
       first_name: true;
+      O;
       last_name: true;
       id: true;
     };
@@ -70,7 +73,11 @@ export default function VacationForm(props: Props) {
   const form = useForm<z.infer<typeof validation>>({
     resolver: zodResolver(validation),
     defaultValues: {
-      ...props.value,
+      description: props.value?.description ?? "",
+      employee_id: props.value?.employee_id,
+      from_date: props.value?.from_date ?? dayjs().startOf("D").toDate(),
+      to_date: props.value?.to_date ?? dayjs().endOf("D").toDate(),
+      type: props.value?.type,
       media: props.value?.media?.path
         ? {
             path: props.value.media?.path,
@@ -136,201 +143,198 @@ export default function VacationForm(props: Props) {
   );
   return (
     <>
-      <form
-        className=""
-        autoComplete="off"
-        noValidate
-        onSubmit={form.handleSubmit(handleSubmit)}
-      >
-        <Card className="max-w-[450px] m-auto p-2">
-          <CardHeader
-            title={<Typography variant="h5">Vacation Form</Typography>}
-          >
-            {" "}
-          </CardHeader>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <form
+          className=""
+          autoComplete="off"
+          noValidate
+          onSubmit={form.handleSubmit(handleSubmit)}
+        >
+          <Card className="max-w-[450px] m-auto p-2">
+            <CardHeader
+              title={<Typography variant="h5">Vacation Form</Typography>}
+            >
+              {" "}
+            </CardHeader>
 
-          <CardContent className="flex flex-col gap-5">
-            <Controller
-              control={form.control}
-              name="description"
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  required
-                  multiline
-                  minRows={3}
-                  maxRows={5}
-                  error={Boolean(fieldState.error)}
-                  label="Description"
-                  size="small"
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  value={field.value}
-                  helperText={fieldState?.error?.message}
-                />
-              )}
-            />
-
-            <Controller
-              control={form.control}
-              name={"from_date"}
-              render={({ field, fieldState }) => (
-                <FormControl {...field}>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      minDate={dayjs().subtract(7, "day")}
-                      label="Date Start"
-                      slotProps={{
-                        textField: {
-                          InputLabelProps: { shrink: true },
-                          size: "small",
-                          required: true,
-                          error: Boolean(fieldState?.error),
-                          helperText: fieldState?.error?.message,
-                        },
-                      }}
-                      defaultValue={dayjs(field.value)}
-                      onChange={(e) => {
-                        field.onChange(e?.toDate());
-                      }}
-                    />
-                  </LocalizationProvider>
-                </FormControl>
-              )}
-            />
-
-            <Controller
-              control={form.control}
-              name={"to_date"}
-              render={({ field, fieldState }) => (
-                <FormControl {...field}>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      minDate={dayjs().subtract(7, "day")}
-                      label="Date End"
-                      slotProps={{
-                        textField: {
-                          InputLabelProps: { shrink: true },
-                          size: "small",
-                          required: true,
-                          error: Boolean(fieldState?.error),
-                          helperText: fieldState?.error?.message,
-                        },
-                      }}
-                      defaultValue={dayjs(field.value)}
-                      onChange={(e) => {
-                        field.onChange(e?.toDate());
-                      }}
-                    />
-                  </LocalizationProvider>
-                </FormControl>
-              )}
-            />
-
-            <Controller
-              name="type"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <FormControl
-                  fullWidth
-                  required
-                  size="small"
-                  error={Boolean(fieldState?.error?.message)}
-                >
-                  <InputLabel className="mb-3" shrink placeholder="type">
-                    Type
-                  </InputLabel>
-                  <Select
-                    {...field}
-                    error={Boolean(fieldState.error)}
-                    size="small"
-                    label="Type"
-                    notched
-                    fullWidth
-                    placeholder="type"
-                    defaultValue={field.value}
-                  >
-                    <MenuItem key={-1} value={undefined}>
-                      None
-                    </MenuItem>
-
-                    {Object.keys($Enums.VacationType).map((res) => (
-                      <MenuItem key={res} value={res}>
-                        {" "}
-                        {res}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  <FormHelperText>{fieldState.error?.message}</FormHelperText>
-                </FormControl>
-              )}
-            />
-
-            <Controller
-              name={"employee_id" as any}
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Autocomplete
-                  disablePortal
-                  onChange={(e, v) => {
-                    field.onChange(v?.value);
-                  }}
-                  isOptionEqualToValue={(e) => e.value === props.value?.id}
-                  defaultValue={(() => {
-                    const result = props.employees.find(
-                      (res) => res.id === field.value
-                    );
-
-                    return result
-                      ? {
-                          label: `(${result.id}) ${result.first_name} ${result.last_name}`,
-                          value: result.id,
-                        }
-                      : undefined;
-                  })()}
-                  size="small"
-                  options={props.employees.map((res) => ({
-                    label: `(${res.id}) ${res.first_name} ${res.last_name}`,
-                    value: res.id,
-                  }))}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      required
-                      error={Boolean(fieldState.error)}
-                      helperText={fieldState.error?.message}
-                      InputLabelProps={{ shrink: true }}
-                      label="Employee"
-                      placeholder="employee"
-                    />
-                  )}
-                />
-              )}
-            />
-
-            <div className="grid-cols-12">
+            <CardContent className="flex flex-col gap-5">
               <Controller
                 control={form.control}
-                name="media"
+                name="description"
                 render={({ field, fieldState }) => (
-                  <UploadWidget
-                    isPdf
-                    path={field.value?.path}
-                    onSave={(e) => {
-                      field.onChange(
-                        e
-                          ? {
-                              path: e,
-                              title: form.getValues("description"),
-                              type: "Pdf",
-                            }
-                          : undefined
-                      );
-                    }}
+                  <TextField
+                    {...field}
+                    required
+                    multiline
+                    minRows={3}
+                    maxRows={5}
+                    error={Boolean(fieldState.error)}
+                    label="Description"
+                    size="small"
+                    InputLabelProps={{ shrink: true }}
+                    fullWidth
+                    value={field.value}
+                    helperText={fieldState?.error?.message}
                   />
                 )}
               />
-              {/* <UploadWidget
+
+              <Controller
+                control={form.control}
+                name={"from_date"}
+                render={({ field, fieldState }) => (
+                  <FormControl {...field}>
+                    <DateTimePicker
+                      minDate={dayjs().subtract(7, "day")}
+                      label="From DateTime"
+                      slotProps={{
+                        textField: {
+                          InputLabelProps: { shrink: true },
+                          size: "small",
+                          required: true,
+                          error: Boolean(fieldState?.error),
+                          helperText: fieldState?.error?.message,
+                        },
+                      }}
+                      defaultValue={dayjs(field.value)}
+                      onChange={(e) => {
+                        field.onChange(e?.toDate());
+                      }}
+                    />
+                  </FormControl>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name={"to_date"}
+                render={({ field, fieldState }) => (
+                  <FormControl {...field}>
+                    <DateTimePicker
+                      minDate={dayjs().subtract(7, "day")}
+                      label="To DateTime"
+                      slotProps={{
+                        textField: {
+                          InputLabelProps: { shrink: true },
+                          size: "small",
+                          required: true,
+                          error: Boolean(fieldState?.error),
+                          helperText: fieldState?.error?.message,
+                        },
+                      }}
+                      defaultValue={dayjs(field.value)}
+                      onChange={(e) => {
+                        field.onChange(e?.toDate());
+                      }}
+                    />
+                  </FormControl>
+                )}
+              />
+
+              <Controller
+                name="type"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <FormControl
+                    fullWidth
+                    required
+                    size="small"
+                    error={Boolean(fieldState?.error?.message)}
+                  >
+                    <InputLabel className="mb-3" shrink placeholder="type">
+                      Type
+                    </InputLabel>
+                    <Select
+                      {...field}
+                      error={Boolean(fieldState.error)}
+                      size="small"
+                      label="Type"
+                      notched
+                      fullWidth
+                      placeholder="type"
+                      defaultValue={field.value}
+                    >
+                      <MenuItem key={-1} value={undefined}>
+                        None
+                      </MenuItem>
+
+                      {Object.keys($Enums.VacationType).map((res) => (
+                        <MenuItem key={res} value={res}>
+                          {" "}
+                          {res}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    <FormHelperText>{fieldState.error?.message}</FormHelperText>
+                  </FormControl>
+                )}
+              />
+
+              <Controller
+                name={"employee_id" as any}
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Autocomplete
+                    disablePortal
+                    onChange={(e, v) => {
+                      field.onChange(v?.value);
+                    }}
+                    isOptionEqualToValue={(e) => e.value === props.value?.id}
+                    defaultValue={(() => {
+                      const result = props.employees.find(
+                        (res) => res.id === field.value
+                      );
+
+                      return result
+                        ? {
+                            label: `(${result.id}) ${result.first_name} ${result.last_name}`,
+                            value: result.id,
+                          }
+                        : undefined;
+                    })()}
+                    size="small"
+                    options={props.employees.map((res) => ({
+                      label: `(${res.id}) ${res.first_name} ${res.last_name}`,
+                      value: res.id,
+                    }))}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        required
+                        error={Boolean(fieldState.error)}
+                        helperText={fieldState.error?.message}
+                        InputLabelProps={{ shrink: true }}
+                        label="Employee"
+                        placeholder="employee"
+                      />
+                    )}
+                  />
+                )}
+              />
+
+              <div className="grid-cols-12">
+                <Controller
+                  control={form.control}
+                  name="media"
+                  render={({ field, fieldState }) => (
+                    <UploadWidget
+                      isPdf
+                      path={field.value?.path}
+                      onSave={(e) => {
+                        field.onChange(
+                          e
+                            ? {
+                                path: e,
+                                title: form.getValues("description"),
+                                type: "Pdf",
+                              }
+                            : undefined
+                        );
+                      }}
+                    />
+                  )}
+                />
+                {/* <UploadWidget
                 isPdf
                 path={props.value?.media?.path}
                 onSave={(e) => {
@@ -339,24 +343,25 @@ export default function VacationForm(props: Props) {
                   );
                 }}
               /> */}
-            </div>
-          </CardContent>
-          <LoadingButton
-            variant="contained"
-            fullWidth
-            className={
-              isPadding
-                ? ""
-                : "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
-            }
-            disableElevation
-            type="submit"
-            loading={isPadding}
-          >
-            Save
-          </LoadingButton>
-        </Card>
-      </form>
+              </div>
+            </CardContent>
+            <LoadingButton
+              variant="contained"
+              fullWidth
+              className={
+                isPadding
+                  ? ""
+                  : "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
+              }
+              disableElevation
+              type="submit"
+              loading={isPadding}
+            >
+              Save
+            </LoadingButton>
+          </Card>
+        </form>
+      </LocalizationProvider>
     </>
   );
 }

@@ -25,7 +25,8 @@ export async function createSchedule(
         throw new Error("Schedule already create in this date");
       }
 
-      const schedule = await prisma.schedule.create({
+      console.log(params.attendance);
+      await prisma.schedule.create({
         data: {
           config_id,
           to_date: date.startOf("D").toDate(),
@@ -56,6 +57,7 @@ export async function updateSchedule(
   id: number,
   params: Prisma.ScheduleUncheckedUpdateInput
 ): Promise<ServiceActionModel<void>> {
+  console.log(id);
   return handlerServiceAction(
     async (auth, config_id) => {
       await prisma.attendance.deleteMany({
@@ -64,7 +66,6 @@ export async function updateSchedule(
       await prisma.schedule.update({
         where: {
           id,
-          //  config_id
         },
         data: {
           to_date: params.to_date,

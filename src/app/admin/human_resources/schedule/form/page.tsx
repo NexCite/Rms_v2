@@ -4,6 +4,7 @@ import { getUserInfo } from "@rms/lib/auth";
 import { Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
 import React from "react";
+import dayjs from "dayjs";
 
 export default async function page(props: {
   params: { node: "schedule" };
@@ -28,7 +29,7 @@ export default async function page(props: {
         },
       })
     : undefined;
-
+  console.log(schedule);
   const employees = (await prisma.employee.findMany({
     where: {
       // id,
@@ -45,8 +46,9 @@ export default async function page(props: {
 
   const vactions = await prisma.vacation.findMany({
     where: {
+      status: "Accepted",
       to_date: {
-        gte: new Date(),
+        gte: dayjs(new Date()).startOf("date").toDate(),
       },
       config_id,
     },

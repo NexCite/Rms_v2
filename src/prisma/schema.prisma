@@ -868,22 +868,25 @@ model AdvancePayment {
   amount        Float
   currency      Currency  @relation(fields: [currency_id], references: [id])
   private       Boolean   @default(false)
-  currency_id   Int
+
+  currency_id Int
 }
 
 model Vacation {
-  id          Int          @id @default(autoincrement())
-  from_date   DateTime?
-  to_date     DateTime?
-  status      Status       @default(Pending)
-  description String       @default("")
-  media       Media?       @relation(fields: [media_id], references: [id], onDelete: Cascade)
-  media_id    Int?
-  employee    Employee     @relation(fields: [employee_id], references: [id], onDelete: Cascade)
-  employee_id Int
-  type        VacationType
-  config_id   Int?
-  config      Config?      @relation(fields: [config_id], references: [id])
+  id            Int          @id @default(autoincrement())
+  from_date     DateTime?
+  to_date       DateTime?
+  status        Status       @default(Pending)
+  description   String       @default("")
+  media         Media?       @relation(fields: [media_id], references: [id], onDelete: Cascade)
+  media_id      Int?
+  employee      Employee     @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+  employee_id   Int
+  type          VacationType
+  create_date   DateTime     @default(now())
+  modified_date DateTime     @default(now()) @updatedAt
+  config_id     Int?
+  config        Config?      @relation(fields: [config_id], references: [id])
 }
 
 enum VacationType {
