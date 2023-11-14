@@ -291,10 +291,10 @@ export default function ExportEntryDataTable(props: Props) {
                   </th>
                   <th align="center">
                     {" "}
-                    <Typography>Credit</Typography>
+                    <Typography>Debit</Typography>
                   </th>
                   <th align="center">
-                    <Typography>Debit</Typography>
+                    <Typography>Credit</Typography>
                   </th>
                 </tr>
               </thead>
