@@ -99,7 +99,9 @@ export default function VacationTable(props: Props) {
       setTransition(() => {
         replace(
           pathName +
-            `?status=${status}&from_date=${selectDate?.from?.getTime()}&to_date=${selectDate?.to?.getTime()}`,
+            `?status=${
+              status || "Pending"
+            }&from_date=${selectDate?.from?.getTime()}&to_date=${selectDate?.to?.getTime()}`,
           {}
         );
       });
@@ -129,8 +131,6 @@ export default function VacationTable(props: Props) {
     },
     [replaceUrlPath]
   );
-
-  useEffect(() => {}, [tabValue]);
 
   const handleSubmit = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
@@ -163,8 +163,8 @@ export default function VacationTable(props: Props) {
             className={`text-center rounded-sm ${
               original.status === "Deleted"
                 ? "bg-red-500"
-                : original.create_date.toLocaleTimeString() !==
-                  original.modified_date.toLocaleTimeString()
+                : original.create_date?.toLocaleTimeString() !==
+                  original.modified_date?.toLocaleTimeString()
                 ? "bg-yellow-400"
                 : ""
             }`}
@@ -191,7 +191,7 @@ export default function VacationTable(props: Props) {
         header: "Date From",
         columnDefType: "data",
         id: "from_date",
-        accessorFn: (p) => dayjs(p.from_date).format("t"),
+        accessorFn: (p) => p.from_date?.toLocaleDateString(),
         muiTableHeadCellProps: {
           align: "center",
         },
@@ -284,10 +284,12 @@ export default function VacationTable(props: Props) {
         >
           <CardHeader
             className="pt-0"
-            title={<Typography variant="h5">Total Accepted</Typography>}
+            title={<Typography variant="h5">Total {tabValue}</Typography>}
           />
 
-          <span style={{ fontSize: 28, fontWeight: "bold" }}>{0}</span>
+          <span style={{ fontSize: 28, fontWeight: "bold" }}>
+            {props.vacations?.length || 0}
+          </span>
         </Card>
 
         <Box sx={{ width: "100%" }}>

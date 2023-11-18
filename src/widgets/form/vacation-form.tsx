@@ -31,6 +31,7 @@ import {
 } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { createVacation, updateVacation } from "@rms/service/vacation-service";
+import { Alert } from "@rms/components/ui/alert";
 
 interface Props {
   id?: number;
@@ -38,7 +39,6 @@ interface Props {
   employees?: Prisma.EmployeeGetPayload<{
     select: {
       first_name: true;
-      O;
       last_name: true;
       id: true;
     };
@@ -89,6 +89,7 @@ export default function VacationForm(props: Props) {
   });
 
   const [media, setMedia] = useState<Prisma.MediaGetPayload<{}>>();
+  const [error, setError] = useState("");
 
   const store = useStore();
   const handleSubmit = useCallback(
@@ -158,6 +159,11 @@ export default function VacationForm(props: Props) {
             </CardHeader>
 
             <CardContent className="flex flex-col gap-5">
+              {error && (
+                <Alert color="red" className="mb-10" variant="destructive">
+                  <h4>{error}</h4>
+                </Alert>
+              )}
               <Controller
                 control={form.control}
                 name="description"

@@ -5,15 +5,38 @@ import { handlerServiceAction } from "@rms/lib/handler";
 import prisma from "@rms/prisma/prisma";
 import { Prisma, Status } from "@prisma/client";
 import { copyMediaTemp, deleteMedia } from "./media-service";
+import moment from "moment";
+import dayjs from "dayjs";
 
 export async function createVacation(
   props: Prisma.VacationUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
     async (auth, config_id) => {
-      if (props.media) {
-        props.media.create.path = await copyMediaTemp(props.media.create.path);
+      const checkVacation = await prisma.vacation.findMany({
+        where: {
+          from_date: {
+            lte: props.to_date,
+          },
+          to_date: {
+            gte: props.from_date,
+          },
+          employee_id: props.employee_id,
+          status: {
+            not: "Deleted",
+          },
+        },
+      });
+
+      if (checkVacation.length > 0) {
+        throw new Error(
+          "Vacation date is conflicting with an existing date for selected employee"
+        );
       }
+
+      // if (props.media) {
+      //   props.media.create.path = await copyMediaTemp(props.media.create.path);
+      // }
 
       await prisma.vacation.create({
         data: {
@@ -40,6 +63,27 @@ export async function updateVacation(
 ) {
   return handlerServiceAction(
     async (auth, config_id) => {
+      const checkVacation = await prisma.vacation.findMany({
+        where: {
+          from_date: {
+            lte: props.to_date as any,
+          },
+          to_date: {
+            gte: props.from_date as any,
+          },
+          employee_id: props.employee_id as any,
+          status: {
+            not: "Deleted",
+          },
+        },
+      });
+
+      if (checkVacation.length > 0) {
+        throw new Error(
+          "Vacation date is conflicting with an existing date for selected employee"
+        );
+      }
+
       const result = await prisma.vacation.findUnique({
         where: { id, config_id },
         include: { media: true },
@@ -69,13 +113,10 @@ export async function deleteVacationById(
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
     async (auth, config_id) => {
-      if (auth.type === "Admin")
-        await prisma.vacation.delete({ where: { id: id, config_id } });
-      else
-        await prisma.vacation.update({
-          where: { id: id, config_id },
-          data: { status: "Deleted" },
-        });
+      await prisma.vacation.update({
+        where: { id: id, config_id },
+        data: { status: "Deleted" },
+      });
 
       return;
     },
