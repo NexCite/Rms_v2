@@ -1,15 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useTransition,
-} from "react";
-import styled from "@emotion/styled";
-import { $Enums, Prisma } from "@prisma/client";
+import { useCallback, useMemo, useState, useTransition } from "react";
+import { Prisma } from "@prisma/client";
 import Authorized from "@rms/components/ui/authorized";
 import { useStore } from "@rms/hooks/toast-hook";
 import { useRouter } from "next/navigation";
@@ -21,7 +14,6 @@ import { DateRange } from "react-day-picker";
 import {
   Box,
   Card,
-  CardContent,
   CardHeader,
   MenuItem,
   Tab,
@@ -163,8 +155,8 @@ export default function VacationTable(props: Props) {
             className={`text-center rounded-sm ${
               original.status === "Deleted"
                 ? "bg-red-500"
-                : original.create_date?.toLocaleTimeString() !==
-                  original.modified_date?.toLocaleTimeString()
+                : (original as any).create_date?.toLocaleTimeString() !==
+                  (original as any).modified_date?.toLocaleTimeString()
                 ? "bg-yellow-400"
                 : ""
             }`}
@@ -278,19 +270,40 @@ export default function VacationTable(props: Props) {
           </LoadingButton>
         </form>
 
-        <Card
-          className="text-center p-4"
-          style={{ width: 300, margin: "0px 10px 0px auto" }}
+        <div
+          className="text-center pb-4"
+          style={{
+            width: 250,
+            margin: "25px 10px 0px auto",
+          }}
         >
-          <CardHeader
-            className="pt-0"
-            title={<Typography variant="h5">Total {tabValue}</Typography>}
-          />
+          <div
+            style={{
+              fontSize: 20,
+              backgroundColor: "#3c6097",
+              borderTopLeftRadius: 6,
+              borderTopRightRadius: 6,
+              padding: "10px 0px",
+              color: "white",
+            }}
+          >
+            Total {tabValue}
+          </div>
 
-          <span style={{ fontSize: 28, fontWeight: "bold" }}>
+          <div
+            className="font-bold p-3"
+            style={{
+              fontSize: 25,
+              borderBottomLeftRadius: 6,
+              borderBottomRightRadius: 6,
+              border: "1px solid #194c99",
+              borderTop: "0px",
+              color: "#3c6097",
+            }}
+          >
             {props.vacations?.length || 0}
-          </span>
-        </Card>
+          </div>
+        </div>
 
         <Box sx={{ width: "100%" }}>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>

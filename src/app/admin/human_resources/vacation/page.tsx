@@ -24,10 +24,9 @@ export default async function page(props: {
 }) {
   const startDate = parseInt(props.searchParams.from_date);
   const endDate = parseInt(props.searchParams.to_date);
-  const status = props.searchParams.status as
-    | "Accepted"
-    | "Pending"
-    | "Deleted";
+  const status =
+    (props.searchParams.status as "Accepted" | "Pending" | "Deleted") ||
+    "Pending";
 
   const config_id = await getConfigId();
 
@@ -42,28 +41,45 @@ export default async function page(props: {
 
   var value: CommonetType[];
 
-  value = await prisma.vacation.findMany({
-    where: {
-      config_id,
-      status: (status || "Pending") as any,
-      to_date: {
-        lte: date[1],
+  if (Number.isNaN(startDate) || Number.isNaN(endDate)) {
+    value = await prisma.vacation.findMany({
+      where: {
+        config_id,
+        status: (status || "Pending") as any,
       },
-      from_date: {
-        gte: date[0],
-      },
-    },
-    include: {
-      employee: {
-        select: {
-          id: true,
-          first_name: true,
-          last_name: true,
+      include: {
+        employee: {
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+          },
         },
       },
-    },
-  });
-
+    });
+  } else {
+    value = await prisma.vacation.findMany({
+      where: {
+        config_id,
+        status: (status || "Pending") as any,
+        to_date: {
+          lte: date[1],
+        },
+        from_date: {
+          gte: date[0],
+        },
+      },
+      include: {
+        employee: {
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+          },
+        },
+      },
+    });
+  }
   return (
     <div>
       <VacationTable

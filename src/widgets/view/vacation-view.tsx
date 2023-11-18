@@ -32,13 +32,19 @@ export default function VacationView(props: Props) {
             {`${vacation.employee.first_name} ${vacation.employee.last_name}`}{" "}
             <span
               className={
-                (vacation.status === "Deleted"
+                vacation.status === "Deleted"
                   ? "bg-red-500"
                   : vacation.status === "Accepted"
                   ? "bg-green-500"
-                  : "bg-blue-500") + " p-1"
+                  : "bg-blue-500"
               }
-              style={{ fontSize: 14, borderRadius: 5, userSelect: "none" }}
+              style={{
+                fontSize: 14,
+                borderRadius: 5,
+                userSelect: "none",
+                padding: "4px 6px",
+                color: "white",
+              }}
             >
               {vacation.status}
             </span>
@@ -88,6 +94,10 @@ export default function VacationView(props: Props) {
               </p>
 
               <p className="pt-4 font-bold">Description</p>
+
+              <span className="opacity-60" style={{ fontSize: 14 }}>
+                {vacation.type}
+              </span>
 
               <p>{vacation.description}</p>
             </div>

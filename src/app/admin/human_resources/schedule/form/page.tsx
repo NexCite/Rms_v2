@@ -29,7 +29,6 @@ export default async function page(props: {
         },
       })
     : undefined;
-  console.log(schedule);
   const employees = (await prisma.employee.findMany({
     where: {
       // id,

@@ -31,8 +31,6 @@ export default async function page(props: { params: { id: string } }) {
       },
     });
 
-    console.log(value);
-
     return (
       <>
         <VacationView value={value} />

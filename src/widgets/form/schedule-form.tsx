@@ -109,7 +109,7 @@ export default function ScheduleForm(props: Props) {
       }),
     []
   );
-  console.log(props.schedule);
+
   useEffect(() => {}, [props.employees]);
 
   const scheduleConfig = useMemo(() => {
@@ -170,7 +170,6 @@ export default function ScheduleForm(props: Props) {
 
   const handleSubmit = useCallback(
     (values: z.infer<typeof formSchema>) => {
-      console.log(values.attendance);
       var formData = {
         to_date: values.to_date,
         attendance: [],
