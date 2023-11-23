@@ -94,214 +94,6 @@ export default function MainExport(props: Props) {
     </Modal>
   );
 }
-const Style = styled.div`
-  #action {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-    justify-content: space-between;
-  }
-
-  width: 100%;
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  bottom: 0;
-  z-index: 9999999999;
-  background-color: white;
-  padding: 10px;
-  margin: auto;
-`;
-
-const Style1 = styled.div`
-  .by {
-    div {
-      width: 33%;
-
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-  }
-`;
-const Style2 = styled.div`
-  h1 {
-    font-size: 16pt;
-  }
-`;
-function Tab2(props: Props) {
-  const amount = useMemo(() => {
-    var a = 0;
-    props.entry.sub_entries.forEach((e) => {
-      if (e.type === "Debit") {
-        a += e.amount;
-      }
-    });
-    return {
-      amountStr: props.entry.currency.symbol + FormatNumberWithFixed(a),
-      amount: a,
-    };
-  }, [props.entry.sub_entries, props.entry.currency.symbol]);
-  return (
-    <Style2 className="font-mono">
-      <div className={"bg-center flex items-center gap-5"}>
-        <Image
-          src={`/api/media${props.config.logo}`}
-          width={60}
-          height={60}
-          style={{ borderRadius: "50%" }}
-          alt="logo"
-        />
-        <h1 contentEditable className="text-4xl ">
-          {props.config.name}
-        </h1>
-      </div>
-      <div
-        dir="auto"
-        className="flex justify-center flex-col w-full items-center  titles"
-      >
-        <h1>سند صرف</h1>
-        <h1>سند صرف رقم {props.entry.id}</h1>
-
-        <h1>Payment Voucher</h1>
-      </div>
-      <div className="flex justify-between items-center">
-        <h2>Date: {props.entry.to_date.toLocaleDateString()}</h2>
-        <h2 dir="auto">التاريخ: {props.entry.to_date.toLocaleDateString()}</h2>
-      </div>
-      <div className="flex justify-start" dir="auto">
-        <p>{props.entry.title}</p>
-      </div>
-      <div className="flex justify-center" dir="auto">
-        <p>{props.entry.description}</p>
-      </div>
-      {props.entry.rate && (
-        <h1 className="w-full text-[10pt] mt-10" dir="ltr">
-          Rate : ${props.entry.rate}
-        </h1>
-      )}
-      {props.entry.rate && (
-        <h1 className="w-full text-[10pt] mt-10" dir="ltr">
-          Amount Rate : ${amount.amount / props.entry.rate}
-        </h1>
-      )}
-      <h1 className="w-full text-[10pt] mt-10" dir="ltr">
-        Amount: {amount.amountStr}
-      </h1>
-      <div>
-        <div className="flex justify-around mt-10 gap-20">
-          <div>
-            <h2 className="text-center">توقيع المدير</h2>
-
-            <h2 className="text-center">Manager Sign</h2>
-          </div>
-          <div>
-            <h2 className="text-center">المستلم</h2>
-            <h2 className="text-center">Received By</h2>
-            <h2 className="text-center" contentEditable>
-              type here{" "}
-            </h2>
-          </div>
-          <div>
-            <h2 className="text-center">أعداد</h2>
-            <h2 className="text-center">Prepared By</h2>
-            <h2 className="text-center">
-              {props.user.first_name} {props.user.last_name}
-            </h2>{" "}
-          </div>
-        </div>
-      </div>
-    </Style2>
-  );
-}
-function Tab3(props: Props) {
-  const amount = useMemo(() => {
-    var a = 0;
-    props.entry.sub_entries.forEach((e) => {
-      if (e.type === "Debit") {
-        a += e.amount;
-      }
-    });
-    return {
-      amountStr: props.entry.currency.symbol + FormatNumberWithFixed(a),
-      amount: a,
-    };
-  }, [props.entry.sub_entries, props.entry.currency.symbol]);
-  return (
-    <Style2 className="font-mono">
-      <div className={"bg-center flex items-center gap-5"}>
-        <Image
-          src={`/api/media${props.config.logo}`}
-          width={60}
-          height={60}
-          style={{ borderRadius: "50%" }}
-          alt="logo"
-        />
-        <h1 contentEditable className="text-4xl ">
-          {props.config.name}
-        </h1>
-      </div>
-      <div
-        dir="auto"
-        className="flex justify-center flex-col w-full items-center  titles"
-      >
-        <h1>سند صرف</h1>
-        <h1>سند قبض رقم {props.entry.id}</h1>
-
-        <h1>Receipt Voucher</h1>
-      </div>
-      <div className="flex justify-between items-center">
-        <h2>Date: {props.entry.to_date.toLocaleDateString()}</h2>
-        <h2 dir="auto">التاريخ: {props.entry.to_date.toLocaleDateString()}</h2>
-      </div>
-      <div className="flex justify-start" dir="auto">
-        <p>{props.entry.title}</p>
-      </div>
-      <div className="flex justify-center" dir="auto">
-        <p>{props.entry.description}</p>
-      </div>
-      {props.entry.rate && (
-        <h1 className="w-full text-[10pt] mt-10" dir="ltr">
-          Rate : ${props.entry.rate}
-        </h1>
-      )}
-      {props.entry.rate && (
-        <h1 className="w-full text-[10pt] mt-10" dir="ltr">
-          Amount Rate : ${amount.amount / props.entry.rate}
-        </h1>
-      )}
-      <h1 className="w-full text-[10pt] mt-10" dir="ltr">
-        Amount: {amount.amountStr}
-      </h1>
-      <div>
-        <div className="flex justify-around mt-10 gap-20">
-          <div>
-            <h2 className="text-center">توقيع المدير</h2>
-
-            <h2 className="text-center">Manager Sign</h2>
-          </div>
-          <div>
-            <h2 className="text-center">المستلم</h2>
-            <h2 className="text-center">Received By</h2>
-            <h2 className="text-center" contentEditable>
-              type here{" "}
-            </h2>
-          </div>
-          <div>
-            <h2 className="text-center">أعداد</h2>
-            <h2 className="text-center">Prepared By</h2>
-            <h2 className="text-center">
-              {props.user.first_name} {props.user.last_name}
-            </h2>{" "}
-          </div>
-        </div>
-      </div>
-    </Style2>
-  );
-}
-
 function Tab1(props: Props) {
   const amount = useMemo(() => {
     var a = 0;
@@ -402,3 +194,223 @@ function Tab1(props: Props) {
     </Style1>
   );
 }
+function Tab2(props: Props) {
+  const amount = useMemo(() => {
+    var a = 0;
+    props.entry.sub_entries.forEach((e) => {
+      if (e.type === "Debit") {
+        a += e.amount;
+      }
+    });
+    return {
+      amountStr: props.entry.currency.symbol + FormatNumberWithFixed(a),
+      amount: a,
+    };
+  }, [props.entry.sub_entries, props.entry.currency.symbol]);
+  return (
+    <Style2 className="font-mono">
+      <div className={"bg-center flex items-center gap-5"}>
+        <Image
+          src={`/api/media${props.config.logo}`}
+          width={60}
+          height={60}
+          style={{ borderRadius: "50%" }}
+          alt="logo"
+        />
+        <h1 contentEditable className="text-2xl ">
+          {props.config.name}
+        </h1>
+      </div>
+      <div
+        dir="auto"
+        className="flex justify-center flex-col w-full items-center  titles"
+      >
+        <h1>سند صرف</h1>
+        <h1>سند صرف رقم {props.entry.id}</h1>
+
+        <h1>Payment Voucher</h1>
+      </div>
+      <div className="flex justify-between items-center">
+        <h2>Date: {props.entry.to_date.toLocaleDateString()}</h2>
+        <h2 dir="auto">التاريخ: {props.entry.to_date.toLocaleDateString()}</h2>
+      </div>
+      <div className="flex justify-center" dir="auto">
+        <p>
+          صرفنا إلى السيد {props.user.first_name} {props.user.last_name}
+        </p>
+      </div>
+      <br />
+      <div className="flex flex-col justify-center items-center" dir="auto">
+        <p>نقدًا / {amount.amountStr}</p>
+        <p className="max-w-lg   ">وذلك عن: {props.entry.description}</p>
+      </div>
+      {props.entry.rate && (
+        <h1 className="w-full text-[10pt] mt-10" dir="ltr">
+          Rate : ${props.entry.rate}
+        </h1>
+      )}
+      {props.entry.rate && (
+        <h1 className="w-full text-[10pt] mt-10" dir="ltr">
+          Amount Rate : ${amount.amount / props.entry.rate}
+        </h1>
+      )}
+
+      <div>
+        <div className="flex justify-around mt-10 gap-20">
+          <div>
+            <h2 className="text-center">توقيع المدير</h2>
+
+            <h2 className="text-center">Manager Sign</h2>
+          </div>
+          <div>
+            <h2 className="text-center">المستلم</h2>
+            <h2 className="text-center">Received By</h2>
+            <h2 className="text-center" contentEditable>
+              type here{" "}
+            </h2>
+          </div>
+          <div>
+            <h2 className="text-center">أعداد</h2>
+            <h2 className="text-center">Prepared By</h2>
+            <h2 className="text-center">
+              {props.user.first_name} {props.user.last_name}
+            </h2>{" "}
+          </div>
+        </div>
+      </div>
+    </Style2>
+  );
+}
+function Tab3(props: Props) {
+  const amount = useMemo(() => {
+    var a = 0;
+    props.entry.sub_entries.forEach((e) => {
+      if (e.type === "Debit") {
+        a += e.amount;
+      }
+    });
+    return {
+      amountStr: props.entry.currency.symbol + FormatNumberWithFixed(a),
+      amount: a,
+    };
+  }, [props.entry.sub_entries, props.entry.currency.symbol]);
+  return (
+    <Style2 className="font-mono">
+      <div className={"bg-center flex items-center gap-5 "}>
+        <Image
+          src={`/api/media${props.config.logo}`}
+          width={60}
+          height={60}
+          style={{ borderRadius: "50%" }}
+          alt="logo"
+        />
+        <h1 contentEditable className="text-2xl ">
+          {props.config.name}
+        </h1>
+      </div>
+      <div
+        dir="auto"
+        className="flex justify-center flex-col w-full items-center  titles "
+      >
+        <h1>سند صرف</h1>
+        <h1>سند قبض رقم {props.entry.id}</h1>
+
+        <h1>Receipt Voucher</h1>
+      </div>
+      <div className="flex justify-between items-center">
+        <h2>Date: {props.entry.to_date.toLocaleDateString()}</h2>
+        <h2 dir="auto">التاريخ: {props.entry.to_date.toLocaleDateString()}</h2>
+      </div>
+      <div className="flex justify-start" dir="auto">
+        <p>
+          صرفنا إلى السيد/السادة {props.user.first_name} {props.user.last_name}
+        </p>
+      </div>
+      <div className="flex justify-start" dir="auto">
+        <p>مبلغ وقدره: {amount.amountStr}</p>
+      </div>
+      <div dir="auto" className="flex ">
+        <div className="flex items-center gap-10 justify-around">
+          <div className="flex items-start gap-3 justify-around">
+            <p>نقدا/شيك رقم: </p>
+            <div contentEditable className="border-b-[1px] border-black">
+              {"                "}
+            </div>
+          </div>
+          <div className="flex items-start gap-3 justify-around">
+            <div>تاريخ:</div>
+            <p contentEditable className="border-b-[1px] border-black"></p>
+          </div>
+          <div className="flex items-start gap-3 justify-around">
+            <div>بنك:</div>
+            <p contentEditable className="border-b-[1px] border-black"></p>
+          </div>
+        </div>
+      </div>
+      <div className="flex justify-start" dir="auto">
+        <p>وذلك عن: {props.entry.description}</p>
+      </div>
+      <div>
+        <div className="flex justify-around mt-10 gap-20">
+          <div>
+            <h2 className="text-center">توقيع المدير</h2>
+
+            <h2 className="text-center">Manager Sign</h2>
+          </div>
+          <div>
+            <h2 className="text-center">المستلم</h2>
+            <h2 className="text-center">Received By</h2>
+            <h2 className="text-center" contentEditable>
+              type here{" "}
+            </h2>
+          </div>
+          <div>
+            <h2 className="text-center">أعداد</h2>
+            <h2 className="text-center">Prepared By</h2>
+            <h2 className="text-center">
+              {props.user.first_name} {props.user.last_name}
+            </h2>{" "}
+          </div>
+        </div>
+      </div>
+    </Style2>
+  );
+}
+
+const Style = styled.div`
+  #action {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    justify-content: space-between;
+  }
+
+  width: 100%;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 9999999999;
+  background-color: white;
+  padding: 10px;
+  margin: auto;
+`;
+
+const Style1 = styled.div`
+  .by {
+    div {
+      width: 33%;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+`;
+const Style2 = styled.div`
+  h1 {
+    font-size: 16pt;
+  }
+`;

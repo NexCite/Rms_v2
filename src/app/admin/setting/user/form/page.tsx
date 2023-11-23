@@ -20,6 +20,7 @@ export default async function page(props: {
       email: true;
       country: true;
       address1: true;
+      role: true;
       phone_number: true;
       address2: true;
       gender: true;
@@ -43,6 +44,7 @@ export default async function page(props: {
         last_name: true,
         email: true,
         country: true,
+        role: true,
         address1: true,
         address2: true,
         phone_number: true,
@@ -52,10 +54,10 @@ export default async function page(props: {
       },
     });
   }
-
+  const roles = await prisma.role.findMany({});
   return (
     <>
-      <UserFormComponent value={value} user={user} />
+      <UserFormComponent value={value} user={user} roles={roles} />
     </>
   );
 }

@@ -4,7 +4,7 @@ import { handlerServiceAction } from "@rms/lib/handler";
 import { hashPassword } from "@rms/lib/hash";
 import { CommonRouteKeys } from "@rms/models/CommonModel";
 import prisma from "@rms/prisma/prisma";
-import { copyMediaTemp } from "./media-service";
+import { deleteMedia, saveFile } from "./media-service";
 import { createScheuleConfig } from "./schedule-config-service";
 
 export async function createConfig(
@@ -27,11 +27,20 @@ export async function createConfig(
       },
     });
 
-    const newPath = await copyMediaTemp(params.logo, result.id);
+    const newPath = await saveFile(params.logo, result.id);
 
     await prisma.config.update({
       where: { id: result.id },
       data: { logo: newPath },
+    });
+    const role = await prisma.role.create({
+      data: {
+        config_id: result.id,
+        name: "Admin",
+        permissions: Object.keys(
+          $Enums.UserPermission
+        ) as $Enums.UserPermission[],
+      },
     });
     await prisma.user.create({
       data: {
@@ -47,6 +56,7 @@ export async function createConfig(
         config_id: result.id,
         path: CommonRouteKeys,
         status: "Enable",
+
         permissions: Object.keys(
           $Enums.UserPermission
         ) as $Enums.UserPermission[],
@@ -65,12 +75,26 @@ export async function updateConfig(
   }
 ) {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
+      const oldData = await prisma.config.findFirst({
+        where: { id: config_id },
+      });
+      var newLogoPath: string;
+      console.log("asdasdas");
+
+      if (oldData.logo !== params.logo) {
+        try {
+          deleteMedia(params.logo.toString());
+        } catch (error) {}
+
+        newLogoPath = await saveFile(params.logo.toString(), config_id);
+      }
+
       const updateParams = {
         name: params.name,
         username: params.username,
         email: params.email,
-        // logo: "",
+        logo: newLogoPath ?? params.logo,
         phone_number: params.phone_number,
       };
 
@@ -85,8 +109,6 @@ export async function updateConfig(
         data: updateParams,
       });
 
-      // const newPath = await copyMediaTemp(params.logo, result.id);
-
       // await prisma.config.update({
       //   where: { id: result.id },
       //   data: { logo: newPath },
@@ -94,14 +116,14 @@ export async function updateConfig(
 
       delete updateParams.name;
 
-      await prisma.user.update({
-        where: { id: auth.id, config_id },
-        data: {
-          ...updateParams,
-          first_name: params.first_name,
-          last_name: params.last_name,
-        },
-      });
+      // await prisma.user.update({
+      //   where: { id: info.user.id, config_id },
+      //   data: {
+      //     ...updateParams,
+      //     first_name: params.first_name,
+      //     last_name: params.last_name,
+      //   },
+      // });
 
       return "";
     },
@@ -113,7 +135,7 @@ export async function updateConfig(
 
 export async function getConfig() {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       return prisma.config.findFirst({
         where: { id: config_id },
         select: { name: true, email: true, logo: true, phone_number: true },

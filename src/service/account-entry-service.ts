@@ -8,8 +8,8 @@ export async function createAccount_Entry(
   node: $Enums.Account_Entry_Type
 ) {
   return handlerServiceAction(
-    async (auth, config_id) => {
-      props.user_id = auth.id;
+    async (info, config_id) => {
+      props.user_id = info.user.id;
       props.config_id = config_id;
 
       await prisma.account_Entry.create({ data: props });
@@ -32,8 +32,8 @@ export async function updateAccount_Entry(
   node: $Enums.Account_Entry_Type
 ) {
   return handlerServiceAction(
-    async (auth, config_id) => {
-      props.user_id = auth.id;
+    async (info, config_id) => {
+      props.user_id = info.user.id;
       props.config_id = config_id;
 
       return await prisma.account_Entry.update({
@@ -55,7 +55,7 @@ export async function deleteAccount_Entry(
   node: $Enums.Account_Entry_Type
 ) {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       await prisma.account_Entry.delete({ where: { id: id, config_id } });
 
       // if (auth.type === "Admin") {
@@ -63,7 +63,7 @@ export async function deleteAccount_Entry(
       // } else {
       //   await prisma.account_Entry.update({
       //     where: { id: id,config_id },
-      //     props: { status: "Deleted", user_id: auth.id },
+      //     props: { status: "Deleted", user_id: info.user.id },
       //   });
       // }
 

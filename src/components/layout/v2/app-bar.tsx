@@ -6,21 +6,18 @@ import RouteModel from "@rms/models/RouteModel";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useMemo, useState } from "react";
-import BackButton from "../ui/back-button";
-import { Sidebar } from "./side-bar";
+import AppConfig from "../../../../app-config.json";
 
-import AppConfig from "../../../app-config.json";
 import { MenuIcon } from "lucide-react";
-import { MdClose } from "react-icons/md";
+import BackButton from "@rms/components/ui/back-button";
 type Props = {
-  children: React.ReactNode;
   routes: RouteModel[];
   config: {
     logo: string;
     name: string;
   };
 };
-export default function AppBar(props: Props) {
+export default function AppBarV2(props: Props) {
   var path = usePathname();
   const [show, setShow] = useState(true);
 
@@ -57,32 +54,21 @@ export default function AppBar(props: Props) {
 
   return (
     <>
-      <aside
-        id="cta-button-sidebar"
-        className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform ${
-          show ? "sm:translate-x-0" : " -translate-x-full "
-        } `}
-      >
-        <div className="h-full border border-gray-200  overflow-y-auto bg-gray-50 dark:bg-gray-800">
-          <Sidebar
-            menu={
-              <div className="sm:hidden">
-                <IconButton onClick={(e) => setShow(!show)}>
-                  <MdClose />
-                </IconButton>
-              </div>
-            }
-            config={props.config}
-            routers={props.routes}
-          />
-        </div>
-      </aside>
-
-      <div className={`  ${show ? "sm:ml-64" : ""}   flex flex-col static  `}>
+      <div className={`  w-full  `}>
         {subRouteTitle && (
           <div className="flex justify-between items-center  border dark:border-gray-700 p-3 static">
             <div className="flex items-center gap-4 justify-start">
-              <div>
+              <div
+                className="mobile-darwer"
+                onClick={(e) => {
+                  var bar = document.querySelector(".side-bar");
+                  if (bar.classList.contains("show-drawer")) {
+                    bar.classList.remove("show-drawer");
+                  } else {
+                    bar.classList.add("show-drawer");
+                  }
+                }}
+              >
                 {
                   <IconButton onClick={(e) => setShow(!show)}>
                     <MenuIcon />
@@ -90,7 +76,6 @@ export default function AppBar(props: Props) {
                 }
               </div>
               {canGoBack && <BackButton />}
-              <h1 className="text-3xl">{subRouteTitle}</h1>
             </div>
 
             {AppConfig.ignore.add_app_bar.filter((res) => {
@@ -102,6 +87,7 @@ export default function AppBar(props: Props) {
                 <Link href={path + "/form"}>
                   <Button
                     variant="contained"
+                    disableElevation
                     className={
                       "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
                     }
@@ -112,11 +98,6 @@ export default function AppBar(props: Props) {
                 </Link>
               </Authorized>
             )}
-          </div>
-        )}
-        {subRouteTitle && (
-          <div className=" w-full h-[97vh] rounded-lg overflow-y-auto pb-14 ">
-            <div>{props.children}</div>
           </div>
         )}
       </div>

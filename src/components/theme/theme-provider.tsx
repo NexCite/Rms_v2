@@ -5,10 +5,8 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { type ThemeProviderProps } from "next-themes/dist/types";
 import { ServerStyleSheet, StyleSheetManager } from "styled-components";
 import { useServerInsertedHTML } from "next/navigation";
-import {
-  createTheme,
-  ThemeProvider as MUIThemeProvider,
-} from "@mui/material/styles";
+
+import { ProgressLoader } from "nextjs-progressloader";
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   const [styledComponentsStyleSheet] = React.useState(
@@ -24,6 +22,7 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
 
   return (
     <StyleSheetManager sheet={styledComponentsStyleSheet.instance}>
+      <ProgressLoader color="black" />
       <NextThemesProvider {...props}>{children}</NextThemesProvider>
     </StyleSheetManager>
   );

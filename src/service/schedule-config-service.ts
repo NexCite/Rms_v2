@@ -55,7 +55,7 @@ export async function updateScheuleConfig(
   props: Prisma.ScheduleConfigUncheckedUpdateInput
 ) {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       props.config_id = config_id;
       await prisma.scheduleConfig.update({
         where: { id: id },
@@ -70,7 +70,7 @@ export async function updateScheuleConfig(
 
 export async function deleteScheuleConfig(id: number) {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       return await prisma.scheduleConfig.delete({
         where: { id: id, config_id },
       });
@@ -81,7 +81,7 @@ export async function deleteScheuleConfig(id: number) {
       // } else
       //   return await prisma.entry.update({
       //     where: { id: id,config_id },
-      //     data: { status: "Deleted", user_id: auth.id },
+      //     data: { status: "Deleted", user_id: info.user.id },
       //   });
     },
     "Delete_Schedules_Config",

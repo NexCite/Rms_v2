@@ -1,20 +1,23 @@
 "use server";
 
-import { Prisma } from "@prisma/client";
+import { $Enums, Prisma } from "@prisma/client";
 import { getUserInfo } from "@rms/lib/auth";
 import { handlerServiceAction } from "@rms/lib/handler";
 
 import { hashPassword } from "@rms/lib/hash";
-
+import route from "../../routes.json";
 import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import RouteModel from "@rms/models/RouteModel";
+const Routes = route as RouteModel[];
 
 export async function createUser(
   props: Prisma.UserUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       props.config_id = config_id;
 
       props.password = hashPassword(props.password);
@@ -43,14 +46,14 @@ export async function updateUser(
   props: Prisma.UserUncheckedUpdateInput
 ): Promise<ServiceActionModel<Prisma.UserUpdateInput>> {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       props.config_id = config_id;
 
       if (props.password) {
         props.password = hashPassword(props.password.toString());
       }
       if (props.type === "Admin") {
-        if (auth.type === "User") {
+        if (info.user.type === "User") {
           props.type = "User";
         }
       }
@@ -67,7 +70,7 @@ export async function deleteUserById(
   id: number
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       await prisma.user.delete({ where: { id: id, config_id } });
 
       // if (auth.type === "Admin") {
@@ -86,3 +89,91 @@ export async function deleteUserById(
     { id }
   );
 }
+
+export default async function getUserFullInfo(
+  withRedirect?: boolean
+): Promise<UserFullInfoType | undefined> {
+  const token = cookies().get("rms-auth");
+  if (!token?.value) {
+    if (withRedirect) {
+      redirect("/login");
+    } else {
+      return undefined;
+    }
+  }
+  const auth = await prisma.auth.findFirst({
+    where: { token: token.value, status: "Enable" },
+    include: {
+      user: {
+        select: {
+          username: true,
+          first_name: true,
+          last_name: true,
+          id: true,
+          permissions: true,
+          type: true,
+          config_id: true,
+          role: true,
+          config: {
+            select: {
+              logo: true,
+              name: true,
+              id: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!auth) {
+    if (withRedirect) {
+      redirect("/login");
+    } else {
+      return undefined;
+    }
+  }
+
+  var routes = Routes.filter((res) => {
+    if (auth.user.permissions?.includes(res.key)) {
+      res.children = res.children?.filter((r) =>
+        auth.user.permissions?.includes(r.key)
+      );
+      return res;
+    }
+  });
+  const user = {
+    id: auth.user_id,
+    username: auth.user.username,
+    first_name: auth.user.first_name,
+    last_name: auth.user.last_name,
+    permissions: auth.user.permissions,
+    type: auth.user.type,
+    role: auth.user.role,
+  };
+
+  const config = {
+    id: auth.user.config.id,
+    name: auth.user.config.name,
+    logo: auth.user.config.logo,
+  };
+
+  return { routes, user, config };
+}
+export type UserFullInfoType = {
+  user: {
+    id: number;
+    username: string;
+    first_name: string;
+    last_name: string;
+    permissions: $Enums.UserPermission[];
+    type: $Enums.UserType;
+    role: Prisma.RoleGetPayload<{}>;
+  };
+  config: {
+    id: number;
+    name: string;
+    logo: string;
+  };
+  routes: RouteModel[];
+};

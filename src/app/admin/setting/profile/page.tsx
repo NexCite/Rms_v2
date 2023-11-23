@@ -13,6 +13,7 @@ export default async function page() {
 
   const user = await prisma.user.findFirst({
     where: { id: userInfo.id, config_id },
+    include: { role: true },
   });
 
   return (
@@ -62,6 +63,10 @@ export default async function page() {
         <div className="flex justify-between items-center ">
           <h1 className="text-lg">Gender</h1>
           <h1 className="text-lg">{user.gender}</h1>
+        </div>
+        <div className="flex justify-between items-center ">
+          <h1 className="text-lg">Role</h1>
+          <h1 className="text-lg">{user.role.name}</h1>
         </div>
         <div className="flex justify-between items-center ">
           <h1 className="text-lg">Phone Number</h1>

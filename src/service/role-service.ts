@@ -5,60 +5,59 @@ import { handlerServiceAction } from "@rms/lib/handler";
 import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 
-export async function createSubCategory(
-  props: Prisma.SubCategoryUncheckedCreateInput
+export async function createRole(
+  props: Prisma.RoleUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
     async (info, config_id) => {
       props.config_id = config_id;
-      props.user_id = info.user.id;
 
-      await prisma.subCategory.create({ data: props });
+      await prisma.role.create({ data: props });
       return;
     },
-    "Add_SubCategory",
+    "Add_Role",
     true,
     props
   );
 }
 
-export async function updateSubCategory(
+export async function updateRole(
   id: number,
-  props: Prisma.SubCategoryUncheckedUpdateInput
-): Promise<ServiceActionModel<Prisma.SubCategoryUpdateInput>> {
+  props: Prisma.RoleUncheckedUpdateInput
+): Promise<ServiceActionModel<Prisma.RoleUpdateInput>> {
   return handlerServiceAction(
     async (info, config_id) => {
       props.config_id = config_id;
-      props.user_id = info.user.id;
-      return await prisma.subCategory.update({
+
+      return await prisma.role.update({
         where: { id },
         data: props,
       });
     },
-    "Edit_SubCategory",
+    "Edit_Role",
     true,
     props
   );
 }
 
-export async function deleteSubCategoryById(
+export async function deleteRoleById(
   id: number
 ): Promise<ServiceActionModel<void>> {
-  return handlerServiceAction(
+  return handlerServiceAction<void>(
     async (info, config_id) => {
-      await prisma.subCategory.delete({ where: { id, config_id } });
-
+      await prisma.role.delete({ where: { id } });
       // if (auth.type === "Admin") {
-      //   await prisma.subCategory.delete({ where: { id } });
+      //   await prisma.Role.delete({ where: { id } });
       // } else {
-      //   await prisma.subCategory.update({
+      //   await prisma.Role.update({
       //     where: { id },
       //     data: { status: "Deleted", user_id: info.user.id },
       //   });
       // }
+
       return;
     },
-    "Delete_SubCategory",
+    "Delete_Role",
     true,
     { id }
   );

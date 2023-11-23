@@ -6,7 +6,7 @@ import { handlerServiceAction } from "@rms/lib/handler";
 import prisma from "@rms/prisma/prisma";
 import { confirmActivity } from "./activity-service";
 import { ActivityStatus } from "@rms/models/CommonModel";
-import { copyMediaTemp, deleteMedia } from "./media-service";
+import { copyMediaTemp, deleteMedia, saveFile } from "./media-service";
 export async function createEntry(
   props: Prisma.EntryUncheckedCreateInput,
   includeRate: boolean,
@@ -17,15 +17,15 @@ export async function createEntry(
   }
 ) {
   return handlerServiceAction(
-    async (auth, config_id) => {
-      props.user_id = auth.id;
+    async (info, config_id) => {
+      props.user_id = info.user.id;
       props.config_id = config_id;
       if (!includeRate) {
         props.rate = null;
       }
       delete (props as any).includeRate;
       if (props.media) {
-        props.media.create.path = await copyMediaTemp(props.media.create.path);
+        props.media.create.path = await saveFile(props.media.create.path);
       }
 
       if (activity) activity.status = ActivityStatus.Provided;
@@ -54,16 +54,14 @@ export async function updateEntry(
   includeRate?: boolean
 ) {
   return handlerServiceAction(
-    async (auth, config_id) => {
-      console.log(includeRate);
+    async (info, config_id) => {
       if (!includeRate) {
         props.rate = null;
       }
 
       delete (props as any).includeRate;
-      console.log(props.rate);
 
-      props.user_id = auth.id;
+      props.user_id = info.user.id;
       props.config_id = config_id;
       const result = await prisma.entry.findUnique({
         where: { config_id, id: id },
@@ -86,7 +84,7 @@ export async function updateEntry(
 }
 export async function deleteEntry(id: number) {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       return await prisma.entry.delete({ where: { id: id, config_id } });
 
       // if (auth.type === "Admin") {

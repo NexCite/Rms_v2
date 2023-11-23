@@ -3,6 +3,9 @@ import GetRoutes from "@rms/config/route-config";
 import { UserSelectCommon } from "@rms/models/CommonModel";
 import HttpStatusCode from "@rms/models/HttpStatusCode";
 import prisma from "@rms/prisma/prisma";
+import getUserFullInfo, {
+  type UserFullInfoType,
+} from "@rms/service/user-service";
 import { sign, verify } from "jsonwebtoken";
 import { RedirectType } from "next/dist/client/components/redirect";
 import { cookies, headers } from "next/headers";
@@ -63,15 +66,18 @@ const RouteSkip = ["/admin"];
 
 export async function checkUserPermissions(
   permission: $Enums.UserPermission
-): Promise<{ status: HttpStatusCode; user?: UserSelectCommon }> {
-  const userInfo = await getUserInfo();
+): Promise<
+  | { status: HttpStatusCode.UNAUTHORIZED }
+  | { status: HttpStatusCode.OK; data: UserFullInfoType }
+> {
+  const userInfo = await getUserFullInfo();
   if (!userInfo) {
     return { status: HttpStatusCode.UNAUTHORIZED };
   }
-  return userInfo.permissions?.includes(permission)
+  return userInfo.user.role.permissions?.includes(permission)
     ? {
         status: HttpStatusCode.OK,
-        user: userInfo,
+        data: userInfo,
       }
     : { status: HttpStatusCode.UNAUTHORIZED };
 }
@@ -109,7 +115,7 @@ export async function GetUserRoute(middleware?: boolean): Promise<
     });
     if (auth.length === 0) return undefined;
 
-    const routes = GetRoutes(auth[0].user.permissions);
+    const routes = await GetRoutes();
     const url = new URL(headers().get("url") ?? "");
     if (RouteSkip?.includes(url.pathname)) return auth[0].user.permissions;
 

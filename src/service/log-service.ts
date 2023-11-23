@@ -18,7 +18,7 @@ export async function getLogs(props: {
 
   date?: Date;
 }) {
-  return handlerServiceAction(async (auth, config_id) => {
+  return handlerServiceAction(async (info, config_id) => {
     return prisma.log.findMany({
       include: {
         user: true,

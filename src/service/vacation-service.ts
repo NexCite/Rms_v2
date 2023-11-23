@@ -10,7 +10,7 @@ export async function createVacation(
   props: Prisma.VacationUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       const checkVacation = await prisma.vacation.findMany({
         where: {
           from_date: {
@@ -60,7 +60,7 @@ export async function updateVacation(
   props: Prisma.VacationUncheckedUpdateInput
 ) {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       const checkVacation = await prisma.vacation.findMany({
         where: {
           from_date: {
@@ -110,7 +110,7 @@ export async function deleteVacationById(
   id: number
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       await prisma.vacation.update({
         where: { id: id, config_id },
         data: { status: "Deleted" },

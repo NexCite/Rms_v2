@@ -8,8 +8,8 @@ export async function createPayment(
   props: Prisma.PaymentUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth, config_id) => {
-      props.user_id = auth.id;
+    async (info, config_id) => {
+      props.user_id = info.user.id;
       props.config_id = config_id;
 
       var invoice = await prisma.invoice.findFirst({
@@ -62,8 +62,8 @@ export async function updatePayment(
   props: Prisma.PaymentUncheckedUpdateInput
 ) {
   return handlerServiceAction(
-    async (auth, config_id) => {
-      props.user_id = auth.id;
+    async (info, config_id) => {
+      props.user_id = info.user.id;
       props.config_id = config_id;
 
       var invoice = await prisma.invoice.findFirst({
@@ -207,7 +207,7 @@ export async function deletePaymentById(
   id: number
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       await prisma.payment.delete({ where: { id: id, config_id } });
 
       // if (auth.type === "Admin") {

@@ -341,10 +341,7 @@ export default function EntryForm(props: Props) {
                 elevation={0}
                 className="rounded-none"
               >
-                <AccordionSummary
-                  expandIcon={<MdOutlineKeyboardArrowUp />}
-                  aria-controls="panel1a-content"
-                >
+                <AccordionSummary expandIcon={<MdOutlineKeyboardArrowUp />}>
                   <Typography className="text-2xl">
                     Activity Information
                   </Typography>

@@ -611,7 +611,7 @@ export default function ExportEntryDataTable(props: Props) {
               value: res.id,
             }))}
             renderInput={(params) => (
-              <TextField {...params} label="More Four Digits" />
+              <TextField {...params} label="More Four Digits" size="small" />
             )}
           />
 

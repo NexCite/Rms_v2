@@ -34,9 +34,11 @@ type Props = {
     permissions: $Enums.UserPermission[];
     type: $Enums.UserType;
   };
+  roles: Prisma.RoleGetPayload<{}>[];
   value?: Prisma.UserGetPayload<{
     select: {
       username: true;
+      role: true;
       id: true;
       first_name: true;
       last_name: true;
@@ -86,6 +88,7 @@ export default function UserFormComponent(props: Props) {
       country: z.string(),
       email: z.string().optional().nullable(),
       permissions: z.array(z.enum(Object.keys($Enums.UserPermission) as any)),
+      role_id: z.number(),
       status: z
         .enum([
           $Enums.Status.Enable,
@@ -136,6 +139,10 @@ export default function UserFormComponent(props: Props) {
     },
     [back, store, form, props.value]
   );
+  const defaultRole = useMemo(() => {
+    const role = props.roles.find((res) => res.id === props.value?.role?.id);
+    return role ? { label: role.name, id: role.id } : undefined;
+  }, [props.roles]);
   return (
     <form
       className=""
@@ -290,20 +297,18 @@ export default function UserFormComponent(props: Props) {
           />
 
           <Controller
-            name={"permissions"}
+            name={"role_id"}
             control={form.control}
             render={({ field, fieldState }) => (
               <Autocomplete
                 disablePortal
                 onChange={(e, v) => {
-                  field.onChange(v);
+                  field.onChange(v?.id);
                 }}
-                multiple
-                defaultValue={field.value}
+                defaultValue={props.value?.role}
                 size="small"
-                options={Object.keys($Enums.UserPermission).sort((a, b) =>
-                  a.localeCompare(b)
-                )}
+                getOptionLabel={(e) => e.name}
+                options={props.roles}
                 renderInput={(params) => (
                   <TextField
                     {...params}

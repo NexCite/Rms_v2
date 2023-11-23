@@ -8,7 +8,7 @@ export async function createEquity(
   params: Prisma.EquityUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       await prisma.equity.create({
         data: {
           config_id,
@@ -43,7 +43,7 @@ export async function updateEquity(
   params: Prisma.EquityUncheckedUpdateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       await prisma.agentBox.deleteMany({
         where: { equity_id: id },
       });
@@ -100,7 +100,7 @@ export async function deleteEquityById(
   id: number
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       if (auth.type === "Admin") {
         await prisma.equity.delete({
           where: {

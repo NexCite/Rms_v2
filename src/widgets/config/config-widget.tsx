@@ -208,21 +208,22 @@ export default function ConfigWidget(props: Props) {
                 />
               )}
             />
-
             <Controller
               control={form.control}
               name="logo"
               render={({ field, fieldState }) => (
-                <UploadWidget
-                  isLogo
-                  onSave={(e) => {
-                    form.setValue("logo", e ?? "");
-                    form.clearErrors("logo");
-                  }}
-                />
+                <>
+                  <UploadWidget
+                    isLogo
+                    path={field.value}
+                    onSave={(e) => {
+                      form.setValue("logo", e ?? "");
+                      form.clearErrors("logo");
+                    }}
+                  />
+                </>
               )}
             />
-
             <div className="flex justify-end">
               <LoadingButton
                 variant="contained"

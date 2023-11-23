@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 
 type Props = {
-  permission: $Enums.UserPermission;
+  permission: $Enums.UserPermission | "None";
   children: React.ReactNode;
   className?: string;
 };

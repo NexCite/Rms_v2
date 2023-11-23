@@ -8,22 +8,10 @@ import { checkUserPermissions } from "./auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createLog } from "@rms/service/log-service";
+import { UserFullInfoType } from "@rms/service/user-service";
 
 export async function handlerServiceAction<T>(
-  action: (
-    user?: Prisma.UserGetPayload<{
-      select: {
-        username: true;
-        first_name: true;
-        last_name: true;
-        id: true;
-        permissions: true;
-        type: true;
-        config_id: true;
-      };
-    }>,
-    config_id?: number
-  ) => Promise<T>,
+  action: (info?: UserFullInfoType, config_id?: number) => Promise<T>,
   key: $Enums.UserPermission | "None",
   update?: boolean,
   body?: any
@@ -70,12 +58,15 @@ export async function handlerServiceAction<T>(
       }
     }
   } else {
-    const auth = await checkUserPermissions(key);
+    const resultPermissions = await checkUserPermissions(key);
     const url = new URL(urlHeader);
 
-    if (auth.status === HttpStatusCode.OK) {
+    if (resultPermissions.status === HttpStatusCode.OK) {
       try {
-        var result = await action(auth.user!, auth.user.config_id);
+        var result = await action(
+          resultPermissions.data!,
+          resultPermissions.data.config.id
+        );
         if (!url.pathname.includes("/log")) {
           await createLog({
             action: key.includes("Add")
@@ -86,7 +77,7 @@ export async function handlerServiceAction<T>(
               ? "Delete"
               : "View",
             page: url.toString(),
-            user_id: auth.user.id,
+            user_id: resultPermissions.data.user.id,
             body: JSON.stringify(body),
           });
         }
@@ -111,7 +102,7 @@ export async function handlerServiceAction<T>(
               ? "Delete"
               : "View",
             page: url.toString(),
-            user_id: auth.user.id,
+            user_id: resultPermissions.data.user.id,
             body: JSON.stringify(body),
             error: JSON.stringify(error.message),
           });

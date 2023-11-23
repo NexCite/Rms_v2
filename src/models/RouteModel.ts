@@ -3,7 +3,7 @@ import { $Enums } from "@prisma/client";
 export default interface RouteModel {
   title: string;
   path: string;
-  icon: any;
+  icon?: string;
   key: $Enums.UserPermission;
   index: number;
   hide: boolean;

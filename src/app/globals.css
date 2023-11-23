@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: rms;
+  src: url("/font.ttf");
+}
+* {
+  font-family: rms;
+  font-weight: 400;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -59,7 +68,7 @@
   }
 }
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 4px;
   height: 8px;
 }
 
@@ -70,13 +79,15 @@
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #1c1c1cc9;
-  border-radius: 5px;
+  background: rgba(22, 21, 21, 0.788);
+  border-radius: 10px;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: #101010;
+}
+* {
 }
 
 /* input:focus + label {
@@ -175,5 +186,78 @@ table {
       padding: 5px;
       border: #00000013 solid 1px;
     }
+  }
+}
+
+#layout-app {
+  height: 100vh;
+}
+.drawer-close {
+  display: none !important;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.drawer-close svg {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.side-bar {
+  width: 250px; /* or whatever width your sidebar has */
+  height: 100%; /* Adjust as needed */
+  left: 0;
+  top: 0;
+  position: fixed;
+  transition: left 0.5s, visibility 0.5s;
+  background-color: white;
+  z-index: 10;
+
+  visibility: visible;
+  border-width: 1px;
+}
+
+#app-main {
+  width: 100%;
+  padding-left: 250px;
+  transition: padding-left 0.5s;
+  height: 100%;
+}
+#main {
+  padding: 10px;
+  max-height: 100%;
+  overflow-y: scroll;
+  padding-bottom: 100px;
+}
+.mobile-darwer {
+  display: none;
+}
+@media screen and (max-width: 900px) {
+  .side-bar {
+    left: -200px;
+
+    visibility: hidden;
+    transition: left 0.5s, visibility 0.5s;
+  }
+  #app-main {
+    padding-left: 0px;
+    transition: padding-left 0.5s;
+  }
+  .side-bar.show-drawer {
+    width: 250px;
+    left: 0;
+    visibility: visible;
+
+    transition: left 0.5s, visibility 0.5s;
+  }
+  .mobile-darwer {
+    display: block;
+  }
+  .drawer-close {
+    display: block !important;
   }
 }

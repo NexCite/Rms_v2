@@ -12,13 +12,13 @@ export async function GET(
 ) {
   if (context.params[""]) {
     if (context.params[""].join("/")) {
-      var result = (await readMedia(context.params[""].join("/"))) as any;
+      var result = await readMedia(context.params[""].join("/"));
 
       if (!result) {
         return NextResponse.error();
       }
 
-      return new NextResponse(new File([result?.file], result.name));
+      return new NextResponse(result);
     }
   }
   return NextResponse.error();

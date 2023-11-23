@@ -9,9 +9,9 @@ export async function createTwoDigit(
   props: Prisma.Two_DigitUncheckedCreateInput
 ) {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       props.config_id = config_id;
-      props.user_id = auth.id;
+      props.user_id = info.user.id;
 
       await prisma.two_Digit.create({ data: props });
       return;
@@ -27,9 +27,9 @@ export async function updateTwoDigit(
   props: Prisma.Two_DigitUncheckedUpdateInput
 ) {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       props.config_id = config_id;
-      props.user_id = auth.id;
+      props.user_id = info.user.id;
 
       props.modified_date = new Date();
       await prisma.two_Digit.update({
@@ -45,7 +45,7 @@ export async function updateTwoDigit(
 }
 export async function deleteTwoDigit(id: number) {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       await prisma.two_Digit.delete({ where: { id: id, config_id } });
 
       // if (auth.type === "Admin")
@@ -53,7 +53,7 @@ export async function deleteTwoDigit(id: number) {
       // else
       //   await prisma.two_Digit.update({
       //     where: { id: id,config_id },
-      //     data: { status: "Disable", user_id: auth.id },
+      //     data: { status: "Disable", user_id: info.user.id },
       //   });
     },
     "Delete_Two_Digit",
@@ -66,8 +66,8 @@ export async function createThreeDigit(
   props: Prisma.Three_DigitUncheckedCreateInput
 ) {
   return handlerServiceAction(
-    async (auth, config_id) => {
-      props.user_id = auth.id;
+    async (info, config_id) => {
+      props.user_id = info.user.id;
       props.config_id = config_id;
 
       await prisma.three_Digit.create({ data: props });
@@ -84,9 +84,9 @@ export async function updateThreeDigit(
   props: Prisma.Three_DigitUncheckedUpdateInput
 ) {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       props.config_id = config_id;
-      props.user_id = auth.id;
+      props.user_id = info.user.id;
 
       props.modified_date = new Date();
 
@@ -103,14 +103,14 @@ export async function updateThreeDigit(
 }
 export async function deleteThreeDigit(id: number) {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       await prisma.three_Digit.delete({ where: { id: id, config_id } });
       // if (auth.type === "Admin")
       //   await prisma.three_Digit.delete({ where: { id: id,config_id } });
       // else
       //   await prisma.three_Digit.update({
       //     where: { id: id,config_id },
-      //     data: { status: "Deleted", user_id: auth.id },
+      //     data: { status: "Deleted", user_id: info.user.id },
       //   });
     },
     "Edit_Three_Digit",
@@ -122,8 +122,8 @@ export async function createMoreDigit(
   props: Prisma.More_Than_Four_DigitUncheckedCreateInput
 ) {
   return handlerServiceAction(
-    async (auth, config_id) => {
-      props.user_id = auth.id;
+    async (info, config_id) => {
+      props.user_id = info.user.id;
       props.config_id = config_id;
 
       await prisma.more_Than_Four_Digit.create({ data: props });
@@ -140,9 +140,9 @@ export async function updateMoreDigit(
   props: Prisma.More_Than_Four_DigitUncheckedUpdateInput
 ) {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       props.config_id = config_id;
-      props.user_id = auth.id;
+      props.user_id = info.user.id;
 
       props.modified_date = new Date();
       await prisma.more_Than_Four_Digit.update({
@@ -158,7 +158,7 @@ export async function updateMoreDigit(
 }
 export async function deleteMoreDigit(id: number) {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       await prisma.more_Than_Four_Digit.delete({
         where: { id: id, config_id },
       });
@@ -168,7 +168,7 @@ export async function deleteMoreDigit(id: number) {
       // else
       //   await prisma.more_Than_Four_Digit.update({
       //     where: { id: id,config_id },
-      //     data: { status: "Disable", user_id: auth.id },
+      //     data: { status: "Disable", user_id: info.user.id },
       //   });
     },
     "Delete_More_Than_Four_Digit",

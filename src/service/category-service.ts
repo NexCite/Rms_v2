@@ -9,9 +9,9 @@ export async function createCategory(
   props: Prisma.CategoryUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       props.config_id = config_id;
-      props.user_id = auth.id;
+      props.user_id = info.user.id;
 
       await prisma.category.create({ data: props });
       return;
@@ -27,9 +27,9 @@ export async function updateCategory(
   props: Prisma.CategoryUncheckedUpdateInput
 ): Promise<ServiceActionModel<Prisma.CategoryUpdateInput>> {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       props.config_id = config_id;
-      props.user_id = auth.id;
+      props.user_id = info.user.id;
 
       return await prisma.category.update({
         where: { id },
@@ -46,14 +46,14 @@ export async function deleteCategoryById(
   id: number
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction<void>(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       await prisma.category.delete({ where: { id } });
       // if (auth.type === "Admin") {
       //   await prisma.category.delete({ where: { id } });
       // } else {
       //   await prisma.category.update({
       //     where: { id },
-      //     data: { status: "Deleted", user_id: auth.id },
+      //     data: { status: "Deleted", user_id: info.user.id },
       //   });
       // }
 

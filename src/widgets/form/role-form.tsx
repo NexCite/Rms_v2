@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Prisma } from "@prisma/client";
+import { $Enums, Prisma } from "@prisma/client";
 
 import { useRouter } from "next/navigation";
 
@@ -10,29 +10,28 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import LoadingButton from "@mui/lab/LoadingButton";
-import { Card, CardContent, CardHeader, TextField } from "@mui/material";
+import {
+  Autocomplete,
+  Card,
+  CardContent,
+  CardHeader,
+  TextField,
+} from "@mui/material";
 import { useStore } from "@rms/hooks/toast-hook";
-import { createCurrency, updateCurrency } from "@rms/service/currency-service";
-import { FormatNumberWithFixed } from "@rms/lib/global";
-import NumericFormatCustom from "@rms/components/ui/text-field-number";
-type Props = { value: Prisma.CurrencyGetPayload<{}> };
-export default function CurrencyForm(props: Props) {
+import { createRole, updateRole } from "@rms/service/role-service";
+
+type Props = { value?: Prisma.RoleGetPayload<{}> };
+export default function RoleForm(props: Props) {
   const [isPadding, setTransition] = useTransition();
   const { back } = useRouter();
   const formSchema = useMemo(() => {
     return z.object({
-      name: z
-        .string()
-        .min(1, { message: "Name must be at least 1  character" }),
-      symbol: z
-        .string()
-        .min(1, { message: "Symbol must be at least 1  character" }),
-      rate: z
-        .number()
-        .min(2)
-        .or(z.string().min(2).regex(/^\d+$/).transform(Number))
-        .optional()
-        .nullable(),
+      name: z.string(),
+
+      permissions: z
+        .array(z.enum(Object.keys($Enums.UserPermission) as any))
+        .min(1)
+        .default([]),
     });
   }, []);
 
@@ -47,7 +46,7 @@ export default function CurrencyForm(props: Props) {
       setTransition(async () => {
         if (props.value) {
           setTransition(async () => {
-            const result = await updateCurrency(props.value.id, values);
+            const result = await updateRole(props.value.id, values);
             store.OpenAlert(result);
             if (result.status === 200) back();
             Object.keys(result.errors ?? []).map((e) => {
@@ -56,7 +55,7 @@ export default function CurrencyForm(props: Props) {
           });
         } else {
           setTransition(async () => {
-            const result = await createCurrency(values as any);
+            const result = await createRole(values as any);
             store.OpenAlert(result);
             if (result.status === 200) back();
             Object.keys(result.errors ?? []).map((e) => {
@@ -76,7 +75,7 @@ export default function CurrencyForm(props: Props) {
         noValidate
       >
         <Card>
-          <CardHeader title="Currency Form" />
+          <CardHeader title="Role Form" />
           <CardContent className="flex flex-col gap-5">
             <Controller
               name="name"
@@ -97,50 +96,34 @@ export default function CurrencyForm(props: Props) {
                 );
               }}
             />
-
             <Controller
-              name="symbol"
+              name={"permissions"}
               control={form.control}
-              render={({ field, fieldState }) => {
-                return (
-                  <TextField
-                    size="small"
-                    label="Symbol"
-                    placeholder="symbol"
-                    required
-                    fullWidth
-                    error={Boolean(fieldState.error)}
-                    helperText={fieldState.error?.message}
-                    {...field}
-                    InputLabelProps={{ shrink: true }}
-                  />
-                );
-              }}
-            />
-            <Controller
-              name="rate"
-              control={form.control}
-              render={({ field, fieldState }) => {
-                return (
-                  <>
-                    {" "}
+              render={({ field, fieldState }) => (
+                <Autocomplete
+                  disablePortal
+                  onChange={(e, v) => {
+                    field.onChange(v);
+                  }}
+                  multiple
+                  defaultValue={field.value}
+                  size="small"
+                  options={Object.keys($Enums.UserPermission).sort((a, b) =>
+                    a.localeCompare(b)
+                  )}
+                  renderInput={(params) => (
                     <TextField
-                      size="small"
-                      label="Rate"
-                      placeholder="rate"
-                      value={field.value}
-                      InputProps={{
-                        inputComponent: NumericFormatCustom as any,
-                      }}
-                      fullWidth
+                      {...params}
+                      required
                       error={Boolean(fieldState.error)}
-                      helperText={` ${fieldState.error?.message ?? ""}`}
-                      {...field}
+                      helperText={fieldState.error?.message}
                       InputLabelProps={{ shrink: true }}
+                      label="Permissions"
+                      placeholder="permissions"
                     />
-                  </>
-                );
-              }}
+                  )}
+                />
+              )}
             />
           </CardContent>
           <div className="flex justify-end5 m-5 mt-2">

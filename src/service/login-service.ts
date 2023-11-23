@@ -13,6 +13,7 @@ export async function createLogin(params: {
 }): Promise<ServiceActionModel<string>> {
   const user = await prisma.user.findFirst({
     where: { username: params.username },
+    include: { role: {} },
   });
 
   if (user !== null) {
@@ -20,7 +21,7 @@ export async function createLogin(params: {
     if (isPasswordOk) {
       var token = generateToken(user.username);
       cookies().set("rms-auth", token);
-      cookies().set("rms-permissions", JSON.stringify(user.permissions));
+      cookies().set("rms-permissions", JSON.stringify(user.role.permissions));
       await prisma.auth.updateMany({
         where: {
           user_id: user.id,

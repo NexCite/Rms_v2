@@ -61,7 +61,6 @@ export default function UploadWidget(props: Props) {
 
                       setTransition(async () => {
                         if (path) {
-                          await path;
                           if (props.onSave) {
                             props.onSave();
                           }
@@ -74,7 +73,7 @@ export default function UploadWidget(props: Props) {
                   </LoadingButton>
                   <iframe
                     className="w-full h-[500px] bg-white mt-5"
-                    src={`/api/media/${path}`}
+                    src={`/api/media${path}`}
                   ></iframe>
                 </div>
               ) : (
@@ -94,9 +93,44 @@ export default function UploadWidget(props: Props) {
                 />
               )}
             </>
+          ) : path ? (
+            <div>
+              <LoadingButton
+                variant="contained"
+                className={
+                  isPadding
+                    ? ""
+                    : "hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white "
+                }
+                disableElevation
+                loading={isPadding}
+                onClick={() => {
+                  setPath(undefined);
+
+                  setTransition(async () => {
+                    if (path) {
+                      if (props.onSave) {
+                        props.onSave();
+                      }
+                    }
+                  });
+                }}
+                type="button"
+              >
+                Remove
+              </LoadingButton>
+
+              <Image
+                width={1000}
+                height={1000}
+                alt={"logo"}
+                className="mt-3 w-[100px] h-[100px] rounded-full object-fill"
+                src={`/api/media${props.path}`}
+              ></Image>
+            </div>
           ) : (
             <ImageUploading
-              acceptType={["pdf", "jpg", "jpeg", "svg", "png"]}
+              acceptType={["jpg", "jpeg", "svg", "png"]}
               value={images}
               onChange={onChange as any}
               maxNumber={maxNumber}

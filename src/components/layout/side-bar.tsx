@@ -42,7 +42,7 @@ export function Sidebar(props: Props) {
     <Card className="h-full w-full rounded-none flex flex-col overflow-y-auto">
       <div className="flex  p-3  flex-row justify-between items-center">
         <Image
-          src={`/api/media${props.config.logo}`}
+          src={`/logo.png`}
           alt={props.config.name}
           width={80}
           height={80}
@@ -51,7 +51,7 @@ export function Sidebar(props: Props) {
         {props.menu}
       </div>
       <Divider />
-      <List>
+      {/* <List>
         {props.routers
           .filter((res) => !res.end)
           .map((res, i) =>
@@ -153,7 +153,7 @@ export function Sidebar(props: Props) {
         <Link href={"/logout"}>
           <ListItemButton>Logout</ListItemButton>
         </Link>
-      </List>
+      </List> */}
     </Card>
   );
 }

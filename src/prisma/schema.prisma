@@ -75,6 +75,8 @@ model User {
 
   invoices Invoice[]
   logs     Log[]
+  role_id  Int?
+  role     Role?     @relation(fields: [role_id], references: [id])
 
   payments             Payment[]
   employees            Employee[]
@@ -557,11 +559,14 @@ enum EntryType {
 }
 
 model Role {
-  id          Int              @id @default(autoincrement())
-  name        String           @unique
-  config_id   Int
-  config      Config           @relation(fields: [config_id], references: [id])
-  permissions UserPermission[]
+  id            Int              @id @default(autoincrement())
+  name          String           @unique
+  config_id     Int
+  config        Config           @relation(fields: [config_id], references: [id])
+  permissions   UserPermission[]
+  users         User[]
+  create_date   DateTime         @default(now())
+  modified_date DateTime         @default(now()) @updatedAt
 }
 
 enum UserPermission {
@@ -696,6 +701,11 @@ enum UserPermission {
   View_Schedule_Config
   Edit_Schedule_Config
   Add_Schedule_Config
+  Add_Role
+  View_Role
+  View_Roles
+  Edit_Role
+  Delete_Role
 }
 
 enum Account_Entry_Type {

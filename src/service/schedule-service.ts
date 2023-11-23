@@ -9,7 +9,7 @@ export async function createSchedule(
   params: Prisma.ScheduleUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       const date = moment(params.to_date);
 
       const result = await prisma.schedule.findFirst({
@@ -57,7 +57,7 @@ export async function updateSchedule(
   params: Prisma.ScheduleUncheckedUpdateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       await prisma.attendance.deleteMany({
         where: { schedule_id: id },
       });
@@ -83,8 +83,8 @@ export async function deleteScheduleById(
   id: number
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth, config_id) => {
-      if (auth.type === "Admin") {
+    async (info, config_id) => {
+      if (info.user.type === "Admin") {
         await prisma.schedule.delete({
           where: {
             id,

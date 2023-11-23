@@ -1,6 +1,7 @@
 "use server";
 
 import prisma from "@rms/prisma/prisma";
+import NexCite from "@rms/lib/nexcite_lib";
 import {
   existsSync,
   mkdirSync,
@@ -33,7 +34,7 @@ async function streamToBytes(readableStream: any) {
 }
 
 export async function getAllMedia() {
-  return handlerServiceAction((auth, config_id) => {
+  return handlerServiceAction((info, config_id) => {
     return prisma.media.findMany({
       where: { NOT: { status: "Deleted" }, config_id },
       orderBy: { modified_date: "desc" },
@@ -44,23 +45,16 @@ export async function getAllMedia() {
 export async function uploadMediaTemp(fromData: FormData) {
   try {
     var file = fromData.get("file") as any;
-    const date = new Date();
-    var buffer = await streamToBytes(file["stream"]() as ReadableStream);
-    var type = file["name"].split(".");
-    const fileName = date.getTime() + "." + type[type.length - 1];
-    const filePath = AppConfig.media.temp_path
-      .replace("{type}", type[type.length - 1])
-      .replace("{year}", date.getFullYear() + "")
-      .replace("{month}", date.getMonth() + 1 + "")
-      .replace("{day}", date.getDate() + "");
-    const dir = path.join(process.cwd(), "..", filePath.replace("{name}", ""));
+    const config_id = await getConfigId();
 
-    if (!existsSync(dir)) {
-      mkdirSync(dir, { recursive: true });
-    }
-    const fullPath = dir + "/" + fileName;
-    writeFileSync(fullPath, buffer);
-    return filePath + "/" + fileName;
+    var uploadService = await new NexCite.UploadService({
+      folderName: "NexCite/RMS/" + config_id,
+      type: "local",
+    }).init();
+
+    var result = await uploadService.uploadFile(file);
+
+    return result;
   } catch (e) {
     console.log(e);
     return "error";
@@ -69,24 +63,10 @@ export async function uploadMediaTemp(fromData: FormData) {
 export async function readMedia(filePath: string) {
   const config_id = await getConfigId();
 
-  if (
-    !filePath.startsWith(`/${config_id}`) &&
-    (filePath.startsWith("/assets/temp") ||
-      filePath.startsWith("/assets/temp/"))
-  ) {
-    return;
-  }
-
-  const dir = path.join(process.cwd(), "..", filePath);
-
-  var file = readFileSync(dir);
-
-  var fileName = filePath;
-
-  return {
-    file: file,
-    name: fileName[fileName.length - 1],
-  };
+  return new NexCite.MediaService({
+    folderName: "NexCite/RMS/" + config_id,
+    type: "local",
+  }).readFile(filePath);
 }
 
 export async function copyMediaTemp(tempFilePath: string, config_id?: number) {
@@ -115,10 +95,17 @@ export async function copyMediaTemp(tempFilePath: string, config_id?: number) {
 
   return newFolderPath + "/" + fileName;
 }
+export async function saveFile(tempFilePath: string, config_id?: number) {
+  return await new NexCite.UploadService({
+    folderName: "NexCite/RMS/" + config_id,
+    type: "local",
+  }).saveFile(tempFilePath);
+}
 export async function deleteMedia(filePath: string) {
-  const dir = path.join(process.cwd(), "..", filePath);
+  const config_id = await getConfigId();
 
-  unlinkSync(dir);
-
-  return 200;
+  return new NexCite.UploadService({
+    folderName: "NexCite/RMS/" + config_id,
+    type: "local",
+  });
 }

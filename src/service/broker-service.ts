@@ -12,9 +12,9 @@ export async function createBroker(
   props: Prisma.BrokerUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction<void>(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       props.config_id = config_id;
-      props.user_id = auth.id;
+      props.user_id = info.user.id;
 
       await prisma.broker.create({ data: props });
       return;
@@ -30,9 +30,9 @@ export async function updateBroker(
   props: Prisma.BrokerUncheckedUpdateInput
 ): Promise<ServiceActionModel<Prisma.BrokerUpdateInput>> {
   return handlerServiceAction<Prisma.BrokerUpdateInput>(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       props.config_id = config_id;
-      props.user_id = auth.id;
+      props.user_id = info.user.id;
 
       return await prisma.broker.update({
         where: { id },
@@ -49,7 +49,7 @@ export async function deleteBrokerById(
   id: number
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction<void>(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       await prisma.broker.delete({ where: { id: id, config_id } });
 
       // if (auth.type === "Admin")
@@ -57,7 +57,7 @@ export async function deleteBrokerById(
       // else
       //   await prisma.broker.update({
       //     where: { id: id,config_id },
-      //     data: { status: "Deleted", user_id: auth.id },
+      //     data: { status: "Deleted", user_id: info.user.id },
       //   });
 
       return;

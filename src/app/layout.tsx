@@ -35,8 +35,6 @@ export default async function RootLayout({
         <title>Rms System</title>
       </head>
       <body>
-        <NextTopLoader showSpinner={false} color="#090808" />
-
         <ThemeProvider
           attribute="class"
           defaultTheme="ligth"

@@ -10,8 +10,8 @@ export async function createInvoice(
   props: Prisma.InvoiceUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth, config_id) => {
-      props.user_id = auth.id;
+    async (info, config_id) => {
+      props.user_id = info.user.id;
       props.config_id = config_id;
 
       await prisma.invoice.create({ data: props });
@@ -29,8 +29,8 @@ export async function updateInvoice(
   props: Prisma.InvoiceUncheckedUpdateInput
 ) {
   return handlerServiceAction(
-    async (auth, config_id) => {
-      props.user_id = auth.id;
+    async (info, config_id) => {
+      props.user_id = info.user.id;
       props.config_id = config_id;
 
       var invoice = await prisma.invoice.findFirst({
@@ -70,7 +70,7 @@ export async function deleteInvoiceById(
   id: number
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
-    async (auth, config_id) => {
+    async (info, config_id) => {
       await prisma.invoice.delete({ where: { id: id, config_id } });
 
       // if (auth.type === "Admin") {
