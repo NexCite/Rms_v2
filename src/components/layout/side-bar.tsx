@@ -3,19 +3,9 @@ import React from "react";
 
 import RouteModel from "@rms/models/RouteModel";
 
-import { ChevronDownIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Card,
-  Divider,
-  List,
-  ListItemButton,
-  Typography,
-} from "@mui/material";
+import { Card, Divider } from "@mui/material";
 import Image from "next/image";
 import Link from "next/link";
 

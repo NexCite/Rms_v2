@@ -69,6 +69,7 @@
     "moment": "^2.29.4",
     "next": "14.0.3",
     "next-themes": "^0.2.1",
+    "next13-progressbar": "^1.1.0",
     "nextjs-progressloader": "^0.2.3",
     "nextjs-toploader": "^1.6.4",
     "npm": "^10.2.4",
