@@ -197,7 +197,7 @@ export default function EntryForm(props: Props) {
       }
     });
     return { totalDebit, totalCredit, totalUnkown };
-  }, [form.watch("sub_entries")]);
+  }, [form]);
   const handleSubmit = useCallback(
     (values) => {
       var m: Prisma.EntryUncheckedCreateInput;
@@ -283,7 +283,7 @@ export default function EntryForm(props: Props) {
       }
 
       setTransition(async () => {
-        if (props.isEditMode) {
+        if (props.entry) {
           const result = await updateEntry(props.id, m, values.includeRate);
           store.OpenAlert(result);
           if (result.status === 200) {
@@ -305,7 +305,7 @@ export default function EntryForm(props: Props) {
         }
       });
     },
-    [props, formSchema, back, form, store]
+    [props, back, form, store]
   );
   const [loadingUi, setLoadingUi] = useState(true);
   useEffect(() => {
@@ -321,7 +321,7 @@ export default function EntryForm(props: Props) {
       }
       return undefined;
     }
-  }, [form.watch("currency_id")]);
+  }, [form, props.currencies]);
   return (
     <form
       className="max-w-[450px] m-auto"

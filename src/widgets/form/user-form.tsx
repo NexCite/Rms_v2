@@ -139,10 +139,7 @@ export default function UserFormComponent(props: Props) {
     },
     [back, store, form, props.value]
   );
-  const defaultRole = useMemo(() => {
-    const role = props.roles.find((res) => res.id === props.value?.role?.id);
-    return role ? { label: role.name, id: role.id } : undefined;
-  }, [props.roles]);
+
   return (
     <form
       className=""

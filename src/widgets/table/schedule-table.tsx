@@ -101,7 +101,7 @@ export default function ScheduleTable(props: Props) {
         accessorFn: ({ to_date }) => dayjs(to_date).format("DD-MM-YYYY"),
       },
     ],
-    [store.OpenAlert, , store]
+    []
   );
 
   return (

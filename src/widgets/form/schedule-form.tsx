@@ -234,13 +234,13 @@ export default function ScheduleForm(props: Props) {
         }
       });
     },
-    [props, formSchema, back, form]
+    [props, back, form, store]
   );
 
   const [loadingUi, setLoadingUi] = useState(true);
   useEffect(() => {
     setLoadingUi(false);
-  }, [props.employees]);
+  }, []);
 
   return (
     <form

@@ -101,7 +101,7 @@ export async function deleteEquityById(
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
     async (info, config_id) => {
-      if (auth.type === "Admin") {
+      if (info.user.type === "Admin") {
         await prisma.equity.delete({
           where: {
             id,

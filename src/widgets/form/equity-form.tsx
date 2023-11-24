@@ -253,7 +253,7 @@ export default function EquityForm(props: Props) {
       });
       // }
     },
-    [props, formSchema, back, form]
+    [props, store, back]
   );
 
   const [loadingUi, setLoadingUi] = useState(true);

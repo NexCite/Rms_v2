@@ -51,8 +51,8 @@ export default async function page(props: {
   return (
     <MainExport
       user={{
-        first_name: user.user.first_name,
-        last_name: user.user.last_name,
+        first_name: user.data.user.first_name,
+        last_name: user.data.user.last_name,
       }}
       entry={entry as any}
       config={config.result}

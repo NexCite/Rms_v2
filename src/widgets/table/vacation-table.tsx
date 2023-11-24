@@ -132,7 +132,7 @@ export default function VacationTable(props: Props) {
         replaceUrlPath();
       });
     },
-    [selectDate, pathName, replace]
+    [replaceUrlPath]
   );
 
   const columns = useMemo<MRT_ColumnDef<CommonType>[]>(
@@ -225,7 +225,7 @@ export default function VacationTable(props: Props) {
         },
       },
     ],
-    [store.OpenAlert, , store]
+    []
   );
 
   return (

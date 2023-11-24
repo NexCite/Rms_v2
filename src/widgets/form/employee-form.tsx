@@ -81,7 +81,7 @@ export default function EmployeeFormComponent(props: Props) {
         ])
         .optional(),
     });
-  }, [props.value]);
+  }, []);
   const form = useForm<z.infer<typeof validation>>({
     resolver: zodResolver(validation),
     defaultValues: props.value,

@@ -476,7 +476,7 @@ export default function ExportEntryDataTable(props: Props) {
         totalCredit,
         currencies,
       };
-    }, [props.data]);
+    }, [props.data, search]);
 
   const titleRef = useRef<HTMLHeadingElement>();
   const { toPDF, targetRef } = usePDF();

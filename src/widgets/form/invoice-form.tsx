@@ -90,7 +90,7 @@ export default function InvoiceForm(props: Props) {
     (values: z.infer<any>) => {
       const result = validation.safeParse(values);
       const error = [];
-      if (!props.isEditMode) {
+      if (!props.value) {
         if (!form.getValues().debit_credit) {
           error.push({ message: "Missing  type" });
         }
@@ -172,7 +172,7 @@ export default function InvoiceForm(props: Props) {
         });
       }
     },
-    [back, store.OpenAlert, form, media, props.value]
+    [back, store.OpenAlert, media, props.value]
   );
   return (
     <>
