@@ -197,7 +197,7 @@ export default function EntryForm(props: Props) {
       }
     });
     return { totalDebit, totalCredit, totalUnkown };
-  }, [form]);
+  }, [form, form.watch("sub_entries"), form.watch("currency_id")]);
   const handleSubmit = useCallback(
     (values) => {
       var m: Prisma.EntryUncheckedCreateInput;
@@ -321,7 +321,7 @@ export default function EntryForm(props: Props) {
       }
       return undefined;
     }
-  }, [form, props.currencies]);
+  }, [form, props.currencies, form.watch("currency_id")]);
   return (
     <form
       className="max-w-[450px] m-auto"
@@ -585,7 +585,7 @@ export default function EntryForm(props: Props) {
                 render={({ field, fieldState }) =>
                   currency?.rate ? (
                     <FormControl {...field} size="small">
-                      <h1>Include Rage</h1>
+                      <h1>Include Rate</h1>
                       <Switch
                         checked={field.value}
                         onChange={(e, v) => {

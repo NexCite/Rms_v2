@@ -444,13 +444,13 @@ export default function ScheduleForm(props: Props) {
                                   control={
                                     <Switch
                                       onChange={(e, c) => {
-                                        field.value[i].absent = c;
-
                                         if (!props.isEditMode && c) {
                                           var result = confirm(
                                             `Are you sure ${res.username} absent?`
                                           );
                                           if (result) {
+                                            field.value[i].absent = c;
+
                                             field.value[i].from_over_time =
                                               null;
                                             field.value[i].to_over_time = null;
@@ -460,14 +460,16 @@ export default function ScheduleForm(props: Props) {
                                             field.onChange(field.value);
                                             return;
                                           }
-                                        }
+                                        } else if (c) {
+                                          field.value[i].absent = c;
 
-                                        if (c) {
                                           field.value[i].from_over_time = null;
                                           field.value[i].to_over_time = null;
                                           field.value[i].from_time = null;
                                           field.value[i].to_time = null;
                                         } else {
+                                          field.value[i].absent = c;
+
                                           field.value[i].from_over_time =
                                             scheduleConfig.from_over_time;
                                           field.value[i].to_over_time =

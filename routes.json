@@ -80,6 +80,7 @@
   {
     "index": 1,
     "title": "Trading",
+    "icon": "LineChart",
     "children": [
       {
         "index": 0,
@@ -129,6 +130,8 @@
   },
   {
     "index": 2,
+    "icon": "Landmark",
+
     "title": "Payment Box",
     "children": [
       {
@@ -220,7 +223,7 @@
         "path": "/admin/setting/category/category",
         "key": "View_Categories",
         "addKey": "Add_Category",
-        "icon": "User2"
+        "icon": "Book"
       },
       {
         "index": 5,
@@ -228,7 +231,7 @@
         "path": "/admin/setting/category/sub_category",
         "key": "View_SubCategories",
         "addKey": "Add_SubCategory",
-        "icon": "User2"
+        "icon": "BookCopy"
       },
       {
         "index": 6,
@@ -236,7 +239,7 @@
         "path": "/admin/setting/schedule_config",
         "key": "View_Schedules_Config",
         "addKey": "None",
-        "icon": "User2"
+        "icon": "CalendarClock"
       },
       {
         "index": 7,
@@ -244,15 +247,15 @@
         "path": "/admin/setting/configuration",
         "key": "View_Config",
         "addKey": "Add_Config",
-        "icon": "User2"
+        "icon": "SlidersHorizontal"
       },
       {
-        "index": 7,
+        "index": 8,
         "title": "Role",
         "path": "/admin/setting/role",
         "key": "View_Role",
         "addKey": "Add_Role",
-        "icon": "User2"
+        "icon": "UserCog"
       }
     ],
     "key": "Setting",
