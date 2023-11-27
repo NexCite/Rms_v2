@@ -20,6 +20,8 @@ export default async function page(props: {
       email: true;
       country: true;
       address1: true;
+      role_id: true;
+
       role: true;
       phone_number: true;
       address2: true;
@@ -47,6 +49,7 @@ export default async function page(props: {
         role: true,
         address1: true,
         address2: true,
+        role_id: true,
         phone_number: true,
         gender: true,
         permissions: true,

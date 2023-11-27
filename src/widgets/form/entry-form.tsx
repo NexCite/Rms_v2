@@ -291,7 +291,6 @@ export default function EntryForm(props: Props) {
   useEffect(() => {
     setLoadingUi(false);
   }, []);
-
   const currency = useMemo(() => {
     var currency_id = watch.currency_id;
     if (currency_id) {

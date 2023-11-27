@@ -22,7 +22,7 @@ import {
 import { useStore } from "@rms/hooks/toast-hook";
 import Countries from "@rms/lib/country";
 import { useCallback, useMemo, useTransition } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
 type Props = {
@@ -45,6 +45,7 @@ type Props = {
       email: true;
       country: true;
       address1: true;
+      role_id: true;
       address2: true;
       gender: true;
       permissions: true;
@@ -102,6 +103,13 @@ export default function UserFormComponent(props: Props) {
     defaultValues: props.value,
   });
   const store = useStore();
+  const watch = useWatch({ control: form.control });
+  const userRole = useMemo(() => {
+    const role = props.roles.find((res) => res.id === props.value?.role?.id);
+
+    return role;
+  }, [props.roles, props.value]);
+
   const handleSubmit = useCallback(
     (values: z.infer<any>) => {
       if (props.value) {
@@ -169,7 +177,6 @@ export default function UserFormComponent(props: Props) {
               />
             )}
           />
-
           <Controller
             control={form.control}
             name="password"
@@ -236,7 +243,6 @@ export default function UserFormComponent(props: Props) {
               />
             )}
           />
-
           <Controller
             name="gender"
             control={form.control}
@@ -275,7 +281,6 @@ export default function UserFormComponent(props: Props) {
               </FormControl>
             )}
           />
-
           <Controller
             control={form.control}
             name="email"
@@ -299,10 +304,11 @@ export default function UserFormComponent(props: Props) {
               <Autocomplete
                 disablePortal
                 onChange={(e, v) => {
-                  field.onChange(v?.id);
+                  field.onChange(v.id);
                 }}
-                defaultValue={props.value?.role}
                 size="small"
+                defaultValue={userRole}
+                isOptionEqualToValue={(e) => e.id === field.value}
                 getOptionLabel={(e) => e.name}
                 options={props.roles}
                 renderInput={(params) => (
@@ -319,7 +325,6 @@ export default function UserFormComponent(props: Props) {
               />
             )}
           />
-
           <Controller
             name={"country"}
             control={form.control}
