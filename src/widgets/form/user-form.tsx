@@ -87,7 +87,6 @@ export default function UserFormComponent(props: Props) {
       address2: z.string().optional().nullable(),
       country: z.string(),
       email: z.string().optional().nullable(),
-      permissions: z.array(z.enum(Object.keys($Enums.UserPermission) as any)),
       role_id: z.number(),
       status: z
         .enum([
@@ -313,8 +312,8 @@ export default function UserFormComponent(props: Props) {
                     error={Boolean(fieldState.error)}
                     helperText={fieldState.error?.message}
                     InputLabelProps={{ shrink: true }}
-                    label="Permissions"
-                    placeholder="permissions"
+                    label="Role"
+                    placeholder="role"
                   />
                 )}
               />
