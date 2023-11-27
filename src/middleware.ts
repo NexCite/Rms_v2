@@ -38,29 +38,14 @@ export async function middleware(request: NextRequest) {
       }
     ).then((res) => res.json());
 
-    if (!request.nextUrl.pathname.includes("log")) {
-      await fetch(
-        `${process.env.NODE_ENV === "development" ? "http://" : "http://"}${
-          url.host
-        }/api/user`,
-        {
-          method: "Post",
-          body: JSON.stringify({
-            action: "View",
-            page: request.url,
-            body: JSON.stringify({}),
-          }),
-          headers: { Cookie: `rms-auth=${auth.value}`, url: request.url },
-          next: { revalidate: 1 },
-          cache: "no-store",
-        }
-      ).then((res) => res.json());
-    }
-    if (!checkAuth.data) {
+    if (!checkAuth.permissions) {
       return NextResponse.redirect(url);
     }
 
-    response.cookies.set("rms-permissions", JSON.stringify(checkAuth.data));
+    response.cookies.set(
+      "rms-permissions",
+      JSON.stringify(checkAuth.permissions)
+    );
 
     return response;
   } catch (error) {

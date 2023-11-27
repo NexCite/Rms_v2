@@ -4,36 +4,77 @@ import { handlerServiceAction } from "@rms/lib/handler";
 import { hashPassword } from "@rms/lib/hash";
 import { CommonRouteKeys } from "@rms/models/CommonModel";
 import prisma from "@rms/prisma/prisma";
-import { deleteMedia, saveFile } from "./media-service";
+import { saveFile, uploadMediaTemp } from "./media-service";
 import { createScheuleConfig } from "./schedule-config-service";
 
-export async function createConfig(
-  params: Prisma.ConfigUncheckedCreateInput & {
-    first_name: string;
-    last_name: string;
-  }
-) {
+export async function saveConfig(props: {
+  config: Prisma.ConfigUncheckedUpdateInput;
+  id?: number;
+  file?: FormData;
+}) {
   return handlerServiceAction(async () => {
-    params.password = hashPassword(params.password);
+    if (props.config.password) {
+      props.config.password = hashPassword(props.config.password.toString());
+    }
+    var media: {
+      path: string;
+      fileName: string;
+      type: $Enums.MediaType;
+    };
 
-    const result = await prisma.config.create({
+    if (props.file) {
+      const path = await uploadMediaTemp(props.file);
+      media = await saveFile(path);
+    }
+
+    await prisma.config.update({
+      where: { id: props.id },
       data: {
-        name: params.name,
-        password: params.password,
-        username: params.username,
-        email: params.email,
-        logo: "",
-        phone_number: params.phone_number,
+        name: props.config.name,
+        password: props.config.password,
+        username: props.config.username,
+        email: props.config.email,
+        logo: media?.path ?? props.config.logo,
+
+        phone_number: props.config.phone_number,
       },
     });
 
-    const newPath = await saveFile(params.logo, result.id);
+    return "Updated";
+  }, "Edit_Config");
+}
+
+export async function initConfig(props: {
+  config: Prisma.ConfigUncheckedCreateInput & {
+    first_name: string;
+    last_name: string;
+  };
+
+  file?: FormData;
+}) {
+  return handlerServiceAction(async () => {
+    props.config.password = hashPassword(props.config.password);
+
+    const result = await prisma.config.create({
+      data: {
+        name: props.config.name,
+        password: props.config.password,
+        username: props.config.username,
+        email: props.config.email,
+        logo: "",
+        phone_number: props.config.phone_number,
+      },
+    });
+
+    const tempFilePath = await uploadMediaTemp(props.file);
+
+    const newPath = await saveFile(tempFilePath);
 
     await prisma.config.update({
       where: { id: result.id },
-      data: { logo: newPath },
+      data: { logo: newPath.path },
     });
-    const role = await prisma.role.create({
+    var role = await prisma.role.create({
       data: {
         config_id: result.id,
         name: "Admin",
@@ -44,93 +85,25 @@ export async function createConfig(
     });
     await prisma.user.create({
       data: {
-        first_name: params.first_name,
-        last_name: params.last_name,
+        first_name: props.config.first_name,
+        last_name: props.config.last_name,
         gender: "Male",
-        phone_number: params.phone_number,
-        username: params.username,
-        password: params.password,
+        phone_number: props.config.phone_number,
+        username: props.config.username,
+        password: props.config.password,
         country: "Lebanon",
         type: "Admin",
-        email: params.email,
+        email: props.config.email,
         config_id: result.id,
         path: CommonRouteKeys,
         status: "Enable",
-
-        permissions: Object.keys(
-          $Enums.UserPermission
-        ) as $Enums.UserPermission[],
+        role_id: role.id,
       },
     });
     await createScheuleConfig(result.id);
 
     return "";
   }, "None");
-}
-
-export async function updateConfig(
-  params: Prisma.ConfigUncheckedUpdateInput & {
-    first_name: string;
-    last_name: string;
-  }
-) {
-  return handlerServiceAction(
-    async (info, config_id) => {
-      const oldData = await prisma.config.findFirst({
-        where: { id: config_id },
-      });
-      var newLogoPath: string;
-      console.log("asdasdas");
-
-      if (oldData.logo !== params.logo) {
-        try {
-          deleteMedia(params.logo.toString());
-        } catch (error) {}
-
-        newLogoPath = await saveFile(params.logo.toString(), config_id);
-      }
-
-      const updateParams = {
-        name: params.name,
-        username: params.username,
-        email: params.email,
-        logo: newLogoPath ?? params.logo,
-        phone_number: params.phone_number,
-      };
-
-      if (params.password) {
-        params.password = hashPassword(params.password as string);
-
-        updateParams["password"] = params.password;
-      }
-
-      await prisma.config.update({
-        where: { id: config_id },
-        data: updateParams,
-      });
-
-      // await prisma.config.update({
-      //   where: { id: result.id },
-      //   data: { logo: newPath },
-      // });
-
-      delete updateParams.name;
-
-      // await prisma.user.update({
-      //   where: { id: info.user.id, config_id },
-      //   data: {
-      //     ...updateParams,
-      //     first_name: params.first_name,
-      //     last_name: params.last_name,
-      //   },
-      // });
-
-      return "";
-    },
-    "Edit_Config",
-    true,
-    params
-  );
 }
 
 export async function getConfig() {

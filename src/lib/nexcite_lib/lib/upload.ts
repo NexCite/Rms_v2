@@ -2,6 +2,7 @@ import fs, { promises as fsPromises } from "fs";
 import os from "os";
 import path, { resolve } from "path";
 import UplaodType from "../types/upload-type";
+import { getMediaType } from "@rms/lib/media";
 
 export default class NextCiteUpload {
   folderName: string;
@@ -24,7 +25,11 @@ export default class NextCiteUpload {
 
     this.copyFileToNewDir(tempFilePath, newFilePath);
 
-    return newFilePath.replace(this._fullPath, "");
+    return {
+      path: newFilePath.replace(this._fullPath, ""),
+      fileName: path.basename(newFilePath),
+      type: getMediaType(newFilePath),
+    };
   }
   //#region init
   async init() {
@@ -108,7 +113,6 @@ export default class NextCiteUpload {
 
     const timeNow = now.getTime();
     const fileName = `${timeNow}${NextCiteUpload.getFileExtension(file.type)}`;
-    console.log(fileName);
 
     const filePath = path.join(dirPath, fileName);
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -134,8 +138,10 @@ export default class NextCiteUpload {
     fs.unlinkSync(sourceFilePath);
   }
 
-  deleteFile(path: string) {
-    fs.unlinkSync(path);
+  deleteFile(filePath: string) {
+    try {
+      fs.unlinkSync(path.join(this._fullPath, filePath));
+    } catch (error) {}
   }
 
   //#endregion

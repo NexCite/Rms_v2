@@ -1,6 +1,6 @@
 "use server";
 
-import { Broker, Prisma, Trader } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { handlerServiceAction } from "@rms/lib/handler";
 
 import ServiceActionModel from "@rms/models/ServiceActionModel";

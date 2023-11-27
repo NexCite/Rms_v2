@@ -19,13 +19,12 @@ import { Button } from "@rms/components/ui/button";
 import Loading from "@rms/components/ui/loading";
 import NumericFormatCustom from "@rms/components/ui/text-field-number";
 import { useStore } from "@rms/hooks/toast-hook";
-import { FormatNumberWithFixed } from "@rms/lib/global";
 import { createEquity, updateEquity } from "@rms/service/equity-service";
 import dayjs from "dayjs";
 import { PlusSquare, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
 interface BoxesTypes {
@@ -264,6 +263,7 @@ export default function EquityForm(props: Props) {
   const handleInput = useCallback((value: any, onChange: any) => {
     onChange(value);
   }, []);
+  const watch = useWatch({ control: form.control });
 
   return (
     <form
@@ -488,7 +488,7 @@ export default function EquityForm(props: Props) {
                         onClick={() => {
                           form.setValue(
                             "coverage",
-                            form.watch("coverage").concat([
+                            watch.coverage.concat([
                               {
                                 starting_float: 0,
                                 current_float: 0,
@@ -695,7 +695,7 @@ export default function EquityForm(props: Props) {
                         onClick={() => {
                           form.setValue(
                             "managers",
-                            form.watch("managers").concat([
+                            watch.managers.concat([
                               {
                                 starting_float: 0,
                                 current_float: 0,
@@ -813,7 +813,7 @@ export default function EquityForm(props: Props) {
                         onClick={() => {
                           form.setValue(
                             "expensive",
-                            form.watch("expensive").concat([
+                            watch.expensive.concat([
                               {
                                 expensive: 0,
                                 name: "",
@@ -928,7 +928,7 @@ export default function EquityForm(props: Props) {
                         onClick={() => {
                           form.setValue(
                             "p_l",
-                            form.watch("p_l").concat([
+                            watch.p_l.concat([
                               {
                                 p_l: 0,
                                 name: "",
@@ -1041,7 +1041,7 @@ export default function EquityForm(props: Props) {
                         onClick={() => {
                           form.setValue(
                             "agents",
-                            form.watch("agents").concat([
+                            watch.agents.concat([
                               {
                                 commission: 0,
                                 name: "",
@@ -1155,7 +1155,7 @@ export default function EquityForm(props: Props) {
                         onClick={() => {
                           form.setValue(
                             "adjustment",
-                            form.watch("adjustment").concat([
+                            watch.adjustment.concat([
                               {
                                 adjustment: 0,
                                 name: "",
@@ -1269,7 +1269,7 @@ export default function EquityForm(props: Props) {
                         onClick={() => {
                           form.setValue(
                             "credit",
-                            form.watch("credit").concat([
+                            watch.credit.concat([
                               {
                                 credit: 0,
                                 name: "",

@@ -38,6 +38,9 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import moment from "moment";
+import { fileZod, mediaZod } from "@rms/lib/common";
+import { MuiFileInput } from "mui-file-input";
+import { MdAttachFile, MdClose } from "react-icons/md";
 
 interface Props {
   schedule?: Prisma.ScheduleGetPayload<{
@@ -49,7 +52,6 @@ interface Props {
   isEditMode?: boolean;
   vactions: Prisma.VacationGetPayload<{}>[];
   scheduleConfig: Prisma.ScheduleConfigGetPayload<{}>;
-  // attendances?: Prisma.AttendanceGetPayload<{}>[];
   employees: Prisma.EmployeeGetPayload<{
     select: {
       id: true;
@@ -95,22 +97,17 @@ export default function ScheduleForm(props: Props) {
             to_over_time: z.date().nullable().optional(),
             absent: z.boolean(),
             description: z.string().optional().nullable(),
-            media: z
-              .object({
-                path: z.string().optional(),
-                type: z.enum([$Enums.MediaType.Pdf]).default("Pdf").optional(),
-                title: z.string().optional(),
-              })
-              .optional(),
+
             employee_id: z.number(),
             username: z.string(),
+
+            media: mediaZod.optional().nullable(),
+            file: fileZod.optional().nullable(),
           })
         ),
       }),
     []
   );
-
-  useEffect(() => {}, [props.employees]);
 
   const scheduleConfig = useMemo(() => {
     return props.scheduleConfig;
@@ -120,9 +117,8 @@ export default function ScheduleForm(props: Props) {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: props.isEditMode
+    defaultValues: props.schedule
       ? {
-          to_date: props.schedule.to_date,
           attendance: props.schedule.attendance.map((res) => {
             const vaction = props.vactions.find(
               (ress) => ress.employee_id === res.employee_id
@@ -130,23 +126,18 @@ export default function ScheduleForm(props: Props) {
 
             return {
               username: res.employee?.username,
-              absent: vaction ? true : false,
-              description: vaction?.description,
+              absent: res.absent ?? vaction ? true : false,
+              description: res.description ?? vaction?.description,
               employee_id: res.employee_id,
               from_time: res.absent ? null : res.from_time,
               to_time: res.absent ? null : res.to_time,
               from_over_time: res.absent ? null : res.from_over_time,
               to_over_time: res.absent ? null : res.to_over_time,
 
-              media: res.media
-                ? {
-                    path: res.media.path,
-                    title: res.media.title,
-                    type: res.media.type,
-                  }
-                : undefined,
+              media: res.media,
             };
           }),
+          to_date: props.schedule.to_date,
         }
       : {
           attendance: props.employees.map((res) => {
@@ -167,7 +158,6 @@ export default function ScheduleForm(props: Props) {
           to_date: moment().startOf("D").toDate(),
         },
   });
-
   const handleSubmit = useCallback(
     (values: z.infer<typeof formSchema>) => {
       var formData = {
@@ -178,8 +168,17 @@ export default function ScheduleForm(props: Props) {
         ...res,
         username: undefined,
       }));
-      formData.to_date = values.to_date;
+      formData.attendance = formData.attendance.map((res) => {
+        const fileForm = res.file ? new FormData() : undefined;
 
+        fileForm?.append("file", res.file);
+        delete res.file;
+        return {
+          data: res,
+          file: fileForm,
+        };
+      });
+      formData.to_date = dayjs(values.to_date).startOf("D").toDate();
       const error = [];
 
       values.attendance.map((res) => {
@@ -192,7 +191,6 @@ export default function ScheduleForm(props: Props) {
               message: `From In Time and To In Time must be required for ${res.username}`,
             });
           }
-
           if (
             (res.from_over_time && !res.to_over_time) ||
             (!res.from_over_time && res.to_over_time)
@@ -207,9 +205,13 @@ export default function ScheduleForm(props: Props) {
               message: `Description must be required for ${res.username}`,
             });
           }
+          if (!res.file && !res.media) {
+            error.push({
+              message: `File not append for ${res.username}`,
+            });
+          }
         }
       });
-
       if (error.length > 0) {
         form.setError("attendance", {
           message: error.map((res) => `<div> ${res.message} </div>`).join(""),
@@ -217,16 +219,15 @@ export default function ScheduleForm(props: Props) {
         });
         return;
       }
-
       setTransition(async () => {
-        if (props.schedule) {
+        if (props.isEditMode) {
           const result = await updateSchedule(props.id, formData as any);
           store.OpenAlert(result);
           if (result.status === 200) {
             back();
           }
         } else {
-          const result = await createSchedule(formData as any);
+          const result = await createSchedule(formData);
           store.OpenAlert(result);
           if (result.status === 200) {
             back();
@@ -437,83 +438,127 @@ export default function ScheduleForm(props: Props) {
                                   field.onChange(field.value);
                                 }}
                               />
-                              <div className="w-max">
-                                <FormControlLabel
-                                  disabled={props.isEditMode}
-                                  checked={res.absent}
-                                  control={
-                                    <Switch
-                                      onChange={(e, c) => {
-                                        if (!props.isEditMode && c) {
-                                          var result = confirm(
-                                            `Are you sure ${res.username} absent?`
-                                          );
-                                          if (result) {
-                                            field.value[i].absent = c;
-
-                                            field.value[i].from_over_time =
-                                              null;
-                                            field.value[i].to_over_time = null;
-                                            field.value[i].from_time = null;
-                                            field.value[i].to_time = null;
-
-                                            field.onChange(field.value);
-                                            return;
-                                          }
-                                        } else if (c) {
+                              <FormControlLabel
+                                disabled={props.isEditMode}
+                                checked={res.absent}
+                                control={
+                                  <Switch
+                                    onChange={(e, c) => {
+                                      if (!props.isEditMode && c) {
+                                        var result = confirm(
+                                          `Are you sure ${res.username} absent?`
+                                        );
+                                        if (result) {
                                           field.value[i].absent = c;
+                                          field.value[i].description = null;
 
                                           field.value[i].from_over_time = null;
                                           field.value[i].to_over_time = null;
                                           field.value[i].from_time = null;
                                           field.value[i].to_time = null;
-                                        } else {
-                                          field.value[i].absent = c;
-
-                                          field.value[i].from_over_time =
-                                            scheduleConfig.from_over_time;
-                                          field.value[i].to_over_time =
-                                            scheduleConfig.to_over_time;
-                                          field.value[i].from_time =
-                                            scheduleConfig.from_time;
-                                          field.value[i].to_time =
-                                            scheduleConfig.to_time;
+                                          field.value[i].file = null;
+                                          field.onChange(field.value);
+                                          return;
                                         }
-                                        field.onChange(field.value);
-                                      }}
-                                    />
-                                  }
-                                  label="Absent"
-                                />
-                              </div>
+                                      } else if (c) {
+                                        field.value[i].description = null;
 
-                              {(res.absent || field.value[i].absent) && (
-                                <>
-                                  <TextField
-                                    InputLabelProps={{ shrink: true }}
-                                    size="small"
-                                    type="text"
-                                    label="Description"
-                                    value={res.description}
-                                    required
-                                    minRows={3}
-                                    maxRows={5}
-                                    multiline
-                                    onChange={(e) => {
-                                      field.value[i].description =
-                                        e.target.value;
+                                        field.value[i].absent = c;
+                                        field.value[i].file = null;
+                                        field.value[i].from_over_time = null;
+                                        field.value[i].to_over_time = null;
+                                        field.value[i].from_time = null;
+                                        field.value[i].to_time = null;
+                                      } else {
+                                        field.value[i].description = null;
+
+                                        field.value[i].file = null;
+                                        field.value[i].absent = c;
+
+                                        field.value[i].from_over_time =
+                                          scheduleConfig.from_over_time;
+                                        field.value[i].to_over_time =
+                                          scheduleConfig.to_over_time;
+                                        field.value[i].from_time =
+                                          scheduleConfig.from_time;
+                                        field.value[i].to_time =
+                                          scheduleConfig.to_time;
+                                      }
                                       field.onChange(field.value);
                                     }}
-                                    error={Boolean(
-                                      checkBoxesError(
-                                        fieldState,
-                                        i,
-                                        "description"
-                                      )
-                                    )}
                                   />
-                                </>
-                              )}
+                                }
+                                label="Absent"
+                              />
+                              <div className="flex gap-5 w-full flex-col">
+                                {(res.absent || field.value[i].absent) && (
+                                  <>
+                                    <TextField
+                                      InputLabelProps={{ shrink: true }}
+                                      size="small"
+                                      type="text"
+                                      label="Description"
+                                      value={res.description}
+                                      required
+                                      minRows={3}
+                                      maxRows={5}
+                                      multiline
+                                      onChange={(e) => {
+                                        field.value[i].description =
+                                          e.target.value;
+                                        field.onChange(field.value);
+                                      }}
+                                      error={Boolean(
+                                        checkBoxesError(
+                                          fieldState,
+                                          i,
+                                          "description"
+                                        )
+                                      )}
+                                    />
+                                    <div>
+                                      {res.media ? (
+                                        <div>
+                                          <iframe
+                                            className="w-full h-[450px]"
+                                            src={`/api/media/${res.media.path}`}
+                                          />
+                                        </div>
+                                      ) : (
+                                        <MuiFileInput
+                                          fullWidth
+                                          required
+                                          value={res.file}
+                                          label={"Append File"}
+                                          clearIconButtonProps={{
+                                            children: (
+                                              <MdClose fontSize="small" />
+                                            ),
+                                          }}
+                                          onChange={(e) => {
+                                            field.value[i].file = e;
+                                            field.value[i].media = null;
+                                            field.onChange(field.value);
+                                          }}
+                                          error={Boolean(
+                                            checkBoxesError(
+                                              fieldState,
+                                              i,
+                                              "file"
+                                            )
+                                          )}
+                                          InputProps={{
+                                            inputProps: {
+                                              accept: ".pdf",
+                                            },
+                                            startAdornment: <MdAttachFile />,
+                                          }}
+                                        />
+                                      )}
+                                    </div>
+                                  </>
+                                )}
+                              </div>
                             </div>
                           </div>
                         ))}

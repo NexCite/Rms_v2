@@ -1,4 +1,4 @@
-import { $Enums } from "@prisma/client";
+import { $Enums, Prisma } from "@prisma/client";
 import GetRoutes from "@rms/config/route-config";
 import { UserSelectCommon } from "@rms/models/CommonModel";
 import HttpStatusCode from "@rms/models/HttpStatusCode";
@@ -45,10 +45,13 @@ export async function getUserInfo(): Promise<UserSelectCommon | undefined> {
   return auth?.user;
 }
 
-export function generateToken(username: string) {
+export function generateToken(
+  user: Prisma.UserGetPayload<{ include: { role: true } }>
+) {
   return sign(
     {
-      username,
+      username: user.username,
+      permissions: user.role.permissions,
     },
     process.env["HASHKEY"]!
   );

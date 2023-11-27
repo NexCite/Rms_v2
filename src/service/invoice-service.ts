@@ -1,8 +1,7 @@
 "use server";
 
-import { $Enums, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { handlerServiceAction } from "@rms/lib/handler";
-import { getMediaType } from "@rms/lib/media";
 import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 

@@ -150,7 +150,7 @@ export default function PaymentForm(props: Props) {
         });
       }
     },
-    [back, store, form, media, props.value, props.isEditMode]
+    [back, store, form, media, props.value, props.isEditMode, validation]
   );
   return (
     <>

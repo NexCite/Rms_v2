@@ -5,7 +5,7 @@ import { $Enums, Prisma } from "@prisma/client";
 import { Button } from "@rms/components/ui/button";
 
 import { FormatNumberWithFixed } from "@rms/lib/global";
-import { createEntry, updateEntry } from "@rms/service/entry-service";
+import { saveEntry } from "@rms/service/entry-service";
 import { PlusSquare, X } from "lucide-react";
 
 import LoadingButton from "@mui/lab/LoadingButton";
@@ -30,8 +30,10 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import Loading from "@rms/components/ui/loading";
 import NumericFormatCustom from "@rms/components/ui/text-field-number";
 import { useStore } from "@rms/hooks/toast-hook";
+import { fileZod, mediaZod } from "@rms/lib/common";
 import { Activity, ActivityStatus } from "@rms/models/CommonModel";
 import dayjs from "dayjs";
+import { MuiFileInput } from "mui-file-input";
 import { useRouter } from "next/navigation";
 import {
   useCallback,
@@ -40,10 +42,14 @@ import {
   useState,
   useTransition,
 } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { MdOutlineKeyboardArrowUp } from "react-icons/md";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import {
+  MdAttachFile,
+  MdClose,
+  MdDelete,
+  MdOutlineKeyboardArrowUp,
+} from "react-icons/md";
 import { z } from "zod";
-import UploadWidget from "../upload/upload-widget";
 
 interface Props {
   id?: number;
@@ -124,19 +130,15 @@ export default function EntryForm(props: Props) {
           })
         )
         .min(2),
-      media: z
-        .object({
-          path: z.string().optional(),
-          type: z.enum([$Enums.MediaType.Pdf]).default("Pdf").optional(),
-          title: z.string().optional(),
-        })
-        .optional(),
+      file: fileZod.optional().nullable(),
+      media: mediaZod.optional().nullable(),
       to_date: z.date(),
     })
     .optional()
     .nullable();
 
   const store = useStore();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: props.activity
@@ -168,22 +170,26 @@ export default function EntryForm(props: Props) {
               two_digit_id: res.two_digit_id,
               type: res.type,
             })) ?? [],
-          media: props.isEditMode
-            ? undefined
-            : props.entry?.media?.path
-            ? {
-                path: props.entry?.media?.path,
-                type: "Pdf",
-                title: props.entry?.media?.title,
-              }
-            : undefined,
+          media: props.entry?.media,
         },
   });
+  const watch = useWatch({ control: form.control });
+
+  const defaultImage = useMemo(() => {
+    const file = watch.file;
+    const media = watch.media;
+    if (file) {
+      return URL.createObjectURL(file);
+    }
+    if (media) {
+      return media;
+    }
+  }, [watch.file, watch.media]);
   const { totalCredit, totalDebit, totalUnkown } = useMemo(() => {
     var totalDebit = 0,
       totalCredit = 0,
       totalUnkown = 0;
-    form.watch("sub_entries").map((res) => {
+    watch.sub_entries.map((res) => {
       switch (res.type) {
         case "Credit":
           totalCredit += res.amount;
@@ -197,52 +203,10 @@ export default function EntryForm(props: Props) {
       }
     });
     return { totalDebit, totalCredit, totalUnkown };
-  }, [form, form.watch("sub_entries"), form.watch("currency_id")]);
-  const handleSubmit = useCallback(
-    (values) => {
-      var m: Prisma.EntryUncheckedCreateInput;
-      m = {
-        description: values.description,
-        title: values.title,
-        to_date: values.to_date,
-        note: values.note,
-        currency_id: values.currency_id,
-        sub_entries: {
-          createMany: {
-            data: values.sub_entries.map((res) => ({
-              amount: parseFloat(res.amount + ""),
-              status: "Enable",
-              type: res.type,
-              account_entry_id:
-                res.account_entry_id === 0 ? undefined : res.account_entry_id,
-              two_digit_id:
-                res.two_digit_id === 0 ? undefined : res.two_digit_id,
-              three_digit_id:
-                res.three_digit_id === 0 ? undefined : res.three_digit_id,
-              more_than_four_digit_id:
-                res.more_than_four_digit_id === 0
-                  ? undefined
-                  : res.more_than_four_digit_id,
-              reference_id:
-                res.reference_id === 0 ? undefined : res.reference_id,
-            })),
-          },
-        },
-        media: values.media
-          ? {
-              create: {
-                path: values?.media.path,
-                title: values?.title,
-                type: "Pdf",
-                file_name: (() => {
-                  var filename = values.media?.path?.split("/");
-                  return filename[filename.length - 1];
-                })(),
-              },
-            }
-          : undefined,
-      };
+  }, [watch.sub_entries]);
 
+  const handleSubmit = useCallback(
+    (values: z.infer<typeof formSchema>) => {
       const error = [];
       var debit = 0;
       var credit = 0;
@@ -281,27 +245,43 @@ export default function EntryForm(props: Props) {
         });
         return;
       }
+      var dataForm = new FormData();
+
+      if (values.file) {
+        dataForm.append("file", values.file);
+      } else {
+        dataForm = undefined;
+      }
 
       setTransition(async () => {
-        if (props.entry) {
-          const result = await updateEntry(props.id, m, values.includeRate);
-          store.OpenAlert(result);
-          if (result.status === 200) {
-            back();
-          }
-        } else {
-          const result = await createEntry(
-            m,
-            values.includeRate,
+        const result = await saveEntry({
+          id: props.entry?.id,
 
-            props.activity
-              ? { id: props.activity.id, status: ActivityStatus.Provided }
-              : undefined
-          );
-          store.OpenAlert(result);
-          if (result.status === 200) {
-            back();
-          }
+          entry: {
+            currency_id: values.currency_id,
+            description: values.description,
+            title: values.title,
+            note: values.note,
+            to_date: values.to_date,
+          },
+          subEntries: values.sub_entries as any,
+          activity: props.activity
+            ? { id: props.activity.id, status: ActivityStatus.Provided }
+            : undefined,
+          file: dataForm,
+          includeRate: values.includeRate,
+          media: values.media
+            ? {
+                file_name: values.media.file_name,
+                path: values.media.path,
+                type: values.media.type,
+                title: values.media.title,
+              }
+            : undefined,
+        });
+        store.OpenAlert(result);
+        if (result.status === 200) {
+          back();
         }
       });
     },
@@ -313,7 +293,7 @@ export default function EntryForm(props: Props) {
   }, []);
 
   const currency = useMemo(() => {
-    var currency_id = form.watch("currency_id");
+    var currency_id = watch.currency_id;
     if (currency_id) {
       const currency = props.currencies.find((res) => res.id === currency_id);
       if (currency?.rate) {
@@ -321,7 +301,7 @@ export default function EntryForm(props: Props) {
       }
       return undefined;
     }
-  }, [form, props.currencies, form.watch("currency_id")]);
+  }, [props.currencies, watch.currency_id]);
   return (
     <form
       className="max-w-[450px] m-auto"
@@ -332,7 +312,6 @@ export default function EntryForm(props: Props) {
         <Loading />
       ) : (
         <Card className="">
-          {props.entry?.rate}
           {props.activity && (
             <div className="  entry-form-size:absolute top-[80px]   end-[2%] entry-form-size:max-w-xs  w-full    ">
               <Accordion
@@ -599,29 +578,73 @@ export default function EntryForm(props: Props) {
                 }
               />
 
-              <div className="grid-cols-12">
-                <Controller
-                  control={form.control}
-                  name="media"
-                  render={({ field, fieldState }) => (
-                    <UploadWidget
-                      isPdf
-                      path={field.value?.path}
-                      onSave={(e) => {
-                        field.onChange(
-                          e
-                            ? {
-                                path: e,
-                                title: form.getValues("title"),
-                                type: "Pdf",
-                              }
-                            : undefined
-                        );
-                      }}
-                    />
-                  )}
-                />
-              </div>
+              <Controller
+                control={form.control}
+                name="file"
+                render={({ field, fieldState }) => (
+                  <>
+                    {!defaultImage && (
+                      <MuiFileInput
+                        value={field.value}
+                        label={"Append File"}
+                        {...field}
+                        error={Boolean(fieldState.error)}
+                        helperText={fieldState?.error?.message}
+                        clearIconButtonProps={{
+                          children: <MdClose fontSize="small" />,
+                        }}
+                        InputProps={{
+                          inputProps: {
+                            accept: ".pdf",
+                          },
+                          startAdornment: <MdAttachFile />,
+                        }}
+                      />
+                    )}
+                    <div className="mt-3">
+                      {defaultImage && typeof defaultImage === "string" ? (
+                        <div>
+                          <LoadingButton
+                            color="error"
+                            loading={isPadding}
+                            onClick={() => {
+                              setTransition(async () => {
+                                field.onChange();
+                              });
+                            }}
+                            startIcon={<MdDelete />}
+                          ></LoadingButton>
+                          <iframe
+                            src={defaultImage}
+                            className="w-full  h-[450px] "
+                          />
+                        </div>
+                      ) : typeof defaultImage === "object" ? (
+                        <div>
+                          <LoadingButton
+                            loading={isPadding}
+                            onClick={() => {
+                              setTransition(async () => {
+                                form.setValue("media", undefined);
+                              });
+                            }}
+                            color="error"
+                            startIcon={<MdDelete />}
+                          >
+                            Delete
+                          </LoadingButton>
+                          <iframe
+                            className="w-full  h-[450px] "
+                            src={`/api/media/${defaultImage.path}`}
+                          ></iframe>
+                        </div>
+                      ) : (
+                        <></>
+                      )}
+                    </div>
+                  </>
+                )}
+              />
             </>
 
             <>
@@ -1000,9 +1023,9 @@ export default function EntryForm(props: Props) {
                 onClick={() => {
                   form.setValue(
                     "sub_entries",
-                    form
-                      .watch("sub_entries")
-                      .concat([{ amount: 1, type: $Enums.EntryType.Debit }])
+                    watch.sub_entries.concat([
+                      { amount: 1, type: $Enums.EntryType.Debit },
+                    ])
                   );
                 }}
               >

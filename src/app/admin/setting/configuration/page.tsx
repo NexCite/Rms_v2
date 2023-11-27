@@ -1,4 +1,4 @@
-import ConfigWidget from "@rms/widgets/config/config-widget";
+import { UpdateConfig } from "@rms/widgets/config/config-widget";
 import { getConfigId } from "@rms/lib/config";
 import { Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
@@ -14,6 +14,7 @@ export default async function page() {
       logo: true;
       email: true;
       phone_number: true;
+      media: true;
     };
   }> = await prisma.config.findFirst({
     where: { id: config_id },
@@ -23,6 +24,7 @@ export default async function page() {
       logo: true,
       email: true,
       phone_number: true,
+      media: true,
     },
   });
 
@@ -41,7 +43,7 @@ export default async function page() {
 
   return (
     <div>
-      <ConfigWidget value={value} user={user} />
+      <UpdateConfig config={value} id={config_id} />
     </div>
   );
 }

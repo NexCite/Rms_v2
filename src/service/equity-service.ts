@@ -1,7 +1,7 @@
 "use server";
-import ServiceActionModel from "@rms/models/ServiceActionModel";
-import { handlerServiceAction } from "@rms/lib/handler";
 import { Prisma } from "@prisma/client";
+import { handlerServiceAction } from "@rms/lib/handler";
+import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 
 export async function createEquity(

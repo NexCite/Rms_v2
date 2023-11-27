@@ -10,7 +10,7 @@ import {
 import { useRouter } from "next/navigation";
 
 import { useCallback, useMemo, useTransition } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
 import LoadingButton from "@mui/lab/LoadingButton";
@@ -25,8 +25,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import Countries from "@rms/lib/country";
 import { useStore } from "@rms/hooks/toast-hook";
+import Countries from "@rms/lib/country";
 
 export default function Account_EntryForm(props: {
   account?: Prisma.Account_EntryGetPayload<{
@@ -45,6 +45,7 @@ export default function Account_EntryForm(props: {
 }) {
   const [isPadding, setTransition] = useTransition();
   const { back } = useRouter();
+
   const formSchema = useMemo(() => {
     return z
       .object({
@@ -112,6 +113,7 @@ export default function Account_EntryForm(props: {
     resolver: zodResolver(formSchema),
     defaultValues: props.account,
   });
+  const watch = useWatch({ control: form.control });
   const store = useStore();
 
   const handleSubmit = useCallback(
@@ -402,9 +404,9 @@ export default function Account_EntryForm(props: {
                 render={({ field, fieldState }) => (
                   <Autocomplete
                     disabled={
-                      form.watch("more_than_four_digit_id")
+                      watch.more_than_four_digit_id
                         ? true
-                        : form.watch("three_digit_id")
+                        : watch.three_digit_id
                         ? true
                         : false
                     }
@@ -462,9 +464,9 @@ export default function Account_EntryForm(props: {
                         : undefined;
                     })()}
                     disabled={
-                      form.watch("two_digit_id")
+                      watch.two_digit_id
                         ? true
-                        : form.watch("more_than_four_digit_id")
+                        : watch.more_than_four_digit_id
                         ? true
                         : false
                     }
@@ -495,9 +497,9 @@ export default function Account_EntryForm(props: {
                   <Autocomplete
                     size="small"
                     disabled={
-                      form.watch("two_digit_id")
+                      watch.two_digit_id
                         ? true
-                        : form.watch("three_digit_id")
+                        : watch.three_digit_id
                         ? true
                         : false
                     }

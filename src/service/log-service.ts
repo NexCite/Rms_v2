@@ -1,5 +1,5 @@
 "use server";
-import { $Enums, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { getConfigId } from "@rms/lib/config";
 import { handlerServiceAction } from "@rms/lib/handler";
 import prisma from "@rms/prisma/prisma";

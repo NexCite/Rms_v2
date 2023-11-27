@@ -19,9 +19,8 @@ export async function createLogin(params: {
   if (user !== null) {
     var isPasswordOk = checkPassword(params.password, user.password);
     if (isPasswordOk) {
-      var token = generateToken(user.username);
+      var token = generateToken(user);
       cookies().set("rms-auth", token);
-      cookies().set("rms-permissions", JSON.stringify(user.role.permissions));
       await prisma.auth.updateMany({
         where: {
           user_id: user.id,

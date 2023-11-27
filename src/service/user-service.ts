@@ -5,12 +5,12 @@ import { getUserInfo } from "@rms/lib/auth";
 import { handlerServiceAction } from "@rms/lib/handler";
 
 import { hashPassword } from "@rms/lib/hash";
-import route from "../../routes.json";
+import RouteModel from "@rms/models/RouteModel";
 import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import RouteModel from "@rms/models/RouteModel";
+import route from "../../routes.json";
 const Routes = route as RouteModel[];
 
 export async function createUser(
@@ -135,9 +135,9 @@ export default async function getUserFullInfo(
   }
 
   var routes = Routes.filter((res) => {
-    if (auth.user.permissions?.includes(res.key)) {
+    if (auth.user.role.permissions?.includes(res.key)) {
       res.children = res.children?.filter((r) =>
-        auth.user.permissions?.includes(r.key)
+        auth.user.role.permissions?.includes(r.key)
       );
       return res;
     }
@@ -147,7 +147,6 @@ export default async function getUserFullInfo(
     username: auth.user.username,
     first_name: auth.user.first_name,
     last_name: auth.user.last_name,
-    permissions: auth.user.permissions,
     type: auth.user.type,
     role: auth.user.role,
   };
@@ -166,7 +165,6 @@ export type UserFullInfoType = {
     username: string;
     first_name: string;
     last_name: string;
-    permissions: $Enums.UserPermission[];
     type: $Enums.UserType;
     role: Prisma.RoleGetPayload<{}>;
   };

@@ -9,7 +9,7 @@ import { $Enums, Prisma } from "@prisma/client";
 import Authorized from "@rms/components/ui/authorized";
 import { useStore } from "@rms/hooks/toast-hook";
 import { deleteAccount_Entry } from "@rms/service/account-entry-service";
-import { MaterialReactTable, MRT_ColumnDef } from "material-react-table";
+import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
 import Link from "next/link";
 type CommonAccountType = Prisma.Account_EntryGetPayload<{
   include: {

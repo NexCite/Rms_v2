@@ -11,7 +11,6 @@ type Props = {
 
 export default async function LayoutV2(props: Props) {
   const userInfo = await getUserFullInfo();
-
   return (
     <div id="layout-app">
       <div className="side-bar mobile-drawer">

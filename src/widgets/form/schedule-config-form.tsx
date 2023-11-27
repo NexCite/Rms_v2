@@ -1,19 +1,14 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import LoadingButton from "@mui/lab/LoadingButton";
-import {
-  TimeField,
-  LocalizationProvider,
-  TimePicker,
-} from "@mui/x-date-pickers";
+import { LocalizationProvider, TimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Prisma } from "@prisma/client";
 import { useStore } from "@rms/hooks/toast-hook";
 import { updateScheuleConfig } from "@rms/service/schedule-config-service";
 import dayjs from "dayjs";
-import { useRouter } from "next/navigation";
-import React, { useMemo, useTransition } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useMemo, useTransition } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
 type Props = {
@@ -22,6 +17,7 @@ type Props = {
 export default function ScheduleConfigForm(props: Props) {
   const [isPadding, setTransition] = useTransition();
   const store = useStore();
+
   const validation = useMemo(
     () =>
       z.object({
@@ -36,6 +32,8 @@ export default function ScheduleConfigForm(props: Props) {
     resolver: zodResolver(validation),
     defaultValues: props.config,
   });
+
+  const watch = useWatch({ control: form.control });
 
   const handleForm = (values: z.infer<typeof validation>) => {
     setTransition(() => {
@@ -69,11 +67,7 @@ export default function ScheduleConfigForm(props: Props) {
             name="from_time"
             render={({ field, fieldState, formState }) => (
               <TimePicker
-                maxTime={
-                  form.watch("to_time")
-                    ? dayjs(form.watch("to_time"))
-                    : undefined
-                }
+                maxTime={watch.to_time ? dayjs(watch.to_time) : undefined}
                 value={dayjs(field.value)}
                 onChange={(e) => {
                   field.onChange(e?.toDate());
@@ -100,11 +94,7 @@ export default function ScheduleConfigForm(props: Props) {
             name="to_time"
             render={({ field, fieldState, formState }) => (
               <TimePicker
-                minTime={
-                  form.watch("from_time")
-                    ? dayjs(form.watch("from_time"))
-                    : undefined
-                }
+                minTime={watch.from_time ? dayjs(watch.from_time) : undefined}
                 value={dayjs(field.value)}
                 onChange={(e) => {
                   field.onChange(e?.toDate());
@@ -132,9 +122,7 @@ export default function ScheduleConfigForm(props: Props) {
             render={({ field, fieldState, formState }) => (
               <TimePicker
                 maxTime={
-                  form.watch("to_over_time")
-                    ? dayjs(form.watch("to_over_time"))
-                    : undefined
+                  watch.to_over_time ? dayjs(watch.to_over_time) : undefined
                 }
                 value={dayjs(field.value)}
                 onChange={(e) => {
@@ -163,9 +151,7 @@ export default function ScheduleConfigForm(props: Props) {
             render={({ field, fieldState, formState }) => (
               <TimePicker
                 minTime={
-                  form.watch("from_over_time")
-                    ? dayjs(form.watch("from_over_time"))
-                    : undefined
+                  watch.from_over_time ? dayjs(watch.from_over_time) : undefined
                 }
                 value={dayjs(field.value)}
                 onChange={(e) => {

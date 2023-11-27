@@ -11,10 +11,9 @@ import { z } from "zod";
 
 import LoadingButton from "@mui/lab/LoadingButton";
 import { Card, CardContent, CardHeader, TextField } from "@mui/material";
+import NumericFormatCustom from "@rms/components/ui/text-field-number";
 import { useStore } from "@rms/hooks/toast-hook";
 import { createCurrency, updateCurrency } from "@rms/service/currency-service";
-import { FormatNumberWithFixed } from "@rms/lib/global";
-import NumericFormatCustom from "@rms/components/ui/text-field-number";
 type Props = { value: Prisma.CurrencyGetPayload<{}> };
 export default function CurrencyForm(props: Props) {
   const [isPadding, setTransition] = useTransition();

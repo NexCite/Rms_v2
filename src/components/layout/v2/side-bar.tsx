@@ -44,7 +44,6 @@ export default function SideBarV2(props: Props) {
   const [menuIndex, setMenuIndex] = React.useState(
     props.routes.find((res) => pathName.startsWith(res.path))?.index ?? -1
   );
-
   const handleMenuIndexClick = useCallback(
     (i) => {
       if (menuIndex === i) {
@@ -61,13 +60,16 @@ export default function SideBarV2(props: Props) {
       {props.routes.filter((res) => !res.end).length > 0 && (
         <div className=" flex flex-col  ">
           <div className="flex  justify-between   p-1 ">
-            <Image
-              src={`/api/media${props.config.logo}`}
-              alt={props.config.name}
-              width={80}
-              height={80}
-              className="rounded-full w-12 h-12 mb-3 ml-2 "
-            />
+            <div className="flex gap-5 items-center">
+              <Image
+                src={`/api/media/${props.config.logo}`}
+                alt={props.config.name}
+                width={80}
+                height={80}
+                className="rounded-full w-12 h-12 mb-3 ml-2 "
+              />
+              <h1 className="text-xl">{props.config.name}</h1>
+            </div>
             <IconButton
               className="drawer-close"
               onClick={() => {

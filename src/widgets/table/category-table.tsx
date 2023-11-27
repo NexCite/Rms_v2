@@ -6,10 +6,10 @@ import { useMemo, useTransition } from "react";
 
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import Authorized from "@rms/components/ui/authorized";
+import { useStore } from "@rms/hooks/toast-hook";
 import { deleteCategoryById } from "@rms/service/category-service";
 import { deleteSubCategoryById } from "@rms/service/sub-category-service";
-import { MaterialReactTable, MRT_ColumnDef } from "material-react-table";
-import { useStore } from "@rms/hooks/toast-hook";
+import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
 import Link from "next/link";
 
 type Props =

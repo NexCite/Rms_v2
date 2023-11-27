@@ -1,12 +1,13 @@
 "use client";
 
+import styled from "@emotion/styled";
+import LoadingButton from "@mui/lab/LoadingButton";
 import {
   Button,
   Card,
   CardContent,
   CardHeader,
   Divider,
-  Tab,
   Table,
   TableBody,
   TableCell,
@@ -16,15 +17,13 @@ import {
   Typography,
 } from "@mui/material";
 import { Prisma } from "@prisma/client";
-import { FormatNumberWithFixed } from "@rms/lib/global";
-import React, { useMemo, useTransition } from "react";
-import styled from "@emotion/styled";
-import Link from "next/link";
-import LoadingButton from "@mui/lab/LoadingButton";
-import { deleteEquityById } from "@rms/service/equity-service";
-import { useStore } from "@rms/hooks/toast-hook";
 import Authorized from "@rms/components/ui/authorized";
+import { useStore } from "@rms/hooks/toast-hook";
+import { FormatNumberWithFixed } from "@rms/lib/global";
+import { deleteEquityById } from "@rms/service/equity-service";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useMemo, useTransition } from "react";
 
 type Props = {
   equity: Prisma.EquityGetPayload<{

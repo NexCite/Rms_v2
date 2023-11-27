@@ -1,6 +1,4 @@
-import { getUserInfo } from "@rms/lib/auth";
-import { getConfig } from "@rms/service/config-service";
-import ConfigWidget from "@rms/widgets/config/config-widget";
+import { InitConfig } from "@rms/widgets/config/config-widget";
 import { env } from "process";
 import React from "react";
 
@@ -15,6 +13,5 @@ export default async function page(props: {
       </div>
     );
 
-  // return <ConfigWidget value={await getConfig()}  user={await getUserInfo()}/>;
-  return <div></div>;
+  return <InitConfig />;
 }

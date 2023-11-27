@@ -8,8 +8,7 @@ import { Prisma } from "@prisma/client";
 import Authorized from "@rms/components/ui/authorized";
 import { useStore } from "@rms/hooks/toast-hook";
 import { deleteUserById } from "@rms/service/user-service";
-import { MaterialReactTable, MRT_ColumnDef } from "material-react-table";
-import { useRouter } from "next/navigation";
+import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
 import Link from "next/link";
 
 type Props = {

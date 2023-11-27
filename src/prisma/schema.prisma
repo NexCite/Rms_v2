@@ -520,12 +520,13 @@ model Entry {
   status        Status     @default(Enable)
   sub_entries   SubEntry[]
   media         Media?
-  currency_id   Int
-  currency      Currency   @relation(fields: [currency_id], references: [id], onDelete: Cascade)
-  user_id       Int?
-  user          User?      @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  config_id     Int?
-  config        Config?    @relation(fields: [config_id], references: [id], onDelete: Cascade)
+
+  currency_id Int
+  currency    Currency @relation(fields: [currency_id], references: [id], onDelete: Cascade)
+  user_id     Int?
+  user        User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  config_id   Int?
+  config      Config?  @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id], name: "unique_combination")
 }
@@ -560,13 +561,15 @@ enum EntryType {
 
 model Role {
   id            Int              @id @default(autoincrement())
-  name          String           @unique
+  name          String
   config_id     Int
   config        Config           @relation(fields: [config_id], references: [id])
   permissions   UserPermission[]
   users         User[]
   create_date   DateTime         @default(now())
   modified_date DateTime         @default(now()) @updatedAt
+
+  @@unique([config_id, name], name: "unique_combination")
 }
 
 enum UserPermission {
@@ -859,7 +862,7 @@ model Attendance {
   from_over_time DateTime?
   to_over_time   DateTime?
   absent         Boolean   @default(false)
-  description    String    @default("")
+  description    String?   @default("")
   media          Media?    @relation(fields: [media_id], references: [id], onDelete: Cascade)
   media_id       Int?
   employee       Employee  @relation(fields: [employee_id], references: [id], onDelete: Cascade)

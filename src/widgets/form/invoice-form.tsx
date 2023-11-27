@@ -28,13 +28,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rms/components/ui/select";
+import { useStore } from "@rms/hooks/toast-hook";
 import { createInvoice, updateInvoice } from "@rms/service/invoice-service";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import UploadWidget from "../upload/upload-widget";
-import { useStore } from "@rms/hooks/toast-hook";
 type CommonType = Prisma.InvoiceGetPayload<{ include: { media: true } }>;
 
 interface Props {
@@ -172,7 +172,7 @@ export default function InvoiceForm(props: Props) {
         });
       }
     },
-    [back, store.OpenAlert, media, props.value]
+    [back, media, props.value, form, store, validation]
   );
   return (
     <>

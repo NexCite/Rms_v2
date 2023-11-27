@@ -1,20 +1,11 @@
 import { GetUserRoute, getUserInfo } from "@rms/lib/auth";
 import { createLog } from "@rms/service/log-service";
+import getUserFullInfo from "@rms/service/user-service";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-  const data = await GetUserRoute(true);
+  const data = await getUserFullInfo();
   return NextResponse.json({
-    data,
-  });
-}
-
-export async function POST(req: NextRequest) {
-  const data = await getUserInfo();
-
-  createLog({ ...(await req.json()), user_id: data.id });
-
-  return NextResponse.json({
-    data,
+    permissions: data.user.role.permissions,
   });
 }

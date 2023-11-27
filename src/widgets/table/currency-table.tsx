@@ -1,17 +1,16 @@
 "use client";
 
 import { Prisma } from "@prisma/client";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useMemo, useTransition } from "react";
 
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import Authorized from "@rms/components/ui/authorized";
-import { deleteCurrency } from "@rms/service/currency-service";
-import { MaterialReactTable, MRT_ColumnDef } from "material-react-table";
 import { useStore } from "@rms/hooks/toast-hook";
-import Link from "next/link";
-import { FontRomanIcon } from "@radix-ui/react-icons";
 import { FormatNumberWithFixed } from "@rms/lib/global";
+import { deleteCurrency } from "@rms/service/currency-service";
+import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
+import Link from "next/link";
 
 type Props = {
   currencies: Prisma.CurrencyGetPayload<{}>[];

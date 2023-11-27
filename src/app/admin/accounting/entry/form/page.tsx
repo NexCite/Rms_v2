@@ -100,7 +100,6 @@ export default async function page(props: {
     const result = await getActivities(activity_id, config_id);
     activity = result.status !== 200 ? undefined : result.result;
   }
-
   return (
     <div>
       <EntryForm
