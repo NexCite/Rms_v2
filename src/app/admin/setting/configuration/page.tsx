@@ -10,7 +10,6 @@ export default async function page() {
   var value: Prisma.ConfigGetPayload<{
     select: {
       name: true;
-      username: true;
       logo: true;
       email: true;
       phone_number: true;
@@ -20,7 +19,6 @@ export default async function page() {
     where: { id: config_id },
     select: {
       name: true,
-      username: true,
       logo: true,
       email: true,
       phone_number: true,

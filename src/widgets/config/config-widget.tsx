@@ -287,7 +287,6 @@ type Props = {
   config: Prisma.ConfigGetPayload<{
     select: {
       name: true;
-      username: true;
       logo: true;
       email: true;
       phone_number: true;
