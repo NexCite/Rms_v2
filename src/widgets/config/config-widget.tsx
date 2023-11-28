@@ -7,7 +7,7 @@ import { useStore } from "@rms/hooks/toast-hook";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useTransition } from "react";
 import z from "zod";
-import { fileZod, mediaZod } from "@rms/lib/common";
+import { fileZod } from "@rms/lib/common";
 import { initConfig, editConfig } from "@rms/service/config-service";
 import { MuiFileInput } from "mui-file-input";
 import { MdAttachFile, MdClose, MdDelete } from "react-icons/md";
