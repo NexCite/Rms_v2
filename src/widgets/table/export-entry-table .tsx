@@ -713,11 +713,11 @@ export default function ExportEntryDataTable(props: Props) {
               <>
                 <div className="flex  items-center gap-4 p-5">
                   <Image
-                    src={"/api/media" + props.config.logo}
+                    src={"/api/media/" + props.config.logo}
                     width={60}
                     height={60}
                     alt="logo"
-                    style={{ borderRadius: "50%" }}
+                    className="rounded-full w-12 h-12 mb-3 ml-2 "
                   />
                   <Typography className="text-4xl">
                     {props.config.name}
