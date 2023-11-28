@@ -20,8 +20,3 @@ export async function generateMetadata({ params }): Promise<Metadata> {
 export default async function layout(props: { children: React.ReactNode }) {
   return <LayoutV2>{props.children}</LayoutV2>;
 }
-{
-  /* <Layout config={config!} route={GetRoutes(user?.permissions!)}>
-        {props.children}
-      </Layout> */
-}

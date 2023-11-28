@@ -4,7 +4,11 @@ import { Prisma } from "@prisma/client";
 import { handlerServiceAction } from "@rms/lib/handler";
 import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
-
+/**
+ *
+ * Done
+ *
+ */
 export async function createEmployee(
   props: Prisma.EmployeeUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
@@ -22,10 +26,15 @@ export async function createEmployee(
   );
 }
 
+/**
+ *
+ * Done
+ *
+ */
 export async function updateEmployee(
   id: number,
   props: Prisma.EmployeeUncheckedUpdateInput
-): Promise<ServiceActionModel<Prisma.EmployeeUpdateInput>> {
+) {
   return handlerServiceAction(
     async (info, config_id) => {
       props.config_id = config_id;
@@ -38,13 +47,17 @@ export async function updateEmployee(
   );
 }
 
+/**
+ *
+ * Done
+ *
+ */
 export async function deleteEmployeeById(
   id: number
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
     async (info, config_id) => {
       await prisma.employee.delete({ where: { id: id, config_id } });
-
       return;
     },
     "Delete_Employee",

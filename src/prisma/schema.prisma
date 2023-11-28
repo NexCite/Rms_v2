@@ -12,15 +12,11 @@ datasource db {
 }
 
 model Config {
-  id   Int    @id @default(autoincrement())
-  name String @unique
-
-  logo         String @default("")
-  phone_number String @unique
-  email        String @unique
-
-  password             String
-  username             String                 @unique
+  id                   Int                    @id @default(autoincrement())
+  name                 String                 @unique
+  logo                 String                 @default("")
+  phone_number         String                 @unique
+  email                String                 @unique
   users                User[]
   invoices             Invoice[]
   accounts             Account[]
@@ -45,14 +41,13 @@ model Config {
   expensive_boxes      ExpensiveBox[]
   pl_boxes             P_LBox[]
   agent_boxes          AgentBox[]
-
-  client_boxes      ManagerBox[]
-  credit_boxes      CreditBox[]
-  adgjustment_boxes AdjustmentBox[]
-  schedule_configes ScheduleConfig[]
-  schedules         Schedule[]
-  vacations         Vacation[]
-  roles             Role[]
+  client_boxes         ManagerBox[]
+  credit_boxes         CreditBox[]
+  adgjustment_boxes    AdjustmentBox[]
+  schedule_configes    ScheduleConfig[]
+  schedules            Schedule[]
+  vacations            Vacation[]
+  roles                Role[]
 }
 
 model User {

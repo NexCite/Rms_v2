@@ -4,6 +4,11 @@ import { handlerServiceAction } from "@rms/lib/handler";
 import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 
+/**
+ *
+ * Done
+ *
+ */
 export async function createEquity(
   params: Prisma.EquityUncheckedCreateInput
 ): Promise<ServiceActionModel<void>> {
@@ -96,6 +101,11 @@ export async function updateEquity(
   );
 }
 
+/**
+ *
+ * Done
+ *
+ */
 export async function deleteEquityById(
   id: number
 ): Promise<ServiceActionModel<void>> {

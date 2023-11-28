@@ -6,12 +6,8 @@ import { handlerServiceAction } from "@rms/lib/handler";
 import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 
-//todo: add user by token
-
-export async function createBroker(
-  props: Prisma.BrokerUncheckedCreateInput
-): Promise<ServiceActionModel<void>> {
-  return handlerServiceAction<void>(
+export async function createBroker(props: Prisma.BrokerUncheckedCreateInput) {
+  return handlerServiceAction(
     async (info, config_id) => {
       props.config_id = config_id;
       props.user_id = info.user.id;
@@ -28,8 +24,8 @@ export async function createBroker(
 export async function updateBroker(
   id: number,
   props: Prisma.BrokerUncheckedUpdateInput
-): Promise<ServiceActionModel<Prisma.BrokerUpdateInput>> {
-  return handlerServiceAction<Prisma.BrokerUpdateInput>(
+) {
+  return handlerServiceAction(
     async (info, config_id) => {
       props.config_id = config_id;
       props.user_id = info.user.id;
@@ -45,10 +41,8 @@ export async function updateBroker(
   );
 }
 
-export async function deleteBrokerById(
-  id: number
-): Promise<ServiceActionModel<void>> {
-  return handlerServiceAction<void>(
+export async function deleteBrokerById(id: number) {
+  return handlerServiceAction(
     async (info, config_id) => {
       await prisma.broker.delete({ where: { id: id, config_id } });
 

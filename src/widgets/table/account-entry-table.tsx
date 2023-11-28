@@ -8,7 +8,7 @@ import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import { $Enums, Prisma } from "@prisma/client";
 import Authorized from "@rms/components/ui/authorized";
 import { useStore } from "@rms/hooks/toast-hook";
-import { deleteAccount_Entry } from "@rms/service/account-entry-service";
+import { deleteAccountEntry } from "@rms/service/account-entry-service";
 import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
 import Link from "next/link";
 type CommonAccountType = Prisma.Account_EntryGetPayload<{
@@ -279,7 +279,7 @@ export default function Account_EntryTable(props: Props) {
                   );
                   if (isConfirm) {
                     setActiveTransition(async () => {
-                      const result = await deleteAccount_Entry(id, props.node);
+                      const result = await deleteAccountEntry(id, props.node);
 
                       store.OpenAlert(result);
                     });

@@ -4,6 +4,11 @@ import { Prisma } from "@prisma/client";
 import { handlerServiceAction } from "@rms/lib/handler";
 import prisma from "@rms/prisma/prisma";
 
+/**
+ *
+ * Done
+ *
+ */
 export async function createCurrency(
   props: Prisma.CurrencyUncheckedCreateInput
 ) {
@@ -20,6 +25,11 @@ export async function createCurrency(
   );
 }
 
+/**
+ *
+ * Done
+ *
+ */
 export async function updateCurrency(
   id: number,
   props: Prisma.CurrencyUncheckedUpdateInput
@@ -39,19 +49,15 @@ export async function updateCurrency(
   );
 }
 
+/**
+ *
+ * Done
+ *
+ */
 export async function deleteCurrency(id: number) {
   return handlerServiceAction(
     async (info, config_id) => {
       return await prisma.currency.delete({ where: { id: id, config_id } });
-      // if (auth.type === "Admin") {
-      //   await prisma.entry.deleteMany({ where: { currency_id: id } });
-      //   await prisma.invoice.deleteMany({ where: { currency_id: id } });
-      //   return await prisma.currency.delete({ where: { id: id,config_id } });
-      // } else
-      //   return await prisma.entry.update({
-      //     where: { id: id,config_id },
-      //     data: { status: "Deleted", user_id: info.user.id },
-      //   });
     },
     "Delete_Currency",
     true,

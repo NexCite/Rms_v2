@@ -1,12 +1,16 @@
 "use server";
 
 import { Prisma } from "@prisma/client";
-
 import { FileMapper } from "@rms/lib/common";
 import { handlerServiceAction } from "@rms/lib/handler";
 import { ActivityStatus } from "@rms/models/CommonModel";
 import prisma from "@rms/prisma/prisma";
 import { confirmActivity } from "./activity-service";
+/**
+ *
+ * Done
+ *
+ */
 export async function saveEntry(props: {
   entry: Prisma.EntryUncheckedCreateInput;
   media?: Prisma.MediaUncheckedCreateInput;
@@ -22,7 +26,6 @@ export async function saveEntry(props: {
   return handlerServiceAction(
     async (info, config_id) => {
       props.entry.user_id = info.user.id;
-
       props.entry.config_id = config_id;
       if (!props.includeRate) {
         props.entry.rate = null;
@@ -31,11 +34,12 @@ export async function saveEntry(props: {
         props.media = await FileMapper({
           config_id,
           file: props.file,
-
           title: props.entry.title,
         });
       }
+
       if (props.activity) props.activity.status = ActivityStatus.Provided;
+
       const currency = await prisma.currency.findUnique({
         where: { id: props.entry.currency_id, rate: { gt: 0 } },
       });
@@ -81,18 +85,12 @@ export async function saveEntry(props: {
       if (props.id) {
         await prisma.subEntry.deleteMany({ where: { entry_id: props.id } });
       }
-
       props.subEntries = props.subEntries.map((res) => {
         res.entry_id = entry.id;
         return res;
       });
-
       await prisma.subEntry.createMany({ data: props.subEntries });
-
-      var r = props.activity
-        ? await confirmActivity(props.activity)
-        : undefined;
-
+      props.activity ? await confirmActivity(props.activity) : undefined;
       return;
     },
     "Add_Entry",
@@ -101,20 +99,15 @@ export async function saveEntry(props: {
   );
 }
 
+/**
+ *
+ * Done
+ *
+ */
 export async function deleteEntry(id: number) {
   return handlerServiceAction(
     async (info, config_id) => {
       return await prisma.entry.delete({ where: { id: id, config_id } });
-
-      // if (auth.type === "Admin") {
-      //   await prisma.subEntry.deleteMany({ where: { entry_id: id } });
-      //   await prisma.media.deleteMany({ where: { entry_id: id } });
-      //   return await prisma.entry.delete({ where: { id: id,config_id } });
-      // } else
-      //   return await prisma.entry.update({
-      //     where: { id: id,config_id },
-      //     data: { status: "Deleted", user_id: id },
-      //   });
     },
     "Delete_Entry",
     true,

@@ -4,10 +4,14 @@ import { Prisma } from "@prisma/client";
 import { handlerServiceAction } from "@rms/lib/handler";
 import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
-
+/**
+ *
+ * Done
+ *
+ */
 export async function createCategory(
   props: Prisma.CategoryUncheckedCreateInput
-): Promise<ServiceActionModel<void>> {
+) {
   return handlerServiceAction(
     async (info, config_id) => {
       props.config_id = config_id;
@@ -22,10 +26,15 @@ export async function createCategory(
   );
 }
 
+/**
+ *
+ * Done
+ *
+ */
 export async function updateCategory(
   id: number,
   props: Prisma.CategoryUncheckedUpdateInput
-): Promise<ServiceActionModel<Prisma.CategoryUpdateInput>> {
+) {
   return handlerServiceAction(
     async (info, config_id) => {
       props.config_id = config_id;
@@ -41,23 +50,16 @@ export async function updateCategory(
     props
   );
 }
+/**
+ *
+ * Done
+ *
+ */
 
-export async function deleteCategoryById(
-  id: number
-): Promise<ServiceActionModel<void>> {
-  return handlerServiceAction<void>(
+export async function deleteCategoryById(id: number) {
+  return handlerServiceAction(
     async (info, config_id) => {
       await prisma.category.delete({ where: { id } });
-      // if (auth.type === "Admin") {
-      //   await prisma.category.delete({ where: { id } });
-      // } else {
-      //   await prisma.category.update({
-      //     where: { id },
-      //     data: { status: "Deleted", user_id: info.user.id },
-      //   });
-      // }
-
-      return;
     },
     "Delete_Category",
     true,

@@ -7,15 +7,17 @@ import prisma from "@rms/prisma/prisma";
 import { saveFile, uploadMediaTemp } from "./media-service";
 import { createScheuleConfig } from "./schedule-config-service";
 
-export async function saveConfig(props: {
+/**
+ *
+ * Done
+ *
+ */
+export async function editConfig(props: {
   config: Prisma.ConfigUncheckedUpdateInput;
   id?: number;
   file?: FormData;
 }) {
   return handlerServiceAction(async () => {
-    if (props.config.password) {
-      props.config.password = hashPassword(props.config.password.toString());
-    }
     var media: {
       path: string;
       fileName: string;
@@ -31,8 +33,7 @@ export async function saveConfig(props: {
       where: { id: props.id },
       data: {
         name: props.config.name,
-        password: props.config.password,
-        username: props.config.username,
+
         email: props.config.email,
         logo: media?.path ?? props.config.logo,
 
@@ -40,72 +41,100 @@ export async function saveConfig(props: {
       },
     });
 
-    return "Updated";
+    return "Config Updated";
   }, "Edit_Config");
 }
 
+/**
+ *
+ * Done
+ *
+ */
 export async function initConfig(props: {
   config: Prisma.ConfigUncheckedCreateInput & {
     first_name: string;
     last_name: string;
+    username: string;
+    password: string;
   };
-
   file?: FormData;
 }) {
   return handlerServiceAction(async () => {
     props.config.password = hashPassword(props.config.password);
+    const tempFilePath = await uploadMediaTemp(props.file);
+    const newPath = await saveFile(tempFilePath);
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          {
+            username: props.config.username,
+          },
+          {
+            email: props.config.email,
+          },
+        ],
+      },
+    });
+    if (user) {
+      if (user.username === props.config.username) {
+        throw new Error("Username already used!");
+      }
 
+      if (user.email === props.config.email) {
+        throw new Error("Email already used!");
+      }
+    }
     const result = await prisma.config.create({
       data: {
         name: props.config.name,
-        password: props.config.password,
-        username: props.config.username,
         email: props.config.email,
-        logo: "",
+        logo: newPath.path,
+
         phone_number: props.config.phone_number,
+        schedule_configes: {
+          create: {},
+        },
+
+        roles: {
+          create: {
+            name: "Admin",
+            permissions: Object.keys(
+              $Enums.UserPermission
+            ) as $Enums.UserPermission[],
+            users: {
+              create: {
+                first_name: props.config.first_name,
+                last_name: props.config.last_name,
+                gender: "Male",
+                phone_number: props.config.phone_number,
+                username: props.config.username,
+                password: props.config.password,
+                country: "Lebanon",
+                type: "Admin",
+                email: props.config.email,
+                path: CommonRouteKeys,
+                status: "Enable",
+              },
+            },
+          },
+        },
       },
     });
 
-    const tempFilePath = await uploadMediaTemp(props.file);
-
-    const newPath = await saveFile(tempFilePath);
-
-    await prisma.config.update({
-      where: { id: result.id },
-      data: { logo: newPath.path },
+    await prisma.user.updateMany({
+      where: { username: props.config.username },
+      data: { config_id: result.id },
     });
-    var role = await prisma.role.create({
-      data: {
-        config_id: result.id,
-        name: "Admin",
-        permissions: Object.keys(
-          $Enums.UserPermission
-        ) as $Enums.UserPermission[],
-      },
-    });
-    await prisma.user.create({
-      data: {
-        first_name: props.config.first_name,
-        last_name: props.config.last_name,
-        gender: "Male",
-        phone_number: props.config.phone_number,
-        username: props.config.username,
-        password: props.config.password,
-        country: "Lebanon",
-        type: "Admin",
-        email: props.config.email,
-        config_id: result.id,
-        path: CommonRouteKeys,
-        status: "Enable",
-        role_id: role.id,
-      },
-    });
-    await createScheuleConfig(result.id);
 
-    return "";
+    return "Project created successfully!";
   }, "None");
 }
 
+/**
+ *
+ * Done
+ *
+ */
 export async function getConfig() {
   return handlerServiceAction(
     async (info, config_id) => {

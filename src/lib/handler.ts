@@ -92,8 +92,6 @@ export async function handlerServiceAction<T>(
           message: "Operation Successfully",
         };
       } catch (error: any) {
-        // console.log(error);
-
         if ((error as any).meta && (error as any).message) {
           await createLog({
             action: key.includes("Add")

@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useTransition } from "react";
 import z from "zod";
 import { fileZod, mediaZod } from "@rms/lib/common";
-import { initConfig, saveConfig } from "@rms/service/config-service";
+import { initConfig, editConfig } from "@rms/service/config-service";
 import { MuiFileInput } from "mui-file-input";
 import { MdAttachFile, MdClose, MdDelete } from "react-icons/md";
 import Image from "next/image";
@@ -351,7 +351,7 @@ export function UpdateConfig(props: Props) {
         dataForm = undefined;
       }
       setTransition(async () => {
-        const res = await saveConfig({
+        const res = await editConfig({
           config: values.config,
           file: dataForm,
           id: props.id,

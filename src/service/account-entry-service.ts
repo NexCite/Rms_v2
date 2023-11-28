@@ -3,7 +3,13 @@ import { $Enums, Prisma } from "@prisma/client";
 import { handlerServiceAction } from "@rms/lib/handler";
 import prisma from "@rms/prisma/prisma";
 
-export async function createAccount_Entry(
+/**
+ *
+ * Done
+ *
+ */
+
+export async function createAccountEntry(
   props: Prisma.Account_EntryUncheckedCreateInput,
   node: $Enums.Account_Entry_Type
 ) {
@@ -26,7 +32,12 @@ export async function createAccount_Entry(
   );
 }
 
-export async function updateAccount_Entry(
+/**
+ *
+ * Done
+ *
+ */
+export async function updateAccountEntry(
   id: number,
   props: Prisma.Account_EntryUncheckedUpdateInput,
   node: $Enums.Account_Entry_Type
@@ -50,23 +61,18 @@ export async function updateAccount_Entry(
     props
   );
 }
-export async function deleteAccount_Entry(
+/**
+ *
+ * Done
+ *
+ */
+export async function deleteAccountEntry(
   id: number,
   node: $Enums.Account_Entry_Type
 ) {
   return handlerServiceAction(
     async (info, config_id) => {
       await prisma.account_Entry.delete({ where: { id: id, config_id } });
-
-      // if (auth.type === "Admin") {
-      //   await prisma.account_Entry.delete({ where: { id: id,config_id } });
-      // } else {
-      //   await prisma.account_Entry.update({
-      //     where: { id: id,config_id },
-      //     props: { status: "Deleted", user_id: info.user.id },
-      //   });
-      // }
-
       return;
     },
     node === "Client"

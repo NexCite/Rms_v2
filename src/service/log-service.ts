@@ -5,7 +5,11 @@ import { handlerServiceAction } from "@rms/lib/handler";
 import prisma from "@rms/prisma/prisma";
 import moment from "moment";
 import { revalidatePath } from "next/cache";
-
+/**
+ *
+ * Done
+ *
+ */
 export async function createLog(props: Prisma.LogUncheckedCreateInput) {
   const config_id = await getConfigId();
   props.config_id = config_id;

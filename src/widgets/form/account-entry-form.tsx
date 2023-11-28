@@ -3,8 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { $Enums, Prisma } from "@prisma/client";
 import {
-  createAccount_Entry,
-  updateAccount_Entry,
+  createAccountEntry,
+  updateAccountEntry,
 } from "@rms/service/account-entry-service";
 
 import { useRouter } from "next/navigation";
@@ -120,7 +120,7 @@ export default function Account_EntryForm(props: {
     (values: z.infer<typeof formSchema>) => {
       setTransition(async () => {
         if (props.account) {
-          await updateAccount_Entry(props.account.id, values, props.node).then(
+          await updateAccountEntry(props.account.id, values, props.node).then(
             (res) => {
               store.OpenAlert(res);
               Object.keys(res.errors ?? []).map((e) => {
@@ -133,7 +133,7 @@ export default function Account_EntryForm(props: {
             }
           );
         } else {
-          await createAccount_Entry(values as any, props.node).then((res) => {
+          await createAccountEntry(values as any, props.node).then((res) => {
             store.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);

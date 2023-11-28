@@ -3,6 +3,11 @@
 import { handlerServiceAction } from "@rms/lib/handler";
 import { ActivityStatus } from "@rms/models/CommonModel";
 
+/**
+ *
+ * Done
+ *
+ */
 export async function confirmActivity({
   id,
   status,
@@ -31,6 +36,11 @@ export async function confirmActivity({
     { id, status }
   );
 }
+/**
+ *
+ * Done
+ *
+ */
 export async function getActivities(id?: number, config_id?: number) {
   return handlerServiceAction(
     async () => {
@@ -43,7 +53,6 @@ export async function getActivities(id?: number, config_id?: number) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // 'Content-Type': 'application/x-www-form-urlencoded',
         },
       });
 
