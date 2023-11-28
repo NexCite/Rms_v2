@@ -321,6 +321,7 @@ export default function VacationTable(props: Props) {
           </Box>
 
           <MaterialReactTable
+            initialState={{ pagination: { pageSize: 100, pageIndex: 0 } }}
             state={{
               showProgressBars: false,
               showSkeletons: false,

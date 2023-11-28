@@ -145,6 +145,7 @@ export default function DigitTable(props: Props) {
       />
 
       <MaterialReactTable
+        initialState={{ pagination: { pageSize: 100, pageIndex: 0 } }}
         state={{ showProgressBars: isPadding }}
         enableRowActions
         columns={columns as any}

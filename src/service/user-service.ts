@@ -2,6 +2,7 @@
 
 import { $Enums, Prisma } from "@prisma/client";
 import { getUserInfo } from "@rms/lib/auth";
+import { RouteData } from "@rms/lib/common";
 import { handlerServiceAction } from "@rms/lib/handler";
 
 import { hashPassword } from "@rms/lib/hash";
@@ -10,8 +11,6 @@ import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import route from "../../routes.json";
-const Routes = route as RouteModel[];
 
 export async function createUser(
   props: Prisma.UserUncheckedCreateInput
@@ -134,7 +133,7 @@ export default async function getUserFullInfo(
     }
   }
 
-  var routes = Routes.filter((res) => {
+  var routes = RouteData.filter((res) => {
     if (auth.user.role.permissions?.includes(res.key)) {
       res.children = res.children?.filter((r) =>
         auth.user.role.permissions?.includes(r.key)

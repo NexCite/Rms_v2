@@ -88,6 +88,7 @@ export default function RoleTable(props: Props) {
         title={<Typography variant="h5">Role Table</Typography>}
       ></CardHeader>
       <MaterialReactTable
+        initialState={{ pagination: { pageSize: 100, pageIndex: 0 } }}
         state={{ showProgressBars: isPadding }}
         enableRowActions
         columns={columns}

@@ -3,7 +3,11 @@ import React, { useCallback, useMemo, useState, useTransition } from "react";
 
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { MaterialReactTable, type MRT_ColumnDef } from "material-react-table";
+import {
+  MaterialReactTable,
+  useMaterialReactTable,
+  type MRT_ColumnDef,
+} from "material-react-table";
 
 import { $Enums, Prisma } from "@prisma/client";
 import { FormatNumberWithFixed } from "@rms/lib/global";
@@ -572,6 +576,7 @@ export default function EntryDataTable(props: Props) {
             </form>
           </CardContent>
           <MaterialReactTable
+            initialState={{ pagination: { pageSize: 100, pageIndex: 0 } }}
             state={{ showProgressBars: isPadding }}
             enableRowActions
             muiLinearProgressProps={({ isTopToolbar }) => ({

@@ -580,9 +580,7 @@ enum UserPermission {
   Edit_Equity
   Delete_Equity
   Add_Two_Digit
-  View_Export_Entry
   View_Balance_Sheet
-
   Edit_Two_Digit
   Delete_Two_Digit
   View_Three_Digit

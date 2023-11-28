@@ -146,6 +146,7 @@ export default function ScheduleTable(props: Props) {
         </form>
 
         <MaterialReactTable
+          initialState={{ pagination: { pageSize: 100, pageIndex: 0 } }}
           state={{ showLoadingOverlay: isPadding }}
           enableRowActions
           columns={columns}

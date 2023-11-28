@@ -235,6 +235,7 @@ export default function Account_EntryTable(props: Props) {
           title={<Typography variant="h5">{props.node} Table</Typography>}
         />
         <MaterialReactTable
+          initialState={{ pagination: { pageSize: 100, pageIndex: 0 } }}
           columns={columns}
           data={props.accounts}
           enableRowActions

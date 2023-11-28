@@ -102,6 +102,7 @@ export default function CategoryTable(props: Props) {
         }
       ></CardHeader>
       <MaterialReactTable
+        initialState={{ pagination: { pageSize: 100, pageIndex: 0 } }}
         state={{ showProgressBars: isPadding }}
         enableRowActions
         columns={columns}

@@ -112,6 +112,7 @@ export default function CurrencyTable(props: Props) {
         />
 
         <MaterialReactTable
+          initialState={{ pagination: { pageSize: 100, pageIndex: 0 } }}
           state={{ showProgressBars: isPadding }}
           enableRowActions
           columns={columns}

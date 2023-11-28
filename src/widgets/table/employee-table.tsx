@@ -196,6 +196,7 @@ export default function EmployeesTable(props: Props) {
         />
 
         <MaterialReactTable
+          initialState={{ pagination: { pageSize: 100, pageIndex: 0 } }}
           state={{ showProgressBars: isPadding }}
           columns={columns}
           data={props.employees}

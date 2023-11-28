@@ -91,6 +91,7 @@ export default function LogTable(props: Props) {
         />
 
         <MaterialReactTable
+          initialState={{ pagination: { pageSize: 100, pageIndex: 0 } }}
           // state={{ showProgressBars: isPadding }}
           columns={columns}
           data={props.data}

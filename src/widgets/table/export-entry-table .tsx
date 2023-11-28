@@ -693,6 +693,7 @@ export default function ExportEntryDataTable(props: Props) {
         </form>
         <div ref={targetRef}>
           <MaterialReactTable
+            initialState={{ pagination: { pageSize: 100, pageIndex: 0 } }}
             state={{ showProgressBars: isPadding }}
             columns={columns}
             data={entries}
@@ -795,6 +796,9 @@ export default function ExportEntryDataTable(props: Props) {
               return (
                 <>
                   <MaterialReactTable
+                    initialState={{
+                      pagination: { pageSize: 100, pageIndex: 0 },
+                    }}
                     state={{ showProgressBars: isPadding }}
                     muiTableContainerProps={{ sx: { margin: 0 } }}
                     enablePagination={false}

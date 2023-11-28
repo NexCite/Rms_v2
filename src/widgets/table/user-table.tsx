@@ -195,6 +195,7 @@ export default function UserTable(props: Props) {
         <CardHeader title={<Typography variant="h5">User Table</Typography>} />
 
         <MaterialReactTable
+          initialState={{ pagination: { pageSize: 100, pageIndex: 0 } }}
           state={{ showProgressBars: isPadding }}
           columns={columns}
           data={props.users}
