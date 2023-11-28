@@ -1,4 +1,3 @@
-import { checkUserPermissions } from "@rms/lib/auth";
 import { getConfigId } from "@rms/lib/config";
 import prisma from "@rms/prisma/prisma";
 import { getConfig } from "@rms/service/config-service";
