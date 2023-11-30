@@ -1,2 +1,2 @@
-type UplaodType = "s3" | "local";
-export default UplaodType;
+type UploadType = "s3" | "local";
+export default UploadType;

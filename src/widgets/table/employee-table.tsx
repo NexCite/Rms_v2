@@ -213,7 +213,13 @@ export default function EmployeesTable(props: Props) {
                 </MenuItem>
               </Link>
             </Authorized>,
-
+            <Authorized permission="View_Employee" key={1}>
+              <Link href={pathName + "/" + id}>
+                <MenuItem className="cursor-pointer" disabled={isPadding}>
+                  View
+                </MenuItem>
+              </Link>
+            </Authorized>,
             <Authorized permission="Delete_Employee" key={3}>
               <MenuItem
                 disabled={isPadding}

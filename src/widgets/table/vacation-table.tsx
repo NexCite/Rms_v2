@@ -22,6 +22,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useMemo, useState, useTransition } from "react";
 import { DateRange } from "react-day-picker";
+import CountCard from "../common/count-card";
+
 type CommonType = Prisma.VacationGetPayload<{
   include: {
     employee: {
@@ -75,7 +77,7 @@ export default function VacationTable(props: Props) {
 
   const store = useStore();
 
-  const { push, replace } = useRouter();
+  const { replace } = useRouter();
 
   const [tabValue, setTabValue] = useState<"Accepted" | "Pending" | "Deleted">(
     props.status
@@ -270,38 +272,15 @@ export default function VacationTable(props: Props) {
         </form>
 
         <div
-          className="text-center pb-4"
           style={{
-            width: 250,
             margin: "25px 10px 0px auto",
+            width: "fit-content",
           }}
         >
-          <div
-            style={{
-              fontSize: 20,
-              backgroundColor: "#3c6097",
-              borderTopLeftRadius: 6,
-              borderTopRightRadius: 6,
-              padding: "10px 0px",
-              color: "white",
-            }}
-          >
-            Total {tabValue}
-          </div>
-
-          <div
-            className="font-bold p-3"
-            style={{
-              fontSize: 25,
-              borderBottomLeftRadius: 6,
-              borderBottomRightRadius: 6,
-              border: "1px solid #194c99",
-              borderTop: "0px",
-              color: "#3c6097",
-            }}
-          >
-            {props.vacations?.length || 0}
-          </div>
+          <CountCard
+            label={"Total " + tabValue}
+            count={props.vacations?.length || 0}
+          ></CountCard>
         </div>
 
         <Box sx={{ width: "100%" }}>

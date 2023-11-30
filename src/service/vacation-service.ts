@@ -1,16 +1,40 @@
 "use server";
 
-import { Prisma } from "@prisma/client";
+import { $Enums, Prisma } from "@prisma/client";
 import { handlerServiceAction } from "@rms/lib/handler";
 import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 import { deleteMedia } from "./media-service";
+import { FileMapper } from "@rms/lib/common";
 
 export async function createVacation(
-  props: Prisma.VacationUncheckedCreateInput
+  props: {
+    employee_id: number;
+    file: FormData;
+    media: Prisma.MediaUncheckedCreateInput;
+    media_id: number;
+    description: string;
+    to_date: Date;
+    from_date: Date;
+    type: $Enums.VacationType;
+  },
+  file: FormData
 ): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
     async (info, config_id) => {
+      if (file) {
+        props.media_id = (
+          await FileMapper({
+            config_id,
+            file: file,
+            title: props.description,
+          })
+        ).id as any;
+      }
+
+      delete props.file;
+      delete props.media;
+
       const checkVacation = await prisma.vacation.findMany({
         where: {
           from_date: {
@@ -31,10 +55,6 @@ export async function createVacation(
           "Vacation date is conflicting with an existing date for selected employee"
         );
       }
-
-      // if (props.media) {
-      //   props.media.create.path = await copyMediaTemp(props.media.create.path);
-      // }
 
       await prisma.vacation.create({
         data: {

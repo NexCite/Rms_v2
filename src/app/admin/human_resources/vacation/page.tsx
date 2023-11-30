@@ -31,12 +31,10 @@ export default async function page(props: {
   const config_id = await getConfigId();
 
   const date: [Date, Date] = [
-    moment(Number.isNaN(startDate) ? undefined : startDate)
-      .startOf("day")
-      .toDate(),
-    moment(Number.isNaN(endDate) ? undefined : endDate)
-      .endOf("day")
-      .toDate(),
+    Number.isNaN(startDate)
+      ? undefined
+      : moment(startDate).startOf("day").toDate(),
+    Number.isNaN(endDate) ? undefined : moment(endDate).endOf("day").toDate(),
   ];
 
   var value: CommonetType[];
@@ -61,7 +59,7 @@ export default async function page(props: {
     value = await prisma.vacation.findMany({
       where: {
         config_id,
-        status: (status || "Pending") as any,
+        status: status || "Pending",
         to_date: {
           lte: date[1],
         },

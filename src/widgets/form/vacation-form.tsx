@@ -28,6 +28,9 @@ import { useCallback, useMemo, useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import UploadWidget from "../upload/upload-widget";
+import { fileZod, mediaZod } from "@rms/lib/common";
+import { MuiFileInput } from "mui-file-input";
+import { MdAttachFile, MdClose } from "react-icons/md";
 
 interface Props {
   id?: number;
@@ -53,16 +56,17 @@ export default function VacationForm(props: Props) {
         .optional(),
       from_date: z.date(),
       to_date: z.date(),
-      media: z
-        .object({
-          path: z.string().optional(),
-          type: z.enum([$Enums.MediaType.Pdf]).default("Pdf").optional(),
-          title: z.string().optional(),
-        })
-        .optional(),
-      // media_id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
       employee_id: z.number().or(z.string().regex(/^\d+$/).transform(Number)),
       type: z.enum(Object.keys($Enums.VacationType) as any),
+      status: z
+        .enum([
+          $Enums.Status.Enable,
+          $Enums.Status.Disable,
+          $Enums.Status.Deleted,
+        ])
+        .optional(),
+      media: mediaZod.optional().nullable(),
+      file: fileZod.optional().nullable(),
     });
   }, []);
 
@@ -74,13 +78,7 @@ export default function VacationForm(props: Props) {
       from_date: props.value?.from_date ?? dayjs().startOf("D").toDate(),
       to_date: props.value?.to_date ?? dayjs().endOf("D").toDate(),
       type: props.value?.type,
-      media: props.value?.media?.path
-        ? {
-            path: props.value.media?.path,
-            type: "Pdf",
-            title: props.value.media?.title,
-          }
-        : undefined,
+      media: props.value?.media,
     },
   });
 
@@ -90,19 +88,11 @@ export default function VacationForm(props: Props) {
   const store = useStore();
   const handleSubmit = useCallback(
     (values: z.infer<any>) => {
-      var media = values.media
-        ? {
-            create: {
-              path: values?.media.path,
-              title: values?.title,
-              type: "Pdf",
-              file_name: (() => {
-                var filename = values.media?.path?.split("/");
-                return filename[filename.length - 1];
-              })(),
-            },
-          }
-        : undefined;
+      const fileForm = values.file ? new FormData() : undefined;
+
+      fileForm?.append("file", values.file);
+      delete values.file;
+      delete values.media;
 
       if (props.value) {
         setTransition(async () => {
@@ -123,7 +113,7 @@ export default function VacationForm(props: Props) {
         setTransition(async () => {
           var value2 = JSON.parse(JSON.stringify({ ...values, media }));
 
-          await createVacation(value2).then((res) => {
+          await createVacation(value2, fileForm).then((res) => {
             store.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);
@@ -273,7 +263,7 @@ export default function VacationForm(props: Props) {
               />
 
               <Controller
-                name={"employee_id" as any}
+                name={"employee_id"}
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Autocomplete
@@ -314,37 +304,69 @@ export default function VacationForm(props: Props) {
                 )}
               />
 
-              <div className="grid-cols-12">
-                <Controller
-                  control={form.control}
-                  name="media"
-                  render={({ field, fieldState }) => (
-                    <UploadWidget
-                      isPdf
-                      path={field.value?.path}
-                      onSave={(e) => {
-                        field.onChange(
-                          e
-                            ? {
-                                path: e,
-                                title: form.getValues("description"),
-                                type: "Pdf",
-                              }
-                            : undefined
-                        );
-                      }}
+              {/* {
+                props.isEditMode && props.isAdmin && (
+                  
+              <Controller
+              name={"status"}
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Autocomplete
+                  disablePortal
+                  onChange={(e, v) => {
+                    field.onChange(v);
+                  }}
+                  isOptionEqualToValue={(e) => e === props.value?.id}
+                  defaultValue={''}
+                  size="small"
+                  options={[
+                    $Enums.Status.Enable,
+                    $Enums.Status.Disable,
+                    $Enums.Status.Deleted,
+                  ]}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      required
+                      error={Boolean(fieldState.error)}
+                      helperText={fieldState.error?.message}
+                      InputLabelProps={{ shrink: true }}
+                      label="Status"
+                      placeholder="status"
                     />
                   )}
                 />
-                {/* <UploadWidget
-                isPdf
-                path={props.value?.media?.path}
-                onSave={(e) => {
-                  setMedia(
-                    e ? { path: e, title: e, type: "Pdf" } : (undefined as any)
-                  );
-                }}
-              /> */}
+              )}
+            />
+
+                )
+              } */}
+
+              <div>
+                <Controller
+                  control={form.control}
+                  name="file"
+                  render={({ field, fieldState }) => (
+                    <>
+                      <MuiFileInput
+                        {...field}
+                        value={field.value}
+                        label={"Append File"}
+                        clearIconButtonProps={{
+                          children: <MdClose fontSize="small" />,
+                        }}
+                        error={Boolean(fieldState.error)}
+                        helperText={fieldState?.error?.message}
+                        InputProps={{
+                          inputProps: {
+                            accept: ".pdf",
+                          },
+                          startAdornment: <MdAttachFile />,
+                        }}
+                      />
+                    </>
+                  )}
+                />
               </div>
             </CardContent>
             <LoadingButton

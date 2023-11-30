@@ -1,16 +1,16 @@
 import fs, { promises as fsPromises } from "fs";
 import os from "os";
 import path, { resolve } from "path";
-import UplaodType from "../types/upload-type";
+import UploadType from "../types/upload-type";
 import { getMediaType } from "@rms/lib/media";
 
 export default class NextCiteUpload {
   folderName: string;
-  type: UplaodType;
+  type: UploadType;
   private dir = os.homedir();
   private _fullPath: string;
 
-  constructor(props: { folderName: string; type: UplaodType }) {
+  constructor(props: { folderName: string; type: UploadType }) {
     this.folderName = props.folderName;
     this.type = props.type;
     this._fullPath = path.join(this.dir, props.folderName);

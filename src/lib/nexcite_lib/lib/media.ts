@@ -1,15 +1,15 @@
 import { readFileSync } from "fs";
 import path from "path";
 import os from "os";
-import UplaodType from "../types/upload-type";
+import UploadType from "../types/upload-type";
 import NextCiteUpload from "./upload";
 
 export default class NexCiteMedia {
   folderName: string;
-  type: UplaodType;
+  type: UploadType;
   private dir = os.homedir();
   private _fullPath: string;
-  constructor(props: { folderName: string; type: UplaodType }) {
+  constructor(props: { folderName: string; type: UploadType }) {
     this.folderName = props.folderName;
     this.type = props.type;
     this._fullPath = `${this.dir}/${props.folderName}`;
