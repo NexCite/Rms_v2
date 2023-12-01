@@ -108,7 +108,7 @@ const RouteData = [
         index: 7,
         title: "Balance sheet",
         path: "/admin/accounting/export_entry",
-        key: "View_Balance_Sheet",
+        key: "View_Sheet_State ",
       },
       {
         index: 8,

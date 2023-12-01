@@ -575,7 +575,7 @@ enum UserPermission {
   Edit_Equity
   Delete_Equity
   Add_Two_Digit
-  View_Balance_Sheet
+  View_Sheet_State
   Edit_Two_Digit
   Delete_Two_Digit
   View_Three_Digit
@@ -685,7 +685,7 @@ enum UserPermission {
   View_Advance_Payment
   View_Advance_Payments
   Add_Vacation
-  Update_Vaction_Status
+  Edit_Vaction_Status
   Edit_Vacation
   Delete_Vacation
   View_Vacation
@@ -702,6 +702,7 @@ enum UserPermission {
   View_Roles
   Edit_Role
   Delete_Role
+  Reset
 }
 
 enum Account_Entry_Type {

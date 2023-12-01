@@ -55,9 +55,9 @@
       },
       {
         "index": 7,
-        "title": "Balance sheet",
-        "path": "/admin/accounting/export_entry",
-        "key": "View_Balance_Sheet"
+        "title": "Sheet State",
+        "path": "/admin/accounting/sheet_state",
+        "key": "View_Sheet_State"
       },
       {
         "index": 8,

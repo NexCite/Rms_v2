@@ -113,7 +113,7 @@ function Tab1(props: Props) {
         <div className="flex items-center justify-between">
           <div className={"bg-center flex items-center gap-5"}>
             <Image
-              src={`/api/media${props.config.logo}`}
+              src={`/api/media/${props.config.logo}`}
               width={60}
               height={80}
               style={{ borderRadius: "50%" }}
@@ -211,7 +211,7 @@ function Tab2(props: Props) {
     <Style2 className="font-mono">
       <div className={"bg-center flex items-center gap-5"}>
         <Image
-          src={`/api/media${props.config.logo}`}
+          src={`/api/media/${props.config.logo}`}
           width={60}
           height={60}
           style={{ borderRadius: "50%" }}
@@ -298,7 +298,7 @@ function Tab3(props: Props) {
     <Style2 className="font-mono">
       <div className={"bg-center flex items-center gap-5 "}>
         <Image
-          src={`/api/media${props.config.logo}`}
+          src={`/api/media/${props.config.logo}`}
           width={60}
           height={60}
           style={{ borderRadius: "50%" }}

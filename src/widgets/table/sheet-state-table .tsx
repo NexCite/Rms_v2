@@ -7,6 +7,7 @@ import React, {
   useState,
   useTransition,
 } from "react";
+import { toPng, toJpeg, toBlob, toPixelData, toSvg } from "html-to-image";
 
 import { $Enums, Prisma } from "@prisma/client";
 import { FormatNumberWithFixed } from "@rms/lib/global";
@@ -34,7 +35,7 @@ import moment from "moment";
 import Image from "next/image";
 import { usePDF } from "react-to-pdf";
 
-export default function ExportEntryDataTable(props: Props) {
+export default function SheetStateTable(props: Props) {
   const [isPadding, setTransition] = useTransition();
 
   const [search, setSearch] = useState({
@@ -684,14 +685,33 @@ export default function ExportEntryDataTable(props: Props) {
             type="button"
             onClick={(e) => {
               setTransition(() => {
-                toPDF({ filename: titleRef.current.innerText });
+                toPng(document.getElementById("export-to-img")).then(function (
+                  dataUrl
+                ) {
+                  const anchor = document.createElement("a");
+
+                  // Set the href to the URL you want to download
+                  anchor.href = dataUrl;
+
+                  // Optional: set the download attribute to a specific filename
+                  anchor.download = titleRef.current.innerText + ".png";
+
+                  // Append the anchor to the document body temporarily
+                  document.body.appendChild(anchor);
+
+                  // Trigger the download by simulating a click on the anchor
+                  anchor.click();
+
+                  // Remove the anchor from the document body
+                  document.body.removeChild(anchor);
+                });
               });
             }}
           >
             Export
           </LoadingButton>
         </form>
-        <div ref={targetRef}>
+        <div ref={targetRef} id="export-to-img">
           <MaterialReactTable
             initialState={{ pagination: { pageSize: 100, pageIndex: 0 } }}
             state={{ showProgressBars: isPadding }}

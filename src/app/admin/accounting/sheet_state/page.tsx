@@ -3,7 +3,7 @@ import moment from "moment";
 import { $Enums, Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
 
-import ExportEntryDataTable from "@rms/widgets/table/export-entry-table ";
+import SheetStateTable from "@rms/widgets/table/sheet-state-table ";
 import { getUserStatus } from "@rms/service/user-service";
 import { getConfigId } from "@rms/lib/config";
 type CommonInclude = {
@@ -454,7 +454,7 @@ export default async function Entry(props: {
   const currencies = await prisma.currency.findMany({ where: { config_id } });
   return (
     <div>
-      <ExportEntryDataTable
+      <SheetStateTable
         currencies={currencies}
         config={config}
         data={entries}
