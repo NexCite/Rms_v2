@@ -210,7 +210,7 @@ export default function TradingForm(props: Props) {
       <Style className="card" onSubmit={form.handleSubmit(handleSubmit)}>
         <Form {...form}>
           <form className="card" autoComplete="off">
-            <Card>
+            <Card variant="outlined">
               <CardHeader>
                 {" "}
                 <div className="flex justify-between items-center">

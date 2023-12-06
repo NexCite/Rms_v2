@@ -40,7 +40,7 @@ export default async function page(props: {
         where: {
           config_id,
         },
-        orderBy: { modified_date: "desc" },
+        orderBy: { id: "desc" },
       });
       break;
 
@@ -50,7 +50,7 @@ export default async function page(props: {
         where: {
           config_id,
         },
-        orderBy: { modified_date: "desc" },
+        orderBy: { id: "desc" },
       });
       break;
     case "more":
@@ -59,7 +59,7 @@ export default async function page(props: {
         where: {
           config_id,
         },
-        orderBy: { modified_date: "desc" },
+        orderBy: { id: "desc" },
       });
 
       break;

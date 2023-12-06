@@ -35,7 +35,6 @@ type Props = {
           account_entry: true;
           entry: true;
           two_digit: true;
-
           three_digit: true;
           more_than_four_digit: true;
         };
@@ -171,7 +170,6 @@ function Tab1(props: Props) {
           <div className="flex justify-around mt-20 gap-20">
             <div>
               <h2 className="text-center">توقيع المدير</h2>
-
               <h2 className="text-center">Manager Sign</h2>
             </div>
             <div>
@@ -185,7 +183,7 @@ function Tab1(props: Props) {
               <h2 className="text-center">أعداد</h2>
               <h2 className="text-center">Prepared By</h2>
               <h2 className="text-center">
-                {props.user.first_name} {props.user.last_name}
+                <span contentEditable>...</span>
               </h2>{" "}
             </div>
           </div>
@@ -236,7 +234,7 @@ function Tab2(props: Props) {
       </div>
       <div className="flex justify-center" dir="auto">
         <p>
-          صرفنا إلى السيد {props.user.first_name} {props.user.last_name}
+          صرفنا إلى السيد <span contentEditable>...</span>
         </p>
       </div>
       <br />
@@ -273,7 +271,7 @@ function Tab2(props: Props) {
             <h2 className="text-center">أعداد</h2>
             <h2 className="text-center">Prepared By</h2>
             <h2 className="text-center">
-              {props.user.first_name} {props.user.last_name}
+              <span contentEditable>...</span>
             </h2>{" "}
           </div>
         </div>
@@ -323,7 +321,7 @@ function Tab3(props: Props) {
       </div>
       <div className="flex justify-start" dir="auto">
         <p>
-          صرفنا إلى السيد/السادة {props.user.first_name} {props.user.last_name}
+          صرفنا إلى السيد/السادة <span contentEditable>...</span>
         </p>
       </div>
       <div className="flex justify-start" dir="auto">
@@ -368,7 +366,7 @@ function Tab3(props: Props) {
             <h2 className="text-center">أعداد</h2>
             <h2 className="text-center">Prepared By</h2>
             <h2 className="text-center">
-              {props.user.first_name} {props.user.last_name}
+              <span contentEditable>...</span>
             </h2>{" "}
           </div>
         </div>

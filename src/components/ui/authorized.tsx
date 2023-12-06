@@ -16,9 +16,5 @@ export default function Authorized(props: Props) {
     setShow(cookies["rms-permissions"]?.includes(props.permission));
   }, [cookies, props.permission]);
 
-  return show ? (
-    <div className={props.className}>{props.children}</div>
-  ) : (
-    <span></span>
-  );
+  return show ? <div className={props.className}>{props.children}</div> : <></>;
 }

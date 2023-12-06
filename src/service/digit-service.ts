@@ -194,3 +194,26 @@ export async function deleteMoreDigit(id: number) {
     { id }
   );
 }
+export async function resetDigit(id: number, node: "two" | "three" | "more") {
+  return handlerServiceAction(
+    async (info, config_id) => {
+      await (
+        prisma[
+          node === "two"
+            ? "two_Digit"
+            : node === "three"
+            ? "three_Digit"
+            : "more_Than_Four_Digit"
+        ] as any
+      ).update({
+        where: { id: id, config_id },
+        data: {
+          modified_date: new Date(),
+          create_date: new Date(),
+        },
+      });
+    },
+    "Reset",
+    true
+  );
+}

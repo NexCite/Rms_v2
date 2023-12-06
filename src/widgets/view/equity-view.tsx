@@ -127,7 +127,7 @@ export default function EquityView(props: Props) {
       credit_boxes,
     };
   }, [props.equity]);
-  const [isPadding, setPadding] = useTransition();
+  const [isPadding, setTransition] = useTransition();
   const store = useStore();
   const { back } = useRouter();
 
@@ -160,7 +160,7 @@ export default function EquityView(props: Props) {
                   `Do You sure you want to delete  id:${props.equity.id} `
                 );
                 if (isConfirm) {
-                  setPadding(async () => {
+                  setTransition(async () => {
                     const result = await deleteEquityById(props.equity.id);
 
                     if (result.status === 200) {

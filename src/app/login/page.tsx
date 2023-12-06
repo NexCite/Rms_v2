@@ -1,7 +1,9 @@
 import LoginWidget from "@rms/widgets/login/login-widget";
+import { writeFileSync } from "fs";
 import React from "react";
+const ZKJUBAER = require("zk-jubaer");
 
-export default function Login() {
+export default async function Login() {
   return (
     <div>
       <LoginWidget />

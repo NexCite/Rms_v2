@@ -49,7 +49,7 @@ export default function EntryView(props: Props) {
     });
     return a;
   }, [props]);
-  const [isPadding, setPadding] = useTransition();
+  const [isPadding, setTransition] = useTransition();
   const store = useStore();
   const pathName = usePathname();
   return (
@@ -67,7 +67,7 @@ export default function EntryView(props: Props) {
                 `Do You sure you want to delete ${props.entry.title} id:${props.entry.id} `
               );
               if (isConfirm) {
-                setPadding(async () => {
+                setTransition(async () => {
                   const result = await deleteEntry(props.entry.id);
 
                   store.OpenAlert({

@@ -66,3 +66,18 @@ export async function deleteCategoryById(id: number) {
     { id }
   );
 }
+export async function resetCategory(id: number) {
+  return handlerServiceAction(
+    async (info, config_id) => {
+      await prisma.category.update({
+        where: { id, config_id },
+        data: {
+          modified_date: new Date(),
+          create_date: new Date(),
+        },
+      });
+    },
+    "Reset",
+    true
+  );
+}

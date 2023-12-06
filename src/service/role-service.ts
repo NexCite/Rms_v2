@@ -62,3 +62,18 @@ export async function deleteRoleById(
     { id }
   );
 }
+export async function resetRole(id: number) {
+  return handlerServiceAction(
+    async (info, config_id) => {
+      await prisma.role.update({
+        where: { id, config_id },
+        data: {
+          modified_date: new Date(),
+          create_date: new Date(),
+        },
+      });
+    },
+    "Reset",
+    true
+  );
+}

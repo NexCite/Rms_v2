@@ -37,7 +37,7 @@ type Props = {
 
 export default function PaymentTable(props: Props) {
   const pathName = usePathname();
-  const [isPadding, setPadding] = useTransition();
+  const [isPadding, setTransition] = useTransition();
 
   const [globalFilter, setGlobalFilter] = useState("");
 
@@ -79,7 +79,7 @@ export default function PaymentTable(props: Props) {
                           `Do You sure you want to delete payment id:${id} `
                         );
                         if (isConfirm) {
-                          setPadding(async () => {
+                          setTransition(async () => {
                             const result = await deletePaymentById(id);
 
                             store.OpenAlert(result);

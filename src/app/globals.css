@@ -67,28 +67,26 @@
     @apply bg-background text-foreground;
   }
 }
-::-webkit-scrollbar {
+/* ::-webkit-scrollbar {
   width: 4px;
   height: 8px;
 }
 
 /* Track */
-::-webkit-scrollbar-track {
+/* ::-webkit-scrollbar-track {
   background: #f1f1f1;
-}
+} */
 
 /* Handle */
-::-webkit-scrollbar-thumb {
+/* ::-webkit-scrollbar-thumb {
   background: rgba(22, 21, 21, 0.788);
   border-radius: 10px;
-}
+} */
 
 /* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
+/* ::-webkit-scrollbar-thumb:hover {
   background: #101010;
-}
-* {
-}
+}  */
 
 /* input:focus + label {
   width: min-content;
@@ -208,7 +206,7 @@ table {
   justify-content: center;
 }
 .side-bar {
-  width: 250px; /* or whatever width your sidebar has */
+  width: 280px; /* or whatever width your sidebar has */
   height: 100%; /* Adjust as needed */
   left: 0;
   top: 0;
@@ -223,14 +221,14 @@ table {
 
 #app-main {
   width: 100%;
-  padding-left: 250px;
+  padding-left: 280px;
   transition: padding-left 0.5s;
   height: 100%;
 }
 #main {
   padding: 10px;
   max-height: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
   padding-bottom: 100px;
 }
 .mobile-darwer {
@@ -248,7 +246,7 @@ table {
     transition: padding-left 0.5s;
   }
   .side-bar.show-drawer {
-    width: 250px;
+    width: 280px;
     left: 0;
     visibility: visible;
 
@@ -260,4 +258,9 @@ table {
   .drawer-close {
     display: block !important;
   }
+}
+
+.nexcite-btn {
+  background-color: #1176c8;
+  text-transform: capitalize;
 }

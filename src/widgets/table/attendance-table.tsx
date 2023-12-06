@@ -14,12 +14,7 @@ type Props = {
 };
 
 export default function AttendanceTable(props: Props) {
-  const pathName = usePathname();
-  const [isPadding, setTransition] = useTransition();
-
   const store = useStore();
-
-  const { replace } = useRouter();
 
   const columns = useMemo<MRT_ColumnDef<CommonType>[] | any>(
     () => [
@@ -101,11 +96,11 @@ export default function AttendanceTable(props: Props) {
 
   return (
     <div className="w-full">
-      <Card>
+      <Card variant="outlined">
         <CardHeader title={<Typography variant="h5">Attendance</Typography>} />
 
         <MaterialReactTable
-          state={{ showLoadingOverlay: isPadding }}
+          state={{}}
           columns={columns}
           data={props.attendance}
         />

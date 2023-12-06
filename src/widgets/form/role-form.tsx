@@ -9,16 +9,21 @@ import { useCallback, useMemo, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import LoadingButton from "@mui/lab/LoadingButton";
 import {
   Autocomplete,
   Card,
   CardContent,
   CardHeader,
+  Checkbox,
   TextField,
+  darken,
+  lighten,
+  styled,
 } from "@mui/material";
+import NexCiteButton from "@rms/components/button/nexcite-button";
 import { useStore } from "@rms/hooks/toast-hook";
 import { createRole, updateRole } from "@rms/service/role-service";
+import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";
 
 type Props = { value?: Prisma.RoleGetPayload<{}> };
 export default function RoleForm(props: Props) {
@@ -74,7 +79,7 @@ export default function RoleForm(props: Props) {
         onSubmit={form.handleSubmit(handleSubmit)}
         noValidate
       >
-        <Card>
+        <Card variant="outlined">
           <CardHeader title="Role Form" />
           <CardContent className="flex flex-col gap-5">
             <Controller
@@ -105,12 +110,25 @@ export default function RoleForm(props: Props) {
                   onChange={(e, v) => {
                     field.onChange(v);
                   }}
+                  limitTags={8}
+                  renderOption={(props, option, { selected }) => (
+                    <li {...props}>
+                      <Checkbox
+                        icon={<MdCheckBoxOutlineBlank />}
+                        checkedIcon={<MdCheckBox />}
+                        style={{ marginRight: 8 }}
+                        checked={selected}
+                      />
+                      {option}
+                    </li>
+                  )}
                   multiple
                   defaultValue={field.value}
                   size="small"
                   options={Object.keys($Enums.UserPermission).sort((a, b) =>
                     a.localeCompare(b)
                   )}
+                  disableCloseOnSelect
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -127,23 +145,24 @@ export default function RoleForm(props: Props) {
             />
           </CardContent>
           <div className="flex justify-end5 m-5 mt-2">
-            <LoadingButton
-              fullWidth
-              variant="contained"
-              className={
-                isPadding
-                  ? ""
-                  : "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
-              }
-              disableElevation
-              loading={isPadding}
-              type="submit"
-            >
-              Save
-            </LoadingButton>
+            <NexCiteButton isPadding={isPadding} />
           </div>
         </Card>
       </form>
     </>
   );
 }
+const GroupHeader = styled("div")(({ theme }) => ({
+  position: "sticky",
+  top: "-8px",
+  padding: "4px 10px",
+  color: theme.palette.primary.main,
+  backgroundColor:
+    theme.palette.mode === "light"
+      ? lighten(theme.palette.primary.light, 0.85)
+      : darken(theme.palette.primary.main, 0.8),
+}));
+
+const GroupItems = styled("ul")({
+  padding: 0,
+});

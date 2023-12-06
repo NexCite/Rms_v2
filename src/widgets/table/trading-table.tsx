@@ -46,7 +46,7 @@ type Props =
 
 export default function TradingTable(props: Props) {
   const pathName = usePathname();
-  const [isPadding, setPadding] = useTransition();
+  const [isPadding, setTransition] = useTransition();
 
   const [globalFilter, setGlobalFilter] = useState("");
 
@@ -90,7 +90,7 @@ export default function TradingTable(props: Props) {
                             `Do You sure you want to delete ${username} id:${id} `
                           );
                           if (isConfirm) {
-                            setPadding(async () => {
+                            setTransition(async () => {
                               var result;
 
                               switch (props.node) {

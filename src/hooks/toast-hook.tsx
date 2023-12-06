@@ -47,11 +47,9 @@ const AlertProvider: React.FC = () => {
           onClose={store?.CloseAlert}
           severity={store?.status === 200 ? "info" : "error"}
         >
-          <AlertTitle>
-            {store?.status === 200
-              ? store?.message ?? "Operation Successful"
-              : store?.message ?? "Operation Error"}
-          </AlertTitle>
+          <AlertTitle
+            dangerouslySetInnerHTML={{ __html: store.message }}
+          ></AlertTitle>
         </Alert>
       </div>
     </Snackbar>

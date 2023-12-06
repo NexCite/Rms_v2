@@ -6,22 +6,24 @@ import NextTopLoader from "nextjs-toploader";
 import prisma from "@rms/prisma/prisma";
 import { AlertProvider } from "@rms/hooks/toast-hook";
 import { getConfigId } from "@rms/lib/config";
+import { headers } from "next/headers";
+import { Metadata } from "next";
 
+export async function generateMetadata({ params }): Promise<Metadata> {
+  const url = new URL(
+    headers().get("url") || headers().get("referer") || headers().get("host")
+  );
+  url.pathname = `/logo.png`;
+  return {
+    title: "RMS Systeam",
+    icons: [url],
+  };
+}
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const config_id = await getConfigId();
-  var logo = "/logo.png";
-
-  if (config_id) {
-    var result = await prisma.config.findUnique({ where: { id: config_id } });
-    if (result) {
-      logo = result.logo;
-    }
-  }
-
   const v = env.vesrion;
 
   return (
@@ -30,10 +32,6 @@ export default async function RootLayout({
       suppressContentEditableWarning={true}
       suppressHydrationWarning={true}
     >
-      <head>
-        <link rel="icon" href={logo} />
-        <title>Rms System</title>
-      </head>
       <body>
         <ThemeProvider
           attribute="class"

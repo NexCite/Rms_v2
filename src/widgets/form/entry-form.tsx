@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { $Enums, Prisma } from "@prisma/client";
-import { Button } from "@rms/components/ui/button";
 
 import { FormatNumberWithFixed } from "@rms/lib/global";
 import { saveEntry } from "@rms/service/entry-service";
@@ -21,12 +20,14 @@ import {
   CardHeader,
   Divider,
   FormControl,
+  IconButton,
   Switch,
   TextField,
   Typography,
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import NexCiteButton from "@rms/components/button/nexcite-button";
 import Loading from "@rms/components/ui/loading";
 import NumericFormatCustom from "@rms/components/ui/text-field-number";
 import { useStore } from "@rms/hooks/toast-hook";
@@ -62,9 +63,12 @@ interface Props {
   activity?: Activity;
   isEditMode?: boolean;
   more_than_four_digit: {
+    type: $Enums.DigitType;
+
     three_digit: {
       id: number;
       name: string;
+      type: $Enums.DigitType;
     };
     id: number;
     name: string;
@@ -82,6 +86,8 @@ interface Props {
   three_digit: {
     id: number;
     name: string;
+    type: $Enums.DigitType;
+
     two_digit: {
       id: number;
       name: string;
@@ -91,6 +97,7 @@ interface Props {
   account_entry: {
     id: number;
     username: string;
+
     type: $Enums.Account_Entry_Type;
   }[];
 
@@ -174,6 +181,28 @@ export default function EntryForm(props: Props) {
         },
   });
   const watch = useWatch({ control: form.control });
+  const defaultSelect = useMemo(() => {
+    return watch.sub_entries.map((res, i) => ({
+      two_digit: res.two_digit_id
+        ? props.two_digit.find((digit) => digit.id === res.two_digit_id)
+        : null,
+      more_digit: res.more_than_four_digit_id
+        ? props.more_than_four_digit.find(
+            (digit) => digit.id === res.more_than_four_digit_id
+          )
+        : null,
+      account: res.account_entry_id
+        ? props.account_entry.find((digit) => digit.id === res.account_entry_id)
+        : null,
+      reference: res.reference_id
+        ? props.account_entry.find((digit) => digit.id === res.reference_id)
+        : null,
+
+      three_digit: res.three_digit_id
+        ? props.three_digit.find((digit) => digit.id === res.three_digit_id)
+        : null,
+    }));
+  }, [watch.sub_entries]);
 
   const defaultImage = useMemo(() => {
     const file = watch.file;
@@ -192,13 +221,13 @@ export default function EntryForm(props: Props) {
     watch.sub_entries.map((res) => {
       switch (res.type) {
         case "Credit":
-          totalCredit += res.amount;
+          totalCredit += parseFloat(res.amount as any);
           break;
         case "Debit":
-          totalDebit += res.amount;
+          totalDebit += parseFloat(res.amount as any);
           break;
         default:
-          totalUnkown += res.amount;
+          totalUnkown += parseFloat(res.amount as any);
           break;
       }
     });
@@ -303,7 +332,7 @@ export default function EntryForm(props: Props) {
   }, [props.currencies, watch.currency_id]);
   return (
     <form
-      className="max-w-[450px] m-auto"
+      className="max-w-[700px] m-auto"
       noValidate
       onSubmit={form.handleSubmit(handleSubmit)}
     >
@@ -407,20 +436,10 @@ export default function EntryForm(props: Props) {
           <CardHeader
             title={
               <div className="flex justify-between items-center flex-row">
-                <Typography variant="h5">Entry From</Typography>
-                <LoadingButton
-                  type="submit"
-                  variant="contained"
-                  className={
-                    isPadding
-                      ? ""
-                      : "hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white w-[150px]"
-                  }
-                  disableElevation
-                  loading={isPadding}
-                >
-                  Save
-                </LoadingButton>
+                <Typography variant="h5" className="w-full">
+                  Entry From
+                </Typography>
+                <NexCiteButton isPadding={isPadding} />
               </div>
             }
           ></CardHeader>
@@ -436,6 +455,7 @@ export default function EntryForm(props: Props) {
                     InputLabelProps={{ shrink: true }}
                     required
                     value={field.value}
+                    onChange={(e) => field.onChange(e.target.value)}
                     error={Boolean(fieldState.error)}
                     label="Title"
                     size="small"
@@ -461,6 +481,7 @@ export default function EntryForm(props: Props) {
                     size="small"
                     fullWidth
                     value={field.value}
+                    onChange={(e) => field.onChange(e.target.value)}
                     helperText={fieldState?.error?.message}
                   />
                 )}
@@ -481,6 +502,7 @@ export default function EntryForm(props: Props) {
                     size="small"
                     fullWidth
                     value={field.value}
+                    onChange={(e) => field.onChange(e.target.value)}
                     helperText={fieldState?.error?.message}
                   />
                 )}
@@ -706,19 +728,15 @@ export default function EntryForm(props: Props) {
                           <div className="mb-5 " key={i}>
                             <div className="flex justify-between items-center">
                               <h1>SubEntry: {i + 1}</h1>
-                              <Button
+                              <IconButton
                                 onClick={() => {
                                   field.onChange(
                                     field.value.filter((res, ii) => i !== ii)
                                   );
                                 }}
-                                size="sm"
-                                className="bg-black"
-                                color="dark"
-                                type="button"
                               >
                                 <X size="15" />
-                              </Button>
+                              </IconButton>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
@@ -746,22 +764,17 @@ export default function EntryForm(props: Props) {
                               />
 
                               <Autocomplete
-                                value={
-                                  !res.type
-                                    ? null
-                                    : { label: res.type, value: res.type }
-                                }
+                                value={res.type}
                                 size="small"
                                 onChange={(e, v) => {
-                                  field.value[i].type = v?.value as any;
+                                  field.value[i].type = v as any;
                                   field.onChange(field.value);
                                 }}
-                                options={Object.keys(
-                                  $Enums.DebitCreditType
-                                ).map((res) => ({ label: res, value: res }))}
+                                options={Object.keys($Enums.DebitCreditType)}
                                 isOptionEqualToValue={(ress) =>
-                                  res.type === (ress.value as any)
+                                  res.type === ress
                                 }
+                                getOptionLabel={(e) => e}
                                 renderInput={(params) => (
                                   <TextField
                                     required
@@ -787,170 +800,102 @@ export default function EntryForm(props: Props) {
 
                             <div className="grid grid-cols-1  md:grid-cols-2 gap-4 mt-3">
                               <Autocomplete
-                                isOptionEqualToValue={(ress) =>
-                                  ress.value === res.two_digit_id
-                                }
-                                value={
-                                  props.two_digit
-                                    .filter(
-                                      (ress) => ress.id === res.two_digit_id
-                                    )
-                                    .map((res) => ({
-                                      label: `(${res.id}) ${res.name}`,
-                                      value: res.id,
-                                    }))[0] || null
-                                }
+                                disablePortal
                                 size="small"
+                                groupBy={(e) => e.type}
+                                value={defaultSelect[i].two_digit}
                                 onChange={(e, v) => {
-                                  field.value[i].two_digit_id = v?.value;
+                                  field.value[i].more_than_four_digit_id = null;
+                                  field.value[i].account_entry_id = null;
+                                  field.value[i].three_digit_id = null;
+                                  field.value[i].two_digit_id = v?.id;
                                   field.onChange(field.value);
                                 }}
-                                options={props.two_digit.map((res) => ({
-                                  label: `(${res.id}) ${res.name}`,
-                                  value: res.id,
-                                }))}
-                                disabled={
-                                  res.three_digit_id
-                                    ? true
-                                    : res.more_than_four_digit_id
-                                    ? true
-                                    : res.account_entry_id
-                                    ? true
-                                    : false
+                                options={props.two_digit}
+                                getOptionLabel={(e) => `(${e.id}) ${e.name}`}
+                                isOptionEqualToValue={(ress) =>
+                                  ress.id === res.two_digit_id
                                 }
                                 renderInput={(params) => (
                                   <TextField
                                     {...params}
                                     InputLabelProps={{ shrink: true }}
-                                    label="Two And More"
+                                    label="Two Or More Digit"
                                   />
                                 )}
                               />
                               <Autocomplete
                                 disablePortal
+                                groupBy={(e) => e.type ?? ""}
                                 size="small"
-                                value={
-                                  props.three_digit
-                                    .filter(
-                                      (ress) => ress.id === res.three_digit_id
-                                    )
-                                    .map((res) => ({
-                                      label: `(${res.id}) ${res.name}`,
-                                      value: res.id,
-                                    }))[0] || null
-                                }
+                                value={defaultSelect[i].three_digit}
                                 onChange={(e, v) => {
-                                  field.value[i].three_digit_id = v?.value;
+                                  field.value[i].more_than_four_digit_id = null;
+                                  field.value[i].account_entry_id = null;
+                                  field.value[i].two_digit_id = null;
+                                  field.value[i].three_digit_id = v?.id;
                                   field.onChange(field.value);
                                 }}
-                                options={props.three_digit.map((res) => ({
-                                  label: `(${res.id}) ${res.name}`,
-                                  value: res.id,
-                                }))}
+                                options={props.three_digit}
+                                getOptionLabel={(e) => `(${e.id}) ${e.name}`}
                                 isOptionEqualToValue={(ress) =>
-                                  ress.value === res.three_digit_id
-                                }
-                                disabled={
-                                  res.two_digit_id
-                                    ? true
-                                    : res.more_than_four_digit_id
-                                    ? true
-                                    : res.account_entry_id
-                                    ? true
-                                    : false
+                                  ress.id === res.three_digit_id
                                 }
                                 renderInput={(params) => (
                                   <TextField
                                     {...params}
                                     InputLabelProps={{ shrink: true }}
-                                    label="Three And More"
+                                    label="Three Or More Digit"
                                   />
                                 )}
                               />
 
                               <Autocomplete
                                 disablePortal
+                                groupBy={(e) => e.type}
                                 size="small"
-                                value={
-                                  props.more_than_four_digit
-                                    .filter(
-                                      (ress) =>
-                                        ress.id === res.more_than_four_digit_id
-                                    )
-                                    .map((res) => ({
-                                      label: `(${res.id}) ${res.name}`,
-                                      value: res.id,
-                                    }))[0] || null
-                                }
+                                value={defaultSelect[i].more_digit}
                                 onChange={(e, v) => {
+                                  field.value[i].three_digit_id = null;
+                                  field.value[i].account_entry_id = null;
+                                  field.value[i].two_digit_id = null;
                                   field.value[i].more_than_four_digit_id =
-                                    v?.value;
+                                    v?.id;
                                   field.onChange(field.value);
                                 }}
-                                options={props.more_than_four_digit.map(
-                                  (res) => ({
-                                    label: `(${res.id}) ${res.name}`,
-                                    value: res.id,
-                                  })
-                                )}
-                                disabled={
-                                  res.three_digit_id
-                                    ? true
-                                    : res.two_digit_id
-                                    ? true
-                                    : res.account_entry_id
-                                    ? true
-                                    : false
-                                }
+                                options={props.more_than_four_digit}
+                                getOptionLabel={(e) => `(${e.id}) ${e.name}`}
                                 isOptionEqualToValue={(ress) =>
-                                  ress.value === res.more_than_four_digit_id
+                                  ress.id === res.more_than_four_digit_id
                                 }
                                 renderInput={(params) => (
                                   <TextField
                                     {...params}
                                     InputLabelProps={{ shrink: true }}
-                                    label="Four And More"
+                                    label="Four Or More Digit"
                                   />
                                 )}
                               />
-
                               <Autocomplete
+                                groupBy={(e) => e.type}
                                 disablePortal
                                 size="small"
-                                value={
-                                  props.account_entry
-                                    .filter(
-                                      (ress) => ress.id === res.account_entry_id
-                                    )
-                                    .map((res) => ({
-                                      label: `(${res.id}) ${res.username}`,
-                                      value: res.id,
-                                      group: res.type,
-                                    }))[0] || null
-                                }
+                                value={defaultSelect[i].account}
                                 onChange={(e, v) => {
-                                  field.value[i].account_entry_id = v?.value;
+                                  field.value[i].three_digit_id = null;
+                                  field.value[i].more_than_four_digit_id = null;
+                                  field.value[i].two_digit_id = null;
+                                  field.value[i].reference_id = null;
+
+                                  field.value[i].account_entry_id = v?.id;
                                   field.onChange(field.value);
                                 }}
-                                isOptionEqualToValue={(ress) =>
-                                  ress.value === res.account_entry_id
+                                options={props.account_entry}
+                                getOptionLabel={(e) =>
+                                  `(${e.id}) ${e.username}`
                                 }
-                                groupBy={(res) => res.group}
-                                options={props.account_entry.map((res) => ({
-                                  label: `(${res.id}) ${res.username}`,
-                                  value: res.id,
-                                  group: res.type,
-                                }))}
-                                disabled={
-                                  res.three_digit_id
-                                    ? true
-                                    : res.two_digit_id
-                                    ? true
-                                    : res.reference_id
-                                    ? true
-                                    : res.more_than_four_digit_id
-                                    ? true
-                                    : false
+                                isOptionEqualToValue={(ress) =>
+                                  ress.id === res.account_entry_id
                                 }
                                 renderInput={(params) => (
                                   <TextField
@@ -963,33 +908,23 @@ export default function EntryForm(props: Props) {
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mt-3">
                               <Autocomplete
+                                groupBy={(e) => e.type}
                                 disablePortal
-                                isOptionEqualToValue={(ress) =>
-                                  ress.value === res.reference_id
-                                }
                                 size="small"
-                                value={
-                                  props.account_entry
-                                    .filter(
-                                      (ress) => ress.id === res.reference_id
-                                    )
-                                    .map((res) => ({
-                                      label: `(${res.id}) ${res.username}`,
-                                      value: res.id,
-                                      group: res.type,
-                                    }))[0] || null
-                                }
+                                value={defaultSelect[i].reference}
                                 onChange={(e, v) => {
-                                  field.value[i].reference_id = v?.value;
+                                  field.value[i].account_entry_id = null;
+
+                                  field.value[i].reference_id = v?.id;
                                   field.onChange(field.value);
                                 }}
-                                groupBy={(res) => res.group}
-                                options={props.account_entry.map((res) => ({
-                                  label: `(${res.id}) ${res.username}`,
-                                  value: res.id,
-                                  group: res.type,
-                                }))}
-                                disabled={res.account_entry_id ? true : false}
+                                options={props.account_entry}
+                                getOptionLabel={(e) =>
+                                  `(${e.id}) ${e.username}`
+                                }
+                                isOptionEqualToValue={(ress) =>
+                                  ress.id === res.reference_id
+                                }
                                 renderInput={(params) => (
                                   <TextField
                                     {...params}
@@ -1015,10 +950,7 @@ export default function EntryForm(props: Props) {
                 marginTop: 10,
               }}
             >
-              <Button
-                type="button"
-                className="bg-black"
-                color="dark"
+              <IconButton
                 onClick={() => {
                   form.setValue(
                     "sub_entries",
@@ -1029,7 +961,7 @@ export default function EntryForm(props: Props) {
                 }}
               >
                 <PlusSquare />
-              </Button>
+              </IconButton>
             </div>
           </CardContent>
         </Card>

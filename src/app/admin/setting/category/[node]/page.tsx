@@ -14,14 +14,14 @@ export default async function page(props: {
     case "category":
       value = await prisma.category.findMany({
         where: { config_id },
-        orderBy: { modified_date: "desc" },
+        orderBy: { id: "desc" },
       });
       break;
 
     case "sub_category":
       value = await prisma.subCategory.findMany({
         where: { config_id },
-        orderBy: { modified_date: "desc" },
+        orderBy: { id: "desc" },
       });
       break;
     default:

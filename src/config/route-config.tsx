@@ -8,7 +8,6 @@ import routeJson from "@rms/route.json";
 
 export default async function GetRoutes() {
   const user = await getUserInfo();
-  await getUserFullInfo;
   if (!user) {
     cookies().delete("rms-token");
     redirect("/login");

@@ -17,7 +17,7 @@ export default async function page(props: {
       _count: true,
       two_digit: true,
     },
-    orderBy: { modified_date: "desc" },
+    orderBy: { id: "desc" },
     where: {
       type: props.params.node,
       config_id,

@@ -8,7 +8,7 @@ import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import Authorized from "@rms/components/ui/authorized";
 import { useStore } from "@rms/hooks/toast-hook";
 import { FormatNumberWithFixed } from "@rms/lib/global";
-import { deleteCurrency } from "@rms/service/currency-service";
+import { deleteCurrency, resetCurrency } from "@rms/service/currency-service";
 import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
 import Link from "next/link";
 
@@ -18,7 +18,7 @@ type Props = {
 
 export default function CurrencyTable(props: Props) {
   const pathName = usePathname();
-  const [isPadding, setPadding] = useTransition();
+  const [isPadding, setTransition] = useTransition();
   const store = useStore();
 
   const columns = useMemo<MRT_ColumnDef<Prisma.CurrencyGetPayload<{}>>[]>(
@@ -106,7 +106,7 @@ export default function CurrencyTable(props: Props) {
 
   return (
     <div className="w-full">
-      <Card>
+      <Card variant="outlined">
         <CardHeader
           title={<Typography variant="h5">Currency Table</Typography>}
         />
@@ -128,7 +128,26 @@ export default function CurrencyTable(props: Props) {
                 </MenuItem>
               </Link>
             </Authorized>,
+            <Authorized permission={"Reset"} key={2}>
+              <MenuItem
+                disabled={isPadding}
+                className="cursor-pointer"
+                onClick={() => {
+                  const isConfirm = confirm(
+                    `Do You sure you want to reset ${name} id:${id} `
+                  );
+                  if (isConfirm) {
+                    setTransition(async () => {
+                      const result = await resetCurrency(id);
 
+                      store.OpenAlert(result);
+                    });
+                  }
+                }}
+              >
+                {isPadding ? <> reseting...</> : "Reset"}
+              </MenuItem>
+            </Authorized>,
             <Authorized permission="Delete_Currency" key={3}>
               <MenuItem
                 disabled={isPadding}
@@ -138,7 +157,7 @@ export default function CurrencyTable(props: Props) {
                     `Do You sure you want to delete ${name} id:${id} `
                   );
                   if (isConfirm) {
-                    setPadding(async () => {
+                    setTransition(async () => {
                       const result = await deleteCurrency(id);
 
                       store.OpenAlert(result);

@@ -84,39 +84,33 @@
     "children": [
       {
         "index": 0,
-        "title": "Invoice",
+        "title": "Invoices",
         "path": "/admin/trading/invoice",
         "key": "View_Invoices",
         "addKey": "Add_Invoice"
       },
       {
         "index": 1,
-        "title": "Payment",
+        "title": "Payments",
         "path": "/admin/trading/payment",
         "key": "View_Payments",
         "addKey": "Add_Payment"
       },
       {
         "index": 2,
-        "title": "Trader",
+        "title": "Traders",
         "path": "/admin/trading/accounts/trader",
         "key": "View_Traders",
         "addKey": "Add_Trader"
       },
       {
         "index": 3,
-        "title": "Account",
+        "title": "Accounts",
         "path": "/admin/trading/accounts/account",
         "key": "View_Account",
         "addKey": "Add_Accounts"
       },
-      {
-        "index": 3,
-        "title": "Account",
-        "path": "/admin/trading/accounts/account",
-        "key": "View_Traders",
-        "addKey": "Add_Account"
-      },
+
       {
         "index": 4,
         "title": "Broker",
@@ -132,7 +126,7 @@
     "index": 2,
     "icon": "Landmark",
 
-    "title": "Payment Box",
+    "title": "Payments Box",
     "children": [
       {
         "index": 0,
@@ -143,7 +137,7 @@
       },
       {
         "index": 1,
-        "title": "Equity",
+        "title": "Equities",
         "path": "/admin/payment_box/equity/[id]",
         "key": "View_Equity",
         "hide": true
@@ -166,14 +160,14 @@
       },
       {
         "index": 1,
-        "title": "Schedule",
+        "title": "Schedules",
         "path": "/admin/human_resources/schedule",
         "key": "View_Schedules",
         "addKey": "Add_Schedule"
       },
       {
         "index": 1,
-        "title": "Vacation",
+        "title": "Vacations",
         "path": "/admin/human_resources/vacation",
         "key": "View_Vacations",
         "addKey": "Add_Vacation"
@@ -184,12 +178,12 @@
   },
   {
     "index": 4,
-    "title": "Setting",
+    "title": "Settings",
     "end": true,
     "children": [
       {
         "index": 0,
-        "title": "Currency",
+        "title": "Currencies",
         "path": "/admin/setting/currency",
         "key": "View_Currencies",
         "addKey": "Add_Currency",
@@ -197,7 +191,7 @@
       },
       {
         "index": 1,
-        "title": "User",
+        "title": "Users",
         "path": "/admin/setting/user",
         "key": "View_Users",
         "addKey": "Add_User",
@@ -219,7 +213,7 @@
       },
       {
         "index": 4,
-        "title": "Category",
+        "title": "Categories",
         "path": "/admin/setting/category/category",
         "key": "View_Categories",
         "addKey": "Add_Category",
@@ -227,7 +221,7 @@
       },
       {
         "index": 5,
-        "title": "SubCategory",
+        "title": "Sub Categories",
         "path": "/admin/setting/category/sub_category",
         "key": "View_SubCategories",
         "addKey": "Add_SubCategory",
@@ -251,7 +245,7 @@
       },
       {
         "index": 8,
-        "title": "Role",
+        "title": "Roles",
         "path": "/admin/setting/role",
         "key": "View_Role",
         "addKey": "Add_Role",

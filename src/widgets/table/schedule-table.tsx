@@ -7,7 +7,10 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Prisma } from "@prisma/client";
 import Authorized from "@rms/components/ui/authorized";
 import { useStore } from "@rms/hooks/toast-hook";
-import { deleteScheduleById } from "@rms/service/schedule-service";
+import {
+  deleteScheduleById,
+  resetSchedule,
+} from "@rms/service/schedule-service";
 import dayjs from "dayjs";
 import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
 import Link from "next/link";
@@ -105,7 +108,7 @@ export default function ScheduleTable(props: Props) {
 
   return (
     <div className="w-full">
-      <Card>
+      <Card variant="outlined">
         <CardHeader
           title={<Typography variant="h5">Schedule Table</Typography>}
         />
@@ -168,6 +171,26 @@ export default function ScheduleTable(props: Props) {
                   View
                 </MenuItem>
               </Link>
+            </Authorized>,
+            <Authorized permission={"Reset"} key={2}>
+              <MenuItem
+                disabled={isPadding}
+                className="cursor-pointer"
+                onClick={() => {
+                  const isConfirm = confirm(
+                    `Do You sure you want to reset  id:${id} `
+                  );
+                  if (isConfirm) {
+                    setTransition(async () => {
+                      const result = await resetSchedule(id);
+
+                      store.OpenAlert(result);
+                    });
+                  }
+                }}
+              >
+                {isPadding ? <> reseting...</> : "Reset"}
+              </MenuItem>
             </Authorized>,
             <Authorized permission="Delete_Schedule" key={3}>
               <MenuItem

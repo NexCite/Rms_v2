@@ -84,3 +84,19 @@ export async function deleteAccountEntry(
     { id }
   );
 }
+
+export async function resetAcountEntry(id: number) {
+  return handlerServiceAction(
+    async (info, config_id) => {
+      await prisma.account_Entry.update({
+        where: { id, config_id },
+        data: {
+          modified_date: new Date(),
+          create_date: new Date(),
+        },
+      });
+    },
+    "Reset",
+    true
+  );
+}

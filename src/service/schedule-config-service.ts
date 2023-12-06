@@ -89,3 +89,18 @@ export async function deleteScheuleConfig(id: number) {
     { id }
   );
 }
+export async function resetScheduleConfig(id: number) {
+  return handlerServiceAction(
+    async (info, config_id) => {
+      await prisma.scheduleConfig.update({
+        where: { id, config_id },
+        data: {
+          modified_date: new Date(),
+          create_date: new Date(),
+        },
+      });
+    },
+    "Reset",
+    true
+  );
+}

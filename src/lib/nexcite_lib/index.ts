@@ -5,4 +5,5 @@ module NexCite {
   export class UploadService extends NextCiteUpload {}
   export class MediaService extends NexCiteMedia {}
 }
+
 export default NexCite;

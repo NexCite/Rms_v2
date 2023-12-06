@@ -81,7 +81,7 @@ export default function LogTable(props: Props) {
 
   return (
     <div className="w-full">
-      <Card>
+      <Card variant="outlined">
         <CardHeader
           title={
             <Typography variant="h5" color="blue-gray">

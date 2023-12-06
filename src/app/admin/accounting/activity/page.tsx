@@ -6,7 +6,7 @@ import React from "react";
 export default async function page() {
   const result = await getActivities();
 
-  return result.status !== 200 ? (
+  return result?.status !== 200 ? (
     <div>{result.message}</div>
   ) : (
     <ActivityTable

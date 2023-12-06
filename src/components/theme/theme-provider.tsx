@@ -24,16 +24,15 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   return (
     <StyleSheetManager sheet={styledComponentsStyleSheet.instance}>
       <NextThemesProvider {...props}>
-        <>
-          {children}
-          <Next13ProgressBar
-            height="3px"
-            style=""
-            color="black"
-            options={{ showSpinner: false }}
-            showOnShallow
-          />
-        </>
+        <>{children}</>
+        <Next13ProgressBar
+          color="#29D"
+          startPosition={10}
+          options={{}}
+          stopDelayMs={200}
+          height={3}
+          showOnShallow={true}
+        />
       </NextThemesProvider>
     </StyleSheetManager>
   );

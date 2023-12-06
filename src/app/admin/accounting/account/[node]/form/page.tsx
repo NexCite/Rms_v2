@@ -50,9 +50,15 @@ export default async function page(props: {
       <Account_EntryForm
         node={props.params.node}
         account={value}
-        three_digit={three_digit}
-        more_digit={more_digit}
-        two_digit={two_digit}
+        three_digit={three_digit.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
+        more_digit={more_digit.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
+        two_digit={two_digit.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
       />
     </>
   );

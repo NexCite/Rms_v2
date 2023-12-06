@@ -126,3 +126,18 @@ export async function deleteEquityById(
     { id }
   );
 }
+export async function resetEquity(id: number) {
+  return handlerServiceAction(
+    async (info, config_id) => {
+      await prisma.equity.update({
+        where: { id, config_id },
+        data: {
+          modified_date: new Date(),
+          create_date: new Date(),
+        },
+      });
+    },
+    "Reset",
+    true
+  );
+}

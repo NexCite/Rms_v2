@@ -60,8 +60,9 @@ export default async function page(props: {
       two_digit: { select: { name: true, id: true } },
       name: true,
       id: true,
+      type: true,
     },
-    orderBy: { modified_date: "desc" },
+    orderBy: { id: "desc" },
   });
   const more_than_four_digit = await prisma.more_Than_Four_Digit.findMany({
     where: {
@@ -70,16 +71,17 @@ export default async function page(props: {
       three_digit: { status: await getUserStatus() },
     },
     select: {
-      three_digit: { select: { name: true, id: true } },
+      three_digit: { select: { name: true, id: true, type: true } },
       name: true,
       id: true,
+      type: true,
     },
-    orderBy: { modified_date: "desc" },
+    orderBy: { id: "desc" },
   });
   const two_digits = await prisma.two_Digit.findMany({
     where: { config_id, status: await getUserStatus() },
 
-    orderBy: { modified_date: "desc" },
+    orderBy: { id: "desc" },
   });
   const account_entry = await prisma.account_Entry.findMany({
     where: { config_id, status: await getUserStatus() },
@@ -88,13 +90,13 @@ export default async function page(props: {
       type: true,
       id: true,
     },
-    orderBy: { modified_date: "desc" },
+    orderBy: { id: "desc" },
   });
   const currencies = await prisma.currency.findMany({
     where: {
       config_id,
     },
-    orderBy: { modified_date: "desc" },
+    orderBy: { id: "desc" },
   });
   if (activity_id) {
     const result = await getActivities(activity_id, config_id);
@@ -108,10 +110,18 @@ export default async function page(props: {
         isEditMode={id ? true : false}
         entry={entry}
         currencies={currencies}
-        three_digit={three_digit}
-        account_entry={account_entry}
-        more_than_four_digit={more_than_four_digit}
-        two_digit={two_digits}
+        three_digit={three_digit.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
+        account_entry={account_entry.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
+        more_than_four_digit={more_than_four_digit.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
+        two_digit={two_digits.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
       />
     </div>
   );

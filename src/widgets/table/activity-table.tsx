@@ -16,7 +16,7 @@ type Props = {
 };
 
 export default function ActivityTable(props: Props) {
-  const [isPadding, setPadding] = useTransition();
+  const [isPadding, setTransition] = useTransition();
 
   const store = useStore();
 
@@ -32,7 +32,7 @@ export default function ActivityTable(props: Props) {
           align: "center",
         },
         Cell: ({ row: { original } }) => (
-          <div
+          <span
             className={`text-center rounded-sm ${
               new Date(original.create_date).toLocaleTimeString() !==
               new Date(original.last_modified_date).toLocaleTimeString()
@@ -41,8 +41,29 @@ export default function ActivityTable(props: Props) {
             }`}
           >
             {original.id}
-          </div>
+          </span>
         ),
+      },
+
+      {
+        accessorKey: "client.id",
+        header: "Client Id",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+      },
+      {
+        accessorKey: "account_id",
+        header: "Account Id",
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
       },
       {
         accessorKey: "type",
@@ -84,16 +105,6 @@ export default function ActivityTable(props: Props) {
       },
 
       {
-        accessorKey: "client.id",
-        header: "Client Id",
-        muiTableHeadCellProps: {
-          align: "center",
-        },
-        muiTableBodyCellProps: {
-          align: "center",
-        },
-      },
-      {
         accessorKey: "client.username",
         header: "Username",
         muiTableHeadCellProps: {
@@ -131,7 +142,7 @@ export default function ActivityTable(props: Props) {
     []
   );
   return (
-    <Card>
+    <Card variant="outlined">
       <CardHeader
         title={<Typography variant="h5">Activies Table</Typography>}
       />
@@ -162,7 +173,7 @@ export default function ActivityTable(props: Props) {
                   `Do You sure you want to delete ${description} id:${id} `
                 );
                 if (isConfirm) {
-                  setPadding(async () => {
+                  setTransition(async () => {
                     var result = await confirmActivity({
                       id: id,
                       status: ActivityStatus.Closed,

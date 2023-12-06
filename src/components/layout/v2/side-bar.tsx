@@ -7,13 +7,13 @@ import {
   ListItemButton,
 } from "@mui/material";
 import RouteModel from "@rms/models/RouteModel";
-import { X } from "lucide-react";
+import { LogOut, X } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useCallback, useMemo } from "react";
-import { MdExpandLess, MdExpandMore } from "react-icons/md";
+import { MdExpandLess, MdExpandMore, MdLogout } from "react-icons/md";
 type Props = {
   routes: RouteModel[];
   config: {
@@ -56,11 +56,11 @@ export default function SideBarV2(props: Props) {
   );
 
   return (
-    <div className="mt-3 overflow-y-auto h-full justify-between flex flex-col pb-5">
+    <div className=" overflow-y-auto h-full justify-between flex flex-col pb-5">
       {props.routes.filter((res) => !res.end).length > 0 && (
         <div className=" flex flex-col  ">
           <div className="flex  justify-between   p-1 ">
-            <div className="flex gap-5 items-center">
+            <div className="flex gap-5 items-center justify-center">
               <Image
                 src={`/api/media/${props.config.logo}`}
                 alt={props.config.name}
@@ -68,7 +68,7 @@ export default function SideBarV2(props: Props) {
                 height={80}
                 className="rounded-full w-12 h-12 mb-3 ml-2 "
               />
-              <h1 className="text-xl">{props.config.name}</h1>
+              <h1 className="text-2xl">{props.config.name}</h1>
             </div>
             <IconButton
               className="drawer-close"
@@ -119,9 +119,9 @@ export default function SideBarV2(props: Props) {
                               key={res.title}
                               href={res.path}
                               as={res.path}
-                              className={`flex items-center hover:bg-gray-200 gap-2 px-3 py-2 rounded-md  ${
+                              className={`flex items-center hover:bg-[#3867d6]  hover:text-[white] gap-2 px-3 py-2 rounded-md  ${
                                 pathName.startsWith(res.path)
-                                  ? "bg-gray-200"
+                                  ? "bg-[#3867d6] text-[white]"
                                   : ""
                               }`}
                             >
@@ -164,6 +164,15 @@ export default function SideBarV2(props: Props) {
             ))}
         </div>
       )}
+
+      <div>
+        <Link
+          href={"/logout"}
+          className="flex items-center w-full hover:bg-gray-200 gap-2 px-3 py-2 rounded-md justify-center "
+        >
+          <h1>Logout</h1> <MdLogout />
+        </Link>
+      </div>
     </div>
   );
 }

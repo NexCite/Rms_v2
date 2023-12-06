@@ -5,7 +5,6 @@ import { createUser, updateUser } from "@rms/service/user-service";
 
 import { useRouter } from "next/navigation";
 
-import LoadingButton from "@mui/lab/LoadingButton";
 import {
   Autocomplete,
   Card,
@@ -19,6 +18,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import NexCiteButton from "@rms/components/button/nexcite-button";
 import { useStore } from "@rms/hooks/toast-hook";
 import Countries from "@rms/lib/country";
 import { useCallback, useMemo, useTransition } from "react";
@@ -383,20 +383,7 @@ export default function UserFormComponent(props: Props) {
             )}
           />
         </CardContent>
-        <LoadingButton
-          variant="contained"
-          fullWidth
-          className={
-            isPadding
-              ? ""
-              : "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
-          }
-          disableElevation
-          type="submit"
-          loading={isPadding}
-        >
-          Save
-        </LoadingButton>
+        <NexCiteButton isPadding={isPadding} />
       </Card>
     </form>
   );

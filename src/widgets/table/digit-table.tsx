@@ -4,15 +4,21 @@ import { Prisma } from "@prisma/client";
 import { usePathname } from "next/navigation";
 import { useMemo, useTransition } from "react";
 
-import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
+import { Card, CardHeader, Divider, MenuItem, Typography } from "@mui/material";
+import ExportData from "@rms/components/other/export-data";
 import Authorized from "@rms/components/ui/authorized";
 import { useStore } from "@rms/hooks/toast-hook";
 import {
   deleteMoreDigit,
   deleteThreeDigit,
   deleteTwoDigit,
+  resetDigit,
 } from "@rms/service/digit-service";
-import { MaterialReactTable, type MRT_ColumnDef } from "material-react-table";
+import {
+  MaterialReactTable,
+  createMRTColumnHelper,
+  useMaterialReactTable,
+} from "material-react-table";
 import Link from "next/link";
 
 type Props = {
@@ -24,26 +30,20 @@ type Props = {
   };
 };
 type CommonNode = "two" | "three" | "more";
+const columnHelper = createMRTColumnHelper<any>();
 
 export default function DigitTable(props: Props) {
   const pathName = usePathname();
-  const [isPadding, setPadding] = useTransition();
+  const [isPadding, setTransition] = useTransition();
 
   const store = useStore();
-
-  const columns = useMemo<MRT_ColumnDef<any[]>>(
+  const columns = useMemo(
     () =>
       (
         [
-          {
-            accessorKey: "id",
+          columnHelper.accessor("id", {
             header: "ID",
-            muiTableHeadCellProps: {
-              align: "center",
-            },
-            muiTableBodyCellProps: {
-              align: "center",
-            },
+
             Cell: ({ row: { original } }) => (
               <div
                 className={`text-center rounded-sm ${
@@ -58,79 +58,169 @@ export default function DigitTable(props: Props) {
                 {original.id}
               </div>
             ),
-          },
+          }),
 
-          {
-            accessorKey: "name",
+          columnHelper.accessor("name", {
             header: "Name",
-            muiTableHeadCellProps: {
-              align: "center",
-            },
-            muiTableBodyCellProps: {
-              align: "center",
-            },
-          },
-          {
-            accessorKey: "type",
+          }),
+          columnHelper.accessor("type", {
             header: "Type",
-            muiTableHeadCellProps: {
-              align: "center",
-            },
-            muiTableBodyCellProps: {
-              align: "center",
-            },
-          },
-          {
-            accessorKey: "debit_credit",
+          }),
+          columnHelper.accessor("debit_credit", {
             header: "Debit/Credit",
-            muiTableHeadCellProps: {
-              align: "center",
-            },
-            muiTableBodyCellProps: {
-              align: "center",
-            },
-          },
+          }),
         ] as any
       )
         .concat(
           props.node !== "two"
             ? ([
-                {
-                  accessorKey: props.node === "three" ? "two" : "three",
-                  header: props.node === "three" ? "Two Digit" : "Three Digit",
-                  accessorFn: (p) =>
-                    `(${p.two_digit?.id ?? ""}${p.three_digit?.id ?? ""}) ${
-                      p.two_digit?.name ?? ""
-                    }${p.three_digit?.name ?? ""}  `,
-                  muiTableHeadCellProps: {
-                    align: "center",
-                  },
-                  muiTableBodyCellProps: {
-                    align: "center",
-                  },
-                },
+                columnHelper.accessor(
+                  (row) =>
+                    `(${row.two_digit?.id ?? ""}${row.three_digit?.id ?? ""}) ${
+                      row.two_digit?.name ?? ""
+                    }${row.three_digit?.name ?? ""}  `,
+                  {
+                    id: props.node === "three" ? "two" : "three",
+                    header:
+                      props.node === "three" ? "Two Digit" : "Three Digit",
+                  }
+                ),
               ] as any)
             : []
         )
         .concat([
-          {
-            accessorKey: "create_date",
-            header: "Create Date",
+          columnHelper.accessor(
+            (row) => row.create_date?.toLocaleDateString(),
+            {
+              id: "create_date",
+              header: "Create Date",
+            }
+          ),
 
-            accessorFn: (p) => p.create_date?.toLocaleDateString(),
-          },
-
-          {
-            accessorKey: "modified_date",
-            header: "Modified Date",
-
-            accessorFn: (p) => p.modified_date?.toLocaleDateString(),
-          },
-        ] as any),
+          columnHelper.accessor(
+            (row) => row.modified_date?.toLocaleDateString(),
+            {
+              id: "modified_date",
+              header: "Modified Date",
+            }
+          ),
+        ]),
     [props.node]
   );
+
+  const table = useMaterialReactTable({
+    columns,
+    data: props.value[props.node],
+    enableRowActions: true,
+    muiTableHeadCellProps: {
+      align: "center",
+    },
+    muiTableBodyCellProps: {
+      align: "center",
+    },
+    enableRowSelection: true,
+    enableSelectAll: true,
+    editDisplayMode: "row",
+
+    renderRowActionMenuItems({
+      row: {
+        original: { name, id },
+      },
+    }) {
+      return [
+        <Authorized
+          key={1}
+          permission={
+            props.node === "two"
+              ? "Edit_Two_Digit"
+              : props.node === "three"
+              ? "Edit_Three_Digit"
+              : "Edit_More_Than_Four_Digit"
+          }
+        >
+          <Link href={pathName + "/form?id=" + id}>
+            <MenuItem className="cursor-pointer" disabled={isPadding}>
+              Edit
+            </MenuItem>
+          </Link>
+        </Authorized>,
+        <Authorized permission={"Reset"} key={2}>
+          <MenuItem
+            disabled={isPadding}
+            className="cursor-pointer"
+            onClick={() => {
+              const isConfirm = confirm(
+                `Do You sure you want to reset ${name} id:${id} `
+              );
+              if (isConfirm) {
+                setTransition(async () => {
+                  const result = await resetDigit(id, props.node);
+
+                  store.OpenAlert(result);
+                });
+              }
+            }}
+          >
+            {isPadding ? <> reseting...</> : "Reset"}
+          </MenuItem>
+        </Authorized>,
+        <Authorized
+          key={2}
+          permission={
+            props.node === "two"
+              ? "Delete_Two_Digit"
+              : props.node === "three"
+              ? "Delete_Three_Digit"
+              : "Delete_More_Than_Four_Digit"
+          }
+        >
+          <MenuItem
+            disabled={isPadding}
+            className="cursor-pointer"
+            onClick={() => {
+              const isConfirm = confirm(
+                `Do You sure you want to delete ${name} id:${id} `
+              );
+              if (isConfirm) {
+                setTransition(async () => {
+                  const result =
+                    props.node === "two"
+                      ? await deleteTwoDigit(id)
+                      : props.node === "three"
+                      ? await deleteThreeDigit(id)
+                      : await deleteMoreDigit(id);
+
+                  store.OpenAlert(result);
+                });
+              }
+            }}
+          >
+            {isPadding ? <> deleting...</> : "Delete"}
+          </MenuItem>
+        </Authorized>,
+      ];
+    },
+    renderTopToolbarCustomActions: ({ table }) => (
+      <ExportData data={props.value[props.node]} table={table} />
+    ),
+
+    initialState: {
+      columnVisibility: {
+        status: false,
+        email: false,
+        gender: false,
+        country: false,
+        address1: false,
+        address2: false,
+      },
+      pagination: {
+        pageIndex: 0,
+        pageSize: 100,
+      },
+    },
+  });
   return (
-    <Card>
+    <Card variant="outlined">
       <CardHeader
         title={
           <Typography variant="h5">
@@ -143,70 +233,9 @@ export default function DigitTable(props: Props) {
           </Typography>
         }
       />
+      <Divider />
 
-      <MaterialReactTable
-        initialState={{ pagination: { pageSize: 100, pageIndex: 0 } }}
-        state={{ showProgressBars: isPadding }}
-        enableRowActions
-        columns={columns as any}
-        renderRowActionMenuItems={({
-          row: {
-            original: { id, name },
-          },
-        }) => [
-          <Authorized
-            key={1}
-            permission={
-              props.node === "two"
-                ? "Edit_Two_Digit"
-                : props.node === "three"
-                ? "Edit_Three_Digit"
-                : "Edit_More_Than_Four_Digit"
-            }
-          >
-            <Link href={pathName + "/form?id=" + id}>
-              <MenuItem className="cursor-pointer" disabled={isPadding}>
-                Edit
-              </MenuItem>
-            </Link>
-          </Authorized>,
-          <Authorized
-            key={2}
-            permission={
-              props.node === "two"
-                ? "Delete_Two_Digit"
-                : props.node === "three"
-                ? "Delete_Three_Digit"
-                : "Delete_More_Than_Four_Digit"
-            }
-          >
-            <MenuItem
-              disabled={isPadding}
-              className="cursor-pointer"
-              onClick={() => {
-                const isConfirm = confirm(
-                  `Do You sure you want to delete ${name} id:${id} `
-                );
-                if (isConfirm) {
-                  setPadding(async () => {
-                    const result =
-                      props.node === "two"
-                        ? await deleteTwoDigit(id)
-                        : props.node === "three"
-                        ? await deleteThreeDigit(id)
-                        : await deleteMoreDigit(id);
-
-                    store.OpenAlert(result);
-                  });
-                }
-              }}
-            >
-              {isPadding ? <> deleting...</> : "Delete"}
-            </MenuItem>
-          </Authorized>,
-        ]}
-        data={props.value[props.node]}
-      />
+      <MaterialReactTable table={table} />
     </Card>
   );
 }

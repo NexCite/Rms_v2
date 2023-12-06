@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { $Enums, Prisma } from "@prisma/client";
 
-import LoadingButton from "@mui/lab/LoadingButton";
 import {
   Autocomplete,
   Card,
@@ -19,18 +18,18 @@ import {
 } from "@mui/material";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import NexCiteButton from "@rms/components/button/nexcite-button";
 import { Alert } from "@rms/components/ui/alert";
 import { useStore } from "@rms/hooks/toast-hook";
+import { fileZod, mediaZod } from "@rms/lib/common";
 import { createVacation, updateVacation } from "@rms/service/vacation-service";
 import dayjs from "dayjs";
+import { MuiFileInput } from "mui-file-input";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
-import UploadWidget from "../upload/upload-widget";
-import { fileZod, mediaZod } from "@rms/lib/common";
-import { MuiFileInput } from "mui-file-input";
 import { MdAttachFile, MdClose } from "react-icons/md";
+import { z } from "zod";
 
 interface Props {
   id?: number;
@@ -369,20 +368,7 @@ export default function VacationForm(props: Props) {
                 />
               </div>
             </CardContent>
-            <LoadingButton
-              variant="contained"
-              fullWidth
-              className={
-                isPadding
-                  ? ""
-                  : "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
-              }
-              disableElevation
-              type="submit"
-              loading={isPadding}
-            >
-              Save
-            </LoadingButton>
+            <NexCiteButton isPadding={isPadding} />
           </Card>
         </form>
       </LocalizationProvider>

@@ -171,3 +171,18 @@ export async function deleteScheduleById(
     { id }
   );
 }
+export async function resetSchedule(id: number) {
+  return handlerServiceAction(
+    async (info, config_id) => {
+      await prisma.schedule.update({
+        where: { id, config_id },
+        data: {
+          modified_date: new Date(),
+          create_date: new Date(),
+        },
+      });
+    },
+    "Reset",
+    true
+  );
+}

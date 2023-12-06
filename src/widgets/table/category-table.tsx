@@ -7,7 +7,10 @@ import { useMemo, useTransition } from "react";
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import Authorized from "@rms/components/ui/authorized";
 import { useStore } from "@rms/hooks/toast-hook";
-import { deleteCategoryById } from "@rms/service/category-service";
+import {
+  deleteCategoryById,
+  resetCategory,
+} from "@rms/service/category-service";
 import { deleteSubCategoryById } from "@rms/service/sub-category-service";
 import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
 import Link from "next/link";
@@ -24,10 +27,9 @@ type Props =
 
 export default function CategoryTable(props: Props) {
   const pathName = usePathname();
-  const [isPadding, setPadding] = useTransition();
+  const [isPadding, setTransition] = useTransition();
 
   const store = useStore();
-  const { push } = useRouter();
 
   const columns = useMemo<MRT_ColumnDef<any>[]>(
     () => [
@@ -93,7 +95,7 @@ export default function CategoryTable(props: Props) {
   );
 
   return (
-    <Card>
+    <Card variant="outlined">
       <CardHeader
         title={
           <Typography variant="h5">
@@ -118,7 +120,26 @@ export default function CategoryTable(props: Props) {
               </MenuItem>
             </Link>
           </Authorized>,
+          <Authorized permission={"Reset"} key={2}>
+            <MenuItem
+              disabled={isPadding}
+              className="cursor-pointer"
+              onClick={() => {
+                const isConfirm = confirm(
+                  `Do You sure you want to reset ${name} id:${id} `
+                );
+                if (isConfirm) {
+                  setTransition(async () => {
+                    const result = await resetCategory(id);
 
+                    store.OpenAlert(result);
+                  });
+                }
+              }}
+            >
+              {isPadding ? <> reseting...</> : "Reset"}
+            </MenuItem>
+          </Authorized>,
           <Authorized permission="Delete_Currency" key={3}>
             <MenuItem
               disabled={isPadding}
@@ -128,7 +149,7 @@ export default function CategoryTable(props: Props) {
                   `Do You sure you want to delete ${name} id:${id} `
                 );
                 if (isConfirm) {
-                  setPadding(async () => {
+                  setTransition(async () => {
                     var result;
                     if (props.node === "category") {
                       result = await deleteCategoryById(id);

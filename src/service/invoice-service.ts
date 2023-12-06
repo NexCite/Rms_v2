@@ -88,3 +88,18 @@ export async function deleteInvoiceById(
     { id }
   );
 }
+export async function resetInvoice(id: number) {
+  return handlerServiceAction(
+    async (info, config_id) => {
+      await prisma.invoice.update({
+        where: { id, config_id },
+        data: {
+          modified_date: new Date(),
+          create_date: new Date(),
+        },
+      });
+    },
+    "Reset",
+    true
+  );
+}

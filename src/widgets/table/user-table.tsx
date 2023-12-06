@@ -7,7 +7,7 @@ import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import { Prisma } from "@prisma/client";
 import Authorized from "@rms/components/ui/authorized";
 import { useStore } from "@rms/hooks/toast-hook";
-import { deleteUserById } from "@rms/service/user-service";
+import { deleteUserById, resetUser } from "@rms/service/user-service";
 import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
 import Link from "next/link";
 
@@ -17,7 +17,7 @@ type Props = {
 
 export default function UserTable(props: Props) {
   const pathName = usePathname();
-  const [isPadding, setPadding] = useTransition();
+  const [isPadding, setTransition] = useTransition();
 
   const store = useStore();
 
@@ -191,7 +191,7 @@ export default function UserTable(props: Props) {
 
   return (
     <div>
-      <Card>
+      <Card variant="outlined">
         <CardHeader title={<Typography variant="h5">User Table</Typography>} />
 
         <MaterialReactTable
@@ -212,7 +212,26 @@ export default function UserTable(props: Props) {
                 </MenuItem>
               </Link>
             </Authorized>,
+            <Authorized permission={"Reset"} key={2}>
+              <MenuItem
+                disabled={isPadding}
+                className="cursor-pointer"
+                onClick={() => {
+                  const isConfirm = confirm(
+                    `Do You sure you want to reset  id:${id} `
+                  );
+                  if (isConfirm) {
+                    setTransition(async () => {
+                      const result = await resetUser(id);
 
+                      store.OpenAlert(result);
+                    });
+                  }
+                }}
+              >
+                {isPadding ? <> reseting...</> : "Reset"}
+              </MenuItem>
+            </Authorized>,
             <Authorized permission="Delete_User" key={3}>
               <MenuItem
                 disabled={isPadding}
@@ -222,7 +241,7 @@ export default function UserTable(props: Props) {
                     `Do You sure you want to delete ${username} id:${id} `
                   );
                   if (isConfirm) {
-                    setPadding(async () => {
+                    setTransition(async () => {
                       const result = await deleteUserById(id);
 
                       store.OpenAlert(result);

@@ -12,7 +12,6 @@ import {
   updateSubCategory,
 } from "@rms/service/sub-category-service";
 
-import LoadingButton from "@mui/lab/LoadingButton";
 import {
   Autocomplete,
   Card,
@@ -20,6 +19,7 @@ import {
   Divider,
   TextField,
 } from "@mui/material";
+import NexCiteButton from "@rms/components/button/nexcite-button";
 import { useStore } from "@rms/hooks/toast-hook";
 
 type Props =
@@ -204,20 +204,7 @@ export default function CategoryForm(props: Props) {
             />
           )}
 
-          <LoadingButton
-            variant="contained"
-            fullWidth
-            className={
-              isPadding
-                ? ""
-                : "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
-            }
-            disableElevation
-            type="submit"
-            loading={isPadding}
-          >
-            Save
-          </LoadingButton>
+          <NexCiteButton isPadding={isPadding} />
         </CardContent>
       </Card>
     </form>

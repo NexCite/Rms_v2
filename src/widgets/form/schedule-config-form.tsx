@@ -1,9 +1,9 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import LoadingButton from "@mui/lab/LoadingButton";
 import { LocalizationProvider, TimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Prisma } from "@prisma/client";
+import NexCiteButton from "@rms/components/button/nexcite-button";
 import { useStore } from "@rms/hooks/toast-hook";
 import { updateScheuleConfig } from "@rms/service/schedule-config-service";
 import dayjs from "dayjs";
@@ -52,14 +52,7 @@ export default function ScheduleConfigForm(props: Props) {
         className="flex flex-col gap-5"
       >
         <div className="flex flex-row-reverse">
-          <LoadingButton
-            loading={isPadding}
-            className="hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
-            variant="contained"
-            type="submit"
-          >
-            Save
-          </LoadingButton>
+          <NexCiteButton isPadding={isPadding} />
         </div>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <Controller

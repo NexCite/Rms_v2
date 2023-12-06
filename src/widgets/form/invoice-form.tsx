@@ -182,7 +182,7 @@ export default function InvoiceForm(props: Props) {
       >
         <Form {...form}>
           <form className="card" autoComplete="off">
-            <Card>
+            <Card variant="outlined">
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <h1 className="font-medium text-2xl">Invoice Form</h1>

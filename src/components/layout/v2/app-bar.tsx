@@ -1,5 +1,5 @@
 "use client";
-import { Button, IconButton } from "@mui/material";
+import { Button, Fab, IconButton } from "@mui/material";
 import { $Enums } from "@prisma/client";
 import Authorized from "@rms/components/ui/authorized";
 import RouteModel from "@rms/models/RouteModel";
@@ -10,6 +10,8 @@ import AppConfig from "../../../../app-config.json";
 
 import { MenuIcon } from "lucide-react";
 import BackButton from "@rms/components/ui/back-button";
+import { Next13ProgressBar } from "next13-progressbar";
+import { MdAdd } from "react-icons/md";
 type Props = {
   routes: RouteModel[];
   config: {
@@ -55,6 +57,12 @@ export default function AppBarV2(props: Props) {
   return (
     <>
       <div className={`  w-full  `}>
+        <Next13ProgressBar
+          height="1px"
+          color="red"
+          options={{ showSpinner: false }}
+          showOnShallow
+        />
         {subRouteTitle && (
           <div className="flex justify-between items-center  border dark:border-gray-700 p-3 static">
             <div className="flex items-center gap-4 justify-start">
@@ -86,12 +94,11 @@ export default function AppBarV2(props: Props) {
               <Authorized permission={permission}>
                 <Link href={path + "/form"}>
                   <Button
-                    variant="contained"
+                    className="nexcite-btn"
                     disableElevation
-                    className={
-                      "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
-                    }
-                    type="button"
+                    color="primary"
+                    variant="contained"
+                    startIcon={<MdAdd />}
                   >
                     Add
                   </Button>

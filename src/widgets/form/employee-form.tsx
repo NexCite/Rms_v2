@@ -1,6 +1,5 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import LoadingButton from "@mui/lab/LoadingButton";
 import {
   Autocomplete,
   Card,
@@ -15,6 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import { $Enums, Prisma } from "@prisma/client";
+import NexCiteButton from "@rms/components/button/nexcite-button";
 import { useStore } from "@rms/hooks/toast-hook";
 import Countries from "@rms/lib/country";
 import { createEmployee, updateEmployee } from "@rms/service/employee-service";
@@ -316,20 +316,7 @@ export default function EmployeeFormComponent(props: Props) {
             )}
           />
         </CardContent>
-        <LoadingButton
-          variant="contained"
-          fullWidth
-          className={
-            isPadding
-              ? ""
-              : "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
-          }
-          disableElevation
-          type="submit"
-          loading={isPadding}
-        >
-          Save
-        </LoadingButton>
+        <NexCiteButton isPadding={isPadding} />
       </Card>
     </form>
   );

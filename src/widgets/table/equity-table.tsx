@@ -8,7 +8,7 @@ import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import Authorized from "@rms/components/ui/authorized";
 import { useStore } from "@rms/hooks/toast-hook";
 import { FormatNumberWithFixed } from "@rms/lib/global";
-import { deleteEquityById } from "@rms/service/equity-service";
+import { deleteEquityById, resetEquity } from "@rms/service/equity-service";
 import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
 import Link from "next/link";
 
@@ -29,7 +29,7 @@ type Props = {
 
 export default function BoxTable(props: Props) {
   const pathName = usePathname();
-  const [isPadding, setPadding] = useTransition();
+  const [isPadding, setTransition] = useTransition();
   const store = useStore();
 
   const columns = useMemo<MRT_ColumnDef<CommonPayload>[]>(
@@ -287,7 +287,7 @@ export default function BoxTable(props: Props) {
 
   return (
     <div className="w-full">
-      <Card>
+      <Card variant="outlined">
         <CardHeader
           title={<Typography variant="h5">Equities Table</Typography>}
         />
@@ -316,6 +316,26 @@ export default function BoxTable(props: Props) {
                 </MenuItem>
               </Link>
             </Authorized>,
+            <Authorized permission={"Reset"} key={2}>
+              <MenuItem
+                disabled={isPadding}
+                className="cursor-pointer"
+                onClick={() => {
+                  const isConfirm = confirm(
+                    `Do You sure you want to reset  id:${id} `
+                  );
+                  if (isConfirm) {
+                    setTransition(async () => {
+                      const result = await resetEquity(id);
+
+                      store.OpenAlert(result);
+                    });
+                  }
+                }}
+              >
+                {isPadding ? <> reseting...</> : "Reset"}
+              </MenuItem>
+            </Authorized>,
             <Authorized permission="Delete_Equity" key={3}>
               <MenuItem
                 disabled={isPadding}
@@ -325,7 +345,7 @@ export default function BoxTable(props: Props) {
                     `Do You sure you want to delete ${to_date.toDateString()} id:${id} `
                   );
                   if (isConfirm) {
-                    setPadding(async () => {
+                    setTransition(async () => {
                       const result = await deleteEquityById(id);
 
                       store.OpenAlert(result);

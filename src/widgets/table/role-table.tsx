@@ -7,7 +7,7 @@ import { useMemo, useTransition } from "react";
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import Authorized from "@rms/components/ui/authorized";
 import { useStore } from "@rms/hooks/toast-hook";
-import { deleteRoleById } from "@rms/service/role-service";
+import { deleteRoleById, resetRole } from "@rms/service/role-service";
 import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
 import Link from "next/link";
 
@@ -17,7 +17,7 @@ type Props = {
 
 export default function RoleTable(props: Props) {
   const pathName = usePathname();
-  const [isPadding, setPadding] = useTransition();
+  const [isPadding, setTransition] = useTransition();
 
   const store = useStore();
 
@@ -83,7 +83,7 @@ export default function RoleTable(props: Props) {
   );
 
   return (
-    <Card>
+    <Card variant="outlined">
       <CardHeader
         title={<Typography variant="h5">Role Table</Typography>}
       ></CardHeader>
@@ -104,7 +104,26 @@ export default function RoleTable(props: Props) {
               </MenuItem>
             </Link>
           </Authorized>,
+          <Authorized permission={"Reset"} key={2}>
+            <MenuItem
+              disabled={isPadding}
+              className="cursor-pointer"
+              onClick={() => {
+                const isConfirm = confirm(
+                  `Do You sure you want to reset  ${name} id:${id} `
+                );
+                if (isConfirm) {
+                  setTransition(async () => {
+                    const result = await resetRole(id);
 
+                    store.OpenAlert(result);
+                  });
+                }
+              }}
+            >
+              {isPadding ? <> reseting...</> : "Reset"}
+            </MenuItem>
+          </Authorized>,
           <Authorized permission="Delete_Role" key={3}>
             <MenuItem
               disabled={isPadding}
@@ -114,7 +133,7 @@ export default function RoleTable(props: Props) {
                   `Do You sure you want to delete ${name} id:${id} `
                 );
                 if (isConfirm) {
-                  setPadding(async () => {
+                  setTransition(async () => {
                     var result = await deleteRoleById(id);
 
                     store.OpenAlert(result);

@@ -9,8 +9,8 @@ import { useCallback, useMemo, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import LoadingButton from "@mui/lab/LoadingButton";
 import { Card, CardContent, CardHeader, TextField } from "@mui/material";
+import NexCiteButton from "@rms/components/button/nexcite-button";
 import NumericFormatCustom from "@rms/components/ui/text-field-number";
 import { useStore } from "@rms/hooks/toast-hook";
 import { createCurrency, updateCurrency } from "@rms/service/currency-service";
@@ -74,7 +74,7 @@ export default function CurrencyForm(props: Props) {
         onSubmit={form.handleSubmit(handleSubmit)}
         noValidate
       >
-        <Card>
+        <Card variant="outlined">
           <CardHeader title="Currency Form" />
           <CardContent className="flex flex-col gap-5">
             <Controller
@@ -143,20 +143,7 @@ export default function CurrencyForm(props: Props) {
             />
           </CardContent>
           <div className="flex justify-end5 m-5 mt-2">
-            <LoadingButton
-              fullWidth
-              variant="contained"
-              className={
-                isPadding
-                  ? ""
-                  : "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
-              }
-              disableElevation
-              loading={isPadding}
-              type="submit"
-            >
-              Save
-            </LoadingButton>
+            <NexCiteButton isPadding={isPadding} />
           </div>
         </Card>
       </form>

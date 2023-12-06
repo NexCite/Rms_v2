@@ -1,6 +1,5 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import LoadingButton from "@mui/lab/LoadingButton";
 import {
   Alert,
   AlertTitle,
@@ -20,13 +19,15 @@ import {
   TimePicker,
 } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { $Enums, Prisma } from "@prisma/client";
-import { Button } from "@rms/components/ui/button";
+import { Prisma } from "@prisma/client";
+import NexCiteButton from "@rms/components/button/nexcite-button";
 import Loading from "@rms/components/ui/loading";
 import { useStore } from "@rms/hooks/toast-hook";
+import { fileZod, mediaZod } from "@rms/lib/common";
 import { createSchedule, updateSchedule } from "@rms/service/schedule-service";
 import dayjs from "dayjs";
-import { PlusSquare, X } from "lucide-react";
+import moment from "moment";
+import { MuiFileInput } from "mui-file-input";
 import { useRouter } from "next/navigation";
 import {
   useCallback,
@@ -36,11 +37,8 @@ import {
   useTransition,
 } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
-import moment from "moment";
-import { fileZod, mediaZod } from "@rms/lib/common";
-import { MuiFileInput } from "mui-file-input";
 import { MdAttachFile, MdClose } from "react-icons/md";
+import { z } from "zod";
 
 interface Props {
   schedule?: Prisma.ScheduleGetPayload<{
@@ -253,24 +251,12 @@ export default function ScheduleForm(props: Props) {
         <Loading />
       ) : (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <Card>
+          <Card variant="outlined">
             <CardHeader
               title={
                 <div className="flex justify-between items-center flex-row">
                   <Typography variant="h5">Employees Schedule Form</Typography>
-                  <LoadingButton
-                    type="submit"
-                    variant="contained"
-                    className={
-                      isPadding
-                        ? ""
-                        : "hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white w-[150px]"
-                    }
-                    disableElevation
-                    loading={isPadding}
-                  >
-                    Save
-                  </LoadingButton>
+                  <NexCiteButton isPadding={isPadding} />
                 </div>
               }
             ></CardHeader>

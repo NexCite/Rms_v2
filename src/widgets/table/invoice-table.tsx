@@ -37,7 +37,7 @@ type Props = {
 
 export default function InvoiceTable(props: Props) {
   const pathName = usePathname();
-  const [isPadding, setPadding] = useTransition();
+  const [isPadding, setTransition] = useTransition();
 
   const [globalFilter, setGlobalFilter] = useState("");
 
@@ -81,7 +81,7 @@ export default function InvoiceTable(props: Props) {
                           `Do You sure you want to delete invoice id:${id} `
                         );
                         if (isConfirm) {
-                          setPadding(async () => {
+                          setTransition(async () => {
                             const result = await deleteInvoiceById(id);
 
                             store.OpenAlert(result);

@@ -68,3 +68,18 @@ export async function deleteAccountById(
     { id }
   );
 }
+export async function resetTraderAccount(id: number) {
+  return handlerServiceAction(
+    async (info, config_id) => {
+      await prisma.account.update({
+        where: { id, config_id },
+        data: {
+          modified_date: new Date(),
+          create_date: new Date(),
+        },
+      });
+    },
+    "Reset",
+    true
+  );
+}

@@ -13,7 +13,6 @@ import { useCallback, useMemo, useTransition } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
-import LoadingButton from "@mui/lab/LoadingButton";
 import {
   Alert,
   AlertTitle,
@@ -27,6 +26,7 @@ import {
 } from "@mui/material";
 import { useStore } from "@rms/hooks/toast-hook";
 import Countries from "@rms/lib/country";
+import NexCiteButton from "@rms/components/button/nexcite-button";
 
 export default function Account_EntryForm(props: {
   account?: Prisma.Account_EntryGetPayload<{
@@ -113,8 +113,8 @@ export default function Account_EntryForm(props: {
     resolver: zodResolver(formSchema),
     defaultValues: props.account,
   });
-  const watch = useWatch({ control: form.control });
   const store = useStore();
+  const watch = useWatch({ control: form.control });
 
   const handleSubmit = useCallback(
     (values: z.infer<typeof formSchema>) => {
@@ -147,6 +147,22 @@ export default function Account_EntryForm(props: {
     },
     [back, store, props.account, form, props.node]
   );
+
+  const defualtSelect = useMemo(() => {
+    const two_digit =
+      props.two_digit.find((res) => res.id === watch.two_digit_id) ?? null;
+    const three_digit =
+      props.three_digit.find((res) => res.id === watch.three_digit_id) ?? null;
+    const more_digit =
+      props.more_digit.find(
+        (res) => res.id === watch.more_than_four_digit_id
+      ) ?? null;
+    return {
+      two_digit,
+      three_digit,
+      more_digit,
+    };
+  }, [watch.more_than_four_digit_id, watch.three_digit_id, watch.two_digit_id]);
   return (
     <>
       <form
@@ -154,7 +170,7 @@ export default function Account_EntryForm(props: {
         noValidate
         className="max-w-[450px] m-auto"
       >
-        <Card>
+        <Card variant="outlined">
           <CardHeader
             title={
               <div className="flex justify-between items-center flex-row">
@@ -403,32 +419,16 @@ export default function Account_EntryForm(props: {
                 name="two_digit_id"
                 render={({ field, fieldState }) => (
                   <Autocomplete
-                    disabled={
-                      watch.more_than_four_digit_id
-                        ? true
-                        : watch.three_digit_id
-                        ? true
-                        : false
-                    }
                     size="small"
-                    isOptionEqualToValue={(e) => e.value === field.value}
-                    defaultValue={(() => {
-                      const result = props.two_digit.find(
-                        (res) => res.id === field.value
-                      );
-
-                      return result
-                        ? {
-                            label: `(${result.id}) ${result.name}`,
-                            value: result.id,
-                          }
-                        : undefined;
-                    })()}
+                    isOptionEqualToValue={(e) => e.id === field.value}
+                    value={defualtSelect.two_digit}
+                    getOptionLabel={(e) => `(${e.id}) ${e.name}`}
                     onChange={(e, v) => {
-                      form.setValue("three_digit_id", undefined);
-                      form.setValue("more_than_four_digit_id", undefined);
-                      field.onChange(v?.value);
+                      form.setValue("three_digit_id", null);
+                      form.setValue("more_than_four_digit_id", null);
+                      field.onChange(v?.id ?? null);
                     }}
+                    groupBy={(e) => e.type}
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -437,10 +437,7 @@ export default function Account_EntryForm(props: {
                         InputLabelProps={{ shrink: true }}
                       />
                     )}
-                    options={props.two_digit.map((res) => ({
-                      label: `(${res.id}) ${res.name}`,
-                      value: res.id,
-                    }))}
+                    options={props.two_digit}
                   />
                 )}
               />
@@ -449,31 +446,15 @@ export default function Account_EntryForm(props: {
                 name="three_digit_id"
                 render={({ field, fieldState }) => (
                   <Autocomplete
+                    groupBy={(e) => e.type}
                     size="small"
-                    isOptionEqualToValue={(e) => e.value === field.value}
-                    defaultValue={(() => {
-                      const result = props.three_digit.find(
-                        (res) => res.id === field.value
-                      );
-
-                      return result
-                        ? {
-                            label: `(${result.id}) ${result.name}`,
-                            value: result.id,
-                          }
-                        : undefined;
-                    })()}
-                    disabled={
-                      watch.two_digit_id
-                        ? true
-                        : watch.more_than_four_digit_id
-                        ? true
-                        : false
-                    }
+                    isOptionEqualToValue={(e) => e.id === field.value}
+                    value={defualtSelect.three_digit}
+                    getOptionLabel={(e) => `(${e.id}) ${e.name}`}
                     onChange={(e, v) => {
-                      form.setValue("two_digit_id", undefined);
-                      form.setValue("more_than_four_digit_id", undefined);
-                      field.onChange(v?.value);
+                      form.setValue("two_digit_id", null);
+                      form.setValue("more_than_four_digit_id", null);
+                      field.onChange(v?.id ?? null);
                     }}
                     renderInput={(params) => (
                       <TextField
@@ -483,10 +464,7 @@ export default function Account_EntryForm(props: {
                         InputLabelProps={{ shrink: true }}
                       />
                     )}
-                    options={props.three_digit.map((res) => ({
-                      label: `(${res.id}) ${res.name}`,
-                      value: res.id,
-                    }))}
+                    options={props.three_digit}
                   />
                 )}
               />
@@ -495,31 +473,14 @@ export default function Account_EntryForm(props: {
                 name="more_than_four_digit_id"
                 render={({ field, fieldState }) => (
                   <Autocomplete
+                    groupBy={(e) => e.type}
                     size="small"
-                    disabled={
-                      watch.two_digit_id
-                        ? true
-                        : watch.three_digit_id
-                        ? true
-                        : false
-                    }
-                    isOptionEqualToValue={(e) => e.value === field.value}
-                    defaultValue={(() => {
-                      const result = props.more_digit.find(
-                        (res) => res.id === field.value
-                      );
-
-                      return result
-                        ? {
-                            label: `(${result.id}) ${result.name}`,
-                            value: result.id,
-                          }
-                        : undefined;
-                    })()}
+                    isOptionEqualToValue={(e) => e.id === field.value}
+                    value={defualtSelect.more_digit}
                     onChange={(e, v) => {
-                      form.setValue("two_digit_id", undefined);
-                      form.setValue("three_digit_id", undefined);
-                      field.onChange(v?.value);
+                      form.setValue("two_digit_id", null);
+                      form.setValue("three_digit_id", null);
+                      field.onChange(v?.id ?? null);
                     }}
                     renderInput={(params) => (
                       <TextField
@@ -529,10 +490,8 @@ export default function Account_EntryForm(props: {
                         InputLabelProps={{ shrink: true }}
                       />
                     )}
-                    options={props.more_digit.map((res) => ({
-                      label: `(${res.id}) ${res.name}`,
-                      value: res.id,
-                    }))}
+                    getOptionLabel={(e) => `(${e.id}) ${e.name}`}
+                    options={props.more_digit}
                   />
                 )}
               />{" "}
@@ -543,20 +502,7 @@ export default function Account_EntryForm(props: {
                   </AlertTitle>
                 </Alert>
               )}
-              <LoadingButton
-                variant="contained"
-                fullWidth
-                className={
-                  isPadding
-                    ? ""
-                    : "hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white "
-                }
-                disableElevation
-                type="submit"
-                loading={isPadding}
-              >
-                Save
-              </LoadingButton>
+              <NexCiteButton isPadding={isPadding} />
             </div>
           </CardContent>
         </Card>

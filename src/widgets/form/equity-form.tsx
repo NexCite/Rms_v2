@@ -1,6 +1,5 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import LoadingButton from "@mui/lab/LoadingButton";
 import {
   Alert,
   AlertTitle,
@@ -15,6 +14,7 @@ import {
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Prisma } from "@prisma/client";
+import NexCiteButton from "@rms/components/button/nexcite-button";
 import { Button } from "@rms/components/ui/button";
 import Loading from "@rms/components/ui/loading";
 import NumericFormatCustom from "@rms/components/ui/text-field-number";
@@ -274,24 +274,12 @@ export default function EquityForm(props: Props) {
       {loadingUi ? (
         <Loading />
       ) : (
-        <Card>
+        <Card variant="outlined">
           <CardHeader
             title={
               <div className="flex justify-between items-center flex-row">
                 <Typography variant="h5">Payment Box Form</Typography>
-                <LoadingButton
-                  type="submit"
-                  variant="contained"
-                  className={
-                    isPadding
-                      ? ""
-                      : "hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white w-[150px]"
-                  }
-                  disableElevation
-                  loading={isPadding}
-                >
-                  Save
-                </LoadingButton>
+                <NexCiteButton isPadding={isPadding} />
               </div>
             }
           ></CardHeader>

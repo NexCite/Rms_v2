@@ -4,6 +4,9 @@ const nextConfig = {
     emotion: true,
     styledComponents: true,
   },
+  experimental: {
+    instrumentationHook: true,
+  },
 };
 
 module.exports = nextConfig;

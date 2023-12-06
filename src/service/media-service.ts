@@ -9,7 +9,7 @@ export async function getAllMedia() {
   return handlerServiceAction((info, config_id) => {
     return prisma.media.findMany({
       where: { NOT: { status: "Deleted" }, config_id },
-      orderBy: { modified_date: "desc" },
+      orderBy: { id: "desc" },
     });
   }, "View_Medias");
 }

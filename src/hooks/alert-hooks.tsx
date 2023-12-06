@@ -18,8 +18,7 @@ export default function useAlertHook() {
   const createAlert = useCallback(
     (props: Props) => {
       toast({
-        title:
-          props?.status === 200 ? "Operation Successful" : "Operation Error",
+        title: props?.message,
         variant: props?.status === 200 ? "default" : "destructive",
         description: props?.message,
         type: "foreground",

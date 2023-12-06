@@ -10,7 +10,6 @@ import { useCallback, useMemo, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import LoadingButton from "@mui/lab/LoadingButton";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
@@ -23,6 +22,7 @@ import {
   FormHelperText,
   TextField,
 } from "@mui/material";
+import NexCiteButton from "@rms/components/button/nexcite-button";
 import { useStore } from "@rms/hooks/toast-hook";
 import {
   createMoreDigit,
@@ -268,7 +268,7 @@ export default function DigitForm(props: Props) {
     <>
       <Style onSubmit={form.handleSubmit(handleSubmit)}>
         <form autoComplete="off" noValidate>
-          <Card>
+          <Card variant="outlined">
             <CardHeader
               className="capitalize"
               title={
@@ -456,20 +456,7 @@ export default function DigitForm(props: Props) {
               </div>
             </CardContent>
             <div className="flex justify-end5 m-5 mt-2">
-              <LoadingButton
-                fullWidth
-                variant="contained"
-                className={
-                  isPadding
-                    ? ""
-                    : "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
-                }
-                disableElevation
-                loading={isPadding}
-                type="submit"
-              >
-                Save
-              </LoadingButton>
+              <NexCiteButton isPadding={isPadding} />
             </div>
           </Card>
         </form>
