@@ -18,16 +18,6 @@ type Props = {
   };
 };
 export function Sidebar(props: Props) {
-  const pathName = usePathname();
-
-  const handleOpen = (value) => {
-    setOpen(open === value ? -1 : value);
-  };
-
-  const [open, setOpen] = React.useState(
-    props.routers.find((res) => pathName.startsWith(res.path))?.index ?? -1
-  );
-
   return (
     <Card className="h-full w-full rounded-none flex flex-col overflow-y-auto">
       <div className="flex  p-3  flex-row justify-between items-center">

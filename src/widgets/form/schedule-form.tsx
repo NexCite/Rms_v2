@@ -22,11 +22,10 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Prisma } from "@prisma/client";
 import NexCiteButton from "@rms/components/button/nexcite-button";
 import Loading from "@rms/components/ui/loading";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import { fileZod, mediaZod } from "@rms/lib/common";
 import { createSchedule, updateSchedule } from "@rms/service/schedule-service";
 import dayjs from "dayjs";
-import moment from "moment";
 import { MuiFileInput } from "mui-file-input";
 import { useRouter } from "next/navigation";
 import {
@@ -111,7 +110,7 @@ export default function ScheduleForm(props: Props) {
     return props.scheduleConfig;
   }, [props.scheduleConfig]);
 
-  const store = useStore();
+  const toast = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -153,7 +152,7 @@ export default function ScheduleForm(props: Props) {
               to_over_time: vaction ? null : scheduleConfig.to_over_time,
             };
           }),
-          to_date: moment().startOf("D").toDate(),
+          to_date: dayjs().startOf("D").toDate(),
         },
   });
   const handleSubmit = useCallback(
@@ -220,20 +219,20 @@ export default function ScheduleForm(props: Props) {
       setTransition(async () => {
         if (props.isEditMode) {
           const result = await updateSchedule(props.id, formData as any);
-          store.OpenAlert(result);
+          toast.OpenAlert(result);
           if (result.status === 200) {
             back();
           }
         } else {
           const result = await createSchedule(formData);
-          store.OpenAlert(result);
+          toast.OpenAlert(result);
           if (result.status === 200) {
             back();
           }
         }
       });
     },
-    [props, back, form, store]
+    [props, back, form, toast]
   );
 
   const [loadingUi, setLoadingUi] = useState(true);

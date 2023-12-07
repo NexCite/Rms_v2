@@ -3,7 +3,7 @@
 import { Prisma } from "@prisma/client";
 import { handlerServiceAction } from "@rms/lib/handler";
 import prisma from "@rms/prisma/prisma";
-import moment from "moment";
+import dayjs from "dayjs";
 
 export async function createScheuleConfig(config_id: number) {
   let result = await prisma.scheduleConfig.findFirst({
@@ -11,10 +11,10 @@ export async function createScheuleConfig(config_id: number) {
   });
 
   if (!result) {
-    const fromTime = moment(),
-      toTime = moment(),
-      fromOverTime = moment(),
-      toOverTime = moment();
+    const fromTime = dayjs(),
+      toTime = dayjs(),
+      fromOverTime = dayjs(),
+      toOverTime = dayjs();
     fromTime.hour(8);
     fromTime.minute(0);
     fromTime.second(0);

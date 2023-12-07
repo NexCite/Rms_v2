@@ -21,7 +21,7 @@ import {
   styled,
 } from "@mui/material";
 import NexCiteButton from "@rms/components/button/nexcite-button";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import { createRole, updateRole } from "@rms/service/role-service";
 import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";
 
@@ -44,7 +44,7 @@ export default function RoleForm(props: Props) {
     resolver: zodResolver(formSchema),
     defaultValues: props.value,
   });
-  const store = useStore();
+  const toast = useToast();
 
   const handleSubmit = useCallback(
     (values: z.infer<typeof formSchema>) => {
@@ -52,7 +52,7 @@ export default function RoleForm(props: Props) {
         if (props.value) {
           setTransition(async () => {
             const result = await updateRole(props.value.id, values);
-            store.OpenAlert(result);
+            toast.OpenAlert(result);
             if (result.status === 200) back();
             Object.keys(result.errors ?? []).map((e) => {
               form.setError(e as any, result[e]);
@@ -61,7 +61,7 @@ export default function RoleForm(props: Props) {
         } else {
           setTransition(async () => {
             const result = await createRole(values as any);
-            store.OpenAlert(result);
+            toast.OpenAlert(result);
             if (result.status === 200) back();
             Object.keys(result.errors ?? []).map((e) => {
               form.setError(e as any, result[e]);
@@ -70,7 +70,7 @@ export default function RoleForm(props: Props) {
         }
       });
     },
-    [back, props.value, form, store]
+    [back, props.value, form, toast]
   );
   return (
     <>

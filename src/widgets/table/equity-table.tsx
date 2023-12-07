@@ -6,7 +6,7 @@ import { useMemo, useTransition } from "react";
 
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import Authorized from "@rms/components/ui/authorized";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import { FormatNumberWithFixed } from "@rms/lib/global";
 import { deleteEquityById, resetEquity } from "@rms/service/equity-service";
 import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
@@ -30,7 +30,7 @@ type Props = {
 export default function BoxTable(props: Props) {
   const pathName = usePathname();
   const [isPadding, setTransition] = useTransition();
-  const store = useStore();
+  const toast = useToast();
 
   const columns = useMemo<MRT_ColumnDef<CommonPayload>[]>(
     () => [
@@ -328,7 +328,7 @@ export default function BoxTable(props: Props) {
                     setTransition(async () => {
                       const result = await resetEquity(id);
 
-                      store.OpenAlert(result);
+                      toast.OpenAlert(result);
                     });
                   }
                 }}
@@ -348,7 +348,7 @@ export default function BoxTable(props: Props) {
                     setTransition(async () => {
                       const result = await deleteEquityById(id);
 
-                      store.OpenAlert(result);
+                      toast.OpenAlert(result);
                     });
                   }
                 }}

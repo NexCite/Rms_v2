@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import { Prisma } from "@prisma/client";
 import Authorized from "@rms/components/ui/authorized";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import { FormatNumberWithFixed } from "@rms/lib/global";
 import { deleteEquityById } from "@rms/service/equity-service";
 import Link from "next/link";
@@ -128,7 +128,7 @@ export default function EquityView(props: Props) {
     };
   }, [props.equity]);
   const [isPadding, setTransition] = useTransition();
-  const store = useStore();
+  const toast = useToast();
   const { back } = useRouter();
 
   return (
@@ -166,7 +166,7 @@ export default function EquityView(props: Props) {
                     if (result.status === 200) {
                       back();
                     }
-                    store.OpenAlert({
+                    toast.OpenAlert({
                       ...result,
                       replace: "/admin/payment_box/box",
                     });

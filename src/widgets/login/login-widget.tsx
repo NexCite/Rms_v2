@@ -14,7 +14,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import { useRouter } from "next/navigation";
 const formSchema = z.object({
   username: z.string().min(4),
@@ -23,7 +23,7 @@ const formSchema = z.object({
 export default function ConfigWidget() {
   const [isPadding, setTransition] = useTransition();
   const { replace } = useRouter();
-  const store = useStore();
+  const toast = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -35,7 +35,7 @@ export default function ConfigWidget() {
     setTransition(async () => {
       const req = await createLogin(values);
 
-      store.OpenAlert({ ...req });
+      toast.OpenAlert({ ...req });
       if (req.status == 200) {
         replace("/admin");
       }

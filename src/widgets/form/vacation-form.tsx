@@ -20,7 +20,7 @@ import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import NexCiteButton from "@rms/components/button/nexcite-button";
 import { Alert } from "@rms/components/ui/alert";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import { fileZod, mediaZod } from "@rms/lib/common";
 import { createVacation, updateVacation } from "@rms/service/vacation-service";
 import dayjs from "dayjs";
@@ -84,7 +84,7 @@ export default function VacationForm(props: Props) {
   const [media, setMedia] = useState<Prisma.MediaGetPayload<{}>>();
   const [error, setError] = useState("");
 
-  const store = useStore();
+  const toast = useToast();
   const handleSubmit = useCallback(
     (values: z.infer<any>) => {
       const fileForm = values.file ? new FormData() : undefined;
@@ -98,7 +98,7 @@ export default function VacationForm(props: Props) {
           var value2 = JSON.parse(JSON.stringify({ ...values, media }));
 
           await updateVacation(props.value.id, value2).then((res) => {
-            store.OpenAlert(res);
+            toast.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);
             });
@@ -113,7 +113,7 @@ export default function VacationForm(props: Props) {
           var value2 = JSON.parse(JSON.stringify({ ...values, media }));
 
           await createVacation(value2, fileForm).then((res) => {
-            store.OpenAlert(res);
+            toast.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);
             });
@@ -125,7 +125,7 @@ export default function VacationForm(props: Props) {
         });
       }
     },
-    [back, store, form, props.value]
+    [back, toast, form, props.value]
   );
   return (
     <>

@@ -3,7 +3,7 @@
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import { Prisma } from "@prisma/client";
 import Authorized from "@rms/components/ui/authorized";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import {
   deleteEmployeeById,
   resetEmployee,
@@ -21,7 +21,7 @@ export default function EmployeesTable(props: Props) {
   const pathName = usePathname();
   const [isPadding, setTransition] = useTransition();
 
-  const store = useStore();
+  const toast = useToast();
 
   const columns = useMemo<MRT_ColumnDef<Prisma.EmployeeGetPayload<{}>>[]>(
     () => [
@@ -235,7 +235,7 @@ export default function EmployeesTable(props: Props) {
                     setTransition(async () => {
                       const result = await resetEmployee(id);
 
-                      store.OpenAlert(result);
+                      toast.OpenAlert(result);
                     });
                   }
                 }}
@@ -255,7 +255,7 @@ export default function EmployeesTable(props: Props) {
                     setTransition(async () => {
                       const result = await deleteEmployeeById(id);
 
-                      store.OpenAlert(result);
+                      toast.OpenAlert(result);
                     });
                   }
                 }}

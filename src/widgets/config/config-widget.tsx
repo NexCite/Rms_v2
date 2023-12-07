@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, TextField } from "@mui/material";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import LoadingButton from "@mui/lab/LoadingButton";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useTransition } from "react";
 import z from "zod";
@@ -39,7 +39,7 @@ export function InitConfig() {
   });
 
   const [isPadding, setTransition] = useTransition();
-  const store = useStore();
+  const toast = useToast();
   const { replace } = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -66,7 +66,7 @@ export function InitConfig() {
           config: values.config as any,
           file: dataForm,
         });
-        store.OpenAlert({ ...res });
+        toast.OpenAlert({ ...res });
 
         if (res.status === 200) replace("/login");
         Object.keys(res.errors ?? []).map((e) => {
@@ -74,7 +74,7 @@ export function InitConfig() {
         });
       });
     },
-    [, replace, form, store]
+    [, replace, form, toast]
   );
   return (
     <div className="flex justify-center items-center">
@@ -318,7 +318,7 @@ export function UpdateConfig(props: Props) {
   });
 
   const [isPadding, setTransition] = useTransition();
-  const store = useStore();
+  const toast = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -355,14 +355,14 @@ export function UpdateConfig(props: Props) {
           file: dataForm,
           id: props.id,
         });
-        store.OpenAlert({ ...res });
+        toast.OpenAlert({ ...res });
 
         Object.keys(res.errors ?? []).map((e) => {
           form.setError(e as any, res[e]);
         });
       });
     },
-    [form, store, props.id]
+    [form, toast, props.id]
   );
   return (
     <div className="flex justify-center items-center">

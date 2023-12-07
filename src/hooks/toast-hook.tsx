@@ -21,7 +21,7 @@ type Actions = {
   CloseAlert: () => void;
 };
 
-const useStore = create<State & Actions>((set, value) => ({
+const useToast = create<State & Actions>((set, value) => ({
   OpenAlert(args) {
     set({ ...args, open: true });
   },
@@ -31,7 +31,7 @@ const useStore = create<State & Actions>((set, value) => ({
 }));
 
 const AlertProvider: React.FC = () => {
-  const store = useStore((state) => state);
+  const store = useToast((state) => state);
 
   return (
     <Snackbar
@@ -55,4 +55,4 @@ const AlertProvider: React.FC = () => {
     </Snackbar>
   );
 };
-export { useStore, AlertProvider };
+export { useToast, AlertProvider };

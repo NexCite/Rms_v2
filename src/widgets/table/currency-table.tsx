@@ -6,7 +6,7 @@ import { useMemo, useTransition } from "react";
 
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import Authorized from "@rms/components/ui/authorized";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import { FormatNumberWithFixed } from "@rms/lib/global";
 import { deleteCurrency, resetCurrency } from "@rms/service/currency-service";
 import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
@@ -19,7 +19,7 @@ type Props = {
 export default function CurrencyTable(props: Props) {
   const pathName = usePathname();
   const [isPadding, setTransition] = useTransition();
-  const store = useStore();
+  const toast = useToast();
 
   const columns = useMemo<MRT_ColumnDef<Prisma.CurrencyGetPayload<{}>>[]>(
     () => [
@@ -140,7 +140,7 @@ export default function CurrencyTable(props: Props) {
                     setTransition(async () => {
                       const result = await resetCurrency(id);
 
-                      store.OpenAlert(result);
+                      toast.OpenAlert(result);
                     });
                   }
                 }}
@@ -160,7 +160,7 @@ export default function CurrencyTable(props: Props) {
                     setTransition(async () => {
                       const result = await deleteCurrency(id);
 
-                      store.OpenAlert(result);
+                      toast.OpenAlert(result);
                     });
                   }
                 }}

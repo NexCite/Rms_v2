@@ -12,7 +12,7 @@ import { z } from "zod";
 import { Card, CardContent, CardHeader, TextField } from "@mui/material";
 import NexCiteButton from "@rms/components/button/nexcite-button";
 import NumericFormatCustom from "@rms/components/ui/text-field-number";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import { createCurrency, updateCurrency } from "@rms/service/currency-service";
 type Props = { value: Prisma.CurrencyGetPayload<{}> };
 export default function CurrencyForm(props: Props) {
@@ -39,7 +39,7 @@ export default function CurrencyForm(props: Props) {
     resolver: zodResolver(formSchema),
     defaultValues: props.value,
   });
-  const store = useStore();
+  const toast = useToast();
 
   const handleSubmit = useCallback(
     (values: z.infer<typeof formSchema>) => {
@@ -47,7 +47,7 @@ export default function CurrencyForm(props: Props) {
         if (props.value) {
           setTransition(async () => {
             const result = await updateCurrency(props.value.id, values);
-            store.OpenAlert(result);
+            toast.OpenAlert(result);
             if (result.status === 200) back();
             Object.keys(result.errors ?? []).map((e) => {
               form.setError(e as any, result[e]);
@@ -56,7 +56,7 @@ export default function CurrencyForm(props: Props) {
         } else {
           setTransition(async () => {
             const result = await createCurrency(values as any);
-            store.OpenAlert(result);
+            toast.OpenAlert(result);
             if (result.status === 200) back();
             Object.keys(result.errors ?? []).map((e) => {
               form.setError(e as any, result[e]);
@@ -65,7 +65,7 @@ export default function CurrencyForm(props: Props) {
         }
       });
     },
-    [back, props.value, form, store]
+    [back, props.value, form, toast]
   );
   return (
     <>

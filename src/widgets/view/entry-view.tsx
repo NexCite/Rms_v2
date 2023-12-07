@@ -10,11 +10,12 @@ import {
   TableRow,
 } from "@mui/material";
 import { Prisma } from "@prisma/client";
+import NexCiteButton from "@rms/components/button/nexcite-button";
 import Authorized from "@rms/components/ui/authorized";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import { FormatNumberWithFixed } from "@rms/lib/global";
 import { deleteEntry } from "@rms/service/entry-service";
-import moment from "moment";
+import dayjs from "dayjs";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useTransition } from "react";
@@ -50,18 +51,14 @@ export default function EntryView(props: Props) {
     return a;
   }, [props]);
   const [isPadding, setTransition] = useTransition();
-  const store = useStore();
+  const toast = useToast();
   const pathName = usePathname();
   return (
     <Style className="card">
       <div className="mb-10 gap-5 justify-end flex">
         <Authorized permission="Delete_Entry">
-          <LoadingButton
-            variant="contained"
-            disableElevation
-            className={
-              "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
-            }
+          <NexCiteButton
+            type="button"
             onClick={() => {
               const isConfirm = confirm(
                 `Do You sure you want to delete ${props.entry.title} id:${props.entry.id} `
@@ -70,7 +67,7 @@ export default function EntryView(props: Props) {
                 setTransition(async () => {
                   const result = await deleteEntry(props.entry.id);
 
-                  store.OpenAlert({
+                  toast.OpenAlert({
                     ...result,
                     replace: "/admin/accounting/entry",
                   });
@@ -80,35 +77,20 @@ export default function EntryView(props: Props) {
                 });
               }
             }}
-            loading={isPadding}
           >
             Delete
-          </LoadingButton>
+          </NexCiteButton>
         </Authorized>
 
         <Authorized permission="Edit_Entry">
           <Link href={`/admin/accounting/entry/form?id=${props.entry.id}`}>
-            <Button
-              variant="contained"
-              disableElevation
-              className={
-                "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
-              }
-            >
+            <NexCiteButton type="button" isPadding={isPadding}>
               Edit
-            </Button>
+            </NexCiteButton>
           </Link>
         </Authorized>
         <Link href={pathName + "/export"}>
-          <Button
-            variant="contained"
-            disableElevation
-            className={
-              "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
-            }
-          >
-            Export
-          </Button>
+          <NexCiteButton type="button">Export</NexCiteButton>
         </Link>
       </div>
       <Table>
@@ -198,10 +180,10 @@ export default function EntryView(props: Props) {
           <TableRow>
             <TableCell>{props.entry.id}</TableCell>
             <TableCell>
-              {moment(props.entry.to_date).format("dddd DD-MM-yyy hh:mm")}
+              {dayjs(props.entry.to_date).format("dddd DD-MM-YYYY hh:mm")}
             </TableCell>
             <TableCell>
-              {moment(props.entry.modified_date).format("dddd DD-MM-yyy hh:mm")}
+              {dayjs(props.entry.modified_date).format("dddd DD-MM-YYYY hh:mm")}
             </TableCell>
             <TableCell colSpan={2}>{props.entry.user?.username}</TableCell>
           </TableRow>

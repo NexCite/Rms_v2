@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Card, CardHeader, Typography } from "@mui/material";
 import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
-import moment from "moment";
+import dayjs from "dayjs";
 
 type Props = {
   data: Prisma.LogGetPayload<{ include: { user: true } }>[];
@@ -73,7 +73,7 @@ export default function LogTable(props: Props) {
       {
         accessorKey: "create_date",
         header: "Date",
-        accessorFn: (e) => moment(e.create_date).fromNow(),
+        accessorFn: (e) => dayjs(e.create_date),
       },
     ],
     []

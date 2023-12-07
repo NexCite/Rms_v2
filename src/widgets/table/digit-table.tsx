@@ -2,12 +2,12 @@
 
 import { Prisma } from "@prisma/client";
 import { usePathname } from "next/navigation";
-import { useMemo, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 
 import { Card, CardHeader, Divider, MenuItem, Typography } from "@mui/material";
 import ExportData from "@rms/components/other/export-data";
 import Authorized from "@rms/components/ui/authorized";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import {
   deleteMoreDigit,
   deleteThreeDigit,
@@ -15,11 +15,13 @@ import {
   resetDigit,
 } from "@rms/service/digit-service";
 import {
+  MRT_PaginationState,
   MaterialReactTable,
   createMRTColumnHelper,
   useMaterialReactTable,
 } from "material-react-table";
 import Link from "next/link";
+import useHistoryStore from "@rms/hooks/history-hook";
 
 type Props = {
   node: CommonNode;
@@ -35,8 +37,17 @@ const columnHelper = createMRTColumnHelper<any>();
 export default function DigitTable(props: Props) {
   const pathName = usePathname();
   const [isPadding, setTransition] = useTransition();
+  const historyTablePageStore = useHistoryStore<MRT_PaginationState>(
+    props.node + "-digit-table-page",
+    { pageIndex: 0, pageSize: 10 }
+  )();
+  const [loading, setLoading] = useState(true);
 
-  const store = useStore();
+  useEffect(() => {
+    setLoading(false);
+  }, []);
+
+  const toast = useToast();
   const columns = useMemo(
     () =>
       (
@@ -156,7 +167,7 @@ export default function DigitTable(props: Props) {
                 setTransition(async () => {
                   const result = await resetDigit(id, props.node);
 
-                  store.OpenAlert(result);
+                  toast.OpenAlert(result);
                 });
               }
             }}
@@ -190,7 +201,7 @@ export default function DigitTable(props: Props) {
                       ? await deleteThreeDigit(id)
                       : await deleteMoreDigit(id);
 
-                  store.OpenAlert(result);
+                  toast.OpenAlert(result);
                 });
               }
             }}
@@ -203,8 +214,15 @@ export default function DigitTable(props: Props) {
     renderTopToolbarCustomActions: ({ table }) => (
       <ExportData data={props.value[props.node]} table={table} />
     ),
+    onPaginationChange: historyTablePageStore.setData,
+    state: {
+      showLoadingOverlay: isPadding,
+      pagination: historyTablePageStore.data,
+    },
 
     initialState: {
+      density: "comfortable",
+
       columnVisibility: {
         status: false,
         email: false,
@@ -213,13 +231,11 @@ export default function DigitTable(props: Props) {
         address1: false,
         address2: false,
       },
-      pagination: {
-        pageIndex: 0,
-        pageSize: 100,
-      },
     },
   });
-  return (
+  return loading ? (
+    <></>
+  ) : (
     <Card variant="outlined">
       <CardHeader
         title={

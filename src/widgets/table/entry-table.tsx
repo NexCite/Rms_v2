@@ -1,167 +1,113 @@
 "use client";
-import React, { useCallback, useMemo, useState, useTransition } from "react";
-
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import {
-  MaterialReactTable,
-  createMRTColumnHelper,
-  useMaterialReactTable,
-} from "material-react-table";
+import { useCallback, useEffect, useState, useTransition } from "react";
 
 import { $Enums, Prisma } from "@prisma/client";
 import { FormatNumberWithFixed } from "@rms/lib/global";
 
-import { usePathname, useRouter } from "next/navigation";
-
-import { DateRange } from "react-day-picker";
-
 import {
   Autocomplete,
   Card,
-  CardContent,
   CardHeader,
   Divider,
   MenuItem,
+  Switch,
   TextField,
   Typography,
 } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import NexCiteButton from "@rms/components/button/nexcite-button";
 import Authorized from "@rms/components/ui/authorized";
-import { useStore } from "@rms/hooks/toast-hook";
-import { deleteEntry, resetEntry } from "@rms/service/entry-service";
+import { useToast } from "@rms/hooks/toast-hook";
+import {
+  deleteEntry,
+  findEnteris,
+  resetEntry,
+} from "@rms/service/entry-service";
 import dayjs from "dayjs";
-import moment from "moment";
+import {
+  MRT_TableHeadCellFilterContainer,
+  MRT_ToggleGlobalFilterButton,
+  MRT_GlobalFilterTextField,
+  MaterialReactTable,
+  createMRTColumnHelper,
+  useMaterialReactTable,
+  MRT_PaginationState,
+} from "material-react-table";
 import Link from "next/link";
-
-type CommonEntryType = Prisma.EntryGetPayload<{
-  include: {
-    currency: true;
-
-    sub_entries: {
-      include: {
-        account_entry: true;
-        more_than_four_digit: true;
-        reference: true;
-        three_digit: true;
-        two_digit: true;
-      };
-    };
-  };
-}>;
-type Props = {
-  date?: [Date, Date];
-  id?: number;
-  two_digit_id?: number;
-  three_digit_id?: number;
-  more_digit_id?: number;
-  account_id?: number;
-  two_digits?: Prisma.Two_DigitGetPayload<{}>[];
-  three_digits?: Prisma.Three_DigitGetPayload<{
-    include: { two_digit: true };
-  }>[];
-  more_digits?: Prisma.More_Than_Four_DigitGetPayload<{
-    include: { three_digit: true };
-  }>[];
-  accounts?: Prisma.Account_EntryGetPayload<{}>[];
-  debit?: $Enums.EntryType;
+import { usePathname } from "next/navigation";
+import { usePDF } from "react-to-pdf";
+import useHistoryStore from "@rms/hooks/history-hook";
+type CommonEntriesSearch = {
+  two_digit?: Prisma.Two_DigitGetPayload<{}>;
+  three_digit?: Prisma.Three_DigitGetPayload<{}>;
+  account?: Prisma.Account_EntryGetPayload<{}>;
   type?: $Enums.DigitType;
-
-  data: Prisma.EntryGetPayload<{
-    include: {
-      currency: true;
-
-      sub_entries: {
-        include: {
-          account_entry: true;
-          more_than_four_digit: true;
-          reference: true;
-          three_digit: true;
-          two_digit: true;
-        };
-      };
-    };
-  }>[];
+  more_than_four_digit?: Prisma.More_Than_Four_DigitGetPayload<{}>;
+  include_reference?: boolean;
+  debit?: $Enums.DebitCreditType;
+  id?: number;
+  from: Date;
+  to: Date;
 };
-
-export default function EntryDataTable(props: Props) {
+export default function SheetStateTable(props: Props) {
   const [isPadding, setTransition] = useTransition();
-
-  const [search, setSearch] = useState({
-    two_digit_id: props.two_digit_id,
-    three_digit_id: props.three_digit_id, //customize the default page size
-    more_digit_id: props.more_digit_id,
-    account_id: props.account_id,
-    type: props.type,
-    debit: props.debit,
-    id: props.id,
-  });
-  const [selectDate, setSelectDate] = useState<DateRange>({
-    from: props.date[0],
-    to: props.date[1],
-  });
-
-  const { replace } = useRouter();
-  const store = useStore();
-
-  const pathName = usePathname();
-
-  const handleSubmit = useCallback(
-    (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-
-      setTransition(() => {
-        replace(
-          pathName +
-            `?from_date=${selectDate?.from?.getTime()}&to_date=${selectDate?.to?.getTime()}&two_digit_id=${
-              search.two_digit_id
-            }&more_digit_id=${search.more_digit_id}&three_digit_id=${
-              search.three_digit_id
-            }&account_id=${search.account_id}&type=${search.type}&id=${
-              search.id
-            }&debit=${search.debit}`,
-          {}
-        );
-      });
-    },
-    [search, selectDate, pathName, replace]
+  const historyStore = useHistoryStore<CommonEntriesSearch>("entry")();
+  const [searchEntries, setSearchEntries] = useState<CommonEntriesSearch>(
+    historyStore.data ?? {
+      two_digit: null,
+      three_digit: null,
+      account: null,
+      type: null,
+      more_than_four_digit: null,
+      include_reference: null,
+      debit: null,
+      id: undefined,
+      from: dayjs().startOf("D").toDate(),
+      to: dayjs().endOf("D").toDate(),
+    }
   );
-  const defaultValue = useMemo(() => {
-    const account = props.accounts.find((res) => res.id === props.account_id);
-    const two_digit = props.two_digits.find(
-      (res) => res.id === props.two_digit_id
-    );
-    const three_digit = props.three_digits.find(
-      (res) => res.id === props.three_digit_id
-    );
-    const more_digit = props.more_digits.find(
-      (res) => res.id === props.more_digit_id
-    );
+  const pathName = usePathname();
+  const historyTablePageStore = useHistoryStore<MRT_PaginationState>(
+    "entry-table-page",
+    { pageIndex: 0, pageSize: 100 }
+  )();
+  const [dataEntries, setDataEntries] = useState<any[]>([]);
+  const [id, setId] = useState<number>(undefined);
 
-    return {
-      account,
-      two_digit,
-      three_digit,
-      more_digit,
-    };
-  }, [props]);
+  const { targetRef } = usePDF();
+  const toast = useToast();
+  const handleData = useCallback(() => {
+    setTransition(async () => {
+      historyStore.setData(searchEntries);
+      await findEnteris(searchEntries).then((res) => {
+        setDataEntries(res.result);
+      });
+    });
+  }, [findEnteris, searchEntries, setTransition]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    setLoading(false);
+  }, []);
+  useEffect(() => {
+    searchEntries.id = id;
+    if (!loading) {
+      handleData();
+    }
+  }, [searchEntries, handleData, loading]);
 
   const table = useMaterialReactTable({
     columns,
-    data: props.data,
-    enableRowActions: true,
+    data: dataEntries,
+
     muiTableHeadCellProps: {
       align: "center",
     },
     muiTableBodyCellProps: {
       align: "center",
     },
-
-    enableRowSelection: true,
-    enableSelectAll: true,
-    editDisplayMode: "row",
-
+    muiTableContainerProps: { sx: { margin: 0 } },
+    enableRowActions: true,
     renderRowActionMenuItems({
       row: {
         original: { id, title },
@@ -187,7 +133,7 @@ export default function EntryDataTable(props: Props) {
                 setTransition(async () => {
                   const result = await resetEntry(id);
 
-                  store.OpenAlert(result);
+                  toast.OpenAlert(result);
                 });
               }
             }}
@@ -213,8 +159,9 @@ export default function EntryDataTable(props: Props) {
               if (isConfirm) {
                 setTransition(async () => {
                   const result = await deleteEntry(id);
+                  handleData();
 
-                  store.OpenAlert(result);
+                  toast.OpenAlert(result);
                 });
               }
             }}
@@ -224,256 +171,289 @@ export default function EntryDataTable(props: Props) {
         </Authorized>,
       ];
     },
+    renderTopToolbar: (props) => (
+      <div>
+        <div className="flex justify-between items-center p-3">
+          <Typography variant="h6">
+            Total Result: {dataEntries.length}
+          </Typography>
+          <div className="flex items-center justify-center">
+            <MRT_ToggleGlobalFilterButton table={table} />
+            <MRT_GlobalFilterTextField table={table} />
+          </div>
+        </div>
+        <Divider />
+        <div className="flex gap-5 justify-between p-5 mb-5">
+          <div>
+            <Typography>To: </Typography>
+            <Typography>
+              {searchEntries.two_digit
+                ? `(${searchEntries.two_digit.id}) ${searchEntries.two_digit.name}`
+                : ""}
+            </Typography>
+            <Typography>
+              {searchEntries.three_digit
+                ? `(${searchEntries.three_digit.id}) ${searchEntries.three_digit.name}`
+                : ""}
+            </Typography>
+            <Typography>
+              {searchEntries.more_than_four_digit
+                ? `(${searchEntries.more_than_four_digit.id}) ${searchEntries.more_than_four_digit.name}`
+                : ""}
+            </Typography>
+            <Typography>
+              {searchEntries.account
+                ? `(${searchEntries.account.id}) ${searchEntries.account.username}`
+                : ""}
+            </Typography>
+          </div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div>
+            <Typography>From: </Typography>
+            <Typography>
+              {dayjs(searchEntries.from).format("dddd DD-MM-YYYY")}
+            </Typography>
+          </div>
+          <div>
+            <Typography>To:</Typography>
+            <Typography>
+              {dayjs(searchEntries.to).format("dddd DD-MM-YYYY")}
+            </Typography>
+          </div>
+        </div>
+      </div>
+    ),
+    onPaginationChange: historyTablePageStore.setData,
 
+    state: {
+      showLoadingOverlay: isPadding,
+      pagination: historyTablePageStore.data,
+    },
     initialState: {
-      columnVisibility: {},
-      pagination: {
-        pageIndex: 0,
-        pageSize: 100,
-      },
+      density: "comfortable",
     },
   });
+  return loading ? (
+    <></>
+  ) : (
+    <Card variant="outlined">
+      <CardHeader title={<Typography variant="h5">Entry Table</Typography>} />
 
-  return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Card variant="outlined">
-        <CardHeader
-          title={<Typography variant="h5">Entries Table</Typography>}
-        ></CardHeader>
-
-        <Divider />
-        <CardContent className="mb-0">
-          <form
-            className=" grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4  h-full  overflow-auto  justify-between rms-container p-5"
-            onSubmit={handleSubmit}
-          >
+      <Divider />
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          setSearchEntries((prev) => ({
+            ...prev,
+            id,
+          }));
+        }}
+        className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4  h-full  overflow-auto  justify-between rms-container p-5"
+      >
+        <TextField
+          disabled={isPadding}
+          inputProps={{ type: "number" }}
+          size="small"
+          value={id}
+          placeholder="Id"
+          label="Id"
+          onChange={(e) => {
+            const id = parseInt(e.target.value);
+            setId(Number.isInteger(id) ? id : undefined);
+          }}
+        />
+        <NexCiteButton label="Search By Id" isPadding={isPadding} />
+      </form>
+      <form className=" grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4  h-full  overflow-auto  justify-between rms-container p-5">
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DatePicker
+            slotProps={{ textField: { size: "small" } }}
+            label="From Date"
+            value={dayjs(searchEntries.from)}
+            onChange={(e) => {
+              setSearchEntries((prev) => ({
+                ...prev,
+                from: e.startOf("D").toDate(),
+              }));
+            }}
+          />
+          <DatePicker
+            slotProps={{ textField: { size: "small" } }}
+            label="To Date"
+            value={dayjs(searchEntries.to)}
+            onChange={(e) => {
+              setSearchEntries((prev) => ({
+                ...prev,
+                to: e.endOf("D").toDate(),
+              }));
+            }}
+          />
+        </LocalizationProvider>
+        <Autocomplete
+          disablePortal
+          size="small"
+          key={"Two Digits"}
+          isOptionEqualToValue={(e) => e.id === searchEntries.two_digit?.id}
+          value={searchEntries.two_digit}
+          onChange={(e, f) => {
+            setSearchEntries((prev) => ({
+              ...prev,
+              more_than_four_digit: null,
+              three_digit: null,
+              two_digit: f,
+            }));
+          }}
+          getOptionLabel={(e) => `(${e.id}) ${e.name}`}
+          options={props.two_digits}
+          renderInput={(params) => (
             <TextField
-              label="Id"
-              disabled={
-                search.three_digit_id !== undefined ||
-                search.more_digit_id !== undefined ||
-                search.two_digit_id !== undefined ||
-                search.account_id !== undefined
-              }
-              type="number"
-              size="small"
-              defaultValue={search.id}
-              onChange={(e) => {
-                setSearch((prev) => ({
-                  ...prev,
-                  id: e.target.value ? +e.target.value : undefined,
-                }));
-              }}
+              {...params}
+              className="nexcite-input"
+              label="Two Digits"
             />
+          )}
+        />
+        <Autocomplete
+          disablePortal
+          size="small"
+          isOptionEqualToValue={(e) => e.id === searchEntries.three_digit?.id}
+          key={"Three Digits"}
+          value={searchEntries.three_digit}
+          onChange={(e, f) => {
+            setSearchEntries((prev) => ({
+              ...prev,
+              more_than_four_digit: null,
+              three_digit: f,
+              two_digit: null,
+            }));
+          }}
+          getOptionLabel={(e) => `(${e.id}) ${e.name}`}
+          options={props.three_digits}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              className="nexcite-input"
+              label="Three Digits"
+            />
+          )}
+        />
 
-            <DatePicker
-              slotProps={{ textField: { size: "small" } }}
-              label="From Date"
-              defaultValue={dayjs(selectDate.from)}
-              onChange={(e) => {
-                setSelectDate((prev) => ({
-                  ...prev,
-                  from: e.startOf("D").toDate(),
-                }));
-              }}
-            />
-            <DatePicker
-              slotProps={{ textField: { size: "small" } }}
-              label="To Date"
-              defaultValue={dayjs(selectDate.to)}
-              onChange={(e) => {
-                setSelectDate((prev) => ({
-                  ...prev,
-                  to: e.endOf("D").toDate(),
-                }));
-              }}
-            />
-            <Autocomplete
-              disablePortal
+        <Autocomplete
+          disablePortal
+          size="small"
+          key={"More Digits"}
+          getOptionLabel={(e) => `(${e.id}) ${e.name}`}
+          value={searchEntries.more_than_four_digit}
+          isOptionEqualToValue={(e) =>
+            e.id === searchEntries.more_than_four_digit?.id
+          }
+          onChange={(e, f) => {
+            setSearchEntries((prev) => ({
+              ...prev,
+              more_than_four_digit: f,
+              three_digit: null,
+              two_digit: null,
+            }));
+          }}
+          options={props.more_digits}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              className="nexcite-input"
+              label="More Four Digits"
               size="small"
-              disabled={
-                search.three_digit_id !== undefined ||
-                search.more_digit_id !== undefined ||
-                search.id !== undefined
-              }
-              defaultValue={
-                defaultValue.two_digit
-                  ? {
-                      label: `(${defaultValue.two_digit.id}) ${defaultValue.two_digit.name}`,
-                      value: defaultValue.two_digit.id,
-                    }
-                  : undefined
-              }
-              isOptionEqualToValue={(e) =>
-                e.value === defaultValue.two_digit?.id
-              }
-              onChange={(e, f) => {
-                setSearch((prev) => ({
-                  ...prev,
-                  more_digit_id: undefined,
-                  three_digit_id: undefined,
-                  two_digit_id: f?.value,
-                }));
-              }}
-              options={props.two_digits.map((res) => ({
-                label: `(${res.id}) ${res.name}`,
-                value: res.id,
-              }))}
-              renderInput={(params) => (
-                <TextField {...params} label="Two Digits" />
-              )}
             />
-            <Autocomplete
-              disablePortal
-              size="small"
-              disabled={
-                search.more_digit_id !== undefined ||
-                search.two_digit_id !== undefined ||
-                search.id !== undefined
-              }
-              isOptionEqualToValue={(e) =>
-                e.value === defaultValue.three_digit?.id
-              }
-              defaultValue={
-                defaultValue.three_digit
-                  ? {
-                      label: `(${defaultValue.three_digit.id}) ${defaultValue.three_digit.name}`,
-                      value: defaultValue.three_digit.id,
-                    }
-                  : undefined
-              }
-              onChange={(e, f) => {
-                setSearch((prev) => ({
-                  ...prev,
-                  more_digit_id: undefined,
-                  three_digit_id: f?.value,
-                  two_digit_id: undefined,
-                }));
-              }}
-              options={props.three_digits.map((res) => ({
-                label: `(${res.id}) ${res.name}`,
-                value: res.id,
-              }))}
-              renderInput={(params) => (
-                <TextField {...params} label="Three Digits" />
-              )}
-            />
+          )}
+        />
 
-            <Autocomplete
-              disablePortal
-              disabled={
-                search.three_digit_id !== undefined ||
-                search.two_digit_id !== undefined ||
-                search.id !== undefined
-              }
-              size="small"
-              isOptionEqualToValue={(e) =>
-                e.value === defaultValue.more_digit?.id
-              }
-              defaultValue={
-                defaultValue.more_digit
-                  ? {
-                      label: `(${defaultValue.more_digit.id}) ${defaultValue.more_digit.name}`,
-                      value: defaultValue.more_digit.id,
-                    }
-                  : undefined
-              }
-              onChange={(e, f) => {
-                setSearch((prev) => ({
-                  ...prev,
-                  more_digit_id: f?.value,
-                  three_digit_id: undefined,
-                  two_digit_id: undefined,
-                }));
-              }}
-              options={props.more_digits.map((res) => ({
-                label: `(${res.id}) ${res.name}`,
-                value: res.id,
-              }))}
-              renderInput={(params) => (
-                <TextField {...params} label="More Four Digits" />
-              )}
-            />
-            <Autocomplete
-              disablePortal
-              disabled={search.id !== undefined}
-              size="small"
-              isOptionEqualToValue={(e) => e.value === defaultValue.account?.id}
-              defaultValue={
-                defaultValue.account
-                  ? {
-                      label: `(${defaultValue.account.id}) ${defaultValue.account.username}`,
-                      value: defaultValue.account.id,
-                      group: defaultValue.account.type,
-                    }
-                  : undefined
-              }
-              groupBy={(option) => option.group}
-              onChange={(e, f) => {
-                setSearch((prev) => ({
-                  ...prev,
-                  account_id: f?.value,
-                }));
-              }}
-              options={props.accounts.map((res) => ({
-                label: `(${res.id}) ${res.username} `,
-                value: res.id,
-                group: res.type,
-              }))}
-              renderInput={(params) => (
-                <TextField {...params} label="Accounts" />
-              )}
-            />
+        <Autocomplete
+          disablePortal
+          key={"Accounts"}
+          size="small"
+          isOptionEqualToValue={(e) => e.id === searchEntries.account?.id}
+          value={searchEntries.account}
+          onChange={(e, f) => {
+            setSearchEntries((prev) => ({
+              ...prev,
+              account: f,
+            }));
+          }}
+          getOptionLabel={(e) => `(${e.id}) ${e.username}`}
+          groupBy={(option) => option.type}
+          options={props.accounts.sort((a, b) => a.type.localeCompare(b.type))}
+          renderInput={(params) => (
+            <TextField {...params} className="nexcite-input" label="Accounts" />
+          )}
+        />
 
-            <NexCiteButton isPadding={isPadding} label="Search" />
-          </form>
-        </CardContent>
+        <div className="flex items-center w-full ">
+          <div>
+            <label htmlFor="switch">Include Reffrence</label>
+            <Switch
+              name="switch"
+              onChange={(e, f) => {
+                setSearchEntries((prev) => ({ ...prev, include_reference: f }));
+              }}
+              checked={searchEntries.include_reference}
+            />
+          </div>
+        </div>
+      </form>
+      <div ref={targetRef} id="export-to-img">
         <MaterialReactTable table={table} />
-      </Card>
-      <div></div>
-    </LocalizationProvider>
+      </div>
+    </Card>
   );
 }
 
-const columnHelper = createMRTColumnHelper<CommonEntryType>();
+const columnHelper = createMRTColumnHelper<
+  Prisma.EntryGetPayload<{
+    include: {
+      currency: true;
+      sub_entries: {
+        include: {
+          account_entry: true;
+          more_than_four_digit: true;
+          three_digit: true;
+          reference: true;
+          entry: true;
+          two_digit: true;
+        };
+      };
+    };
+  }>
+>();
 
-var columns = [
+const columns = [
   columnHelper.accessor("id", {
     header: "ID",
-    Cell: ({ row: { original } }) => (
-      <div
-        className={`text-center rounded-sm ${
-          original.status === "Deleted"
-            ? "bg-red-500"
-            : original.create_date.toLocaleTimeString() !==
-              original.modified_date.toLocaleTimeString()
-            ? "bg-yellow-400"
-            : ""
-        }`}
-      >
-        {original.id}
-      </div>
-    ),
   }),
   columnHelper.accessor(
-    (row) => moment(row?.create_date).format("DD-MM-yyy hh:mm a"),
+    (row) => dayjs(row?.to_date).format("DD-MM-YYYY hh:mm a"),
     {
-      id: "create_date",
       header: "Date",
+      id: "to_date",
     }
   ),
   columnHelper.accessor("title", {
     header: "Title",
   }),
-  columnHelper.accessor("sub_entries", {
-    header: "Amount",
-    Cell(originalRow) {
-      var amounts = originalRow.row.original?.sub_entries
-        ?.filter((res) => res.type === "Debit")
-        .map((res) => res.amount);
-      var amount = 0;
-      amounts?.forEach((e) => (amount += e));
-      return originalRow.row.original.rate ? (
+  columnHelper.accessor(
+    (row) => {
+      var debitAmout = 0;
+      var creditAmount = 0;
+
+      row.sub_entries.map((res) => {
+        if (res.type === "Debit") {
+          debitAmout += res.amount;
+        } else {
+          creditAmount += res.amount;
+        }
+      });
+
+      return row.rate ? (
         <table>
           <thead>
             <tr>
@@ -484,84 +464,53 @@ var columns = [
           </thead>
           <tbody>
             <tr>
-              <td>{FormatNumberWithFixed(originalRow.row.original.rate)}</td>
+              <td>{FormatNumberWithFixed(row.rate)}</td>
               <td>
-                ${FormatNumberWithFixed(amount / originalRow.row.original.rate)}
+                $
+                {FormatNumberWithFixed(
+                  debitAmout > creditAmount
+                    ? debitAmout
+                    : creditAmount / row.rate
+                )}
               </td>
               <td>
                 {" "}
-                {originalRow.row.original.currency.symbol}
-                {FormatNumberWithFixed(amount)}
+                {row.currency.symbol}
+                {FormatNumberWithFixed(
+                  debitAmout > creditAmount ? debitAmout : creditAmount
+                )}
               </td>
             </tr>
           </tbody>
         </table>
       ) : (
-        `${originalRow.row.original?.currency?.symbol}${FormatNumberWithFixed(
-          amount
+        `${row?.currency.symbol}${FormatNumberWithFixed(
+          debitAmout > creditAmount ? debitAmout : creditAmount
         )}`
       );
     },
-  }),
-  columnHelper.accessor("description", {
-    header: "SubEntry",
-    size: 500, //large column
-
-    Cell(originalRow) {
+    {
+      id: "amount",
+      header: "Amount",
+    }
+  ),
+  columnHelper.accessor(
+    (row) => {
       var s = [];
-      originalRow?.row.original?.sub_entries
+      row.sub_entries
         ?.sort((a, b) => a.type.length - b.type.length)
         .forEach((e, i) =>
           s.push(
-            <tr key={i}>
+            <tr key={e.id + "" + i}>
               <td align="center">
-                {originalRow.row.original.currency.symbol}
+                {row.currency.symbol}
                 {FormatNumberWithFixed(e.amount)}
               </td>
 
               {e.type === "Debit" && (
                 <td align="center">
                   {e.reference_id ? (
-                    <table className=" min-w-max table-auto text-center">
-                      <tbody>
-                        <tr>
-                          <td>
-                            Reference To: ({e.reference_id}){" "}
-                            {e.reference?.first_name} {e.reference?.last_name}
-                          </td>
-
-                          <td colSpan={2}>
-                            ({e?.two_digit_id ?? ""}
-                            {e?.three_digit_id ?? ""}
-                            {e?.more_than_four_digit_id ?? ""}
-                            {e?.account_entry_id ?? ""}){" "}
-                            {e.two_digit?.name ?? ""}
-                            {e.three_digit?.name ?? ""}
-                            {e.more_than_four_digit?.name ?? ""}
-                            {e.account_entry?.first_name}{" "}
-                            {e.reference?.last_name}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  ) : (
-                    <>
-                      ({e?.two_digit_id ?? ""}
-                      {e?.three_digit_id ?? ""}
-                      {e?.more_than_four_digit_id ?? ""}
-                      {e?.account_entry_id ?? ""}) {e.two_digit?.name ?? ""}
-                      {e.three_digit?.name ?? ""}
-                      {e.more_than_four_digit?.name ?? ""}
-                      {e.account_entry?.first_name} {e.reference?.last_name}
-                    </>
-                  )}
-                </td>
-              )}
-              <td className=""></td>
-              {e.type === "Credit" && (
-                <td align="center">
-                  {e.reference_id ? (
-                    <table className=" min-w-max table-auto text-center">
+                    <table className=" min-w-max table-auto text-left">
                       <tbody>
                         <tr>
                           <td>
@@ -577,8 +526,44 @@ var columns = [
                             {e.two_digit?.name ?? ""}
                             {e.three_digit?.name ?? ""}
                             {e.more_than_four_digit?.name ?? ""}
-                            {e.account_entry?.first_name}{" "}
-                            {e.reference?.last_name}
+                            {e.account_entry?.username ?? ""}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  ) : (
+                    <>
+                      ({e?.three_digit_id ?? ""}
+                      {e?.more_than_four_digit_id ?? ""}
+                      {e?.account_entry_id ?? ""}) {e.two_digit?.name ?? ""}
+                      {e.three_digit?.name ?? ""}
+                      {e.more_than_four_digit?.name ?? ""}
+                      {e.account_entry?.username ?? ""}
+                    </>
+                  )}
+                </td>
+              )}
+              <td className=""></td>
+              {e.type === "Credit" && (
+                <td align="center">
+                  {e.reference_id ? (
+                    <table className=" min-w-max table-auto text-left">
+                      <tbody>
+                        <tr>
+                          <td>
+                            Reference To: ({e.reference_id}){" "}
+                            {e.reference?.username ?? ""}
+                          </td>
+
+                          <td colSpan={2}>
+                            ({e?.two_digit_id ?? ""}
+                            {e?.three_digit_id ?? ""}
+                            {e?.more_than_four_digit_id ?? ""}
+                            {e?.account_entry_id ?? ""}){" "}
+                            {e.two_digit?.name ?? ""}
+                            {e.three_digit?.name ?? ""}
+                            {e.more_than_four_digit?.name ?? ""}
+                            {e.account_entry?.username ?? ""}
                           </td>
                         </tr>
                       </tbody>
@@ -591,7 +576,7 @@ var columns = [
                       {e?.account_entry_id ?? ""}) {e.two_digit?.name ?? ""}
                       {e.three_digit?.name ?? ""}
                       {e.more_than_four_digit?.name ?? ""}
-                      {e.account_entry?.first_name} {e.reference?.last_name}
+                      {e.account_entry?.username ?? ""}
                     </>
                   )}
                 </td>
@@ -601,17 +586,55 @@ var columns = [
         );
 
       return (
-        <table className=" min-w-max table-auto text-center w-full">
+        <table className=" min-w-max table-auto text-left w-full">
           <thead>
             <tr>
-              <td align="center">Amount</td>
-              <td align="center">Debit</td>
-              <td align="center">Credit</td>
+              <th align="center">
+                <Typography>Amount</Typography>
+              </th>
+              <th align="center">
+                {" "}
+                <Typography>Debit</Typography>
+              </th>
+              <th align="center">
+                <Typography>Credit</Typography>
+              </th>
             </tr>
           </thead>
           <tbody>{s}</tbody>
         </table>
       );
     },
-  }),
+    {
+      id: "description",
+      header: "SubEntry",
+    }
+  ),
+  columnHelper.accessor(
+    (row) => {
+      return row.sub_entries
+        .map(
+          (e, i) =>
+            `${e?.two_digit_id ?? ""}
+        ${e?.three_digit_id ?? ""}
+        ${e?.more_than_four_digit_id ?? ""}
+        ${e?.account_entry_id ?? ""}${e.reference_id ?? ""}`
+        )
+        .join(", ");
+    },
+    {
+      header: "Digits",
+    }
+  ),
 ];
+
+type Props = {
+  two_digits?: Prisma.Two_DigitGetPayload<{}>[];
+  three_digits?: Prisma.Three_DigitGetPayload<{
+    include: { two_digit: true };
+  }>[];
+  more_digits?: Prisma.More_Than_Four_DigitGetPayload<{
+    include: { three_digit: true };
+  }>[];
+  accounts?: Prisma.Account_EntryGetPayload<{}>[];
+};

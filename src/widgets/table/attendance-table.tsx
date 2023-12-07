@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useMemo, useTransition } from "react";
 import { Prisma } from "@prisma/client";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
 import { Card, CardHeader, Typography } from "@mui/material";
@@ -14,7 +14,7 @@ type Props = {
 };
 
 export default function AttendanceTable(props: Props) {
-  const store = useStore();
+  const toast = useToast();
 
   const columns = useMemo<MRT_ColumnDef<CommonType>[] | any>(
     () => [
@@ -91,7 +91,7 @@ export default function AttendanceTable(props: Props) {
           }`,
       },
     ],
-    [store.OpenAlert, , store]
+    [toast.OpenAlert, , toast]
   );
 
   return (

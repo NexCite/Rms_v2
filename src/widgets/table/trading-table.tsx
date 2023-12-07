@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@rms/components/ui/dropdown-menu";
 import { Input } from "@rms/components/ui/input";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import { deleteBrokerById } from "@rms/service/broker-service";
 import { deleteTraderById } from "@rms/service/trader-service";
 import { deleteAccountById } from "@rms/service/trading-account-service";
@@ -50,7 +50,7 @@ export default function TradingTable(props: Props) {
 
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const store = useStore();
+  const toast = useToast();
   const { push } = useRouter();
 
   const columns = useMemo<ColumnDef<any>[]>(
@@ -108,7 +108,7 @@ export default function TradingTable(props: Props) {
                                 }
                               }
 
-                              store.OpenAlert(result);
+                              toast.OpenAlert(result);
                             });
                           }
                         }}
@@ -215,7 +215,7 @@ export default function TradingTable(props: Props) {
             accessorFn: (e) => e.modified_date.toLocaleDateString(),
           },
         ] as any) as any,
-    [store.OpenAlert, props.node, , store]
+    [toast.OpenAlert, props.node, , toast]
   );
   const table = useReactTable({
     data: props.data,

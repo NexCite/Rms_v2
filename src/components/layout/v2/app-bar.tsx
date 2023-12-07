@@ -58,8 +58,8 @@ export default function AppBarV2(props: Props) {
     <>
       <div className={`  w-full  `}>
         <Next13ProgressBar
-          height="1px"
-          color="red"
+          height="2px"
+          color="#1176c8"
           options={{ showSpinner: false }}
           showOnShallow
         />

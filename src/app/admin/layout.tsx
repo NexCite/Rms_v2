@@ -1,8 +1,7 @@
 import LayoutV2 from "@rms/components/layout/v2/layout";
-import prisma from "@rms/prisma/prisma";
 import getUserFullInfo from "@rms/service/user-service";
 import { Metadata } from "next";
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 
 import React from "react";
 

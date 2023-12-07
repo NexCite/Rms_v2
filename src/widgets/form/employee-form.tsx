@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { $Enums, Prisma } from "@prisma/client";
 import NexCiteButton from "@rms/components/button/nexcite-button";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import Countries from "@rms/lib/country";
 import { createEmployee, updateEmployee } from "@rms/service/employee-service";
 import { useRouter } from "next/navigation";
@@ -86,7 +86,7 @@ export default function EmployeeFormComponent(props: Props) {
     resolver: zodResolver(validation),
     defaultValues: props.value,
   });
-  const store = useStore();
+  const toast = useToast();
   const handleSubmit = useCallback(
     (values: z.infer<any>) => {
       if (props.value) {
@@ -94,7 +94,7 @@ export default function EmployeeFormComponent(props: Props) {
           var value2 = JSON.parse(JSON.stringify(values));
 
           await updateEmployee(props.value.id, value2).then((res) => {
-            store.OpenAlert(res);
+            toast.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);
             });
@@ -109,7 +109,7 @@ export default function EmployeeFormComponent(props: Props) {
           var value2 = JSON.parse(JSON.stringify(values));
 
           await createEmployee(value2).then((res) => {
-            store.OpenAlert(res);
+            toast.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);
             });
@@ -121,7 +121,7 @@ export default function EmployeeFormComponent(props: Props) {
         });
       }
     },
-    [back, store, form, props.value]
+    [back, toast, form, props.value]
   );
   return (
     <form

@@ -112,6 +112,8 @@ export default async function getUserFullInfo(
             select: {
               logo: true,
               name: true,
+              phone_number: true,
+              email: true,
               id: true,
             },
           },
@@ -149,6 +151,8 @@ export default async function getUserFullInfo(
     id: auth.user.config?.id,
     name: auth.user.config?.name,
     logo: auth.user.config?.logo,
+    phone_number: auth.user.config?.phone_number,
+    email: auth.user.config?.email,
   };
 
   return { routes, user, config };
@@ -166,6 +170,8 @@ export type UserFullInfoType = {
     id: number;
     name: string;
     logo: string;
+    phone_number: string;
+    email: string;
   };
   routes: RouteModel[];
 };

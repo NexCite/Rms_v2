@@ -20,7 +20,7 @@ import {
   TextField,
 } from "@mui/material";
 import NexCiteButton from "@rms/components/button/nexcite-button";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 
 type Props =
   | {
@@ -54,7 +54,7 @@ export default function CategoryForm(props: Props) {
     resolver: zodResolver(validation),
     defaultValues: props.value,
   });
-  const store = useStore();
+  const toast = useToast();
   const handleSubmit = useCallback(
     (values: z.infer<any>) => {
       if (props.value) {
@@ -63,7 +63,7 @@ export default function CategoryForm(props: Props) {
           switch (props.node) {
             case "category": {
               await updateCategory(props.value.id, value2).then((res) => {
-                store.OpenAlert(res);
+                toast.OpenAlert(res);
                 Object.keys(res.errors ?? []).map((e) => {
                   form.setError(e as any, res[e]);
                 });
@@ -75,7 +75,7 @@ export default function CategoryForm(props: Props) {
             }
             case "sub_category": {
               await updateSubCategory(props.value.id, value2).then((res) => {
-                store.OpenAlert(res);
+                toast.OpenAlert(res);
                 Object.keys(res.errors ?? []).map((e) => {
                   form.setError(e as any, res[e]);
                 });
@@ -93,7 +93,7 @@ export default function CategoryForm(props: Props) {
           switch (props.node) {
             case "category": {
               await createCategory(value2).then((res) => {
-                store.OpenAlert(res);
+                toast.OpenAlert(res);
                 Object.keys(res.errors ?? []).map((e) => {
                   form.setError(e as any, res[e]);
                 });
@@ -105,7 +105,7 @@ export default function CategoryForm(props: Props) {
             }
             case "sub_category": {
               await createSubCategory(value2).then((res) => {
-                store.OpenAlert(res);
+                toast.OpenAlert(res);
                 Object.keys(res.errors ?? []).map((e) => {
                   form.setError(e as any, res[e]);
                 });
@@ -119,7 +119,7 @@ export default function CategoryForm(props: Props) {
         });
       }
     },
-    [back, store, props.node, props.value, form]
+    [back, toast, props.node, props.value, form]
   );
   return (
     <form

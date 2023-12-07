@@ -6,7 +6,7 @@ import { useMemo, useTransition } from "react";
 
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import Authorized from "@rms/components/ui/authorized";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import { deleteRoleById, resetRole } from "@rms/service/role-service";
 import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
 import Link from "next/link";
@@ -19,7 +19,7 @@ export default function RoleTable(props: Props) {
   const pathName = usePathname();
   const [isPadding, setTransition] = useTransition();
 
-  const store = useStore();
+  const toast = useToast();
 
   const columns = useMemo<MRT_ColumnDef<Prisma.RoleGetPayload<{}>>[]>(
     () => [
@@ -116,7 +116,7 @@ export default function RoleTable(props: Props) {
                   setTransition(async () => {
                     const result = await resetRole(id);
 
-                    store.OpenAlert(result);
+                    toast.OpenAlert(result);
                   });
                 }
               }}
@@ -136,7 +136,7 @@ export default function RoleTable(props: Props) {
                   setTransition(async () => {
                     var result = await deleteRoleById(id);
 
-                    store.OpenAlert(result);
+                    toast.OpenAlert(result);
                   });
                 }
               }}

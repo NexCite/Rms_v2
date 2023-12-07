@@ -23,7 +23,7 @@ import {
   TextField,
 } from "@mui/material";
 import NexCiteButton from "@rms/components/button/nexcite-button";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import {
   createMoreDigit,
   createThreeDigit,
@@ -145,7 +145,7 @@ export default function DigitForm(props: Props) {
     resolver: zodResolver(formSchema),
     defaultValues: props.value,
   });
-  const store = useStore();
+  const toast = useToast();
   const handleSubmit = useCallback(
     (values: z.infer<typeof formSchema>) => {
       setTransition(async () => {
@@ -158,7 +158,7 @@ export default function DigitForm(props: Props) {
                 ) as Prisma.Three_DigitUncheckedUpdateInput;
                 value2.two_digit_id = +(value2.two_digit_id + "");
                 await updateThreeDigit(props.value.id, value2).then((res) => {
-                  store.OpenAlert(res);
+                  toast.OpenAlert(res);
                   Object.keys(res.errors ?? []).map((e) => {
                     form.setError(e as any, res[e]);
                   });
@@ -173,7 +173,7 @@ export default function DigitForm(props: Props) {
                 ) as Prisma.Two_DigitUncheckedUpdateInput;
 
                 await updateTwoDigit(props.value.id, value1).then((res) => {
-                  store.OpenAlert(res);
+                  toast.OpenAlert(res);
                   Object.keys(res.errors ?? []).map((e) => {
                     form.setError(e as any, res[e]);
                   });
@@ -190,7 +190,7 @@ export default function DigitForm(props: Props) {
                 value3.three_digit_id = +(value3.three_digit_id + "");
 
                 await updateMoreDigit(props.value.id, value3).then((res) => {
-                  store.OpenAlert(res);
+                  toast.OpenAlert(res);
                   Object.keys(res.errors ?? []).map((e) => {
                     form.setError(e as any, res[e]);
                   });
@@ -213,7 +213,7 @@ export default function DigitForm(props: Props) {
                 ) as Prisma.Three_DigitUncheckedCreateInput;
                 value2.two_digit_id = +(value2.two_digit_id + "");
                 await createThreeDigit(value2).then((res) => {
-                  store.OpenAlert(res);
+                  toast.OpenAlert(res);
                   Object.keys(res.errors ?? []).map((e) => {
                     form.setError(e as any, res[e]);
                   });
@@ -228,7 +228,7 @@ export default function DigitForm(props: Props) {
                 ) as Prisma.Two_DigitUncheckedCreateInput;
 
                 await createTwoDigit(value1).then((res) => {
-                  store.OpenAlert(res);
+                  toast.OpenAlert(res);
                   Object.keys(res.errors ?? []).map((e) => {
                     form.setError(e as any, res[e]);
                   });
@@ -245,7 +245,7 @@ export default function DigitForm(props: Props) {
                 value3.three_digit_id = +(value3.three_digit_id + "");
 
                 await createMoreDigit(value3).then((res) => {
-                  store.OpenAlert(res);
+                  toast.OpenAlert(res);
                   Object.keys(res.errors ?? []).map((e) => {
                     form.setError(e as any, res[e]);
                   });
@@ -262,7 +262,7 @@ export default function DigitForm(props: Props) {
         }
       });
     },
-    [back, store, props.node, props.value, form]
+    [back, toast, props.node, props.value, form]
   );
   return (
     <>

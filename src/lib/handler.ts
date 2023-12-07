@@ -82,8 +82,7 @@ export async function handlerServiceAction<T>(
         }
 
         if (update) {
-          const paths = generatePaths(url.pathname);
-          paths.forEach((e) => revalidatePath(e));
+          revalidatePath(urlHeader, "layout");
         }
         return {
           status: HttpStatusCode.OK,
@@ -131,30 +130,6 @@ export async function handlerServiceAction<T>(
             return { message: error.message, status: 500 };
           }
         }
-
-        //   var errors: any = {};
-        //   var msg = error.message.split(":");
-        //   if (error["meta"]["target"]) {
-        //     error["meta"]["target"].map((res: any) => {
-        //       errors[res] = msg.length > 1 ? msg[1] : msg[0];
-        //     });
-
-        //     return {
-        //       status: HttpStatusCode.BAD_REQUEST,
-        //       message: error.message,
-        //       errors: errors,
-        //     };
-        //   }
-        //   return {
-        //     status: HttpStatusCode.BAD_REQUEST,
-        //     message: error.message,
-        //   };
-        // } else {
-        //   return {
-        //     status: HttpStatusCode.INTERNAL_SERVER_ERROR,
-        //     message: error.message,
-        //   };
-        // }
       }
     }
   }

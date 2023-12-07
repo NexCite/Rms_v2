@@ -2,58 +2,6 @@ import prisma from "@rms/prisma/prisma";
 
 import { getConfigId } from "@rms/lib/config";
 import SheetStateTable from "@rms/widgets/table/sheet-state-table ";
-type CommonInclude = {
-  currency: true;
-
-  sub_entries: {
-    include: {
-      account_entry: {
-        include: {
-          more_than_four_digit: {
-            include: {
-              three_digit: { include: { two_digit: true } };
-            };
-          };
-
-          three_digit: {
-            include: {
-              two_digit: true;
-            };
-          };
-          two_digit: true;
-        };
-      };
-      reference: {
-        include: {
-          more_than_four_digit: {
-            include: {
-              three_digit: { include: { two_digit: true } };
-            };
-          };
-
-          three_digit: {
-            include: {
-              two_digit: true;
-            };
-          };
-          two_digit: true;
-        };
-      };
-      more_than_four_digit: {
-        include: {
-          three_digit: { include: { two_digit: true } };
-        };
-      };
-
-      three_digit: {
-        include: {
-          two_digit: true;
-        };
-      };
-      two_digit: true;
-    };
-  };
-};
 
 export default async function Entry(props: { params: {} }) {
   const config_id = await getConfigId();

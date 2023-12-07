@@ -28,7 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rms/components/ui/select";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import { createInvoice, updateInvoice } from "@rms/service/invoice-service";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState, useTransition } from "react";
@@ -85,7 +85,7 @@ export default function InvoiceForm(props: Props) {
 
   const [media, setMedia] = useState<Prisma.MediaGetPayload<{}>>();
 
-  const store = useStore();
+  const toast = useToast();
   const handleSubmit = useCallback(
     (values: z.infer<any>) => {
       const result = validation.safeParse(values);
@@ -145,7 +145,7 @@ export default function InvoiceForm(props: Props) {
           var value2 = JSON.parse(JSON.stringify(values));
 
           await updateInvoice(props.value.id, value2).then((res) => {
-            store.OpenAlert(res);
+            toast.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);
             });
@@ -160,7 +160,7 @@ export default function InvoiceForm(props: Props) {
           var value2 = JSON.parse(JSON.stringify(values));
 
           await createInvoice(value2).then((res) => {
-            store.OpenAlert(res);
+            toast.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);
             });
@@ -172,7 +172,7 @@ export default function InvoiceForm(props: Props) {
         });
       }
     },
-    [back, media, props.value, form, store, validation]
+    [back, media, props.value, form, toast, validation]
   );
   return (
     <>

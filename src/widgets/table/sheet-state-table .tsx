@@ -1,6 +1,13 @@
 "use client";
 import { toPng } from "html-to-image";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 
 import { $Enums, Prisma } from "@prisma/client";
 import { FormatNumberWithFixed } from "@rms/lib/global";
@@ -19,42 +26,36 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import NexCiteButton from "@rms/components/button/nexcite-button";
 import Loading from "@rms/components/ui/loading";
 import { findEnteris } from "@rms/service/entry-service";
-import dayjs from "dayjs";
 import {
   MaterialReactTable,
   createMRTColumnHelper,
   useMaterialReactTable,
 } from "material-react-table";
-import moment from "moment";
+import dayjs from "dayjs";
 import Image from "next/image";
 import { usePDF } from "react-to-pdf";
+import useHistoryStore from "@rms/hooks/history-hook";
 
 export default function SheetStateTable(props: Props) {
   const [isPadding, setTransition] = useTransition();
-
-  const [searchEntries, setSearchEntries] = useState<{
-    two_digit?: Prisma.Two_DigitGetPayload<{}>;
-    three_digit?: Prisma.Three_DigitGetPayload<{}>;
-    account?: Prisma.Account_EntryGetPayload<{}>;
-    type?: $Enums.DigitType;
-    more_than_four_digit?: Prisma.More_Than_Four_DigitGetPayload<{}>;
-    include_reference?: boolean;
-    debit?: $Enums.DebitCreditType;
-    id?: number;
-    from: Date;
-    to: Date;
-  }>({
-    two_digit: null,
-    three_digit: null,
-    account: null,
-    type: null,
-    more_than_four_digit: null,
-    include_reference: null,
-    debit: null,
-    id: null,
-    from: dayjs().startOf("D").toDate(),
-    to: dayjs().endOf("D").toDate(),
-  });
+  const historyStore = useHistoryStore<CommonEntriesSearch>("sheet-state")();
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    setLoading(false);
+  }, []);
+  const [searchEntries, setSearchEntries] = useState<CommonEntriesSearch>(
+    historyStore.data ?? {
+      two_digit: null,
+      three_digit: null,
+      account: null,
+      type: null,
+      more_than_four_digit: null,
+      include_reference: null,
+      debit: null,
+      from: dayjs().startOf("D").toDate(),
+      to: dayjs().endOf("D").toDate(),
+    }
+  );
 
   const [dataEntries, setDataEntries] = useState<any[]>([]);
 
@@ -194,19 +195,23 @@ export default function SheetStateTable(props: Props) {
         currencies,
       };
     }, [dataEntries]);
+
   const titleRef = useRef<HTMLHeadingElement>();
-  const { toPDF, targetRef } = usePDF();
-  const [loadingUi, setLoadingUi] = useState(true);
-  useEffect(() => {
-    setLoadingUi(false);
-  }, []);
-  useEffect(() => {
-    setTransition(() =>
-      findEnteris(searchEntries).then((res) => {
+  const { targetRef } = usePDF();
+  const handleData = useCallback(() => {
+    setTransition(async () => {
+      historyStore.setData(searchEntries);
+      await findEnteris(searchEntries).then((res) => {
         setDataEntries(res.result);
-      })
-    );
-  }, [searchEntries]);
+      });
+    });
+  }, [findEnteris, searchEntries, setTransition]);
+
+  useEffect(() => {
+    if (!loading) {
+      handleData();
+    }
+  }, [searchEntries, handleData, loading]);
   const table = useMaterialReactTable({
     columns,
     data: dataEntries,
@@ -295,6 +300,12 @@ export default function SheetStateTable(props: Props) {
         </div>
       </>
     ),
+    initialState: {
+      density: "comfortable",
+    },
+    state: {
+      showLoadingOverlay: isPadding,
+    },
     renderBottomToolbar: (e) => {
       const subEntriesData = useMemo(
         () =>
@@ -359,17 +370,10 @@ export default function SheetStateTable(props: Props) {
         </>
       );
     },
-
-    initialState: {
-      columnVisibility: {},
-      pagination: {
-        pageIndex: 0,
-        pageSize: 500,
-      },
-    },
+    enablePagination: false,
   });
-  return loadingUi ? (
-    <Loading />
+  return loading ? (
+    <></>
   ) : (
     <Card variant="outlined">
       <CardHeader
@@ -581,7 +585,7 @@ const columns = [
     header: "ID",
   }),
   columnHelper.accessor(
-    (row) => moment(row?.to_date).format("DD-MM-yyy hh:mm a"),
+    (row) => dayjs(row?.to_date).format("DD-MM-YYYY hh:mm a"),
     {
       header: "Date",
       id: "to_date",
@@ -760,6 +764,22 @@ const columns = [
       header: "SubEntry",
     }
   ),
+  columnHelper.accessor(
+    (row) => {
+      return row.sub_entries
+        .map(
+          (e, i) =>
+            `${e?.two_digit_id ?? ""}
+        ${e?.three_digit_id ?? ""}
+        ${e?.more_than_four_digit_id ?? ""}
+        ${e?.account_entry_id ?? ""}${e.reference_id ?? ""}`
+        )
+        .join(", ");
+    },
+    {
+      header: "Digits",
+    }
+  ),
 ];
 
 type Props = {
@@ -802,3 +822,16 @@ const subEntriesColumns = [
     header: "Total Rate",
   }),
 ];
+
+type CommonEntriesSearch = {
+  two_digit?: Prisma.Two_DigitGetPayload<{}>;
+  three_digit?: Prisma.Three_DigitGetPayload<{}>;
+  account?: Prisma.Account_EntryGetPayload<{}>;
+  type?: $Enums.DigitType;
+  more_than_four_digit?: Prisma.More_Than_Four_DigitGetPayload<{}>;
+  include_reference?: boolean;
+  debit?: $Enums.DebitCreditType;
+  id?: number;
+  from: Date;
+  to: Date;
+};

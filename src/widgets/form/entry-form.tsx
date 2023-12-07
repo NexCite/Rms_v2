@@ -30,7 +30,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import NexCiteButton from "@rms/components/button/nexcite-button";
 import Loading from "@rms/components/ui/loading";
 import NumericFormatCustom from "@rms/components/ui/text-field-number";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import { fileZod, mediaZod } from "@rms/lib/common";
 import { Activity, ActivityStatus } from "@rms/models/CommonModel";
 import dayjs from "dayjs";
@@ -144,7 +144,7 @@ export default function EntryForm(props: Props) {
     .optional()
     .nullable();
 
-  const store = useStore();
+  const toast = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -308,13 +308,13 @@ export default function EntryForm(props: Props) {
               }
             : undefined,
         });
-        store.OpenAlert(result);
+        toast.OpenAlert(result);
         if (result.status === 200) {
           back();
         }
       });
     },
-    [props, back, form, store]
+    [props, back, form, toast]
   );
   const [loadingUi, setLoadingUi] = useState(true);
   useEffect(() => {

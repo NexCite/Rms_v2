@@ -3,9 +3,11 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import React from "react";
 
 export default function NexCiteButton(props: {
-  isPadding: boolean;
+  isPadding?: boolean;
   label?: string;
   onClick?: (props: any) => any;
+  type?: "button" | "submit";
+  children?: React.ReactNode;
 }) {
   return (
     <LoadingButton
@@ -14,10 +16,10 @@ export default function NexCiteButton(props: {
       fullWidth
       onClick={props.onClick}
       disableElevation
-      type={props.onClick ? "button" : "submit"}
+      type={props.type ?? "submit"}
       loading={props.isPadding}
     >
-      {props.label ?? "Save"}
+      {props.label ?? props.children ?? "Save"}
     </LoadingButton>
   );
 }

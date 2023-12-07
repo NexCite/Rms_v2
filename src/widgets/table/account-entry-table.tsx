@@ -6,7 +6,7 @@ import { useTransition } from "react";
 import { Card, CardHeader, Divider, MenuItem, Typography } from "@mui/material";
 import { $Enums, Prisma } from "@prisma/client";
 import Authorized from "@rms/components/ui/authorized";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import {
   deleteAccountEntry,
   resetAcountEntry,
@@ -111,7 +111,7 @@ export default function Account_EntryTable(props: Props) {
   const pathName = usePathname();
   const [isPadding, setTransitionTransition] = useTransition();
 
-  const store = useStore();
+  const toast = useToast();
   const table = useMaterialReactTable({
     columns,
     data: props.accounts,
@@ -126,7 +126,9 @@ export default function Account_EntryTable(props: Props) {
     enableRowSelection: true,
     enableSelectAll: true,
     editDisplayMode: "row",
-
+    state: {
+      showLoadingOverlay: isPadding,
+    },
     renderRowActionMenuItems({
       row: {
         original: { username, id },
@@ -161,7 +163,7 @@ export default function Account_EntryTable(props: Props) {
                 setTransitionTransition(async () => {
                   const result = await resetAcountEntry(id);
 
-                  store.OpenAlert(result);
+                  toast.OpenAlert(result);
                 });
               }
             }}
@@ -190,7 +192,7 @@ export default function Account_EntryTable(props: Props) {
                 setTransitionTransition(async () => {
                   const result = await deleteAccountEntry(id, props.node);
 
-                  store.OpenAlert(result);
+                  toast.OpenAlert(result);
                 });
               }
             }}
@@ -205,6 +207,7 @@ export default function Account_EntryTable(props: Props) {
     ),
 
     initialState: {
+      density: "comfortable",
       columnVisibility: {
         status: false,
         email: false,

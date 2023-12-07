@@ -5,7 +5,7 @@ import { getConfigId } from "@rms/lib/config";
 import BackButton from "@rms/components/ui/back-button";
 import VacationView from "@rms/widgets/view/vacation-view";
 import EmployeeView from "@rms/widgets/view/employee-view";
-import moment from "moment";
+import dayjs from "dayjs";
 
 export default async function page(props: {
   params: { id: string };
@@ -31,8 +31,8 @@ export default async function page(props: {
     const date: [Date, Date] = [
       Number.isNaN(startDate)
         ? undefined
-        : moment(startDate).startOf("day").toDate(),
-      Number.isNaN(endDate) ? undefined : moment(endDate).endOf("day").toDate(),
+        : dayjs(startDate).startOf("day").toDate(),
+      Number.isNaN(endDate) ? undefined : dayjs(endDate).endOf("day").toDate(),
     ];
 
     var employee: Prisma.EmployeeGetPayload<{}> =

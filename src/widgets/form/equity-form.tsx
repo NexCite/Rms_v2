@@ -18,7 +18,7 @@ import NexCiteButton from "@rms/components/button/nexcite-button";
 import { Button } from "@rms/components/ui/button";
 import Loading from "@rms/components/ui/loading";
 import NumericFormatCustom from "@rms/components/ui/text-field-number";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import { createEquity, updateEquity } from "@rms/service/equity-service";
 import dayjs from "dayjs";
 import { PlusSquare, X } from "lucide-react";
@@ -188,7 +188,7 @@ export default function EquityForm(props: Props) {
     ),
   });
 
-  const store = useStore();
+  const toast = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -238,13 +238,13 @@ export default function EquityForm(props: Props) {
 
         if (props.isEditMode) {
           const result = await updateEquity(props.id, formsData as any);
-          store.OpenAlert(result);
+          toast.OpenAlert(result);
           if (result.status === 200) {
             back();
           }
         } else {
           const result = await createEquity(formsData as any);
-          store.OpenAlert(result);
+          toast.OpenAlert(result);
           if (result.status === 200) {
             back();
           }
@@ -252,7 +252,7 @@ export default function EquityForm(props: Props) {
       });
       // }
     },
-    [props, store, back]
+    [props, toast, back]
   );
 
   const [loadingUi, setLoadingUi] = useState(true);

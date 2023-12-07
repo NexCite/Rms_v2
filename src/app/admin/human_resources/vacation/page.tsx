@@ -1,7 +1,7 @@
 import VacationTable from "@rms/widgets/table/vacation-table";
 import { Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
-import moment from "moment";
+import dayjs from "dayjs";
 import { getConfigId } from "@rms/lib/config";
 type CommonetType = Prisma.VacationGetPayload<{
   include: {
@@ -33,8 +33,8 @@ export default async function page(props: {
   const date: [Date, Date] = [
     Number.isNaN(startDate)
       ? undefined
-      : moment(startDate).startOf("day").toDate(),
-    Number.isNaN(endDate) ? undefined : moment(endDate).endOf("day").toDate(),
+      : dayjs(startDate).startOf("day").toDate(),
+    Number.isNaN(endDate) ? undefined : dayjs(endDate).endOf("day").toDate(),
   ];
 
   var value: CommonetType[];

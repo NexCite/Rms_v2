@@ -48,7 +48,6 @@ export async function getUserInfo(): Promise<UserSelectCommon | undefined> {
 export function generateToken(
   user: Prisma.UserGetPayload<{ include: { role: true } }>
 ) {
-  console.log(user);
   return sign(
     {
       username: user.username,

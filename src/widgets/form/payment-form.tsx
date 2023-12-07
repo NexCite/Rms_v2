@@ -29,7 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rms/components/ui/select";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import { createPayment, updatePayment } from "@rms/service/payment-service";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState, useTransition } from "react";
@@ -72,7 +72,7 @@ export default function PaymentForm(props: Props) {
   );
 
   const [media, setMedia] = useState<Prisma.MediaGetPayload<{}>>();
-  const store = useStore();
+  const toast = useToast();
   const handleSubmit = useCallback(
     (values: z.infer<any>) => {
       const result = validation.safeParse(values);
@@ -123,7 +123,7 @@ export default function PaymentForm(props: Props) {
           var value2 = JSON.parse(JSON.stringify(values));
 
           await updatePayment(props.value.id, value2).then((res) => {
-            store.OpenAlert(res);
+            toast.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);
             });
@@ -138,7 +138,7 @@ export default function PaymentForm(props: Props) {
           var value2 = JSON.parse(JSON.stringify(values));
 
           await createPayment(value2).then((res) => {
-            store.OpenAlert(res);
+            toast.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);
             });
@@ -150,7 +150,7 @@ export default function PaymentForm(props: Props) {
         });
       }
     },
-    [back, store, form, media, props.value, props.isEditMode, validation]
+    [back, toast, form, media, props.value, props.isEditMode, validation]
   );
   return (
     <>

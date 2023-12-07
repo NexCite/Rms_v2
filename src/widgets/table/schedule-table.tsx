@@ -6,7 +6,7 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Prisma } from "@prisma/client";
 import Authorized from "@rms/components/ui/authorized";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import {
   deleteScheduleById,
   resetSchedule,
@@ -42,7 +42,7 @@ export default function ScheduleTable(props: Props) {
   const pathName = usePathname();
   const [isPadding, setTransition] = useTransition();
 
-  const store = useStore();
+  const toast = useToast();
 
   const { replace } = useRouter();
 
@@ -184,7 +184,7 @@ export default function ScheduleTable(props: Props) {
                     setTransition(async () => {
                       const result = await resetSchedule(id);
 
-                      store.OpenAlert(result);
+                      toast.OpenAlert(result);
                     });
                   }
                 }}
@@ -204,7 +204,7 @@ export default function ScheduleTable(props: Props) {
                     setTransition(async () => {
                       const result = await deleteScheduleById(id);
 
-                      store.OpenAlert(result);
+                      toast.OpenAlert(result);
                     });
                   }
                 }}

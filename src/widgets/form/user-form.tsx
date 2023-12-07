@@ -19,7 +19,7 @@ import {
   Typography,
 } from "@mui/material";
 import NexCiteButton from "@rms/components/button/nexcite-button";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import Countries from "@rms/lib/country";
 import { useCallback, useMemo, useTransition } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
@@ -102,7 +102,7 @@ export default function UserFormComponent(props: Props) {
     resolver: zodResolver(validation),
     defaultValues: props.value,
   });
-  const store = useStore();
+  const toast = useToast();
   const watch = useWatch({ control: form.control });
   const userRole = useMemo(() => {
     const role = props.roles.find((res) => res.id === props.value?.role?.id);
@@ -117,7 +117,7 @@ export default function UserFormComponent(props: Props) {
           var value2 = JSON.parse(JSON.stringify(values));
 
           await updateUser(props.value.id, value2).then((res) => {
-            store.OpenAlert(res);
+            toast.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);
             });
@@ -132,7 +132,7 @@ export default function UserFormComponent(props: Props) {
           var value2 = JSON.parse(JSON.stringify(values));
 
           await createUser(value2).then((res) => {
-            store.OpenAlert(res);
+            toast.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);
             });
@@ -144,7 +144,7 @@ export default function UserFormComponent(props: Props) {
         });
       }
     },
-    [back, store, form, props.value]
+    [back, toast, form, props.value]
   );
 
   return (

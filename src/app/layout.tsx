@@ -2,10 +2,8 @@ import { ThemeProvider } from "@rms/components/theme/theme-provider";
 import "./globals.css";
 
 import { env } from "process";
-import NextTopLoader from "nextjs-toploader";
-import prisma from "@rms/prisma/prisma";
+
 import { AlertProvider } from "@rms/hooks/toast-hook";
-import { getConfigId } from "@rms/lib/config";
 import { headers } from "next/headers";
 import { Metadata } from "next";
 

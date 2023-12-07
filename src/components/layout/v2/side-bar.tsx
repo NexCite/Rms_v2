@@ -119,9 +119,9 @@ export default function SideBarV2(props: Props) {
                               key={res.title}
                               href={res.path}
                               as={res.path}
-                              className={`flex items-center hover:bg-[#3867d6]  hover:text-[white] gap-2 px-3 py-2 rounded-md  ${
+                              className={`flex items-center hover:bg-gray-200   gap-2 px-3 py-2 rounded-md  ${
                                 pathName.startsWith(res.path)
-                                  ? "bg-[#3867d6] text-[white]"
+                                  ? "bg-gray-200 "
                                   : ""
                               }`}
                             >

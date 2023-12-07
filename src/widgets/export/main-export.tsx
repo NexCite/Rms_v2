@@ -20,6 +20,7 @@ import { IconButton, Modal } from "@mui/material";
 type Props = {
   config: {
     logo: string;
+    email: string;
     name: string;
     phone_number: string;
   };

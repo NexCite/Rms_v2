@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
-import moment from "moment";
+import dayjs from "dayjs";
 import ScheduleTable from "@rms/widgets/table/schedule-table";
 import { getConfigId } from "@rms/lib/config";
 
@@ -34,10 +34,10 @@ export default async function page(props: {
   const endDate = parseInt(props.searchParams.to_date);
 
   const date: [Date, Date] = [
-    moment(Number.isNaN(startDate) ? undefined : startDate)
+    dayjs(Number.isNaN(startDate) ? undefined : startDate)
       .startOf("day")
       .toDate(),
-    moment(Number.isNaN(endDate) ? undefined : endDate)
+    dayjs(Number.isNaN(endDate) ? undefined : endDate)
       .endOf("day")
       .toDate(),
   ];

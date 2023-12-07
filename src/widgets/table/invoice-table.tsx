@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@rms/components/ui/dropdown-menu";
 import { Input } from "@rms/components/ui/input";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import { deleteInvoiceById } from "@rms/service/invoice-service";
 import {
   ColumnDef,
@@ -41,7 +41,7 @@ export default function InvoiceTable(props: Props) {
 
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const store = useStore();
+  const toast = useToast();
 
   const { push } = useRouter();
   const columns = useMemo<ColumnDef<Prisma.InvoiceGetPayload<{}>>[]>(
@@ -84,7 +84,7 @@ export default function InvoiceTable(props: Props) {
                           setTransition(async () => {
                             const result = await deleteInvoiceById(id);
 
-                            store.OpenAlert(result);
+                            toast.OpenAlert(result);
                           });
                         }
                       }}
@@ -151,7 +151,7 @@ export default function InvoiceTable(props: Props) {
         accessorFn: (p) => p.modified_date?.toLocaleDateString(),
       },
     ],
-    [store.OpenAlert, , store]
+    [toast.OpenAlert, , toast]
   );
   const table = useReactTable({
     data: props.invoices,

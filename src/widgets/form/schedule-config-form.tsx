@@ -4,7 +4,7 @@ import { LocalizationProvider, TimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Prisma } from "@prisma/client";
 import NexCiteButton from "@rms/components/button/nexcite-button";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import { updateScheuleConfig } from "@rms/service/schedule-config-service";
 import dayjs from "dayjs";
 import { useMemo, useTransition } from "react";
@@ -16,7 +16,7 @@ type Props = {
 };
 export default function ScheduleConfigForm(props: Props) {
   const [isPadding, setTransition] = useTransition();
-  const store = useStore();
+  const toast = useToast();
 
   const validation = useMemo(
     () =>
@@ -38,7 +38,7 @@ export default function ScheduleConfigForm(props: Props) {
   const handleForm = (values: z.infer<typeof validation>) => {
     setTransition(() => {
       updateScheuleConfig(props.config.id, values).then((res) => {
-        store.OpenAlert(res);
+        toast.OpenAlert(res);
       });
     });
   };

@@ -14,7 +14,7 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Prisma } from "@prisma/client";
 import Authorized from "@rms/components/ui/authorized";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import {
   deleteVacationById,
   resetVaction,
@@ -78,7 +78,7 @@ export default function VacationTable(props: Props) {
   const pathName = usePathname();
   const [isPadding, setTransition] = useTransition();
 
-  const store = useStore();
+  const toast = useToast();
 
   const { replace } = useRouter();
 
@@ -344,7 +344,7 @@ export default function VacationTable(props: Props) {
                       setTransition(async () => {
                         const result = await resetVaction(id);
 
-                        store.OpenAlert(result);
+                        toast.OpenAlert(result);
                       });
                     }
                   }}
@@ -364,7 +364,7 @@ export default function VacationTable(props: Props) {
                       setTransition(async () => {
                         const result = await deleteVacationById(id);
 
-                        store.OpenAlert(result);
+                        toast.OpenAlert(result);
                       });
                     }
                   }}

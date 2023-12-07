@@ -6,7 +6,7 @@ import { useMemo, useTransition } from "react";
 
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import Authorized from "@rms/components/ui/authorized";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import {
   deleteCategoryById,
   resetCategory,
@@ -29,7 +29,7 @@ export default function CategoryTable(props: Props) {
   const pathName = usePathname();
   const [isPadding, setTransition] = useTransition();
 
-  const store = useStore();
+  const toast = useToast();
 
   const columns = useMemo<MRT_ColumnDef<any>[]>(
     () => [
@@ -132,7 +132,7 @@ export default function CategoryTable(props: Props) {
                   setTransition(async () => {
                     const result = await resetCategory(id);
 
-                    store.OpenAlert(result);
+                    toast.OpenAlert(result);
                   });
                 }
               }}
@@ -157,7 +157,7 @@ export default function CategoryTable(props: Props) {
                       result = await deleteSubCategoryById(id);
                     }
 
-                    store.OpenAlert(result);
+                    toast.OpenAlert(result);
                   });
                 }
               }}

@@ -16,7 +16,6 @@ export default async function page(props: {
 }) {
   const config_id = await getConfigId();
 
-  const config = await getConfig();
   const auth = await getUserFullInfo();
 
   const entry = await prisma.entry.findFirst({
@@ -50,7 +49,7 @@ export default async function page(props: {
         last_name: auth.user.last_name,
       }}
       entry={entry as any}
-      config={config.result}
+      config={auth.config}
     />
   );
 }

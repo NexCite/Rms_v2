@@ -4,7 +4,7 @@ import { FileMapper } from "@rms/lib/common";
 import { handlerServiceAction } from "@rms/lib/handler";
 import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
-import moment from "moment";
+import dayjs from "dayjs";
 
 export async function createSchedule(params: {
   to_date?: string | Date;
@@ -25,7 +25,7 @@ export async function createSchedule(params: {
 }): Promise<ServiceActionModel<void>> {
   return handlerServiceAction(
     async (info, config_id) => {
-      const date = moment(params.to_date);
+      const date = dayjs(params.to_date);
 
       const result = await prisma.schedule.findFirst({
         where: {

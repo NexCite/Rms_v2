@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@rms/components/ui/dropdown-menu";
 import { Input } from "@rms/components/ui/input";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import { deletePaymentById } from "@rms/service/payment-service";
 import {
   ColumnDef,
@@ -41,7 +41,7 @@ export default function PaymentTable(props: Props) {
 
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const store = useStore();
+  const toast = useToast();
   const { push } = useRouter();
   const columns = useMemo<ColumnDef<Prisma.PaymentGetPayload<{}>>[]>(
     () => [
@@ -82,7 +82,7 @@ export default function PaymentTable(props: Props) {
                           setTransition(async () => {
                             const result = await deletePaymentById(id);
 
-                            store.OpenAlert(result);
+                            toast.OpenAlert(result);
                           });
                         }
                       }}

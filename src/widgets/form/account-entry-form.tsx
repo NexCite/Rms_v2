@@ -24,7 +24,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useStore } from "@rms/hooks/toast-hook";
+import { useToast } from "@rms/hooks/toast-hook";
 import Countries from "@rms/lib/country";
 import NexCiteButton from "@rms/components/button/nexcite-button";
 
@@ -113,7 +113,7 @@ export default function Account_EntryForm(props: {
     resolver: zodResolver(formSchema),
     defaultValues: props.account,
   });
-  const store = useStore();
+  const toast = useToast();
   const watch = useWatch({ control: form.control });
 
   const handleSubmit = useCallback(
@@ -122,7 +122,7 @@ export default function Account_EntryForm(props: {
         if (props.account) {
           await updateAccountEntry(props.account.id, values, props.node).then(
             (res) => {
-              store.OpenAlert(res);
+              toast.OpenAlert(res);
               Object.keys(res.errors ?? []).map((e) => {
                 form.setError(e as any, res[e]);
               });
@@ -134,7 +134,7 @@ export default function Account_EntryForm(props: {
           );
         } else {
           await createAccountEntry(values as any, props.node).then((res) => {
-            store.OpenAlert(res);
+            toast.OpenAlert(res);
             Object.keys(res.errors ?? []).map((e) => {
               form.setError(e as any, res[e]);
             });
@@ -145,7 +145,7 @@ export default function Account_EntryForm(props: {
         }
       });
     },
-    [back, store, props.account, form, props.node]
+    [back, toast, props.account, form, props.node]
   );
 
   const defualtSelect = useMemo(() => {
