@@ -101,8 +101,6 @@ export default function EmployeeView(props: Props) {
       normal: totalMinutes,
     });
 
-    console.log(array);
-
     return array;
   }, [props.attendances]);
 

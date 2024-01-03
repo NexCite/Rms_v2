@@ -1,13 +1,16 @@
 import EquityForm from "@rms/widgets/form/equity-form";
 import { Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
-import React from "react";
+import React, { Suspense } from "react";
 import { getConfigId } from "@rms/lib/config";
+import getUserFullInfo from "@rms/service/user-service";
+import Loading from "@rms/components/ui/loading";
 
 export default async function page(props: {
   params: {};
   searchParams: { id?: string };
 }) {
+  const info = await getUserFullInfo();
   const id = +props.searchParams.id;
   const isEditMode = id ? true : false;
 
@@ -27,11 +30,9 @@ export default async function page(props: {
 
   var Equities: Prisma.EquityGetPayload<{}>[];
 
-  const config_id = await getConfigId();
-
   if (isEditMode) {
     value = await prisma.equity.findFirst({
-      where: { config_id, id },
+      where: { config_id: info.config.id, id },
       select: {
         agent_boxes: true,
         manager_boxes: true,
@@ -46,20 +47,22 @@ export default async function page(props: {
     });
 
     Equities = await prisma.equity.findMany({
-      where: { config_id, NOT: { id } },
+      where: { config_id: info.config.id, NOT: { id } },
     });
   } else {
-    Equities = await prisma.equity.findMany({ where: { config_id } });
+    Equities = await prisma.equity.findMany({
+      where: { config_id: info.config.id },
+    });
   }
 
   return (
-    <>
+    <Suspense fallback={<Loading />}>
       <EquityForm
         id={id}
         value={value}
         isEditMode={isEditMode}
         Equities={Equities}
       />
-    </>
+    </Suspense>
   );
 }

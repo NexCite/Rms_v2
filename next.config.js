@@ -4,8 +4,11 @@ const nextConfig = {
     emotion: true,
     styledComponents: true,
   },
+  reactStrictMode: false,
   experimental: {
     instrumentationHook: true,
+    nextScriptWorkers: true,
+    swcPlugins: [["@swc-jotai/react-refresh", {}]],
   },
 };
 

@@ -1,10 +1,7 @@
-import { getConfigId } from "@rms/lib/config";
 import prisma from "@rms/prisma/prisma";
-import { getConfig } from "@rms/service/config-service";
 import getUserFullInfo, { getUserStatus } from "@rms/service/user-service";
 import MainExport from "@rms/widgets/export/main-export";
 import { notFound } from "next/navigation";
-import React from "react";
 
 export default async function page(props: {
   params: {
@@ -14,15 +11,14 @@ export default async function page(props: {
     id: string;
   };
 }) {
-  const config_id = await getConfigId();
-
-  const auth = await getUserFullInfo();
+  const info = await getUserFullInfo();
+  const userStates = getUserStatus(info.user);
 
   const entry = await prisma.entry.findFirst({
     where: {
-      config_id,
+      config_id: info.config.id,
       id: +props.params.id,
-      status: await getUserStatus(),
+      status: userStates,
     },
     include: {
       currency: true,
@@ -45,11 +41,11 @@ export default async function page(props: {
   return (
     <MainExport
       user={{
-        first_name: auth.user.first_name,
-        last_name: auth.user.last_name,
+        first_name: info.user.first_name,
+        last_name: info.user.last_name,
       }}
       entry={entry as any}
-      config={auth.config}
+      config={info.config}
     />
   );
 }

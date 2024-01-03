@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import Authorized from "@rms/components/ui/authorized";
@@ -13,9 +13,14 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
   type MRT_ColumnDef,
+  MRT_PaginationState,
+  MRT_ColumnFiltersState,
 } from "material-react-table";
 import Link from "next/link";
 import ExportData from "@rms/components/other/export-data";
+import useHistoryStore from "@rms/hooks/history-hook";
+import Loading from "@rms/components/ui/loading";
+import LoadingClient from "@rms/components/other/loading-client";
 
 type Props = {
   data: Activity[];
@@ -147,10 +152,24 @@ export default function ActivityTable(props: Props) {
     ],
     []
   );
+
+  const historyTablePageStore = useHistoryStore<MRT_PaginationState>(
+    "activity-table-page",
+    { pageIndex: 0, pageSize: 100 }
+  )();
+  const historyTableFilterStore = useHistoryStore<MRT_ColumnFiltersState>(
+    "activity-table-filter",
+    []
+  )();
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    setLoading(false);
+  }, []);
   const table = useMaterialReactTable({
     columns,
     data: props.data,
     enableRowActions: true,
+
     muiTableHeadCellProps: {
       align: "center",
     },
@@ -202,9 +221,15 @@ export default function ActivityTable(props: Props) {
       <ExportData data={props.data} table={table} />
     ),
 
+    onPaginationChange: historyTablePageStore.set,
     state: {
       showLoadingOverlay: isPadding,
+      pagination: historyTablePageStore.data,
+      showColumnFilters: historyTableFilterStore.data.length > 0,
+
+      // columnFilters: historyTableFilterStore.data,
     },
+    onColumnFiltersChange: historyTableFilterStore.set,
     initialState: {
       density: "comfortable",
 
@@ -216,10 +241,6 @@ export default function ActivityTable(props: Props) {
         address1: false,
         address2: false,
       },
-      pagination: {
-        pageIndex: 0,
-        pageSize: 100,
-      },
     },
   });
   return (
@@ -228,7 +249,10 @@ export default function ActivityTable(props: Props) {
         title={<Typography variant="h5">Activies Table</Typography>}
       />
 
-      <MaterialReactTable table={table} />
+      <LoadingClient>
+        {" "}
+        <MaterialReactTable table={table} />
+      </LoadingClient>
     </Card>
   );
 }

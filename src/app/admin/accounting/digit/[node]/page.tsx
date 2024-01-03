@@ -1,11 +1,8 @@
 import { Prisma } from "@prisma/client";
 import BackButton from "@rms/components/ui/back-button";
-import { getUserInfo } from "@rms/lib/auth";
 import { getConfigId } from "@rms/lib/config";
 import prisma from "@rms/prisma/prisma";
-import { getUserStatus } from "@rms/service/user-service";
 import DigitTable from "@rms/widgets/table/digit-table";
-import React from "react";
 
 type CommonNode = "two" | "three" | "more";
 const CommonNode = ["two", "three", "more"];

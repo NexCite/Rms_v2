@@ -8,7 +8,9 @@ import {
   CardHeader,
   Divider,
   FormControl,
+  IconButton,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
@@ -25,15 +27,8 @@ import { PlusSquare, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
+import { MdInfo, MdPrivacyTip, MdTipsAndUpdates } from "react-icons/md";
 import { z } from "zod";
-
-interface BoxesTypes {
-  manager: Prisma.ManagerBoxGetPayload<{}>[];
-  coverage: Prisma.CoverageBoxGetPayload<{}>[];
-  agents: Prisma.AgentBoxGetPayload<{}>[];
-  p_l: Prisma.P_LBoxGetPayload<{}>[];
-  expensive: Prisma.ExpensiveBoxGetPayload<{}>[];
-}
 
 interface Props {
   id?: number;
@@ -267,7 +262,7 @@ export default function EquityForm(props: Props) {
 
   return (
     <form
-      className="max-w-[450px] m-auto"
+      className="max-w-[550px] w-full m-auto"
       noValidate
       onSubmit={form.handleSubmit(handleSubmit)}
     >
@@ -278,7 +273,9 @@ export default function EquityForm(props: Props) {
           <CardHeader
             title={
               <div className="flex justify-between items-center flex-row">
-                <Typography variant="h5">Payment Box Form</Typography>
+                <Typography variant="h5" className="w-full">
+                  Equity Form
+                </Typography>
                 <NexCiteButton isPadding={isPadding} />
               </div>
             }
@@ -335,8 +332,8 @@ export default function EquityForm(props: Props) {
             </div>
             {/* ************Coverage Boxes Start************ */}
 
-            <div style={{ margin: "0px 0px 0px" }}>
-              <h1 className="text-2xl">Coverage</h1>
+            <div style={{ margin: "0px 0px 0px" }} className="mt-4">
+              <h1 className="text-2xl">Coverage Account</h1>
             </div>
             <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
 
@@ -356,7 +353,7 @@ export default function EquityForm(props: Props) {
                     {field.value?.map((res, i) => (
                       <div key={i}>
                         <div className="flex justify-between items-center">
-                          <h1>Coverage Box: {i + 1}</h1>
+                          <h1>Index: {i + 1}</h1>
                           <Button
                             onClick={() => {
                               field.onChange(
@@ -518,7 +515,7 @@ export default function EquityForm(props: Props) {
                     {field.value?.map((res, i) => (
                       <div key={i}>
                         <div className="flex justify-between items-center">
-                          <h1>Manager Box: {i + 1}</h1>
+                          <h1>Index: {i + 1}</h1>
                           <Button
                             onClick={() => {
                               field.onChange(
@@ -706,8 +703,16 @@ export default function EquityForm(props: Props) {
             {/* ************Manager Boxes End************ */}
 
             {/* ************Expensive Boxes start************ */}
-            <div style={{ margin: "0px 0px 0px" }}>
+            <div
+              style={{ margin: "0px 0px 0px" }}
+              className="flex items-center"
+            >
               <h1 className="text-2xl">Expensive</h1>
+              <Tooltip title="Commissions Salary">
+                <IconButton size="small">
+                  <MdInfo />
+                </IconButton>
+              </Tooltip>
             </div>
             <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
             <Controller
@@ -727,7 +732,7 @@ export default function EquityForm(props: Props) {
                     {field.value?.map((res, i) => (
                       <div key={i}>
                         <div className="flex justify-between items-center">
-                          <h1>Expensive Box: {i + 1}</h1>
+                          <h1>Index: {i + 1}</h1>
                           <Button
                             onClick={() => {
                               field.onChange(
@@ -841,7 +846,7 @@ export default function EquityForm(props: Props) {
                     {field.value?.map((res, i) => (
                       <div key={i}>
                         <div className="flex justify-between items-center">
-                          <h1>P_L Box: {i + 1}</h1>
+                          <h1>Index: {i + 1}</h1>
                           <Button
                             onClick={() => {
                               field.onChange(
@@ -936,7 +941,7 @@ export default function EquityForm(props: Props) {
 
             {/* ************Agent Boxes start************ */}
             <div style={{ margin: "0px 0px 0px" }}>
-              <h1 className="text-2xl">Agents</h1>
+              <h1 className="text-2xl">Agent</h1>
             </div>
             <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
             <Controller
@@ -955,7 +960,7 @@ export default function EquityForm(props: Props) {
                     {field.value?.map((res, i) => (
                       <div key={i}>
                         <div className="flex justify-between items-center">
-                          <h1>Agent Box: {i + 1}</h1>
+                          <h1>Index: {i + 1}</h1>
                           <Button
                             onClick={() => {
                               field.onChange(
@@ -1069,7 +1074,7 @@ export default function EquityForm(props: Props) {
                     {field.value?.map((res, i) => (
                       <div key={i}>
                         <div className="flex justify-between items-center">
-                          <h1>Adjustment Box: {i + 1}</h1>
+                          <h1>Index: {i + 1}</h1>
                           <Button
                             onClick={() => {
                               field.onChange(
@@ -1183,7 +1188,7 @@ export default function EquityForm(props: Props) {
                     {field.value?.map((res, i) => (
                       <div key={i}>
                         <div className="flex justify-between items-center">
-                          <h1>Credit Box: {i + 1}</h1>
+                          <h1>Index: {i + 1}</h1>
                           <Button
                             onClick={() => {
                               field.onChange(

@@ -1,32 +1,23 @@
 import { $Enums } from "@prisma/client";
-import { getUserInfo } from "@rms/lib/auth";
+import Loading from "@rms/components/ui/loading";
 import { getConfigId } from "@rms/lib/config";
 import prisma from "@rms/prisma/prisma";
-import { getUserStatus } from "@rms/service/user-service";
 import Account_EntryTable from "@rms/widgets/table/account-entry-table";
+import ChartOfAccountAccountsTable from "@rms/widgets/table/char-of-account-table-account";
+import { Suspense } from "react";
 
 export default async function page(props: {
   params: { node: $Enums.Account_Entry_Type };
 }) {
-  const config_id = await getConfigId();
-
-  const accounts = await prisma.account_Entry.findMany({
-    include: {
-      three_digit: true,
-      more_than_four_digit: true,
-      _count: true,
-      two_digit: true,
-    },
-    orderBy: { id: "desc" },
-    where: {
-      type: props.params.node,
-      config_id,
-    },
-  });
-
   return (
-    <div>
-      <Account_EntryTable accounts={accounts} node={props.params.node} />
-    </div>
+    <Suspense fallback={<Loading />}>
+      <ChartOfAccountAccountsTable
+        node={
+          Object.keys($Enums.AccountType).find((e) =>
+            props.params.node.startsWith(e.toLowerCase())
+          ) as any
+        }
+      />
+    </Suspense>
   );
 }

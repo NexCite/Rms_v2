@@ -1,125 +1,97 @@
 "use client";
-import { Button, IconButton } from "@mui/material";
-import { $Enums } from "@prisma/client";
+import { Button, IconButton, Typography } from "@mui/material";
 import Authorized from "@rms/components/ui/authorized";
 import RouteModel from "@rms/models/RouteModel";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import React, { useMemo, useState } from "react";
-import BackButton from "../ui/back-button";
-import { Sidebar } from "./side-bar";
+import { usePathname, useSelectedLayoutSegments } from "next/navigation";
+import React, { ReactElement, ReactNode, useMemo, useState } from "react";
 
-import AppConfig from "../../../app-config.json";
-import { MenuIcon } from "lucide-react";
-import { MdClose } from "react-icons/md";
+import route from "@rms/assets/route";
+import BackButton from "@rms/components/ui/back-button";
+import useDrawerController from "@rms/hooks/drawer-hook";
+import { Next13ProgressBar } from "next13-progressbar";
+import { MdAdd, MdMenu } from "react-icons/md";
 type Props = {
-  children: React.ReactNode;
   routes: RouteModel[];
   config: {
     logo: string;
     name: string;
   };
+  children?: React.ReactNode;
 };
-export default function AppBar(props: Props) {
-  var path = usePathname();
+export default function AppBarV2(props: Props) {
+  var pathName = usePathname();
   const [show, setShow] = useState(true);
+  const segments = useSelectedLayoutSegments();
+  const historyStore = useDrawerController();
 
-  const { subRouteTitle, permission } = useMemo(() => {
-    const routes = props.routes.find((res) =>
-      res.children.find((res) => path.startsWith(res.path))
-    );
-
-    var permission: $Enums.UserPermission | "None";
-    var subRouteTitle = undefined;
-    if (path.includes("/form")) {
-      permission = routes?.key;
-      subRouteTitle = routes?.title;
-    } else {
-      routes?.children?.forEach((res) => {
-        if (path.startsWith(res.path)) {
-          permission = res.addKey;
-          subRouteTitle = res.title;
-        }
+  const { currentRoute } = useMemo(() => {
+    const routeChidlren: RouteModel[] = [];
+    route.forEach((e) => {
+      e.children?.forEach((e) => {
+        routeChidlren.push(e);
       });
-    }
+    });
 
-    return { subRouteTitle, permission };
-  }, [props.routes, path]);
-  const canGoBack = useMemo(() => {
-    const splitPath = path.split("/");
-    return (
-      path !== "/admin" &&
-      (splitPath.length > 5 ||
-        path.includes("form") ||
-        Number.isInteger(parseInt(splitPath[splitPath.length - 1])))
-    );
-  }, [path]);
+    const currentRoute = routeChidlren.find((res) => {
+      var path = res.path
+        .split("/")
+        .filter((e) => e.length > 2)
+        .slice(1);
+
+      return path.toLocaleString() === segments.toLocaleString();
+    });
+
+    return { currentRoute };
+  }, [route, segments]);
 
   return (
-    <>
-      <aside
-        id="cta-button-sidebar"
-        className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform ${
-          show ? "sm:translate-x-0" : " -translate-x-full "
-        } `}
+    <div className="   bg-white   rounded-md my-5 border h-full  ">
+      <div
+        className={`w-full    p-0 flex flex-col gap-5  rounded-t-md  bg-white z-20  `}
       >
-        <div className="h-full border border-gray-200  overflow-y-auto bg-gray-50 dark:bg-gray-800">
-          <Sidebar
-            menu={
-              <div className="sm:hidden">
-                <IconButton onClick={(e) => setShow(!show)}>
-                  <MdClose />
-                </IconButton>
-              </div>
-            }
-            config={props.config}
-            routers={props.routes}
-          />
-        </div>
-      </aside>
-
-      <div className={`  ${show ? "sm:ml-64" : ""}   flex flex-col static  `}>
-        {subRouteTitle && (
-          <div className="flex justify-between items-center  border dark:border-gray-700 p-3 static">
+        <Next13ProgressBar
+          height="2px"
+          color="#1176c8"
+          options={{ showSpinner: false }}
+          showOnShallow
+        />
+        <div className="p-5">
+          <div className="flex justify-between items-center     h-full ">
             <div className="flex items-center gap-4 justify-start">
-              <div>
+              <div className="md:hidden">
                 {
-                  <IconButton onClick={(e) => setShow(!show)}>
-                    <MenuIcon />
+                  <IconButton
+                    onClick={(e) => {
+                      setShow(!show);
+
+                      historyStore.set(true);
+                    }}
+                  >
+                    <MdMenu />
                   </IconButton>
                 }
               </div>
-              {canGoBack && <BackButton />}
-              <h1 className="text-3xl">{subRouteTitle}</h1>
+              {!currentRoute && segments.length > 0 && <BackButton />}
+              <Typography variant="h5">{currentRoute?.title}</Typography>
             </div>
 
-            {AppConfig.ignore.add_app_bar.filter((res) => {
-              var reg = new RegExp(res);
-
-              return reg.test(path);
-            }).length === 0 && (
-              <Authorized permission={permission}>
-                <Link href={path + "/form"}>
-                  <Button
-                    variant="contained"
-                    className={
-                      "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
-                    }
-                    type="button"
-                  >
-                    Add
-                  </Button>
-                </Link>
-              </Authorized>
-            )}
+            <Authorized permission={currentRoute?.addKey}>
+              <Link href={pathName + "/form"}>
+                <Button
+                  className="px-2 border-dashed border w-[140px] rounded-xl"
+                  disableElevation
+                  startIcon={<MdAdd />}
+                  variant="text"
+                >
+                  Create
+                </Button>
+              </Link>
+            </Authorized>
           </div>
-        )}
-        {subRouteTitle && (
-          <div className=" w-full h-[97vh] rounded-lg overflow-y-auto pb-14 ">
-            <div>{props.children}</div>
-          </div>
-        )}
+        </div>
       </div>
-    </>
+      {props.children}
+    </div>
   );
 }

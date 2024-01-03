@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 // generator zod {
@@ -48,6 +49,8 @@ model Config {
   schedules            Schedule[]
   vacations            Vacation[]
   roles                Role[]
+  levels               ChartOfAccount[]
+  vouchers             Voucher[]
 }
 
 model User {
@@ -90,6 +93,8 @@ model User {
   categories           Category[]
   config_id            Int?
   config               Config?                @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  levels               ChartOfAccount[]
+  vouchers             Voucher[]
 
   @@unique([id, username, config_id, phone_number], name: "unique_combination")
 }
@@ -295,26 +300,33 @@ model Media {
   config      Config?      @relation(fields: [config_id], references: [id], onDelete: Cascade)
   attendances Attendance[]
   vacation    Vacation[]
+  voucher_id  Int?         @unique
+  voucher     Voucher?     @relation(fields: [voucher_id], references: [id])
 
   @@unique([id, config_id, invoice_id, payment_id, entry_id], name: "unique_combination")
 }
 
 model Currency {
-  id               Int              @id @default(autoincrement())
-  name             String
-  symbol           String
-  rate             Float?
-  accounts         Account[]
-  invoices         Invoice[]
-  status           Status?          @default(Enable)
-  Entries          Entry[]
-  create_date      DateTime         @default(now())
-  modified_date    DateTime         @default(now()) @updatedAt
-  user_id          Int?
-  user             User?            @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  config_id        Int?
-  config           Config?          @relation(fields: [config_id], references: [id], onDelete: Cascade)
-  advance_payments AdvancePayment[]
+  id                    Int                    @id @default(autoincrement())
+  name                  String
+  symbol                String
+  rate                  Float
+  accounts              Account[]
+  invoices              Invoice[]
+  status                Status?                @default(Enable)
+  Entries               Entry[]
+  create_date           DateTime               @default(now())
+  modified_date         DateTime               @default(now()) @updatedAt
+  user_id               Int?
+  user                  User?                  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  config_id             Int?
+  config                Config?                @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  advance_payments      AdvancePayment[]
+  account_entries       Account_Entry[]
+  more_than_four_digits More_Than_Four_Digit[]
+  levels                ChartOfAccount[]
+  vouchers              Voucher[]
+  voucher_items         VoucherItem[]
 
   @@unique([id, config_id, name, symbol], name: "unique_combination")
 }
@@ -396,6 +408,7 @@ enum UserType {
 enum DebitCreditType {
   Credit
   Debit
+  Debit_Credit
 }
 
 enum DigitType {
@@ -404,6 +417,70 @@ enum DigitType {
   Owner_Equity
   Expensive
   Income
+}
+
+enum ChartOfAccountType {
+  Income
+  Expense
+  Expensive
+  Assets
+  Equity
+  Liabilities
+  Current_Liabilities
+  Non_Current_Liabilities
+  Non_current_Assets
+  Current_Assets
+  Tangible
+  Purchases
+  Taxes
+  Inventory
+  Provision_For_End_of_Service_Indemnity
+  Bank_Overdraft
+  Cash_and_Cash_Equivalent
+  Other_Revenue_and_Expenses
+  Credit_Card
+  Personnel_Charges
+  Other_Credit_Balances
+  Financial_Charges
+  Payable
+  External_Services
+  Sales
+  Capital
+  Operating_Expenses
+  Intangible_Fixed_Assets
+  Amortization
+  Cash
+  Contributions
+  Operating_Income
+  Financial_Income
+  Prepaid
+  Financial
+  Interest_and_Similar_Revenues
+  Book_Value_of_Fixed_Assets_and_Disposed_of
+  Interest_and_Other_Charges
+  Other_Charges_and_Disbursements
+  Sales_of_Production
+  Purchase
+  Cost_of_Revenue
+  Other_Assets
+  Negative_Exchange_Difference
+  Brought_Forward_Results
+  Amortization_Depreciation_and_Charges
+  Variation_of_Stock
+  Receivable
+  Patente_Franchisee
+  Miscellaneous
+  Bank
+  Provision_End_of_sce
+  Fixed_Assets
+  Net_Result_of_The_Financial_Period
+}
+
+enum AccountType {
+  Client
+  IB
+  Supplier
+  Employee
 }
 
 model Two_Digit {
@@ -450,12 +527,10 @@ model Three_Digit {
 }
 
 model More_Than_Four_Digit {
-  id Int @id
-
+  id              Int              @id
   name            String
   create_date     DateTime         @default(now())
   modified_date   DateTime         @default(now()) @updatedAt
-  account_entries Account_Entry[]
   three_digit_id  Int
   three_digit     Three_Digit      @relation(fields: [three_digit_id], references: [id], onDelete: Cascade)
   status          Status           @default(Enable)
@@ -463,12 +538,87 @@ model More_Than_Four_Digit {
   debit_credit    DebitCreditType?
   sub_entries     SubEntry[]
   user_id         Int?
+  account_entries Account_Entry[]
 
-  user      User?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  config_id Int?
-  config    Config? @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  config_id   Int?
+  config      Config?   @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  currency_id Int?
+  currency    Currency? @relation(fields: [currency_id], references: [id])
 
   @@unique([id, config_id, name, three_digit_id], name: "unique_combination")
+}
+
+model LevelEntry {
+  id Int @id @default(autoincrement())
+}
+
+model Voucher {
+  id Int @id @default(autoincrement())
+
+  rate          Float?
+  currency_id   Int
+  user_id       Int
+  config_id     Int
+  title         String
+  description   String
+  note          String?       @default("")
+  to_date       DateTime      @default(now())
+  media         Media?
+  user          User          @relation(fields: [user_id], references: [id])
+  currency      Currency      @relation(fields: [currency_id], references: [id])
+  config        Config        @relation(fields: [config_id], references: [id])
+  create_date   DateTime      @default(now())
+  modified_date DateTime      @default(now()) @updatedAt
+  voucher_items VoucherItem[]
+}
+
+model VoucherItem {
+  id     Int   @id @default(autoincrement())
+  amount Float
+
+  rate                          Float
+  debit_credit                  DebitCreditType
+  voucher                       Voucher?        @relation(fields: [voucher_id], references: [id])
+  voucher_id                    Int?
+  currency_id                   Int
+  currency                      Currency        @relation(fields: [currency_id], references: [id])
+  chart_of_account_id           String
+  chart_of_account              ChartOfAccount  @relation(fields: [chart_of_account_id], references: [id])
+  reffrence_chart_of_account_id String?
+  reference_chart_of_account    ChartOfAccount? @relation("reference", fields: [reffrence_chart_of_account_id], references: [id])
+}
+
+model ChartOfAccount {
+  id                      String              @id
+  class                   String?
+  name                    String
+  first_name              String?
+  last_name               String?
+  country                 String?
+  address                 String?
+  phone_number            String?
+  parent_id               String?
+  email                   String?
+  limit_amount            Float?
+  currency_id             Int?
+  config_id               Int?
+  user_id                 Int?
+  chart_of_account_type   ChartOfAccountType?
+  account_type            AccountType?
+  business_id             String?
+  debit_credit            DebitCreditType?
+  config                  Config?             @relation(fields: [config_id], references: [id])
+  currency                Currency?           @relation(fields: [currency_id], references: [id])
+  user                    User?               @relation(fields: [user_id], references: [id])
+  create_date             DateTime            @default(now())
+  modified_date           DateTime            @default(now()) @updatedAt
+  voucher_items           VoucherItem[]
+  reffrence_voucher_items VoucherItem[]       @relation("reference")
+
+  @@unique([config_id, name], name: "unique_name")
+  @@unique([config_id, id], name: "unique_id")
+  @@unique([config_id, business_id], name: "unique_business_id")
 }
 
 model Account_Entry {
@@ -493,12 +643,14 @@ model Account_Entry {
   more_than_four_digit    More_Than_Four_Digit? @relation(fields: [more_than_four_digit_id], references: [id], onDelete: Cascade)
   sub_entries             SubEntry[]
   user_id                 Int?
+  currency_id             Int?
   user                    User?                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
   ref_entries             SubEntry[]            @relation("reference")
   type                    Account_Entry_Type?
   config_id               Int?
   config                  Config?               @relation(fields: [config_id], references: [id], onDelete: Cascade)
   info                    String?               @default("")
+  currency                Currency?             @relation(fields: [currency_id], references: [id])
 
   @@unique([id, config_id], name: "unique_combination")
 }
@@ -515,13 +667,12 @@ model Entry {
   status        Status     @default(Enable)
   sub_entries   SubEntry[]
   media         Media?
-
-  currency_id Int
-  currency    Currency @relation(fields: [currency_id], references: [id], onDelete: Cascade)
-  user_id     Int?
-  user        User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  config_id   Int?
-  config      Config?  @relation(fields: [config_id], references: [id], onDelete: Cascade)
+  currency_id   Int
+  currency      Currency   @relation(fields: [currency_id], references: [id], onDelete: Cascade)
+  user_id       Int?
+  user          User?      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  config_id     Int?
+  config        Config?    @relation(fields: [config_id], references: [id], onDelete: Cascade)
 
   @@unique([id, config_id], name: "unique_combination")
 }
@@ -703,6 +854,21 @@ enum UserPermission {
   Edit_Role
   Delete_Role
   Reset
+  View_Levels
+  View_Level
+  Add_Level
+  Edit_Level
+  Delete_Level
+  View_Vouchers
+  View_Voucher
+  Add_Voucher
+  Edit_Voucher
+  Delete_Voucher
+  View_Chart_Of_Accounts
+  View_Chart_Of_Account
+  Add_Chart_Of_Account
+  Edit_Chart_Of_Account
+  Delete_Chart_Of_Account
 }
 
 enum Account_Entry_Type {

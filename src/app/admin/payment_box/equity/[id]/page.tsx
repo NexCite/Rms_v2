@@ -1,5 +1,6 @@
 import { getConfigId } from "@rms/lib/config";
 import prisma from "@rms/prisma/prisma";
+import getUserFullInfo from "@rms/service/user-service";
 import EquityView from "@rms/widgets/view/equity-view";
 import React from "react";
 
@@ -7,10 +8,10 @@ export default async function page(props: {
   params: { id: string };
   searchParams: {};
 }) {
-  const config_id = await getConfigId();
+  const info = await getUserFullInfo();
 
   const result = await prisma.equity.findFirst({
-    where: { id: +props.params.id, config_id },
+    where: { id: +props.params.id, config_id: info.config.id },
     include: {
       agent_boxes: true,
       coverage_boxes: true,

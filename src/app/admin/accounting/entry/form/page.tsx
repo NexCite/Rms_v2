@@ -1,24 +1,23 @@
 import { Prisma } from "@prisma/client";
 import BackButton from "@rms/components/ui/back-button";
-import { getConfigId } from "@rms/lib/config";
 import { Activity } from "@rms/models/CommonModel";
 import prisma from "@rms/prisma/prisma";
 import { getActivities } from "@rms/service/activity-service";
-import { getUserStatus } from "@rms/service/user-service";
+import getUserFullInfo, { getUserStatus } from "@rms/service/user-service";
 import EntryForm from "@rms/widgets/form/entry-form";
-import React from "react";
 
 export default async function page(props: {
   params: {};
   searchParams: { id: string; activity_id: string };
 }) {
+  const info = await getUserFullInfo();
+  const userStates = getUserStatus(info.user);
   var id: number,
     entry: Prisma.EntryGetPayload<{
       include: { media: true; sub_entries: true };
     }>,
     activity_id: number | undefined;
   var activity: Activity;
-  const config_id = await getConfigId();
   if (props.searchParams.id && !Number.isInteger(+props.searchParams.id)) {
     return (
       <>
@@ -30,7 +29,7 @@ export default async function page(props: {
   } else if (props.searchParams.id) {
     id = +props.searchParams.id;
     entry = await prisma.entry.findFirst({
-      where: { id: id, config_id },
+      where: { id: id, config_id: info.config.id },
       include: {
         media: true,
         sub_entries: true,
@@ -52,9 +51,9 @@ export default async function page(props: {
 
   const three_digit = await prisma.three_Digit.findMany({
     where: {
-      config_id,
-      status: await getUserStatus(),
-      two_digit: { status: await getUserStatus() },
+      config_id: info.config.id,
+      status: userStates,
+      two_digit: { status: userStates },
     },
     select: {
       two_digit: { select: { name: true, id: true } },
@@ -66,9 +65,9 @@ export default async function page(props: {
   });
   const more_than_four_digit = await prisma.more_Than_Four_Digit.findMany({
     where: {
-      config_id,
-      status: await getUserStatus(),
-      three_digit: { status: await getUserStatus() },
+      config_id: info.config.id,
+      status: userStates,
+      three_digit: { status: userStates },
     },
     select: {
       three_digit: { select: { name: true, id: true, type: true } },
@@ -79,27 +78,28 @@ export default async function page(props: {
     orderBy: { id: "desc" },
   });
   const two_digits = await prisma.two_Digit.findMany({
-    where: { config_id, status: await getUserStatus() },
+    where: { config_id: info.config.id, status: userStates },
 
     orderBy: { id: "desc" },
   });
   const account_entry = await prisma.account_Entry.findMany({
-    where: { config_id, status: await getUserStatus() },
+    where: { config_id: info.config.id, status: userStates },
     select: {
       username: true,
       type: true,
       id: true,
+      currency: true,
     },
     orderBy: { id: "desc" },
   });
   const currencies = await prisma.currency.findMany({
     where: {
-      config_id,
+      config_id: info.config.id,
     },
     orderBy: { id: "desc" },
   });
   if (activity_id) {
-    const result = await getActivities(activity_id, config_id);
+    const result = await getActivities(activity_id, info.config.id);
     activity = result.status !== 200 ? undefined : result.result;
   }
   return (

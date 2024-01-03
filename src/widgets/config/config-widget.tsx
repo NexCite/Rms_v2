@@ -283,9 +283,9 @@ export function InitConfig() {
 }
 
 type Props = {
-  id: number;
   config: Prisma.ConfigGetPayload<{
     select: {
+      id: true;
       name: true;
       logo: true;
       email: true;
@@ -353,7 +353,7 @@ export function UpdateConfig(props: Props) {
         const res = await editConfig({
           config: values.config,
           file: dataForm,
-          id: props.id,
+          id: props.config.id,
         });
         toast.OpenAlert({ ...res });
 
@@ -362,7 +362,7 @@ export function UpdateConfig(props: Props) {
         });
       });
     },
-    [form, toast, props.id]
+    [form, toast, props.config.id]
   );
   return (
     <div className="flex justify-center items-center">
@@ -468,8 +468,9 @@ export function UpdateConfig(props: Props) {
                           startIcon={<MdDelete />}
                         ></LoadingButton>
                         <Image
-                          width={60}
-                          height={60}
+                          width={100}
+                          height={100}
+                          quality={100}
                           alt="logo"
                           src={defaultImage}
                           className="rounded-md object-contain   border w-full h-full "

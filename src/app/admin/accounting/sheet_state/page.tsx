@@ -1,50 +1,57 @@
 import prisma from "@rms/prisma/prisma";
 
-import { getConfigId } from "@rms/lib/config";
+import Loading from "@rms/components/ui/loading";
+import getUserFullInfo from "@rms/service/user-service";
 import SheetStateTable from "@rms/widgets/table/sheet-state-table ";
+import { Suspense } from "react";
 
 export default async function Entry(props: { params: {} }) {
-  const config_id = await getConfigId();
+  const info = await getUserFullInfo();
 
   const two_digits = await prisma.two_Digit.findMany({
       where: {
-        config_id,
+        config_id: info.config.id,
+      },
+      orderBy: {
+        type: "asc",
       },
     }),
     three_digits = await prisma.three_Digit.findMany({
       where: {
-        config_id,
+        config_id: info.config.id,
       },
       include: { two_digit: true },
+      orderBy: {
+        type: "asc",
+      },
     }),
     more_digits = await prisma.more_Than_Four_Digit.findMany({
       where: {
-        config_id,
+        config_id: info.config.id,
       },
       include: { three_digit: true },
+      orderBy: {
+        type: "asc",
+      },
     }),
     accounts = await prisma.account_Entry.findMany({
       where: {
-        config_id,
+        config_id: info.config.id,
+      },
+      include: { currency: true },
+      orderBy: {
+        type: "asc",
       },
     });
 
-  const config = await prisma.config.findFirst({
-    where: {
-      id: config_id,
-    },
-    select: {
-      logo: true,
-      name: true,
-    },
+  const currencies = await prisma.currency.findMany({
+    where: { config_id: info.config.id },
   });
-
-  const currencies = await prisma.currency.findMany({ where: { config_id } });
   return (
-    <div>
+    <Suspense fallback={<Loading />}>
       <SheetStateTable
         currencies={currencies}
-        config={config}
+        config={info.config}
         accounts={accounts.sort((a, b) =>
           (a.type + "").localeCompare(b.type + "")
         )}
@@ -58,6 +65,6 @@ export default async function Entry(props: { params: {} }) {
           (a.type + "").localeCompare(b.type + "")
         )}
       />
-    </div>
+    </Suspense>
   );
 }

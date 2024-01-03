@@ -22,6 +22,7 @@ import {
 } from "material-react-table";
 import Link from "next/link";
 import useHistoryStore from "@rms/hooks/history-hook";
+import LoadingClient from "@rms/components/other/loading-client";
 
 type Props = {
   node: CommonNode;
@@ -214,7 +215,7 @@ export default function DigitTable(props: Props) {
     renderTopToolbarCustomActions: ({ table }) => (
       <ExportData data={props.value[props.node]} table={table} />
     ),
-    onPaginationChange: historyTablePageStore.setData,
+    onPaginationChange: historyTablePageStore.set,
     state: {
       showLoadingOverlay: isPadding,
       pagination: historyTablePageStore.data,
@@ -250,8 +251,9 @@ export default function DigitTable(props: Props) {
         }
       />
       <Divider />
-
-      <MaterialReactTable table={table} />
+      <LoadingClient>
+        <MaterialReactTable table={table} />
+      </LoadingClient>
     </Card>
   );
 }

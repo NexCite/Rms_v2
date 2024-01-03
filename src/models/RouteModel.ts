@@ -1,13 +1,16 @@
+import { SvgIconTypeMap } from "@mui/material";
+import { OverridableComponent } from "@mui/material/OverridableComponent";
 import { $Enums } from "@prisma/client";
 
 export default interface RouteModel {
   title: string;
   path: string;
-  icon?: string;
-  key: $Enums.UserPermission;
+  icon?: OverridableComponent<SvgIconTypeMap<{}, "svg">>;
+  routeKey?: string;
   index: number;
-  hide: boolean;
+  permission: $Enums.UserPermission;
+  hide?: boolean;
   end?: boolean;
-  children: RouteModel[];
-  addKey?: $Enums.UserPermission | "None";
+  children?: RouteModel[];
+  addKey?: $Enums.UserPermission;
 }

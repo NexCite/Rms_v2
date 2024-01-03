@@ -2,264 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: rms;
-  src: url("/font.ttf");
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
 }
 * {
-  font-family: rms;
-  font-weight: 400;
+  scrollbar-width: thin;
+  scrollbar-color: #c1bdc2 #ffffff;
 }
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 224 71.4% 4.1%;
-    --card: 0 0% 100%;
-    --card-foreground: 224 71.4% 4.1%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71.4% 4.1%;
-    --primary: 220.9 39.3% 11%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 220 14.3% 95.9%;
-    --secondary-foreground: 220.9 39.3% 11%;
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
-    --accent: 220 14.3% 95.9%;
-    --accent-foreground: 220.9 39.3% 11%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 224 71.4% 4.1%;
-    --radius: 0.3rem;
-  }
-
-  .dark {
-    --background: 224 71.4% 4.1%;
-    --foreground: 210 20% 98%;
-    --card: 224 71.4% 4.1%;
-    --card-foreground: 210 20% 98%;
-    --popover: 224 71.4% 4.1%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 210 20% 98%;
-    --primary-foreground: 220.9 39.3% 11%;
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
-    --accent: 215 27.9% 16.9%;
-    --accent-foreground: 210 20% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 216 12.2% 83.9%;
-  }
+/* Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    overflow-y: hidden;
-    @apply bg-background text-foreground;
-  }
-}
-/* ::-webkit-scrollbar {
-  width: 4px;
-  height: 8px;
+*::-webkit-scrollbar-track {
+  background: #f1f2f6;
 }
 
-/* Track */
-/* ::-webkit-scrollbar-track {
-  background: #f1f1f1;
-} */
-
-/* Handle */
-/* ::-webkit-scrollbar-thumb {
-  background: rgba(22, 21, 21, 0.788);
+*::-webkit-scrollbar-thumb {
+  background-color: #c1bdc2;
   border-radius: 10px;
-} */
-
-/* Handle on hover */
-/* ::-webkit-scrollbar-thumb:hover {
-  background: #101010;
-}  */
-
-/* input:focus + label {
-  width: min-content;
-  height: min-content;
-  background-color: white;
+  border: 1px solid #f1f2f6;
 }
-input:focus {
-  border: black solid 2px !important;
-}
-input:not(:placeholder-shown) {
-  border-color: rgb(176 190 197 / var(--tw-border-opacity));
-}
-input:not(:placeholder-shown) + label {
-  background-color: white;
-  width: min-content;
-  height: min-content;
-} */
-/* label {
-  margin-left: 10px;
-} */
-
-/* tr,
-td,
-th {
-  padding: 5px;
-  text-align: center;
+body {
+  background-color: #f1f2f6;
+  /* color: rgb(var(--foreground-rgb)); */
+  /* background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb)); */
 }
 
-.rms-container {
-  width: 100%;
-
-  flex-direction: column;
-  border-width: 1px;
-
-  .rms-table {
-    overflow-x: auto;
-
-    width: 100%;
-    table {
-      thead {
-        > th {
-          width: 100%;
-        }
-        background-color: rgb(236 239 241 / 0.5);
-      }
-      tbody {
-        > td {
-          width: 100%;
-        }
-      }
-      width: 100%;
-      tbody,
-      tr,
-      td,
-      th {
-        color: black;
-        font-size: 12pt;
-
-        border: #00000013 solid 1px;
-      }
-
-      table {
-        width: 100%;
-        margin-top: 5px;
-      }
-    }
-  }
-  .rms-table-footer {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 5px;
-    margin-top: 10px;
-    margin-right: 20px;
-    margin-bottom: 10px;
-  } */
-/* } */
-
-table {
-  table {
-    thead {
-      > th {
-        width: 100%;
-      }
-      background-color: rgb(236 239 241 / 0.5);
-    }
-
-    tbody,
-    tr,
-    td,
-    th {
-      color: black;
-      font-size: 12pt;
-      padding: 5px;
-      border: #00000013 solid 1px;
-    }
-  }
+button {
+  text-transform: capitalize !important;
 }
 
-#layout-app {
-  height: 100vh;
+* {
+  /* font-family: "Montserrat", sans-serif !important; */
+  font-weight: 500 !important;
 }
-.drawer-close {
-  display: none !important;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+body {
+  background: #f3f3f3;
 }
-.drawer-close svg {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.required:after {
+  content: " *";
+  color: red;
 }
-.side-bar {
-  width: 280px; /* or whatever width your sidebar has */
-  height: 100%; /* Adjust as needed */
-  left: 0;
-  top: 0;
-  position: fixed;
-  transition: left 0.5s, visibility 0.5s;
-  background-color: white;
-  z-index: 10;
-
-  visibility: visible;
-  border-width: 1px;
-}
-
-#app-main {
-  width: 100%;
-  padding-left: 280px;
-  transition: padding-left 0.5s;
-  height: 100%;
-}
-#main {
-  padding: 10px;
-  max-height: 100%;
-  overflow-y: auto;
-  padding-bottom: 100px;
-}
-.mobile-darwer {
-  display: none;
-}
-@media screen and (max-width: 900px) {
-  .side-bar {
-    left: -200px;
-
-    visibility: hidden;
-    transition: left 0.5s, visibility 0.5s;
-  }
-  #app-main {
-    padding-left: 0px;
-    transition: padding-left 0.5s;
-  }
-  .side-bar.show-drawer {
-    width: 280px;
-    left: 0;
-    visibility: visible;
-
-    transition: left 0.5s, visibility 0.5s;
-  }
-  .mobile-darwer {
-    display: block;
-  }
-  .drawer-close {
-    display: block !important;
-  }
-}
-
 .nexcite-btn {
   background-color: #1176c8;
   text-transform: capitalize;

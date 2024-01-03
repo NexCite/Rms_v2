@@ -110,7 +110,17 @@ export async function handlerServiceAction<T>(
             error.meta = {
               ...error.meta,
             };
+            if (error.code === "P2002") {
+              return {
+                error: error.meta["target"] as string[],
+                meta: error.meta["target"] as string[],
+                message: "Data already exists",
+                status: 500,
+              };
+            }
+
             return {
+              error: error.meta["target"] as string[],
               message: Object.keys(error.meta)
                 .map((res) => `<div>${error.meta[res]}<div>`)
                 .join("\n"),

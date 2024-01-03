@@ -97,7 +97,7 @@ interface Props {
   account_entry: {
     id: number;
     username: string;
-
+    currency: Prisma.CurrencyGetPayload<{}>;
     type: $Enums.Account_Entry_Type;
   }[];
 
@@ -115,6 +115,16 @@ export default function EntryForm(props: Props) {
       description: z.string().min(3),
       note: z.string().optional(),
       currency_id: z.number(),
+      rate: z
+        .number()
+        .or(
+          z
+            .string()
+            .regex(/^-?\d+(\.\d{1,2})?$/)
+            .transform(Number)
+        )
+        .nullable()
+        .optional(),
       sub_entries: z
         .array(
           z.object({
@@ -165,6 +175,7 @@ export default function EntryForm(props: Props) {
           note: props.entry?.note ?? undefined,
           title: props.entry?.title ?? undefined,
           currency_id: props.entry?.currency_id ?? undefined,
+          rate: props.entry?.rate ?? undefined,
 
           includeRate: props.entry?.rate ? true : false,
           sub_entries:
@@ -248,7 +259,10 @@ export default function EntryForm(props: Props) {
           !res.account_entry_id &&
           !res.two_digit_id
         ) {
-          error.push({ index: i + 1, message: "Missing  client or level" });
+          error.push({
+            index: i + 1,
+            message: "Missing  client or chartOfAccount",
+          });
         }
         if (!res.type) {
           error.push({ index: i + 1, message: "Missing  type" });
@@ -292,6 +306,7 @@ export default function EntryForm(props: Props) {
             title: values.title,
             note: values.note,
             to_date: values.to_date,
+            rate: values.rate,
           },
           subEntries: values.sub_entries as any,
           activity: props.activity
@@ -696,30 +711,65 @@ export default function EntryForm(props: Props) {
                             <h1>
                               Total Debit:{" "}
                               {FormatNumberWithFixed(
-                                parseFloat(totalDebit + "")
+                                parseFloat(totalDebit as any)
                               )}
                             </h1>
                             <h1>
                               Total Credit:{" "}
                               {FormatNumberWithFixed(
-                                parseFloat(totalCredit + "")
+                                parseFloat(totalCredit as any)
                               )}
                             </h1>
                             <h1>
                               Total Unkown:{" "}
                               {FormatNumberWithFixed(
-                                parseFloat(totalUnkown + "")
+                                parseFloat(totalUnkown as any)
                               )}
                             </h1>
+                            {watch.includeRate && (
+                              <>
+                                {props.entry?.rate ? (
+                                  <>
+                                    {(currency || props.entry.rate) && (
+                                      <h1>
+                                        Rate:{" "}
+                                        {FormatNumberWithFixed(
+                                          props.entry.rate ?? +currency?.rate,
+                                          2
+                                        ).replace(".00", "")}
+                                      </h1>
+                                    )}
+                                  </>
+                                ) : (
+                                  <>
+                                    {currency && (
+                                      <h1>
+                                        Rate:{" "}
+                                        {FormatNumberWithFixed(
+                                          currency?.rate,
+                                          2
+                                        ).replace(".00", "")}
+                                      </h1>
+                                    )}
+                                  </>
+                                )}
 
-                            {currency && (
-                              <h1>
-                                Rate:{" "}
-                                {FormatNumberWithFixed(
-                                  currency?.rate,
-                                  2
-                                ).replace(".00", "")}
-                              </h1>
+                                {currency && (
+                                  <h1>
+                                    Total/Rate: $
+                                    {FormatNumberWithFixed(
+                                      totalCredit > totalDebit
+                                        ? totalCredit /
+                                            (props.entry?.rate ??
+                                              currency?.rate)
+                                        : totalDebit /
+                                            (props.entry?.rate ??
+                                              currency?.rate),
+                                      2
+                                    ).replace(".00", "")}
+                                  </h1>
+                                )}
+                              </>
                             )}
                           </div>
                           <Divider />
@@ -892,7 +942,9 @@ export default function EntryForm(props: Props) {
                                 }}
                                 options={props.account_entry}
                                 getOptionLabel={(e) =>
-                                  `(${e.id}) ${e.username}`
+                                  `(${e.id}) ${e.username} ${
+                                    e.currency?.symbol ?? ""
+                                  } `
                                 }
                                 isOptionEqualToValue={(ress) =>
                                   ress.id === res.account_entry_id
@@ -920,7 +972,9 @@ export default function EntryForm(props: Props) {
                                 }}
                                 options={props.account_entry}
                                 getOptionLabel={(e) =>
-                                  `(${e.id}) ${e.username}`
+                                  `(${e.id}) ${e.username} ${
+                                    e.currency?.symbol ?? ""
+                                  }`
                                 }
                                 isOptionEqualToValue={(ress) =>
                                   ress.id === res.reference_id

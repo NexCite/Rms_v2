@@ -1,5 +1,5 @@
 "use client";
-import LoadingButton from "@mui/lab/LoadingButton";
+import Button from "@mui/joy/Button";
 import React from "react";
 
 export default function NexCiteButton(props: {
@@ -8,18 +8,23 @@ export default function NexCiteButton(props: {
   onClick?: (props: any) => any;
   type?: "button" | "submit";
   children?: React.ReactNode;
+  className?: string;
+  disabled?: boolean;
+  icon?: any;
 }) {
   return (
-    <LoadingButton
-      variant="contained"
-      className="nexcite-btn"
+    <Button
       fullWidth
+      style={{ textTransform: "capitalize" }}
+      className={`nexcite-btn w-[100px]  ${props.className ?? ""}`}
       onClick={props.onClick}
-      disableElevation
+      variant="solid"
+      disabled={props.isPadding || props.disabled}
       type={props.type ?? "submit"}
       loading={props.isPadding}
+      startDecorator={props.icon}
     >
       {props.label ?? props.children ?? "Save"}
-    </LoadingButton>
+    </Button>
   );
 }

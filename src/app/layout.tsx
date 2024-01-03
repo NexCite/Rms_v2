@@ -1,11 +1,18 @@
-import { ThemeProvider } from "@rms/components/theme/theme-provider";
 import "./globals.css";
 
 import { env } from "process";
+import "@mantine/core/styles.css";
 
 import { AlertProvider } from "@rms/hooks/toast-hook";
 import { headers } from "next/headers";
 import { Metadata } from "next";
+import {
+  ColorSchemeScript,
+  MantineProvider,
+  MantineThemeProvider,
+} from "@mantine/core";
+import { Provider } from "jotai";
+import Providers from "@rms/hooks/jotai-provider";
 
 export async function generateMetadata({ params }): Promise<Metadata> {
   const url = new URL(
@@ -30,20 +37,21 @@ export default async function RootLayout({
       suppressContentEditableWarning={true}
       suppressHydrationWarning={true}
     >
-      <body>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="ligth"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <div className="absolute bottom-1 right-10 z-20    text-black">
-            <h1 className="text-black">version {v}</h1>
-          </div>
+      <head>
+        <meta charSet="UTF-8" />
 
-          {children}
-          <AlertProvider />
-        </ThemeProvider>
+        <ColorSchemeScript />
+      </head>
+      <body>
+        <div className="absolute bottom-1 right-10 z-20    text-black">
+          <h1 className="text-black">version {v}</h1>
+        </div>
+        <MantineThemeProvider>
+          <MantineProvider forceColorScheme="light">
+            <Providers>{children}</Providers>
+          </MantineProvider>
+        </MantineThemeProvider>
+        <AlertProvider />
       </body>
     </html>
   );

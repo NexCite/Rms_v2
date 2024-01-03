@@ -1,10 +1,8 @@
-import UserFormComponent from "@rms/widgets/form/user-form";
-import BackButton from "@rms/components/ui/back-button";
 import { Prisma } from "@prisma/client";
-import prisma from "@rms/prisma/prisma";
-import React from "react";
 import { getUserInfo } from "@rms/lib/auth";
-import { getUserStatus } from "@rms/service/user-service";
+import prisma from "@rms/prisma/prisma";
+import getUserFullInfo, { getUserStatus } from "@rms/service/user-service";
+import UserFormComponent from "@rms/widgets/form/user-form";
 
 export default async function page(props: {
   params: { node: "user" };
@@ -30,15 +28,15 @@ export default async function page(props: {
       id: true;
     };
   }>;
-  const user = await getUserInfo();
+  const info = await getUserFullInfo();
 
   if (isEditMode) {
     value = await prisma.user.findFirst({
       where: {
         id,
-        status: user.type === "Admin" ? undefined : "Enable",
-        type: user.type === "User" ? "User" : undefined,
-        config_id: user.config_id,
+        status: getUserStatus(info.user),
+        type: info.user.type === "User" ? "User" : undefined,
+        config_id: info.config.id,
       },
       select: {
         username: true,
@@ -60,7 +58,7 @@ export default async function page(props: {
   const roles = await prisma.role.findMany({});
   return (
     <>
-      <UserFormComponent value={value} user={user} roles={roles} />
+      <UserFormComponent value={value} user={info.user} roles={roles} />
     </>
   );
 }

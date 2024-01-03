@@ -1,57 +1,108 @@
-import { $Enums } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
 
-import { getConfigId } from "@rms/lib/config";
-import EntryDataTable from "@rms/widgets/table/entry-table";
+import Loading from "@rms/components/ui/loading";
+import getUserFullInfo from "@rms/service/user-service";
+import ExportDigitTable from "@rms/widgets/table/export-digit-table";
+import { Suspense } from "react";
+import SheetStateTable from "@rms/widgets/table/sheet-state-table ";
+import ExportDigitWithAccountTable from "@rms/widgets/table/export-digit-with-account-table";
 
-export default async function Entry(props: {
-  params: {};
-  searchParams: {
-    from_date?: string;
-    to_date?: string;
-    activity_id?: string;
-    id?: string;
-    two_digit_id?: string;
-    three_digit_id?: string;
-    more_digit_id?: string;
-    account_id?: string;
-    debit?: $Enums.EntryType;
-    type?: $Enums.DigitType;
-  };
-}) {
-  const config_id = await getConfigId();
+export default async function Entry(props: { params: {} }) {
+  const info = await getUserFullInfo();
 
   const two_digits = await prisma.two_Digit.findMany({
       where: {
-        config_id,
+        config_id: info.config.id,
       },
     }),
     three_digits = await prisma.three_Digit.findMany({
       where: {
-        config_id,
+        config_id: info.config.id,
       },
       include: { two_digit: true },
     }),
     more_digits = await prisma.more_Than_Four_Digit.findMany({
       where: {
-        config_id,
+        config_id: info.config.id,
       },
       include: { three_digit: true },
     }),
     accounts = await prisma.account_Entry.findMany({
       where: {
-        config_id,
+        config_id: info.config.id,
       },
+      include: { currency: true },
     });
 
+  const currencies = await prisma.currency.findMany({
+    where: { config_id: info.config.id },
+  });
   return (
-    <div>
-      <EntryDataTable
-        accounts={accounts}
-        more_digits={more_digits}
-        three_digits={three_digits}
-        two_digits={two_digits}
+    <Suspense fallback={<Loading />}>
+      {/* <ExportDigitTable
+        currencies={currencies}
+        config={info.config}
+        accounts={accounts.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
+        more_digits={more_digits.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
+        three_digits={three_digits.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
+        two_digits={two_digits.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
+      /> */}
+      <ExportDigitWithAccountTable
+        currencies={currencies}
+        config={info.config}
+        accounts={accounts.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
+        more_digits={more_digits.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
+        three_digits={three_digits.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
+        two_digits={two_digits.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
       />
-    </div>
+      {/* <ExportTable
+        currencies={currencies}
+        config={info.config}
+        accounts={accounts.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
+        more_digits={more_digits.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
+        three_digits={three_digits.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
+        two_digits={two_digits.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
+      /> */}
+      <SheetStateTable
+        currencies={currencies}
+        config={info.config}
+        accounts={accounts.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
+        more_digits={more_digits.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
+        three_digits={three_digits.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
+        two_digits={two_digits.sort((a, b) =>
+          (a.type + "").localeCompare(b.type + "")
+        )}
+      />
+    </Suspense>
   );
 }

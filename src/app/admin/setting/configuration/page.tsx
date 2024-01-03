@@ -3,10 +3,10 @@ import { getConfigId } from "@rms/lib/config";
 import { Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
 import React from "react";
+import getUserFullInfo from "@rms/service/user-service";
 
 export default async function page() {
-  const config_id = await getConfigId();
-
+  const info = await getUserFullInfo({ withRedirect: true, withMedia: true });
   var value: Prisma.ConfigGetPayload<{
     select: {
       name: true;
@@ -16,7 +16,7 @@ export default async function page() {
       media: true;
     };
   }> = await prisma.config.findFirst({
-    where: { id: config_id },
+    where: { id: info.config.id },
     select: {
       name: true,
       logo: true,
@@ -32,7 +32,7 @@ export default async function page() {
       last_name: true;
     };
   }> = await prisma.user.findFirst({
-    where: { id: config_id },
+    where: { id: info.config.id },
     select: {
       first_name: true,
       last_name: true,
@@ -41,7 +41,7 @@ export default async function page() {
 
   return (
     <div>
-      <UpdateConfig config={value} id={config_id} />
+      <UpdateConfig config={info.config as any} />
     </div>
   );
 }

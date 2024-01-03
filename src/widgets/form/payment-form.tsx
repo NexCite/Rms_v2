@@ -157,7 +157,7 @@ export default function PaymentForm(props: Props) {
       <Style className="card" onSubmit={form.handleSubmit(handleSubmit)}>
         <Form {...form}>
           <form className="card" autoComplete="off">
-            <Card variant="outlined">
+            <Card>
               <CardHeader>
                 {" "}
                 <div className="flex justify-between items-center">

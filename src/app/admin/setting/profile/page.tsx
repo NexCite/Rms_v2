@@ -1,32 +1,30 @@
 import Authorized from "@rms/components/ui/authorized";
-import { getUserInfo } from "@rms/lib/auth";
 import { getConfigId } from "@rms/lib/config";
 import prisma from "@rms/prisma/prisma";
+import getUserFullInfo from "@rms/service/user-service";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
 export default async function page() {
-  const config = await prisma.config.findFirst();
-  const userInfo = await getUserInfo();
-  const config_id = await getConfigId();
+  const info = await getUserFullInfo();
 
   const user = await prisma.user.findFirst({
-    where: { id: userInfo.id, config_id },
+    where: { id: info.user.id, config_id: info.config.id },
     include: { role: true },
   });
 
   return (
-    <div className="m-auto max-w-max hadow-sm border p-5 ">
-      <div className="flex gap-6  s ">
+    <div className="m-auto max-w-[350px] hadow-sm border p-5 w-full ">
+      <div className="flex gap-6    justify-between">
         <Image
-          src={`/api/media${config.logo}`}
-          alt={config.name}
+          src={`/api/media/${info.config.logo}`}
+          alt={info.config.name}
           width={100}
           height={100}
-          className="rounded-full"
+          className="rounded-full  h-[90px] w-[90px] border object-cover"
         />
-        <div className="flex flex-col justify-between items-start ">
+        <div className="flex flex-col justify-between items-start w-full">
           <div className="flex  justify-center items-start gap-1">
             <h1 className="text-2xl">
               {user.first_name} {user.last_name}
@@ -37,7 +35,7 @@ export default async function page() {
           <h3 className="opacity-90">@{user.username}</h3>
           <Authorized permission="Edit_Profile" className="w-full">
             <Link
-              href={`/admin/setting/user/form?id=${userInfo.id}`}
+              href={`/admin/setting/user/form?id=${info.user.id}`}
               className="bg-black w-full text-white p-2 rounded-md text-center inline-block"
             >
               Edit

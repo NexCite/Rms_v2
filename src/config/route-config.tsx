@@ -1,10 +1,8 @@
 "use server";
+import route from "@rms/assets/route";
 import { getUserInfo } from "@rms/lib/auth";
-import RouteModel from "@rms/models/RouteModel";
-import getUserFullInfo from "@rms/service/user-service";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import routeJson from "@rms/route.json";
 
 export default async function GetRoutes() {
   const user = await getUserInfo();
@@ -15,9 +13,11 @@ export default async function GetRoutes() {
 
   const permissions = user.permissions;
 
-  var result = (routeJson as RouteModel[]).filter((res) => {
-    if (user.permissions?.includes(res.key)) {
-      res.children = res.children?.filter((r) => permissions?.includes(r.key));
+  var result = route.filter((res) => {
+    if (user.permissions?.includes(res.permission)) {
+      res.children = res.children?.filter((r) =>
+        permissions?.includes(r.permission)
+      );
       return res;
     }
   });

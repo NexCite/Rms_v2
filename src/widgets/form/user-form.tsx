@@ -31,7 +31,6 @@ type Props = {
     id: number;
     first_name: string;
     last_name: string;
-    permissions: $Enums.UserPermission[];
     type: $Enums.UserType;
   };
   roles: Prisma.RoleGetPayload<{}>[];
@@ -253,7 +252,7 @@ export default function UserFormComponent(props: Props) {
                 size="small"
                 error={Boolean(fieldState?.error?.message)}
               >
-                <InputLabel className="mb-3" shrink placeholder="gender">
+                <InputLabel component={"label"} className="mb-3">
                   Gender
                 </InputLabel>
                 <Select

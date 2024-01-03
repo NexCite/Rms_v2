@@ -1,11 +1,9 @@
 import { Prisma } from "@prisma/client";
-import BackButton from "@rms/components/ui/back-button";
-import { getUserInfo } from "@rms/lib/auth";
+
 import { getConfigId } from "@rms/lib/config";
 
 import prisma from "@rms/prisma/prisma";
-import { getUserStatus } from "@rms/service/user-service";
-import Account_EntryForm from "@rms/widgets/form/account-entry-form";
+import getUserFullInfo, { getUserStatus } from "@rms/service/user-service";
 import DigitForm from "@rms/widgets/form/digit-form";
 
 import React from "react";
@@ -15,6 +13,8 @@ export default async function page(props: {
   params: { node: CommonNode };
   searchParams: { id?: string };
 }) {
+  const info = await getUserFullInfo();
+  const userStates = getUserStatus(info.user);
   const config_id = await getConfigId();
 
   const id = +props.searchParams.id;
@@ -30,7 +30,7 @@ export default async function page(props: {
     case "two":
       if (isEditMode) {
         value = await prisma.two_Digit.findFirst({
-          where: { config_id, id, status: await getUserStatus() },
+          where: { config_id, id, status: getUserStatus(info.user) },
         });
       }
 
@@ -39,27 +39,27 @@ export default async function page(props: {
     case "three":
       if (isEditMode) {
         value = await prisma.three_Digit.findFirst({
-          where: { config_id, id, status: await getUserStatus() },
+          where: { config_id: info.config.id, id, status: userStates },
           include: {
             more_than_four_digit: true,
           },
         });
       }
       relation = await prisma.two_Digit.findMany({
-        where: { config_id, status: await getUserStatus() },
+        where: { config_id: info.config.id, status: userStates },
       });
       break;
     case "more":
       if (isEditMode) {
         value = await prisma.more_Than_Four_Digit.findFirst({
-          where: { config_id, id, status: await getUserStatus() },
+          where: { config_id: info.config.id, id, status: userStates },
           include: {
             three_digit: true,
           },
         });
       }
       relation = await prisma.three_Digit.findMany({
-        where: { config_id, status: await getUserStatus() },
+        where: { config_id: info.config.id, status: userStates },
         include: {
           two_digit: true,
         },

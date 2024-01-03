@@ -1,16 +1,15 @@
-import UserTableComponent from "@rms/widgets/table/user-table";
 import { Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
-import { getUserStatus } from "@rms/service/user-service";
-import { getConfigId } from "@rms/lib/config";
+import getUserFullInfo, { getUserStatus } from "@rms/service/user-service";
+import UserTableComponent from "@rms/widgets/table/user-table";
 
 export default async function page() {
-  const config_id = await getConfigId();
-
+  const info = await getUserFullInfo();
+  const userStates = getUserStatus(info.user);
   var value: Prisma.UserGetPayload<{}>[] = await prisma.user.findMany({
     where: {
-      config_id,
-      status: await getUserStatus(),
+      config_id: info.config.id,
+      status: userStates,
       type: "User",
     },
     orderBy: {

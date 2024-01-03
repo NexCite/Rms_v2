@@ -1,16 +1,15 @@
 "use server";
 
 import { $Enums, Prisma } from "@prisma/client";
+import route from "@rms/assets/route";
 import { getUserInfo } from "@rms/lib/auth";
 import { handlerServiceAction } from "@rms/lib/handler";
 
 import { hashPassword } from "@rms/lib/hash";
 import RouteModel from "@rms/models/RouteModel";
-import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import routeJson from "@rms/route.json";
 export async function createUser(props: Prisma.UserUncheckedCreateInput) {
   return handlerServiceAction(
     async (info, config_id) => {
@@ -27,10 +26,20 @@ export async function createUser(props: Prisma.UserUncheckedCreateInput) {
   );
 }
 
-export async function getUserStatus(): Promise<"Enable" | undefined> {
-  const user = await getUserInfo();
-  return user.type === "Admin" ? undefined : "Enable";
-}
+export const getUserStatus = (
+  props: Prisma.UserGetPayload<{
+    select: {
+      id: true;
+      username: true;
+      first_name: true;
+      last_name: true;
+      type: true;
+      role: true;
+    };
+  }>
+) => {
+  return props.type === "Admin" ? undefined : $Enums.Status.Enable;
+};
 
 export async function getUserType() {
   const user = await getUserInfo();
@@ -85,14 +94,16 @@ export async function deleteUserById(id: number) {
 }
 
 export default async function getUserFullInfo(
-  withRedirect?: boolean
+  props: {
+    withRedirect?: boolean;
+    withMedia?: boolean;
+  } = {}
 ): Promise<UserFullInfoType | undefined> {
   const token = cookies().get("rms-auth");
   if (!token?.value) {
-    if (withRedirect) {
+    if (props?.withRedirect) {
       redirect("/login");
     } else {
-      return undefined;
     }
   }
   const auth = await prisma.auth.findFirst({
@@ -111,6 +122,7 @@ export default async function getUserFullInfo(
           config: {
             select: {
               logo: true,
+              media: props.withMedia ?? false,
               name: true,
               phone_number: true,
               email: true,
@@ -123,17 +135,17 @@ export default async function getUserFullInfo(
   });
 
   if (!auth) {
-    if (withRedirect) {
+    if (props.withRedirect) {
       redirect("/login");
     } else {
       return undefined;
     }
   }
 
-  const routes = (routeJson as RouteModel[]).filter((res) => {
-    if (auth.user.role.permissions?.includes(res.key as any)) {
+  const routes = route.filter((res) => {
+    if (auth.user.role.permissions?.includes(res.permission as any)) {
       res.children = res.children?.filter((r) =>
-        auth.user.role.permissions?.includes(r.key as any)
+        auth.user.role.permissions?.includes(r.permission as any)
       );
       return res;
     }

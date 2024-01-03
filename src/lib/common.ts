@@ -304,12 +304,13 @@ const RouteData = [
         index: 8,
         title: "Role",
         path: "/admin/setting/role",
-        key: "View_Role",
+        permission: "View_Role",
         addKey: "Add_Role",
         icon: "UserCog",
       },
     ],
-    key: "Setting",
+    permission: "Setting",
+
     path: "/admin/setting",
   },
 ] as RouteModel[];

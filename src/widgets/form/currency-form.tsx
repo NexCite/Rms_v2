@@ -28,10 +28,22 @@ export default function CurrencyForm(props: Props) {
         .min(1, { message: "Symbol must be at least 1  character" }),
       rate: z
         .number()
-        .min(2)
-        .or(z.string().min(2).regex(/^\d+$/).transform(Number))
-        .optional()
-        .nullable(),
+
+        .or(
+          z
+            .string()
+
+            .regex(/^\d+(\.\d{2})?$/)
+            .nullable()
+            .optional()
+
+            .transform(Number)
+            .nullable()
+            .optional()
+        )
+        .or(z.string())
+        .nullable()
+        .optional(),
     });
   }, []);
 
@@ -46,7 +58,10 @@ export default function CurrencyForm(props: Props) {
       setTransition(async () => {
         if (props.value) {
           setTransition(async () => {
-            const result = await updateCurrency(props.value.id, values);
+            if (Number.isNaN(parseFloat(values.rate + ""))) {
+              values.rate = null;
+            }
+            const result = await updateCurrency(props.value.id, values as any);
             toast.OpenAlert(result);
             if (result.status === 200) back();
             Object.keys(result.errors ?? []).map((e) => {

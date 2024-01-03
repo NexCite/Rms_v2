@@ -1,19 +1,9 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  important: true,
-
-  content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
+  content: ["./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
-      screens: {
-        "entry-form-size": "1380px",
-      },
-
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
@@ -22,5 +12,6 @@ const config: Config = {
     },
   },
   plugins: [],
+  important: true,
 };
 export default config;

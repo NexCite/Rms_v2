@@ -17,6 +17,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Prisma } from "@prisma/client";
+import NexCiteButton from "@rms/components/button/nexcite-button";
 import Authorized from "@rms/components/ui/authorized";
 import { useToast } from "@rms/hooks/toast-hook";
 import { FormatNumberWithFixed } from "@rms/lib/global";
@@ -137,24 +138,14 @@ export default function EquityView(props: Props) {
         <div className="flex flex-row-reverse gap-5">
           <Authorized permission="Edit_Equity">
             <Link href={`/admin/payment_box/equity/form?id=${props.equity.id}`}>
-              <Button
-                variant="contained"
-                disableElevation
-                className={
-                  "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
-                }
-              >
-                Edit
-              </Button>
+              <NexCiteButton className="w-[150px]" label="Edit"></NexCiteButton>
             </Link>
           </Authorized>
           <Authorized permission="Delete_Equity">
-            <LoadingButton
-              variant="contained"
-              disableElevation
-              className={
-                "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
-              }
+            <NexCiteButton
+              isPadding={isPadding}
+              label="Delete"
+              className="bg-red-500 w-[150px]"
               onClick={() => {
                 const isConfirm = confirm(
                   `Do You sure you want to delete  id:${props.equity.id} `
@@ -173,23 +164,24 @@ export default function EquityView(props: Props) {
                   });
                 }
               }}
-              loading={isPadding}
             >
               Delete
-            </LoadingButton>
+            </NexCiteButton>
           </Authorized>
         </div>
-        <h1 className="text-lg text-end">
-          Date: {props.equity.to_date.toLocaleDateString()}{" "}
-        </h1>
-        <h1 className="text-2xl">Description</h1>
+        <div className="flex justify-between w-full mt-5">
+          <h1 className="text-3xl">Description</h1>
+          <h1 className="text-2xl text-end">
+            Date: {props.equity.to_date.toLocaleDateString()}{" "}
+          </h1>
+        </div>
         <Divider />
-        <p className="text-xl p-1">{props.equity.description}</p>
+        <p className="text-2xl p-1">{props.equity.description}</p>
       </div>
 
       <div className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 gap-4 ">
         <Card variant="outlined">
-          <CardHeader title="Total Coverage" />
+          <CardHeader title="Coverage" />
           <CardContent className="mt-0 pt-0">
             <Typography variant="h5">
               ${FormatNumberWithFixed(coverage_boxes)}
@@ -197,7 +189,7 @@ export default function EquityView(props: Props) {
           </CardContent>
         </Card>
         <Card variant="outlined">
-          <CardHeader title="Total Clients" />
+          <CardHeader title="Client" />
           <CardContent className="mt-0 pt-0">
             <Typography variant="h5">
               ${FormatNumberWithFixed(manager_boxes)}
@@ -205,7 +197,7 @@ export default function EquityView(props: Props) {
           </CardContent>
         </Card>
         <Card variant="outlined">
-          <CardHeader title="Total Paid" />
+          <CardHeader title="Commission" />
           <CardContent className="mt-0 pt-0">
             <Typography variant="h5">
               ${FormatNumberWithFixed(commission_boxes)}
@@ -213,7 +205,7 @@ export default function EquityView(props: Props) {
           </CardContent>
         </Card>
         <Card variant="outlined">
-          <CardHeader title="Total P&L" />
+          <CardHeader title="P&L" />
           <CardContent className="mt-0 pt-0">
             <Typography variant="h5">
               ${FormatNumberWithFixed(p_l_boxes)}
@@ -221,7 +213,7 @@ export default function EquityView(props: Props) {
           </CardContent>
         </Card>
         <Card variant="outlined">
-          <CardHeader title="Total Expensive" />
+          <CardHeader title="Expensive" />
           <CardContent className="mt-0 pt-0">
             <Typography variant="h5">
               ${FormatNumberWithFixed(expensive_boxes)}
@@ -229,7 +221,7 @@ export default function EquityView(props: Props) {
           </CardContent>
         </Card>
         <Card variant="outlined">
-          <CardHeader title="Total Adjustment" />
+          <CardHeader title="Adjustment" />
           <CardContent className="mt-0 pt-0">
             <Typography variant="h5">
               ${FormatNumberWithFixed(adjustment_boxes)}
@@ -237,7 +229,7 @@ export default function EquityView(props: Props) {
           </CardContent>
         </Card>
         <Card variant="outlined">
-          <CardHeader title="Total Credit" />
+          <CardHeader title="Credit" />
           <CardContent className="mt-0 pt-0">
             <Typography variant="h5">
               ${FormatNumberWithFixed(credit_boxes)}
@@ -245,12 +237,14 @@ export default function EquityView(props: Props) {
           </CardContent>
         </Card>
         <Card variant="outlined">
+          <div
+            className={`w-full h-2 ${
+              total >= 0 ? "bg-green-500" : "bg-red-400"
+            }`}
+          ></div>
           <CardHeader title="NetProfit" />
           <CardContent className="mt-0 pt-0">
-            <Typography
-              variant="h5"
-              style={{ color: total > 0 ? "green" : total === 0 ? "" : "red" }}
-            >
+            <Typography variant="h5" style={{}}>
               ${FormatNumberWithFixed(total)}
             </Typography>
           </CardContent>
@@ -268,7 +262,7 @@ export default function EquityView(props: Props) {
                   <TableCell align="center">Starting Floating</TableCell>
                   <TableCell align="center">Current Floating </TableCell>
                   <TableCell align="center">Closed P/L</TableCell>
-                  <TableCell align="center">Total </TableCell>
+                  <TableCell align="center"></TableCell>
                 </TableRow>
               </TableHead>
 
