@@ -9,6 +9,19 @@ import prisma from "@rms/prisma/prisma";
  * Done
  *
  */
+
+export async function findCurrenciesService() {
+  return handlerServiceAction(
+    async (user, config_id) => {
+      return await prisma.currency.findMany({
+        where: { config_id: config_id },
+      });
+    },
+    "View_Currencies",
+    false
+  );
+}
+
 export async function createCurrency(
   props: Prisma.CurrencyUncheckedCreateInput
 ) {
@@ -17,7 +30,7 @@ export async function createCurrency(
       props.config_id = config_id;
       props.user_id = info.user.id;
 
-      await prisma.currency.create({ data: props });
+      return await prisma.currency.create({ data: props });
     },
     "Add_Currency",
     true,

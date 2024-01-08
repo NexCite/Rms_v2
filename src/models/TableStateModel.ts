@@ -9,6 +9,7 @@ type StateSetter<T> = (newValue: T | ((prevValue: T) => T)) => void;
 export default interface TableStateModel {
   fromDate?: Date;
   toDate?: Date;
+  showColumnFilters?: boolean;
   filterColumns?: MRT_ColumnFiltersState;
   groups?: MRT_GroupingState;
   pagination?: MRT_PaginationState;
@@ -23,4 +24,5 @@ export default interface TableStateModel {
   setExpanded?: StateSetter<MRT_ExpandedState>;
   setFromDate?: StateSetter<Date>;
   setToDate?: StateSetter<Date>;
+  setShowColumnFilters?: StateSetter<boolean>;
 }

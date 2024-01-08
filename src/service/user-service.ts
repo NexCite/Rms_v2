@@ -8,8 +8,8 @@ import { handlerServiceAction } from "@rms/lib/handler";
 import { hashPassword } from "@rms/lib/hash";
 import RouteModel from "@rms/models/RouteModel";
 import prisma from "@rms/prisma/prisma";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { cookies, headers } from "next/headers";
+import { RedirectType, redirect } from "next/navigation";
 export async function createUser(props: Prisma.UserUncheckedCreateInput) {
   return handlerServiceAction(
     async (info, config_id) => {
@@ -17,8 +17,7 @@ export async function createUser(props: Prisma.UserUncheckedCreateInput) {
 
       props.password = hashPassword(props.password);
 
-      await prisma.user.create({ data: props });
-      return;
+      return await prisma.user.create({ data: props, select: { id: true } });
     },
     "Add_User",
     true,
@@ -93,6 +92,91 @@ export async function deleteUserById(id: number) {
   );
 }
 
+export type UserAuth = {
+  user: Prisma.UserGetPayload<{
+    include: {
+      role: {};
+      config: {
+        select: {
+          id: true;
+          name: true;
+          email: true;
+          logo: true;
+          phone_number: true;
+        };
+      };
+    };
+  }>;
+  routes: RouteModel[];
+};
+export async function userAuth(): Promise<UserAuth> {
+  const token = cookies().get("rms-auth");
+  if (!token?.value) {
+    redirect("/login", RedirectType.replace);
+  }
+  const user = await prisma.user.findFirst({
+    where: { auth: { some: { token: token.value } } },
+    include: {
+      role: {},
+      config: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          logo: true,
+          phone_number: true,
+        },
+      },
+    },
+  });
+  if (!user) {
+    redirect("/login", RedirectType.replace);
+  }
+  const url = new URL(headers().get("url"));
+  const routes = route.filter((res) =>
+    user.role.permissions.includes(res.permission)
+  );
+
+  if (url.pathname === "/admin") {
+    return { user, routes };
+  }
+
+  const findRoute = route.find((res) => {
+    return url.pathname === res.path;
+  });
+
+  const findSubRouter: RouteModel[] = route.reduce(
+    (a, b) => a.concat(b.children),
+    []
+  );
+
+  var findSubRoute = findSubRouter.find((res) => {
+    if (url.pathname.endsWith("form")) {
+      return url.pathname.replace("/form", "").startsWith(res.path);
+    } else {
+      return url.pathname.startsWith(res.path) || res.path === url.pathname;
+    }
+  });
+
+  if (findRoute) {
+    if (!user.role.permissions.includes(findRoute.permission)) {
+      redirect("/login", RedirectType.replace);
+    }
+  } else if (findSubRoute) {
+    if (url.pathname.endsWith("form")) {
+      if (!user.role.permissions.includes(findSubRoute.addKey)) {
+        redirect("/login", RedirectType.replace);
+      }
+    } else if (!user.role.permissions.includes(findSubRoute.permission)) {
+      redirect("/login", RedirectType.replace);
+    }
+  } else {
+    redirect("/login", RedirectType.replace);
+  }
+
+  return { user, routes };
+}
+
 export default async function getUserFullInfo(
   props: {
     withRedirect?: boolean;
@@ -100,56 +184,19 @@ export default async function getUserFullInfo(
   } = {}
 ): Promise<UserFullInfoType | undefined> {
   const token = cookies().get("rms-auth");
+
   if (!token?.value) {
-    if (props?.withRedirect) {
-      redirect("/login");
-    } else {
-    }
+    handleMissingToken(props);
   }
-  const auth = await prisma.auth.findFirst({
-    where: { token: token.value, status: "Enable" },
-    include: {
-      user: {
-        select: {
-          username: true,
-          first_name: true,
-          last_name: true,
-          id: true,
-          permissions: true,
-          type: true,
-          config_id: true,
-          role: true,
-          config: {
-            select: {
-              logo: true,
-              media: props.withMedia ?? false,
-              name: true,
-              phone_number: true,
-              email: true,
-              id: true,
-            },
-          },
-        },
-      },
-    },
-  });
+
+  const auth = await getAuthenticatedUser(token, props);
 
   if (!auth) {
-    if (props.withRedirect) {
-      redirect("/login");
-    } else {
-      return undefined;
-    }
+    handleMissingToken(props);
   }
 
-  const routes = route.filter((res) => {
-    if (auth.user.role.permissions?.includes(res.permission as any)) {
-      res.children = res.children?.filter((r) =>
-        auth.user.role.permissions?.includes(r.permission as any)
-      );
-      return res;
-    }
-  }) as RouteModel[];
+  const routes = filterRoutes(auth);
+
   const user = {
     id: auth.user_id,
     username: auth.user.username,
@@ -168,6 +215,81 @@ export default async function getUserFullInfo(
   };
 
   return { routes, user, config };
+}
+
+function handleMissingToken(props: {
+  withRedirect?: boolean;
+}): void | undefined {
+  if (props.withRedirect) {
+    redirect("/login");
+  }
+}
+type AuthType = Prisma.AuthGetPayload<{
+  include: {
+    user: {
+      select: {
+        username: true;
+        first_name: true;
+        last_name: true;
+        id: true;
+        permissions: true;
+        type: true;
+        config_id: true;
+        role: true;
+        config: {
+          select: {
+            logo: true;
+            name: true;
+            phone_number: true;
+            email: true;
+            id: true;
+          };
+        };
+      };
+    };
+  };
+}>;
+async function getAuthenticatedUser(
+  token: { value?: string },
+  props: { withRedirect?: boolean }
+): Promise<AuthType | null> {
+  return await prisma.auth.findFirst({
+    where: { token: token.value, status: "Enable" },
+    include: {
+      user: {
+        select: {
+          username: true,
+          first_name: true,
+          last_name: true,
+          id: true,
+          permissions: true,
+          type: true,
+          config_id: true,
+          role: true,
+          config: {
+            select: {
+              logo: true,
+              name: true,
+              phone_number: true,
+              email: true,
+              id: true,
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+function filterRoutes(auth: AuthType | null): RouteModel[] {
+  return route.filter((res) => {
+    if (auth?.user.role.permissions?.includes(res.permission as any)) {
+      res.children = res.children?.filter((r) =>
+        auth.user.role.permissions?.includes(r.permission as any)
+      );
+      return res;
+    }
+  }) as RouteModel[];
 }
 export type UserFullInfoType = {
   user: {

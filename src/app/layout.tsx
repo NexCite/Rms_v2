@@ -1,19 +1,10 @@
 import "./globals.css";
 
-import { env } from "process";
-import "@mantine/core/styles.css";
-
 import { AlertProvider } from "@rms/hooks/toast-hook";
 import { headers } from "next/headers";
 import { Metadata } from "next";
-import {
-  ColorSchemeScript,
-  MantineProvider,
-  MantineThemeProvider,
-} from "@mantine/core";
-import { Provider } from "jotai";
-import Providers from "@rms/hooks/jotai-provider";
 
+import procces from "process";
 export async function generateMetadata({ params }): Promise<Metadata> {
   const url = new URL(
     headers().get("url") || headers().get("referer") || headers().get("host")
@@ -29,7 +20,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const v = env.vesrion;
+  const v = procces.env.vesrion;
 
   return (
     <html
@@ -39,18 +30,14 @@ export default async function RootLayout({
     >
       <head>
         <meta charSet="UTF-8" />
-
-        <ColorSchemeScript />
       </head>
       <body>
         <div className="absolute bottom-1 right-10 z-20    text-black">
           <h1 className="text-black">version {v}</h1>
         </div>
-        <MantineThemeProvider>
-          <MantineProvider forceColorScheme="light">
-            <Providers>{children}</Providers>
-          </MantineProvider>
-        </MantineThemeProvider>
+
+        {children}
+
         <AlertProvider />
       </body>
     </html>

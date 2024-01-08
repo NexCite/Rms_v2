@@ -8,7 +8,7 @@ export default function LoadingClient(props: { children: React.ReactNode }) {
     setLoading(false);
   }, []);
   return loading ? (
-    <div className="w-full flex justify-center items-center my-10">
+    <div className="w-full flex justify-center items-center my-10  ">
       <Loading />
     </div>
   ) : (

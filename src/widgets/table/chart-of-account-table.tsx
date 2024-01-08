@@ -1,12 +1,29 @@
 "use client";
 import { MenuItem } from "@mui/material";
-import { Prisma } from "@prisma/client";
-import LoadingClient from "@rms/components/other/loading-client";
-import Authorized, { useAuthorized } from "@rms/components/ui/authorized";
+import Authorized from "@rms/components/ui/authorized";
 import { useToast } from "@rms/hooks/toast-hook";
 import TableStateModel from "@rms/models/TableStateModel";
-import { downloadExcel, useDownloadExcel } from "react-export-table-to-excel";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import Button from "@mui/joy/Button";
+import Card from "@mui/joy/Card";
+import FormControl from "@mui/joy/FormControl";
+import FormLabel from "@mui/joy/FormLabel";
+import Input from "@mui/joy/Input";
+
+import { Option, Select } from "@mui/joy";
+import { $Enums } from "@prisma/client";
+import {
+  AccountGrouped,
+  FormatNumberWithFixed,
+  exportToExcell,
+  totalChartOfAccountVouchers,
+} from "@rms/lib/global";
+import {
+  findChartOfAccountByGrouping,
+  findChartOfAccountForAccountsServiceGrouded,
+} from "@rms/service/chart-of-account-service";
+import dayjs from "dayjs";
 import {
   MRT_ColumnFiltersState,
   MRT_ExpandedState,
@@ -18,42 +35,41 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
-  ReactHTML,
   ReactHTMLElement,
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
   useTransition,
 } from "react";
-import { DownloadTableExcel } from "react-export-table-to-excel";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { AiFillFileExcel } from "react-icons/ai";
+import { MdSearch } from "react-icons/md";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import Button from "@mui/joy/Button";
-import { AiFillFileExcel } from "react-icons/ai";
-import dayjs from "dayjs";
-import { AccountGrouped, FormatNumberWithFixed } from "@rms/lib/global";
-import Typography from "@mui/joy/Typography";
-import FormControl from "@mui/joy/FormControl";
-import FormLabel from "@mui/joy/FormLabel";
-import Input from "@mui/joy/Input";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { findChartOfAccountByGrouping } from "@rms/service/chart-of-account-service";
-import { MdSearch } from "react-icons/md";
 import { ChartOfAccountSearchSchema } from "../schema/chart-of-account";
 
-type Props = {};
+type Props = {
+  accountId?: string;
+  accountType?: $Enums.AccountType;
+  onDateChange?: (from: Date, to: Date) => void;
+  currenices?: {
+    id?: number;
+    name?: string;
+    symbol?: string;
+    rate?: number;
+  }[];
+  currency?: {
+    id?: number;
+    name?: string;
+    symbol?: string;
+    rate?: number;
+  };
+};
 
 export default function ChartOfAccountTable(props: Props) {
-  // const isAuthorized = useAuthorized([
-  //   "View_Chart_Of_Account",
-  //   "Edit_Chart_Of_Account",
-  //   "Delete_Chart_Of_Account",
-  // ]);
   const toast = useToast();
   const [isPadding, setTransition] = useTransition();
   const [data, setData] = useState<AccountGrouped[]>([]);
@@ -64,25 +80,120 @@ export default function ChartOfAccountTable(props: Props) {
     defaultValues: {
       include_reffrence: false,
       from: dayjs(filter.fromDate).startOf("d").toDate(),
-      to: dayjs(filter.fromDate).endOf("d").toDate(),
-      id: undefined,
+      to: dayjs(filter.toDate).endOf("d").toDate(),
+      classLevel: ["1"],
     },
   });
-  const tableRef = useRef();
-  useEffect(() => {
-    if (global.window) {
-      tableRef.current = document.getElementById(
-        "chart-of-account-table"
-      ) as any;
-    }
-  }, [data]);
-  const { onDownload } = useDownloadExcel({
-    currentTableRef: tableRef.current,
-    filename: `${dayjs(filter.fromDate).format("DD-MM-YYYY")}-${dayjs(
-      filter.toDate
-    ).format("DD-MM-YYYY")}`,
-    sheet: "Chart Of Account",
-  });
+  const [currency, setCurrency] = useState<{
+    id?: number;
+    name?: string;
+    symbol?: string;
+    rate?: number;
+  }>(props.currency ?? undefined);
+  const columns = useMemo(
+    () => [
+      columnGroupedDataHelper.accessor("id", {
+        header: "ID",
+        enableGrouping: false,
+      }),
+      columnGroupedDataHelper.accessor("name", {
+        header: "Name",
+        enableGrouping: false,
+      }),
+
+      columnGroupedDataHelper.accessor("class", {
+        filterVariant: "multi-select",
+        filterSelectOptions: Array.from({ length: 9 }).map((res, i) => i + ""),
+        GroupedCell: ({ row, cell }) => {
+          return <span>{cell.getValue()}</span>;
+        },
+        header: "Class",
+      }),
+      columnGroupedDataHelper.accessor(
+        (row) => row.chart_of_account_type?.replaceAll("_", " "),
+        {
+          id: "chart_of_account_type",
+          header: "Account Type",
+          GroupedCell: ({ row, cell }) => {
+            return cell.getValue();
+          },
+        }
+      ),
+      columnGroupedDataHelper.accessor(
+        (row) => row.debit_credit?.replaceAll("_", "/"),
+        {
+          id: "debit_credit",
+          header: "D/C",
+          enableGrouping: false,
+        }
+      ),
+      columnGroupedDataHelper.accessor(
+        (row) => {
+          const result = totalChartOfAccountVouchers([row]);
+          return result;
+        },
+        {
+          enableGrouping: false,
+          Cell(params) {
+            const total = parseFloat(
+              params.row.getAllCells()[7].getValue() as string
+            );
+
+            return (
+              <span
+                className={`${
+                  total >= 0 ? "bg-green-400" : "bg-red-400"
+                }  rounded-lg px-3 text-white`}
+              >
+                {currency?.symbol ?? "$"}
+                {FormatNumberWithFixed(total * (currency?.rate ?? 1), 2)}{" "}
+              </span>
+            );
+          },
+          id: "total",
+          header: "Total",
+          AggregatedCell: ({ row }) => {
+            if (row.getIsGrouped()) {
+              const result = row._getAllCellsByColumnId();
+              var total = 0;
+              result["total"].row.subRows.map((res) => {
+                if (
+                  (res._getAllCellsByColumnId()["total"].getValue() as any)
+                    ?.props
+                ) {
+                  return (total += parseFloat(
+                    (
+                      res
+                        ._getAllCellsByColumnId()
+                        ["total"].getValue() as ReactHTMLElement<any>
+                    )?.props?.children[1].replace(/[$,]/g, "")
+                  ));
+                } else {
+                  return (total += parseFloat(
+                    res._getAllCellsByColumnId()["total"].getValue() as string
+                  ));
+                }
+              });
+
+              return (
+                <span
+                  className={`${
+                    total >= 0 ? "bg-green-400" : "bg-red-400"
+                  }  rounded-lg px-3 text-white`}
+                >
+                  {currency?.symbol ?? "$"}
+                  {FormatNumberWithFixed(total * (currency?.rate ?? 1), 2)}
+                </span>
+              );
+            }
+            return undefined;
+          },
+        }
+      ),
+    ],
+    [currency?.rate, currency?.symbol]
+  );
+  const watch = useWatch({ control: form.control, name: ["from", "to"] });
 
   const table = useMaterialReactTable({
     columns,
@@ -100,6 +211,7 @@ export default function ChartOfAccountTable(props: Props) {
     enableSelectAll: false,
     enableSubRowSelection: false,
     enableStickyFooter: true,
+
     onGroupingChange: filter.setGroups,
     onColumnFiltersChange: filter.setColumnsFilter,
     onSortingChange: filter.setSorting,
@@ -120,7 +232,7 @@ export default function ChartOfAccountTable(props: Props) {
             </MenuItem>
           </Link>
         </Authorized>,
-        <Authorized permission="Delete_Chart_Of_Account" key={3}>
+        <Authorized permission="Delete_Chart_Of_Account" key={2}>
           <MenuItem
             disabled={isPadding}
             className="cursor-pointer"
@@ -151,9 +263,11 @@ export default function ChartOfAccountTable(props: Props) {
     initialState: { showColumnFilters: filter.filterColumns?.length > 0 },
 
     filterFromLeafRows: true,
+    onShowColumnFiltersChange: filter.setShowColumnFilters,
     state: {
       expanded: filter.expanded,
       grouping: filter.groups,
+      showColumnFilters: filter.showColumnFilters,
 
       showLoadingOverlay: isPadding,
       sorting: filter.sorting,
@@ -161,33 +275,65 @@ export default function ChartOfAccountTable(props: Props) {
       columnFilters: filter.filterColumns,
     },
   });
+
   useEffect(() => {
     setTransition(() => {
-      findChartOfAccountByGrouping(form.formState.defaultValues, true).then(
-        (res) => {
-          setData(res.result.groupedTabls);
-        }
-      );
+      if (props.accountId) {
+        findChartOfAccountForAccountsServiceGrouded({
+          accountId: props.accountId,
+          from: form.formState.defaultValues.from,
+          to: form.formState.defaultValues.to,
+          classLevel: form.formState.defaultValues.classLevel,
+        }).then((res) => {
+          setData(res.result);
+        });
+      } else {
+        findChartOfAccountByGrouping(form.formState.defaultValues, true).then(
+          (res) => {
+            setData(res.result.groupedTabls);
+          }
+        );
+      }
     });
-  }, [form.formState.defaultValues]);
+  }, [form.formState.defaultValues, props.accountId]);
 
-  const handleSubimt = useCallback((values: ChartOfAccountSearchSchema) => {
-    setTransition(() => {
-      findChartOfAccountByGrouping(
-        {
-          from: values.from,
-          to: values.to,
-        },
-        true
-      ).then((res) => {
-        setData(res.result.groupedTabls);
+  useEffect(() => {
+    props.onDateChange?.(watch[0], watch[1]);
+  }, [props, watch]);
+
+  const handleSubimt = useCallback(
+    (values: ChartOfAccountSearchSchema) => {
+      setTransition(() => {
+        if (props.accountId) {
+          findChartOfAccountForAccountsServiceGrouded({
+            accountId: props.accountId,
+            classLevel: values.classLevel,
+            from: values.from,
+            to: values.to,
+          }).then((res) => {
+            setData(res.result);
+          });
+        } else {
+          findChartOfAccountByGrouping(
+            {
+              from: values.from,
+              to: values.to,
+              classLevel: values.classLevel,
+            },
+            true
+          ).then((res) => {
+            setData(res.result.groupedTabls);
+          });
+        }
       });
-    });
-  }, []);
+    },
+    [props.accountId]
+  );
+
   return (
-    <LoadingClient>
+    <Card>
       <form
-        className="border p-5  gap-2 flex flex-col "
+        className=" p-5  gap-2 flex flex-col  "
         onSubmit={form.handleSubmit(handleSubimt)}
       >
         <div className="flex-col md:flex-row flex justify-between items-center gap-5">
@@ -196,7 +342,12 @@ export default function ChartOfAccountTable(props: Props) {
             startDecorator={<AiFillFileExcel />}
             onClick={(e) => {
               setTransition(() => {
-                onDownload();
+                exportToExcell({
+                  to: form.getValues("to"),
+                  from: form.getValues("from"),
+                  sheet: "chart of account",
+                  id: "chart-of-account-table",
+                });
               });
             }}
           >
@@ -256,209 +407,183 @@ export default function ChartOfAccountTable(props: Props) {
               </FormControl>
             )}
           />
+          <Controller
+            name="classLevel"
+            control={form.control}
+            render={({ field, fieldState, formState }) => (
+              <FormControl>
+                <FormLabel>Class</FormLabel>
+                <Select
+                  multiple
+                  value={field.value}
+                  defaultValue={field.value}
+                  onChange={(e, newValue) => {
+                    field.onChange(newValue);
+                  }}
+                >
+                  {Array.from({ length: 9 }).map((res, i) => {
+                    return (
+                      <Option value={i + 1 + ""} key={i}>
+                        {i + 1}
+                      </Option>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+            )}
+          />
+
+          {props.currenices?.length > 1 && (
+            <div>
+              <FormControl>
+                <FormLabel>Curreny</FormLabel>
+                <Select
+                  value={currency}
+                  onChange={(e, n) => {
+                    setCurrency(n);
+                  }}
+                >
+                  {props.currenices.map((res, i) => {
+                    return (
+                      <Option value={res} key={i}>
+                        {res.symbol}
+                      </Option>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+            </div>
+          )}
         </div>
       </form>
 
       <MaterialReactTable table={table} />
-    </LoadingClient>
+    </Card>
   );
 }
 const columnGroupedDataHelper = createMRTColumnHelper<AccountGrouped>();
 
-function totalChartOfAccountVouchers(props: AccountGrouped[]) {
-  var total = 0;
-  if (props.length > 0) {
-    props.map((res) => {
-      res.voucher_items.map((res) => {
-        if (res.debit_credit === "Debit") {
-          total += res.amount / res.currency.rate;
-        } else {
-          total -= res.amount / res.currency.rate;
-        }
-      });
-      return (total += totalChartOfAccountVouchers(res.subRows));
-    });
-    return total;
-  } else {
-    return total;
-  }
-}
-const columns = [
-  columnGroupedDataHelper.accessor("id", {
-    header: "ID",
-    enableColumnActions: true,
-  }),
-  columnGroupedDataHelper.accessor("name", {
-    header: "Name",
-  }),
-
-  columnGroupedDataHelper.accessor("class", {
-    header: "Class",
-  }),
-  columnGroupedDataHelper.accessor(
-    (row) => row.chart_of_account_type?.replaceAll("_", " "),
-    {
-      id: "chart_of_account_type",
-      header: "Account Type",
-      GroupedCell: ({ row, cell }) => {
-        return cell.getValue();
-      },
-    }
-  ),
-  columnGroupedDataHelper.accessor(
-    (row) => row.debit_credit?.replaceAll("_", "/"),
-    {
-      id: "debit_credit",
-      header: "D/C",
-    }
-  ),
-  columnGroupedDataHelper.accessor(
-    (row) => {
-      const result = totalChartOfAccountVouchers([row]);
-      return (
-        <span
-          className={`${
-            result >= 0 ? "bg-green-400" : "bg-red-400"
-          }  rounded-lg px-3 text-white`}
-        >
-          ${FormatNumberWithFixed(result, 2)}
-        </span>
-      );
-    },
-    {
-      id: "total",
-      header: "Total",
-      AggregatedCell: ({ row }) => {
-        if (row.getIsGrouped()) {
-          const result = row._getAllCellsByColumnId();
-          var total = 0;
-          result["total"].row.subRows.map((res) => {
-            return (total += parseFloat(
-              (
-                res
-                  ._getAllCellsByColumnId()
-                  ["total"].getValue() as ReactHTMLElement<any>
-              )?.props.children[1].replace(/[$,]/g, "")
-            ));
-          });
-
-          return (
-            <span
-              className={`${
-                total >= 0 ? "bg-green-400" : "bg-red-400"
-              }  rounded-lg px-3 text-white`}
-            >
-              ${FormatNumberWithFixed(total, 2)}
-            </span>
-          );
-        }
-        return undefined;
-      },
-    }
-  ),
-];
 const useFilter = create<TableStateModel>()(
   persist(
     (set, get) => ({
       filterColumns: [],
       fromDate: dayjs().startOf("D").toDate(),
       toDate: dayjs().endOf("D").toDate(),
-
+      showColumnFilters: false,
       groups: [],
       pagination: {
         pageIndex: 0,
         pageSize: 100,
       },
+
       expanded: {},
       globalFilter: "",
       setExpanded(newValue) {
         if (typeof newValue === "function") {
-          this.expanded = (
+          get().expanded = (
             newValue as (prevValue: MRT_ExpandedState) => MRT_ExpandedState
           )(get().expanded);
         } else {
-          this.expanded = newValue;
+          get().expanded = newValue;
         }
-        set(this);
+
+        set((prev) => ({ ...prev, ...get() }));
+      },
+
+      setShowColumnFilters(newValue) {
+        if (typeof newValue === "function") {
+          get().showColumnFilters = (
+            newValue as (prevValue: boolean) => boolean
+          )(get().showColumnFilters);
+        } else {
+          get().showColumnFilters = newValue;
+        }
+
+        set((prev) => ({ ...prev, ...get() }));
       },
       setGlobalFilter(newValue) {
         if (typeof newValue === "function") {
-          this.globalFilter = (
+          get().globalFilter = (
             newValue as (
               prevValue: MRT_ColumnFiltersState
             ) => MRT_ColumnFiltersState
           )(get().globalFilter);
         } else {
-          this.globalFilter = newValue;
+          get().globalFilter = newValue;
         }
-        set(this);
+
+        set((prev) => ({ ...prev, ...get() }));
       },
       setColumnsFilter(newValue) {
         if (typeof newValue === "function") {
-          this.filterColumns = (
+          get().filterColumns = (
             newValue as (
               prevValue: MRT_ColumnFiltersState
             ) => MRT_ColumnFiltersState
           )(get().filterColumns);
         } else {
-          this.filterColumns = newValue;
+          get().filterColumns = newValue;
         }
-        set(this);
+
+        set((prev) => ({ ...prev, ...get() }));
       },
       setGroups(newValue) {
         if (typeof newValue === "function") {
-          this.groups = (
+          get().groups = (
             newValue as (prevValue: MRT_GroupingState) => MRT_GroupingState
           )(get().groups);
         } else {
-          this.groups = newValue;
+          get().groups = newValue;
         }
-        set(this);
+
+        set((prev) => ({ ...prev, ...get() }));
       },
       setFromDate(newValue) {
         if (typeof newValue === "function") {
-          this.fromDate = dayjs(
+          get().fromDate = dayjs(
             (newValue as (prevValue: Date) => Date)(get().fromDate)
           )
             .endOf("D")
             .toDate();
         } else {
-          this.fromDate = dayjs(newValue).endOf("D").toDate();
+          get().fromDate = dayjs(newValue).endOf("D").toDate();
         }
-        set({ fromDate: this.fromDate });
+        set({ fromDate: get().fromDate });
       },
       setToDate(newValue) {
         if (typeof newValue === "function") {
-          this.toDate = dayjs(
+          get().toDate = dayjs(
             (newValue as (prevValue: Date) => Date)(get().toDate)
           )
             .endOf("D")
             .toDate();
         } else {
-          this.toDate = dayjs(newValue).endOf("D").toDate();
+          get().toDate = dayjs(newValue).endOf("D").toDate();
         }
-        set({ toDate: this.toDate });
+        set({ toDate: get().toDate });
       },
       sorting: [],
       setSorting(newValue) {
         if (typeof newValue === "function") {
-          this.sorting = (
+          get().sorting = (
             newValue as (prevValue: MRT_SortingState) => MRT_SortingState
           )(get().sorting);
         } else {
-          this.sorting = newValue;
+          get().sorting = newValue;
         }
-        set(this);
+
+        set((prev) => ({ ...prev, ...get() }));
       },
       setPagination(newValue) {
         if (typeof newValue === "function") {
-          this.pagination = (
+          get().pagination = (
             newValue as (prevValue: MRT_PaginationState) => MRT_PaginationState
           )(get().pagination);
         } else {
-          this.pagination = newValue;
+          get().pagination = newValue;
         }
-        set(this);
+
+        set((prev) => ({ ...prev, ...get() }));
       },
     }),
     {

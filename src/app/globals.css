@@ -65,3 +65,15 @@ body {
   background-color: #1176c8;
   text-transform: capitalize;
 }
+.MuiPaper-root {
+  box-shadow: none;
+  border-radius: var(--Card-radius);
+  border: var(--variant-borderWidth) solid;
+  border-color: var(
+    --variant-outlinedBorder,
+    var(
+      --joy-palette-neutral-outlinedBorder,
+      var(--joy-palette-neutral-300, #cdd7e1)
+    )
+  );
+}

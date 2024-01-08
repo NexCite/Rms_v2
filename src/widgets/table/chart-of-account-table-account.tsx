@@ -5,17 +5,13 @@ import LoadingClient from "@rms/components/other/loading-client";
 import Authorized from "@rms/components/ui/authorized";
 import { useToast } from "@rms/hooks/toast-hook";
 import TableStateModel from "@rms/models/TableStateModel";
-import { useDownloadExcel } from "react-export-table-to-excel";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Button from "@mui/joy/Button";
 import FormControl from "@mui/joy/FormControl";
 import FormLabel from "@mui/joy/FormLabel";
 import Input from "@mui/joy/Input";
-import {
-  findChartOfAccountByGrouping,
-  findChartOfAccounts,
-} from "@rms/service/chart-of-account-service";
+import { findChartOfAccounts } from "@rms/service/chart-of-account-service";
 import dayjs from "dayjs";
 import {
   MRT_ColumnFiltersState,
@@ -29,17 +25,29 @@ import {
 } from "material-react-table";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 import { Controller, useForm } from "react-hook-form";
 import { AiFillFileExcel } from "react-icons/ai";
 import { MdSearch } from "react-icons/md";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { ChartOfAccountSearchSchema } from "../schema/chart-of-account";
-import { FormatNumberWithFixed } from "@rms/lib/global";
+import { FormatNumberWithFixed, exportToExcell } from "@rms/lib/global";
+import Card from "@mui/joy/Card";
+import CardContent from "@mui/joy/CardContent";
+import Typography from "@mui/joy/Typography";
+import Table from "@mui/joy/Table";
 
 type Props = {
   node: $Enums.AccountType;
+  parents: Prisma.ChartOfAccountGetPayload<{}>[];
+  currencies: Prisma.CurrencyGetPayload<{}>[];
 };
 
 type ChartOfAccounts = Prisma.ChartOfAccountGetPayload<{
@@ -47,11 +55,15 @@ type ChartOfAccounts = Prisma.ChartOfAccountGetPayload<{
     currency: true;
     voucher_items: {
       include: {
+        voucher: { include: { currency: true } };
+
         currency: true;
       };
     };
     reffrence_voucher_items: {
       include: {
+        voucher: { include: { currency: true } };
+
         currency: true;
       };
     };
@@ -73,20 +85,144 @@ export default function ChartOfAccountAccountsTable(props: Props) {
       type: props.node,
     },
   });
-  const { onDownload } = useDownloadExcel({
-    currentTableRef: global?.document?.querySelector("table"),
-    filename: `${dayjs(filter.fromDate).format("DD-MM-YYYY")}-${dayjs(
-      filter.toDate
-    ).format("DD-MM-YYYY")}`,
-    sheet: "Chart Of Account",
-  });
 
+  const columns = useMemo(
+    () => [
+      columnGroupedDataHelper.accessor("id", {
+        header: "ID",
+        filterVariant: "autocomplete",
+
+        enableColumnActions: true,
+      }),
+      columnGroupedDataHelper.accessor("business_id", {
+        header: "Business ID",
+        filterVariant: "autocomplete",
+
+        enableColumnActions: true,
+      }),
+      columnGroupedDataHelper.accessor("name", {
+        header: "Name",
+        filterVariant: "autocomplete",
+      }),
+      columnGroupedDataHelper.accessor((row) => row.currency?.name, {
+        id: "currency.name",
+        filterVariant: "multi-select",
+
+        filterSelectOptions: props.currencies.map((res) => res.name),
+
+        header: "Currency",
+      }),
+
+      columnGroupedDataHelper.accessor("class", {
+        filterVariant: "multi-select",
+        filterSelectOptions: Array.from({ length: 9 }).map((res, i) => i + ""),
+
+        header: "Class",
+      }),
+      columnGroupedDataHelper.accessor(
+        (row) => row.chart_of_account_type?.replaceAll("_", " "),
+        {
+          id: "chart_of_account_type",
+          header: "Account Type",
+          filterVariant: "multi-select",
+
+          filterSelectOptions: Object.keys($Enums.ChartOfAccountType),
+          GroupedCell: ({ row, cell }) => {
+            return cell.getValue();
+          },
+        }
+      ),
+      columnGroupedDataHelper.accessor(
+        (row) => row.debit_credit?.replaceAll("_", "/"),
+        {
+          id: "debit_credit",
+          filterVariant: "multi-select",
+
+          header: "D/C",
+        }
+      ),
+      columnGroupedDataHelper.accessor(
+        (row) => {
+          var total = 0;
+
+          row.voucher_items.map((res) => {
+            if (res.debit_credit === "Debit") {
+              total += res.amount / res.rate;
+            } else {
+              total -= res.amount / res.rate;
+            }
+          });
+          row.reffrence_voucher_items?.map((res) => {
+            if (res.debit_credit === "Debit") {
+              total += res.amount / res.rate;
+            } else {
+              total -= res.amount / res.rate;
+            }
+          });
+
+          return total * (row.currency?.rate ?? 1);
+        },
+        {
+          id: "total",
+          header: "Total",
+          filterVariant: "range",
+          filterFn: (row, name, range: string[]) => {
+            const total = row.getAllCells()[9].getValue() as string;
+            //
+
+            const minNumber = range[0];
+            const maxNumber = range[1];
+            // console.log(name);
+
+            if (minNumber && maxNumber) {
+              console.log(minNumber);
+
+              return total >= minNumber && total <= maxNumber;
+            } else if (minNumber) {
+              console.log(1);
+
+              return total >= minNumber;
+            } else if (maxNumber) {
+              console.log(maxNumber);
+
+              return total <= maxNumber;
+            }
+
+            // const minNumber=parseFloat(min)
+            return true;
+          },
+          Cell({
+            row: {
+              getAllCells,
+              original: { currency },
+            },
+          }) {
+            const total = parseFloat(getAllCells()[9].getValue() as string);
+
+            return (
+              <span
+                className={`${
+                  total >= 0 ? "bg-green-400" : "bg-red-400"
+                }  rounded-lg px-3 text-white`}
+              >
+                {currency?.symbol ?? "$"}
+                {FormatNumberWithFixed(total, 2)}
+              </span>
+            );
+          },
+        }
+      ),
+    ],
+    [props.currencies]
+  );
   const table = useMaterialReactTable({
     columns,
     data,
     muiTableHeadCellProps: {
       align: "left",
     },
+
+    muiTableProps: { id: "chart-of-account-table-" + props.node },
     enableRowSelection: false,
     enableStickyHeader: true,
     enableClickToCopy: true,
@@ -99,9 +235,44 @@ export default function ChartOfAccountAccountsTable(props: Props) {
     onGroupingChange: filter.setGroups,
     onColumnFiltersChange: filter.setColumnsFilter,
     onSortingChange: filter.setSorting,
-    enableExpanding: false,
+    enableExpanding: true,
     enableRowActions: true,
     enableExpandAll: true,
+    renderDetailPanel({ row: { original } }) {
+      return (
+        <Table align="center">
+          <thead>
+            <tr>
+              <th>Full Name</th>
+              <th>Phone Number</th>
+              <th>Create Date</th>
+              <th>Parent</th>
+              <th>Email</th>
+              <th>Country</th>
+              <th>Address</th>
+            </tr>
+            <tr>
+              <td>
+                {original.first_name} - {original.last_name}
+              </td>
+              <td>{original.phone_number}</td>
+              <td>{original.create_date.toLocaleDateString()}</td>
+              <td>
+                ({original.id}){" "}
+                {
+                  props.parents.find((res) => res.id === original.parent_id)
+                    ?.name
+                }
+              </td>
+
+              <td> {original.email}</td>
+              <td> {original.country}</td>
+              <td> {original.address}</td>
+            </tr>
+          </thead>
+        </Table>
+      );
+    },
 
     renderRowActionMenuItems({
       row: {
@@ -115,6 +286,11 @@ export default function ChartOfAccountAccountsTable(props: Props) {
               Edit
             </MenuItem>
           </Link>
+        </Authorized>,
+        <Authorized permission="View_Chart_Of_Account" key={2}>
+          <MenuItem disabled={isPadding} className="cursor-pointer">
+            <Link href={pathName + "/" + id}>View</Link>
+          </MenuItem>
         </Authorized>,
         <Authorized permission="Delete_Chart_Of_Account" key={3}>
           <MenuItem
@@ -147,9 +323,13 @@ export default function ChartOfAccountAccountsTable(props: Props) {
     initialState: { showColumnFilters: filter.filterColumns?.length > 0 },
 
     filterFromLeafRows: true,
+    onPaginationChange: filter.setPagination,
+    onShowColumnFiltersChange: filter.setShowColumnFilters,
     state: {
+      pagination: filter.pagination,
       expanded: filter.expanded,
       grouping: filter.groups,
+      showColumnFilters: filter.showColumnFilters,
 
       showLoadingOverlay: isPadding,
       sorting: filter.sorting,
@@ -160,14 +340,12 @@ export default function ChartOfAccountAccountsTable(props: Props) {
   useEffect(() => {
     setTransition(() => {
       findChartOfAccounts(form.formState.defaultValues).then((res) => {
-        // console.log(res.result, "dsadsa");
         setData(res.result);
       });
     });
   }, [form.formState.defaultValues]);
 
   const handleSubimt = useCallback((values: ChartOfAccountSearchSchema) => {
-    console.log(values);
     setTransition(() => {
       findChartOfAccounts({
         from: values.from,
@@ -176,15 +354,24 @@ export default function ChartOfAccountAccountsTable(props: Props) {
         include_reffrence: values.include_reffrence,
         type: values.type,
       }).then((res) => {
-        // console.log(res.result);
         setData(res.result);
       });
     });
   }, []);
   return (
-    <LoadingClient>
+    <Card>
+      <Card className="mb-5">
+        <CardContent>
+          <Typography className="text-2xl capitalize">
+            Total {props.node.replaceAll("_", " ")}s
+          </Typography>
+          <Typography className="text-end text-3xl">
+            {FormatNumberWithFixed(data.length, 0)}
+          </Typography>
+        </CardContent>
+      </Card>
       <form
-        className="border p-5  gap-2 flex flex-col "
+        className=" p-5  gap-2 flex flex-col "
         onSubmit={form.handleSubmit(handleSubimt)}
       >
         <div className="flex-col md:flex-row flex justify-between items-center gap-5">
@@ -193,7 +380,12 @@ export default function ChartOfAccountAccountsTable(props: Props) {
             startDecorator={<AiFillFileExcel />}
             onClick={(e) => {
               setTransition(() => {
-                onDownload();
+                exportToExcell({
+                  to: form.getValues("to"),
+                  from: form.getValues("from"),
+                  sheet: "chart of account " + props.node,
+                  id: "chart-of-account-table-" + props.node,
+                });
               });
             }}
           >
@@ -257,176 +449,170 @@ export default function ChartOfAccountAccountsTable(props: Props) {
       </form>
 
       <MaterialReactTable table={table} />
-    </LoadingClient>
+    </Card>
   );
 }
 const columnGroupedDataHelper = createMRTColumnHelper<ChartOfAccounts>();
 
-const columns = [
-  columnGroupedDataHelper.accessor("id", {
-    header: "ID",
-    enableColumnActions: true,
-  }),
-  columnGroupedDataHelper.accessor("name", {
-    header: "Name",
-  }),
-
-  columnGroupedDataHelper.accessor("class", {
-    header: "Class",
-  }),
-  columnGroupedDataHelper.accessor(
-    (row) => row.chart_of_account_type?.replaceAll("_", " "),
-    {
-      id: "chart_of_account_type",
-      header: "Account Type",
-      GroupedCell: ({ row, cell }) => {
-        return cell.getValue();
-      },
-    }
-  ),
-  columnGroupedDataHelper.accessor(
-    (row) => row.debit_credit?.replaceAll("_", "/"),
-    {
-      id: "debit_credit",
-      header: "D/C",
-    }
-  ),
-  columnGroupedDataHelper.accessor(
-    (row) => {
-      var total = 0;
-
-      row.voucher_items.map((res) => {
-        if (res.debit_credit === "Debit") {
-          total += res.amount / res.rate;
-        } else {
-          total -= res.amount / res.rate;
-        }
-      });
-      row.reffrence_voucher_items?.map((res) => {
-        if (res.debit_credit === "Debit") {
-          total += res.amount / res.rate;
-        } else {
-          total -= res.amount / res.rate;
-        }
-      });
-
-      return (
-        <span
-          className={`${
-            total >= 0 ? "bg-green-400" : "bg-red-400"
-          }  rounded-lg px-3 text-white`}
-        >
-          {FormatNumberWithFixed(total, 2)}
-        </span>
-      );
-    },
-    {
-      id: "total",
-      header: "Total",
-    }
-  ),
-];
 const useFilter = create<TableStateModel>()(
   persist(
     (set, get) => ({
       filterColumns: [],
-      fromDate: dayjs().startOf("year").toDate(),
-      toDate: dayjs().endOf("year").toDate(),
-
+      fromDate: dayjs().startOf("D").toDate(),
+      toDate: dayjs().endOf("D").toDate(),
+      showColumnFilters: false,
       groups: [],
       pagination: {
         pageIndex: 0,
         pageSize: 100,
       },
+
       expanded: {},
       globalFilter: "",
       setExpanded(newValue) {
         if (typeof newValue === "function") {
-          this.expanded = (
+          get().expanded = (
             newValue as (prevValue: MRT_ExpandedState) => MRT_ExpandedState
           )(get().expanded);
         } else {
-          this.expanded = newValue;
+          get().expanded = newValue;
         }
-        set(this);
+
+        set((prev) => ({ ...prev, ...get() }));
+      },
+
+      setShowColumnFilters(newValue) {
+        if (typeof newValue === "function") {
+          get().showColumnFilters = (
+            newValue as (prevValue: boolean) => boolean
+          )(get().showColumnFilters);
+        } else {
+          get().showColumnFilters = newValue;
+        }
+
+        set((prev) => ({ ...prev, ...get() }));
       },
       setGlobalFilter(newValue) {
         if (typeof newValue === "function") {
-          this.globalFilter = (
+          get().globalFilter = (
             newValue as (
               prevValue: MRT_ColumnFiltersState
             ) => MRT_ColumnFiltersState
           )(get().globalFilter);
         } else {
-          this.globalFilter = newValue;
+          get().globalFilter = newValue;
         }
-        set(this);
+
+        set((prev) => ({ ...prev, ...get() }));
       },
       setColumnsFilter(newValue) {
         if (typeof newValue === "function") {
-          this.filterColumns = (
+          get().filterColumns = (
             newValue as (
               prevValue: MRT_ColumnFiltersState
             ) => MRT_ColumnFiltersState
           )(get().filterColumns);
         } else {
-          this.filterColumns = newValue;
+          get().filterColumns = newValue;
         }
-        set(this);
+
+        set((prev) => ({ ...prev, ...get() }));
       },
       setGroups(newValue) {
         if (typeof newValue === "function") {
-          this.groups = (
+          get().groups = (
             newValue as (prevValue: MRT_GroupingState) => MRT_GroupingState
           )(get().groups);
         } else {
-          this.groups = newValue;
+          get().groups = newValue;
         }
-        set(this);
+
+        set((prev) => ({ ...prev, ...get() }));
       },
       setFromDate(newValue) {
         if (typeof newValue === "function") {
-          this.fromDate = (newValue as (prevValue: Date) => Date)(
-            get().fromDate
-          );
+          get().fromDate = dayjs(
+            (newValue as (prevValue: Date) => Date)(get().fromDate)
+          )
+            .endOf("D")
+            .toDate();
         } else {
-          this.fromDate = newValue;
+          get().fromDate = dayjs(newValue).endOf("D").toDate();
         }
-        set({ fromDate: this.fromDate });
+        set({ fromDate: get().fromDate });
       },
       setToDate(newValue) {
         if (typeof newValue === "function") {
-          this.toDate = (newValue as (prevValue: Date) => Date)(get().toDate);
+          get().toDate = dayjs(
+            (newValue as (prevValue: Date) => Date)(get().toDate)
+          )
+            .endOf("D")
+            .toDate();
         } else {
-          this.toDate = newValue;
+          get().toDate = dayjs(newValue).endOf("D").toDate();
         }
-        set({ toDate: this.toDate });
+        set({ toDate: get().toDate });
       },
       sorting: [],
       setSorting(newValue) {
         if (typeof newValue === "function") {
-          this.sorting = (
+          get().sorting = (
             newValue as (prevValue: MRT_SortingState) => MRT_SortingState
           )(get().sorting);
         } else {
-          this.sorting = newValue;
+          get().sorting = newValue;
         }
-        set(this);
+
+        set((prev) => ({ ...prev, ...get() }));
       },
       setPagination(newValue) {
         if (typeof newValue === "function") {
-          this.pagination = (
+          get().pagination = (
             newValue as (prevValue: MRT_PaginationState) => MRT_PaginationState
           )(get().pagination);
         } else {
-          this.pagination = newValue;
+          get().pagination = newValue;
         }
-        set(this);
+
+        set((prev) => ({ ...prev, ...get() }));
       },
     }),
     {
-      name: "chart-of-account-table-accounts",
+      name: "chart-of-account-table-account",
       storage: createJSONStorage(() => localStorage),
     }
   )
 );
+{
+  /* <tbody>
+{original.voucher_items
+  .concat(original.reffrence_voucher_items)
+  .map((res) => (
+    <tr>
+      <td>
+        {/* <Link
+          href={`/admin/accounting/journal_voucher/form?id=${res.voucher_id}`}
+        > */
+}
+//   {res.voucher.id}
+//   {/* </Link> */}
+// </td>
+
+//   <td>{res.voucher.title}</td>
+//   <td>{res.voucher.description}</td>
+//   <td>{res.voucher.to_date.toLocaleDateString()}</td>
+//   <td>{res.debit_credit}</td>
+
+//   <td>
+//     {res.currency?.symbol ?? res.voucher.currency.symbol}
+//     {FormatNumberWithFixed(res.amount, 2)}
+//   </td>
+//   <td>
+//     {FormatNumberWithFixed(
+//       res.currency?.rate ?? res.voucher.currency.rate,
+//       2
+//     )}
+//   </td>
+// </tr>
+// ))}
+// </tbody> */}

@@ -1,5 +1,5 @@
 "use client";
-import { UserFullInfoType } from "@rms/service/user-service";
+import { UserAuth } from "@rms/service/user-service";
 import Image from "next/image";
 import React, { useMemo } from "react";
 
@@ -11,9 +11,7 @@ import Typography from "@mui/joy/Typography";
 import Link from "next/link";
 import { useSelectedLayoutSegments } from "next/navigation";
 import { Next13ProgressBar } from "next13-progressbar";
-export default function SideBarDesktop(
-  props: UserFullInfoType & { path: string }
-) {
+export default function SideBarDesktop(props: UserAuth & { path: string }) {
   const segments = useSelectedLayoutSegments();
   const routers = useMemo(
     () =>
@@ -21,11 +19,11 @@ export default function SideBarDesktop(
         res.children = res.children.filter((res) => !res.hide);
         return res;
       }),
-    props.routes
+    [props.routes]
   );
   const tab = useMemo(
     () => routers.find((res) => segments.includes(res.routeKey)),
-    [segments]
+    [routers, segments]
   );
 
   const [tabIndex, setTabIndex] = React.useState(tab?.index ?? -1);
@@ -34,12 +32,17 @@ export default function SideBarDesktop(
     setTabIndex(newValue);
   };
   return (
-    <div className={`flex h-full max-w-[300px] ${tab ? "w-full" : ""}  border`}>
+    <div
+      className={`flex h-full  w-full  border bg-white`}
+      style={{
+        maxWidth: tabIndex >= 0 ? 250 : 62,
+      }}
+    >
       <Next13ProgressBar />
 
       <div className=" w-20 border h-full">
         <Image
-          src={`/api/media/${props.config.logo}`}
+          src={`/api/media/${props.user.config.logo}`}
           width={100}
           height={100}
           className=" rounded-full  object-cover w-full"
@@ -49,7 +52,7 @@ export default function SideBarDesktop(
         <div className="flex flex-col p-1">
           <Tabs
             aria-label="Vertical tabs"
-            className="shadow-none"
+            className="shadow-none bg-transparent"
             orientation="vertical"
             value={tabIndex}
             onChange={handleChange as any}
@@ -68,72 +71,51 @@ export default function SideBarDesktop(
               ))}
             </TabList>
           </Tabs>
+        </div>
+      </div>
 
-          {/* <Tabs
-            orientation="vertical"
-            onChange={handleChange as}
-            value={tabIndex}
-            aria-label="Tabs where selection follows focus"
-            // selectionFollowsFocus
-          >
-            {routers.map((res, i) => (
-              <Tab
-                key={res.permission}
-                className={`${
-                  res.index === tabIndex ? "bg-slate-200 rounded-lg" : ""
-                }  p-3`}
-                icon={
-                  <res.icon
-                    color="inherit"
-                    fontSize="large"
-                    className="text-black"
-                  />
-                }
-                value={res.index}
-              ></Tab>
-            ))}
-          </Tabs> */}
-        </div>
-      </div>
-      <div
-        className={`flex
-${tab ? "block" : "hidden"}
+      {tabIndex >= 0 && (
+        <div
+          className={`flex
+        
 w-full 
-       flex-col gap-3 p-2`}
-      >
-        <div>
-          <Typography className="text-xl text-gray-700 ">
-            {routers[tabIndex]?.title}
-          </Typography>
-        </div>
-        <Tabs
-          aria-label="Vertical tabs"
-          className="shadow-none w-full bg-transparent"
-          orientation="vertical"
+       flex-col gap-3 `}
         >
-          <TabList className="shadow-none w-full gap-2">
-            {routers[tabIndex]?.children.map((res, i) => (
-              <Link
-                key={i}
-                href={res.path}
-                className="w-full flex gap-5 items-center  "
-              >
-                <Tab
-                  disableIndicator
-                  className={`  w-full flex  rounded-md p-0 ${
-                    segments.includes(res.routeKey)
-                      ? "bg-slate-200 rounded-lg"
-                      : "bg-transparent"
-                  }  p-2`}
+          <div>
+            <Typography className="text-xl text-gray-700 p-2 mt-3">
+              {routers[tabIndex]?.title}
+            </Typography>
+            <Divider />
+          </div>
+          <Tabs
+            aria-label="Vertical tabs"
+            className="shadow-none rounded-none w-full bg-transparent"
+            orientation="vertical"
+          >
+            <TabList className="shadow-none w-full gap-2 rounded-none">
+              {routers[tabIndex]?.children.map((res, i) => (
+                <Link
+                  key={i}
+                  href={res.path}
+                  className="w-full flex gap-5 items-center  "
                 >
-                  {/* {<res.icon />} */}
-                  {res.title}
-                </Tab>{" "}
-              </Link>
-            ))}
-          </TabList>
-        </Tabs>
-      </div>
+                  <Tab
+                    disableIndicator
+                    className={`  w-full flex  rounded-none p-0  ${
+                      segments.includes(res.routeKey)
+                        ? "bg-slate-200 rounded-lg"
+                        : "bg-transparent"
+                    }  p-2`}
+                  >
+                    {res.icon && <res.icon />}
+                    {res.title}
+                  </Tab>{" "}
+                </Link>
+              ))}
+            </TabList>
+          </Tabs>
+        </div>
+      )}
     </div>
   );
 }

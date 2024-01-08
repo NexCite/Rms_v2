@@ -16,18 +16,23 @@ import {
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Prisma } from "@prisma/client";
+import NexciteButton from "@rms/components/button/nexcite-button";
 import NexCiteButton from "@rms/components/button/nexcite-button";
-import { Button } from "@rms/components/ui/button";
 import Loading from "@rms/components/ui/loading";
 import NumericFormatCustom from "@rms/components/ui/text-field-number";
 import { useToast } from "@rms/hooks/toast-hook";
 import { createEquity, updateEquity } from "@rms/service/equity-service";
 import dayjs from "dayjs";
-import { PlusSquare, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { MdInfo, MdPrivacyTip, MdTipsAndUpdates } from "react-icons/md";
+import {
+  MdClose,
+  MdInfo,
+  MdPlusOne,
+  MdPrivacyTip,
+  MdTipsAndUpdates,
+} from "react-icons/md";
 import { z } from "zod";
 
 interface Props {
@@ -354,19 +359,17 @@ export default function EquityForm(props: Props) {
                       <div key={i}>
                         <div className="flex justify-between items-center">
                           <h1>Index: {i + 1}</h1>
-                          <Button
+                          <NexciteButton
                             onClick={() => {
                               field.onChange(
                                 field.value.filter((res, ii) => i !== ii)
                               );
                             }}
-                            size="sm"
                             className="bg-black"
-                            color="dark"
                             type="button"
                           >
-                            <X size="15" />
-                          </Button>
+                            <MdClose size="15" />
+                          </NexciteButton>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
@@ -466,10 +469,9 @@ export default function EquityForm(props: Props) {
                         marginTop: 10,
                       }}
                     >
-                      <Button
+                      <NexciteButton
                         type="button"
                         className="bg-black"
-                        color="dark"
                         onClick={() => {
                           form.setValue(
                             "coverage",
@@ -484,8 +486,8 @@ export default function EquityForm(props: Props) {
                           );
                         }}
                       >
-                        <PlusSquare />
-                      </Button>
+                        <MdPlusOne />
+                      </NexciteButton>
                     </div>
                   </>
                 );
@@ -516,19 +518,17 @@ export default function EquityForm(props: Props) {
                       <div key={i}>
                         <div className="flex justify-between items-center">
                           <h1>Index: {i + 1}</h1>
-                          <Button
+                          <NexciteButton
                             onClick={() => {
                               field.onChange(
                                 field.value.filter((res, ii) => i !== ii)
                               );
                             }}
-                            size="sm"
                             className="bg-black"
-                            color="dark"
                             type="button"
                           >
-                            <X size="15" />
-                          </Button>
+                            <MdClose size="15" />
+                          </NexciteButton>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
@@ -673,10 +673,9 @@ export default function EquityForm(props: Props) {
                         marginTop: 10,
                       }}
                     >
-                      <Button
+                      <NexciteButton
                         type="button"
                         className="bg-black"
-                        color="dark"
                         onClick={() => {
                           form.setValue(
                             "managers",
@@ -693,8 +692,8 @@ export default function EquityForm(props: Props) {
                           );
                         }}
                       >
-                        <PlusSquare />
-                      </Button>
+                        <MdPlusOne />
+                      </NexciteButton>
                     </div>
                   </>
                 );
@@ -733,19 +732,17 @@ export default function EquityForm(props: Props) {
                       <div key={i}>
                         <div className="flex justify-between items-center">
                           <h1>Index: {i + 1}</h1>
-                          <Button
+                          <NexciteButton
                             onClick={() => {
                               field.onChange(
                                 field.value.filter((res, ii) => i !== ii)
                               );
                             }}
-                            size="sm"
                             className="bg-black"
-                            color="dark"
                             type="button"
                           >
-                            <X size="15" />
-                          </Button>
+                            <MdClose size="15" />
+                          </NexciteButton>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
@@ -799,10 +796,9 @@ export default function EquityForm(props: Props) {
                         marginTop: 10,
                       }}
                     >
-                      <Button
+                      <NexciteButton
                         type="button"
                         className="bg-black"
-                        color="dark"
                         onClick={() => {
                           form.setValue(
                             "expensive",
@@ -815,8 +811,8 @@ export default function EquityForm(props: Props) {
                           );
                         }}
                       >
-                        <PlusSquare />
-                      </Button>
+                        <MdPlusOne />
+                      </NexciteButton>
                     </div>
                   </>
                 );
@@ -847,19 +843,17 @@ export default function EquityForm(props: Props) {
                       <div key={i}>
                         <div className="flex justify-between items-center">
                           <h1>Index: {i + 1}</h1>
-                          <Button
+                          <NexciteButton
                             onClick={() => {
                               field.onChange(
                                 field.value.filter((res, ii) => i !== ii)
                               );
                             }}
-                            size="sm"
                             className="bg-black"
-                            color="dark"
                             type="button"
                           >
-                            <X size="15" />
-                          </Button>
+                            <MdClose size="15" />
+                          </NexciteButton>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
@@ -914,10 +908,9 @@ export default function EquityForm(props: Props) {
                         marginTop: 10,
                       }}
                     >
-                      <Button
+                      <NexciteButton
                         type="button"
                         className="bg-black"
-                        color="dark"
                         onClick={() => {
                           form.setValue(
                             "p_l",
@@ -930,8 +923,8 @@ export default function EquityForm(props: Props) {
                           );
                         }}
                       >
-                        <PlusSquare />
-                      </Button>
+                        <MdPlusOne />
+                      </NexciteButton>
                     </div>
                   </>
                 );
@@ -961,19 +954,17 @@ export default function EquityForm(props: Props) {
                       <div key={i}>
                         <div className="flex justify-between items-center">
                           <h1>Index: {i + 1}</h1>
-                          <Button
+                          <NexciteButton
                             onClick={() => {
                               field.onChange(
                                 field.value.filter((res, ii) => i !== ii)
                               );
                             }}
-                            size="sm"
                             className="bg-black"
-                            color="dark"
                             type="button"
                           >
-                            <X size="15" />
-                          </Button>
+                            <MdClose size="15" />
+                          </NexciteButton>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
@@ -1027,10 +1018,9 @@ export default function EquityForm(props: Props) {
                         marginTop: 10,
                       }}
                     >
-                      <Button
+                      <NexciteButton
                         type="button"
                         className="bg-black"
-                        color="dark"
                         onClick={() => {
                           form.setValue(
                             "agents",
@@ -1043,8 +1033,8 @@ export default function EquityForm(props: Props) {
                           );
                         }}
                       >
-                        <PlusSquare />
-                      </Button>
+                        <MdPlusOne />
+                      </NexciteButton>
                     </div>
                   </>
                 );
@@ -1075,19 +1065,17 @@ export default function EquityForm(props: Props) {
                       <div key={i}>
                         <div className="flex justify-between items-center">
                           <h1>Index: {i + 1}</h1>
-                          <Button
+                          <NexciteButton
                             onClick={() => {
                               field.onChange(
                                 field.value.filter((res, ii) => i !== ii)
                               );
                             }}
-                            size="sm"
                             className="bg-black"
-                            color="dark"
                             type="button"
                           >
-                            <X size="15" />
-                          </Button>
+                            <MdClose size="15" />
+                          </NexciteButton>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
@@ -1141,10 +1129,9 @@ export default function EquityForm(props: Props) {
                         marginTop: 10,
                       }}
                     >
-                      <Button
+                      <NexciteButton
                         type="button"
                         className="bg-black"
-                        color="dark"
                         onClick={() => {
                           form.setValue(
                             "adjustment",
@@ -1157,8 +1144,8 @@ export default function EquityForm(props: Props) {
                           );
                         }}
                       >
-                        <PlusSquare />
-                      </Button>
+                        <MdPlusOne />
+                      </NexciteButton>
                     </div>
                   </>
                 );
@@ -1189,19 +1176,17 @@ export default function EquityForm(props: Props) {
                       <div key={i}>
                         <div className="flex justify-between items-center">
                           <h1>Index: {i + 1}</h1>
-                          <Button
+                          <NexciteButton
                             onClick={() => {
                               field.onChange(
                                 field.value.filter((res, ii) => i !== ii)
                               );
                             }}
-                            size="sm"
                             className="bg-black"
-                            color="dark"
                             type="button"
                           >
-                            <X size="15" />
-                          </Button>
+                            <MdClose size="15" />
+                          </NexciteButton>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
@@ -1255,10 +1240,9 @@ export default function EquityForm(props: Props) {
                         marginTop: 10,
                       }}
                     >
-                      <Button
+                      <NexciteButton
                         type="button"
                         className="bg-black"
-                        color="dark"
                         onClick={() => {
                           form.setValue(
                             "credit",
@@ -1271,8 +1255,8 @@ export default function EquityForm(props: Props) {
                           );
                         }}
                       >
-                        <PlusSquare />
-                      </Button>
+                        <MdPlusOne />
+                      </NexciteButton>
                     </div>
                   </>
                 );

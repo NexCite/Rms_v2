@@ -15,16 +15,9 @@ export default async function page(props: {
       username: true;
       first_name: true;
       last_name: true;
-      email: true;
-      country: true;
-      address1: true;
       role_id: true;
 
       role: true;
-      phone_number: true;
-      address2: true;
-      gender: true;
-      permissions: true;
       id: true;
     };
   }>;
@@ -42,15 +35,11 @@ export default async function page(props: {
         username: true,
         first_name: true,
         last_name: true,
-        email: true,
-        country: true,
+
         role: true,
-        address1: true,
-        address2: true,
+
         role_id: true,
-        phone_number: true,
-        gender: true,
-        permissions: true,
+
         id: true,
       },
     });

@@ -69,9 +69,7 @@ export async function initConfig(props: {
           {
             username: props.config.username,
           },
-          {
-            email: props.config.email,
-          },
+          {},
         ],
       },
     });
@@ -80,9 +78,9 @@ export async function initConfig(props: {
         throw new Error("Username already used!");
       }
 
-      if (user.email === props.config.email) {
-        throw new Error("Email already used!");
-      }
+      // if (user.email === props.config.email) {
+      //   throw new Error("Email already used!");
+      // }
     }
     const result = await prisma.config.create({
       data: {
@@ -105,13 +103,13 @@ export async function initConfig(props: {
               create: {
                 first_name: props.config.first_name,
                 last_name: props.config.last_name,
-                gender: "Male",
-                phone_number: props.config.phone_number,
+                // gender: "Male",
+                // phone_number: props.config.phone_number,
                 username: props.config.username,
                 password: props.config.password,
-                country: "Lebanon",
+                // country: "Lebanon",
                 type: "Admin",
-                email: props.config.email,
+                // email: props.config.email,
                 path: CommonRouteKeys,
                 status: "Enable",
               },

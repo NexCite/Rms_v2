@@ -1,5 +1,5 @@
 "use client";
-import { UserFullInfoType } from "@rms/service/user-service";
+import { UserAuth, UserFullInfoType } from "@rms/service/user-service";
 import React, { useMemo } from "react";
 import Authorized from "../ui/authorized";
 import Link from "next/link";
@@ -9,7 +9,7 @@ import NexCiteButton from "../button/nexcite-button";
 import Typography from "@mui/joy/Typography";
 import BackButton from "../ui/back-button";
 
-export default function AppBarDesktop(props: UserFullInfoType) {
+export default function AppBarDesktop(props: UserAuth) {
   const path = usePathname();
   const segments = useSelectedLayoutSegments();
   const routers = useMemo(
@@ -18,22 +18,22 @@ export default function AppBarDesktop(props: UserFullInfoType) {
         res.children = res.children.filter((res) => !res.hide);
         return res;
       }),
-    props.routes
+    [props.routes]
   );
   const currentRoute = useMemo(
     () =>
       routers
         .find((res) => segments.includes(res.routeKey))
         ?.children.find((res) => segments.includes(res.routeKey)),
-    [segments]
+    [routers, segments]
   );
 
   return (
-    <div className="w-full border p-5 flex justify-between  items-center sticky top-0 z-10 bg-white">
+    <div className="w-full border p-3 flex justify-between  items-center sticky top-0 z-10 bg-white">
       <div className="flex items-center gap-1">
         {segments.length > 2 && <BackButton />}
 
-        <Typography fontSize={25}>{currentRoute?.title}</Typography>
+        <Typography fontSize={22}>{currentRoute?.title}</Typography>
       </div>
       {!segments.includes("form") && (
         <Authorized permission={currentRoute?.addKey}>

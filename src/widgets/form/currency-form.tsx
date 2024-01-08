@@ -3,13 +3,21 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Prisma } from "@prisma/client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { useCallback, useMemo, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Card, CardContent, CardHeader, TextField } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  FormControl,
+  FormHelperText,
+  FormLabel,
+  Input,
+  Typography,
+} from "@mui/joy";
 import NexCiteButton from "@rms/components/button/nexcite-button";
 import NumericFormatCustom from "@rms/components/ui/text-field-number";
 import { useToast } from "@rms/hooks/toast-hook";
@@ -17,7 +25,7 @@ import { createCurrency, updateCurrency } from "@rms/service/currency-service";
 type Props = { value: Prisma.CurrencyGetPayload<{}> };
 export default function CurrencyForm(props: Props) {
   const [isPadding, setTransition] = useTransition();
-  const { back } = useRouter();
+  const { back, replace } = useRouter();
   const formSchema = useMemo(() => {
     return z.object({
       name: z
@@ -28,24 +36,19 @@ export default function CurrencyForm(props: Props) {
         .min(1, { message: "Symbol must be at least 1  character" }),
       rate: z
         .number()
+        .min(0.01)
 
         .or(
           z
             .string()
 
             .regex(/^\d+(\.\d{2})?$/)
-            .nullable()
-            .optional()
 
             .transform(Number)
-            .nullable()
-            .optional()
-        )
-        .or(z.string())
-        .nullable()
-        .optional(),
+        ),
     });
   }, []);
+  const pathName = usePathname();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -61,20 +64,23 @@ export default function CurrencyForm(props: Props) {
             if (Number.isNaN(parseFloat(values.rate + ""))) {
               values.rate = null;
             }
-            const result = await updateCurrency(props.value.id, values as any);
-            toast.OpenAlert(result);
-            if (result.status === 200) back();
-            Object.keys(result.errors ?? []).map((e) => {
-              form.setError(e as any, result[e]);
+            updateCurrency(props.value.id, values as any).then((res) => {
+              res?.error?.map((res) => {
+                form.setError(res as any, { message: "already exists" });
+              });
+
+              toast.OpenAlert(res);
             });
           });
         } else {
           setTransition(async () => {
-            const result = await createCurrency(values as any);
-            toast.OpenAlert(result);
-            if (result.status === 200) back();
-            Object.keys(result.errors ?? []).map((e) => {
-              form.setError(e as any, result[e]);
+            await createCurrency(values as any).then((res) => {
+              res?.error?.map((res) => {
+                form.setError(res as any, { message: "already exists" });
+              });
+
+              toast.OpenAlert(res);
+              replace(pathName + "?id=" + res.result.id);
             });
           });
         }
@@ -90,24 +96,27 @@ export default function CurrencyForm(props: Props) {
         noValidate
       >
         <Card variant="outlined">
-          <CardHeader title="Currency Form" />
           <CardContent className="flex flex-col gap-5">
+            <Typography>Currency Form</Typography>
             <Controller
               name="name"
               control={form.control}
               render={({ field, fieldState }) => {
                 return (
-                  <TextField
-                    size="small"
-                    label="Name"
-                    placeholder="name"
-                    required
-                    fullWidth
-                    error={Boolean(fieldState.error)}
-                    helperText={fieldState.error?.message}
-                    {...field}
-                    InputLabelProps={{ shrink: true }}
-                  />
+                  <FormControl error={Boolean(fieldState.error)}>
+                    <FormLabel required>Name</FormLabel>
+                    <Input
+                      placeholder="name"
+                      value={field.value}
+                      onChange={(event) => {
+                        field.onChange(event.target.value);
+                      }}
+                    />
+                    <FormHelperText>
+                      {" "}
+                      {fieldState.error?.message}
+                    </FormHelperText>
+                  </FormControl>
                 );
               }}
             />
@@ -117,17 +126,20 @@ export default function CurrencyForm(props: Props) {
               control={form.control}
               render={({ field, fieldState }) => {
                 return (
-                  <TextField
-                    size="small"
-                    label="Symbol"
-                    placeholder="symbol"
-                    required
-                    fullWidth
-                    error={Boolean(fieldState.error)}
-                    helperText={fieldState.error?.message}
-                    {...field}
-                    InputLabelProps={{ shrink: true }}
-                  />
+                  <FormControl error={Boolean(fieldState.error)}>
+                    <FormLabel required>Symbol</FormLabel>
+                    <Input
+                      placeholder="symbol"
+                      value={field.value}
+                      onChange={(event) => {
+                        field.onChange(event.target.value);
+                      }}
+                    />
+                    <FormHelperText>
+                      {" "}
+                      {fieldState.error?.message}
+                    </FormHelperText>
+                  </FormControl>
                 );
               }}
             />
@@ -136,23 +148,29 @@ export default function CurrencyForm(props: Props) {
               control={form.control}
               render={({ field, fieldState }) => {
                 return (
-                  <>
-                    {" "}
-                    <TextField
-                      size="small"
-                      label="Rate"
-                      placeholder="rate"
+                  <FormControl required error={Boolean(fieldState.error)}>
+                    <FormLabel required>Rate</FormLabel>
+                    <Input
                       value={field.value}
-                      InputProps={{
-                        inputComponent: NumericFormatCustom as any,
+                      onChange={({ target: { value } }) => {
+                        if (Number.isNaN(value)) {
+                          field.onChange(0);
+                        } else {
+                          field.onChange(parseFloat(value));
+                        }
                       }}
-                      fullWidth
-                      error={Boolean(fieldState.error)}
-                      helperText={` ${fieldState.error?.message ?? ""}`}
-                      {...field}
-                      InputLabelProps={{ shrink: true }}
-                    />
-                  </>
+                      placeholder="amount"
+                      slotProps={{
+                        input: {
+                          component: NumericFormatCustom,
+                        },
+                      }}
+                    />{" "}
+                    <FormHelperText>
+                      {" "}
+                      {fieldState.error?.message}
+                    </FormHelperText>
+                  </FormControl>
                 );
               }}
             />

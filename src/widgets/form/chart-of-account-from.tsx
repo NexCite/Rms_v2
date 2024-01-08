@@ -1,5 +1,4 @@
 "use client";
-import {} from "@mantine/form";
 import { $Enums, Prisma } from "@prisma/client";
 import Countries from "@rms/lib/country";
 
@@ -124,14 +123,14 @@ export default function ChartOfAccountForm(props: Props) {
     if (watch.id?.length < 3 && watch.parent_id) {
       form.setValue("parent_id", null);
     }
-  }, [watch.id, form.setValue]);
+  }, [watch.id, form.setValue, watch.parent_id, form]);
   const parentOptions = useMemo(
     () =>
       props.parents.map((res) => ({
         label: `${res.id} ${res.name}`,
         value: res.id,
       })),
-    [props.chart_of_account]
+    [props.parents]
   );
   const parentValue = useMemo(() => {
     const value = parentOptions.find((e) => watch.parent_id === e.value);
@@ -174,6 +173,7 @@ export default function ChartOfAccountForm(props: Props) {
               });
 
               toast.OpenAlert(res);
+              replace(pathName + "?id=" + res.result.id);
             });
           });
         } else {
@@ -192,7 +192,7 @@ export default function ChartOfAccountForm(props: Props) {
         }
       });
     },
-    [form, toast.OpenAlert, props.chart_of_account]
+    [form, props.chart_of_account, toast, replace, pathName]
   );
 
   return (

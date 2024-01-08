@@ -1,12 +1,9 @@
 import route from "@rms/assets/route";
 import AppBarDesktop from "@rms/components/layout/app-bar-desktop";
-import LayoutV2 from "@rms/components/layout/layout";
 import SideBarDesktop from "@rms/components/layout/side-bar-desktop";
-import Authorized from "@rms/components/ui/authorized";
-import getUserFullInfo from "@rms/service/user-service";
+import getUserFullInfo, { userAuth } from "@rms/service/user-service";
 import { Metadata } from "next";
 import { headers } from "next/headers";
-import { Next13ProgressBar } from "next13-progressbar";
 
 import React from "react";
 
@@ -26,14 +23,15 @@ export default async function layout(props: { children: React.ReactNode }) {
   const url = new URL(headers().get("url"));
   const segments = url.pathname.split("/").filter((res) => res !== "");
   const currentRoute = route.find((res) => segments.includes(res.routeKey));
+  const user = await userAuth();
 
   return (
     <div>
       <div className="h-screen w-screen flex gap-0 static">
-        <SideBarDesktop {...info} path={url.pathname} />
+        <SideBarDesktop {...user} path={url.pathname} />
         <div className="overflow-auto w-full max-h-full flex gap-5 flex-col">
-          <AppBarDesktop {...info} />
-          <div className="p-5">{props.children}</div>
+          <AppBarDesktop {...user} />
+          <div className="p-5 ">{props.children}</div>
         </div>
       </div>
     </div>

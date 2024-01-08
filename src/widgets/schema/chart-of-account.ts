@@ -67,6 +67,8 @@ const ChartOfAccountInputSchema = z.object({
 type ChartOfAccountInputSchema = z.infer<typeof ChartOfAccountInputSchema>;
 const ChartOfAccountSearchSchema = z.object({
   from: z.date(),
+  accountId: z.string().optional().nullable(),
+  classLevel: z.string().array().optional().nullable(),
   include_reffrence: z.boolean().optional().nullable(),
   id: z.string().optional().nullable(),
   to: z.date(),

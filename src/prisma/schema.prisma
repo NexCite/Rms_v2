@@ -54,22 +54,16 @@ model Config {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  first_name   String
-  last_name    String
-  password     String   @default("")
-  phone_number String
-  gender       Gender
-  address1     String   @default("")
-  address2     String   @default("")
-  country      String   @default("")
-  email        String   @default("")
-  status       Status   @default(Enable)
-  username     String
-  path         String[]
-  auth         Auth[]
-  brokers      Broker[]
-  traders      Trader[]
+  id         Int      @id @default(autoincrement())
+  first_name String
+  last_name  String
+  password   String   @default("")
+  status     Status   @default(Enable)
+  username   String
+  path       String[]
+  auth       Auth[]
+  brokers    Broker[]
+  traders    Trader[]
 
   invoices Invoice[]
   logs     Log[]
@@ -96,7 +90,7 @@ model User {
   levels               ChartOfAccount[]
   vouchers             Voucher[]
 
-  @@unique([id, username, config_id, phone_number], name: "unique_combination")
+  @@unique([username, config_id], name: "unique_combination")
 }
 
 model Employee {
@@ -328,7 +322,8 @@ model Currency {
   vouchers              Voucher[]
   voucher_items         VoucherItem[]
 
-  @@unique([id, config_id, name, symbol], name: "unique_combination")
+  @@unique([config_id, name], name: "unique_combination")
+  @@unique([config_id, symbol], name: "unique_symbol")
 }
 
 model Category {

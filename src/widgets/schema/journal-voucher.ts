@@ -151,6 +151,8 @@ const VoucherSearchSchema = z.object({
   currencies: z
     .object({ id: z.number(), name: z.string(), symbol: z.string() })
     .array(),
+  pageIndex: z.number().optional().nullable(),
+  pageSize: z.number().optional().nullable(),
   from: z.date().optional().nullable(),
   to: z.date().optional().nullable(),
   include_reffrence: z.boolean().optional().nullable(),
