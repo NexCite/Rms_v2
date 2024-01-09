@@ -31,6 +31,7 @@ import Tabs from "@mui/joy/Tabs";
 import TabList from "@mui/joy/TabList";
 import Tab from "@mui/joy/Tab";
 import TabPanel from "@mui/joy/TabPanel";
+import { Card, CardContent } from "@mui/joy";
 type Props = {
   canEdit?: boolean;
   currencies: Prisma.CurrencyGetPayload<{}>[];
@@ -196,344 +197,382 @@ export default function ChartOfAccountForm(props: Props) {
   );
 
   return (
-    <form
-      onSubmit={form.handleSubmit(onSubmit)}
-      noValidate
-      //   onClick={(e) => selectLevelFocus(false)}
-    >
-      <Tabs sx={{ width: "100%" }}>
-        <TabList>
-          <Tab>Accounting</Tab>
-          <Tab>Account</Tab>
-          <Tab>Address</Tab>
-        </TabList>
-        <TabPanel value={0}>
-          <Controller
-            name="id"
-            control={form.control}
-            render={({ field, fieldState, formState }) => (
-              <FormControl error={Boolean(fieldState.error)}>
-                <FormLabel required>ID</FormLabel>
-                <Input
-                  placeholder="id"
-                  value={field.value}
-                  onChange={(event) => {
-                    const inputValue = event.target.value.replace(/\D/g, "");
+    <Card>
+      <CardContent>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          noValidate
+          //   onClick={(e) => selectLevelFocus(false)}
+        >
+          <Tabs sx={{ width: "100%" }}>
+            <TabList>
+              <Tab>Accounting</Tab>
+              <Tab>Account</Tab>
+              <Tab>Address</Tab>
+            </TabList>
+            <TabPanel value={0}>
+              <Controller
+                name="id"
+                control={form.control}
+                render={({ field, fieldState, formState }) => (
+                  <FormControl error={Boolean(fieldState.error)}>
+                    <FormLabel required>ID</FormLabel>
+                    <Input
+                      placeholder="id"
+                      value={field.value}
+                      onChange={(event) => {
+                        const inputValue = event.target.value.replace(
+                          /\D/g,
+                          ""
+                        );
 
-                    field.onChange(inputValue);
-                  }}
+                        field.onChange(inputValue);
+                      }}
+                    />
+                    <FormHelperText>
+                      {" "}
+                      {fieldState.error?.message}
+                    </FormHelperText>
+                  </FormControl>
+                )}
+              />
+              {watch.id?.length > 2 && (
+                <Controller
+                  name="parent_id"
+                  control={form.control}
+                  render={({ field, fieldState, formState }) => (
+                    <FormControl error={Boolean(fieldState.error)}>
+                      <FormLabel required>Parent</FormLabel>
+                      <Autocomplete
+                        disabled={!props.canEdit}
+                        options={parentOptions}
+                        multiple={false}
+                        onChange={(e, newVale) => {
+                          if (typeof newVale === "object") {
+                            field.onChange(newVale?.value);
+                          }
+                        }}
+                        handleHomeEndKeys
+                        isOptionEqualToValue={(e) =>
+                          e.value === parentValue.value
+                        }
+                        value={parentValue}
+                      ></Autocomplete>
+                      <FormHelperText>
+                        {fieldState.error?.message}
+                      </FormHelperText>
+                    </FormControl>
+                  )}
                 />
-                <FormHelperText> {fieldState.error?.message}</FormHelperText>
-              </FormControl>
-            )}
-          />
-          {watch.id?.length > 2 && (
-            <Controller
-              name="parent_id"
-              control={form.control}
-              render={({ field, fieldState, formState }) => (
-                <FormControl error={Boolean(fieldState.error)}>
-                  <FormLabel required>Parent</FormLabel>
-                  <Autocomplete
-                    disabled={!props.canEdit}
-                    options={parentOptions}
-                    multiple={false}
-                    onChange={(e, newVale) => {
-                      if (typeof newVale === "object") {
-                        field.onChange(newVale?.value);
-                      }
-                    }}
-                    handleHomeEndKeys
-                    isOptionEqualToValue={(e) => e.value === parentValue.value}
-                    value={parentValue}
-                  ></Autocomplete>
-                  <FormHelperText>{fieldState.error?.message}</FormHelperText>
-                </FormControl>
               )}
-            />
-          )}
-          <Controller
-            name="name"
-            control={form.control}
-            render={({ field, fieldState, formState }) => (
-              <FormControl error={Boolean(fieldState.error)}>
-                <FormLabel required>Name</FormLabel>
-                <Input
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder={field.name.replaceAll("_", " ")}
-                />
-                <FormHelperText>{fieldState.error?.message}</FormHelperText>
-              </FormControl>
-            )}
-          />
-          <Controller
-            name="chart_of_account_type"
-            control={form.control}
-            render={({ field, fieldState, formState }) => (
-              <FormControl error={Boolean(fieldState.error)}>
-                <FormLabel required>Chart Of Account Type</FormLabel>
+              <Controller
+                name="name"
+                control={form.control}
+                render={({ field, fieldState, formState }) => (
+                  <FormControl error={Boolean(fieldState.error)}>
+                    <FormLabel required>Name</FormLabel>
+                    <Input
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder={field.name.replaceAll("_", " ")}
+                    />
+                    <FormHelperText>{fieldState.error?.message}</FormHelperText>
+                  </FormControl>
+                )}
+              />
+              <Controller
+                name="chart_of_account_type"
+                control={form.control}
+                render={({ field, fieldState, formState }) => (
+                  <FormControl error={Boolean(fieldState.error)}>
+                    <FormLabel required>Chart Of Account Type</FormLabel>
 
-                <Select
-                  value={field.value}
-                  onChange={(e, newValue) => {
-                    field.onChange(newValue);
-                  }}
-                >
-                  <Option value={null}>
-                    <em>None</em>
-                  </Option>
-                  {Object.keys($Enums.ChartOfAccountType).map((res) => (
-                    <Option key={res} value={res}>
-                      {res.replaceAll("_", " ")}
-                    </Option>
-                  ))}
-                </Select>
-                <FormHelperText>{fieldState.error?.message}</FormHelperText>
-              </FormControl>
-            )}
-          />
-          <Controller
-            name="debit_credit"
-            control={form.control}
-            render={({ field, fieldState, formState }) => (
-              <FormControl error={Boolean(fieldState.error)}>
-                <FormLabel required>D/C</FormLabel>
-
-                <Select
-                  value={field.value}
-                  onChange={(e, newValue) => {
-                    field.onChange(newValue);
-                  }}
-                >
-                  <Option value={null}>
-                    <em>None</em>
-                  </Option>
-                  {Object.keys($Enums.DebitCreditType).map((res) => (
-                    <Option key={res} value={res}>
-                      {res.replaceAll("_", " ")}
-                    </Option>
-                  ))}
-                </Select>
-                <FormHelperText>{fieldState.error?.message}</FormHelperText>
-              </FormControl>
-            )}
-          />
-          <Controller
-            name="currency_id"
-            control={form.control}
-            render={({ field, fieldState, formState }) => (
-              <FormControl error={Boolean(fieldState.error)}>
-                <FormLabel>Currency</FormLabel>
-
-                <Select
-                  value={field.value}
-                  onChange={(e, newValue) => {
-                    field.onChange(newValue);
-                  }}
-                >
-                  <Option value={null}>
-                    <em>None</em>
-                  </Option>
-                  {props.currencies.map((res) => (
-                    <Option key={res.id} value={res.id}>
-                      {res.name} {res.symbol}
-                    </Option>
-                  ))}
-                </Select>
-                <FormHelperText>{fieldState.error?.message}</FormHelperText>
-              </FormControl>
-            )}
-          />
-        </TabPanel>
-        <TabPanel value={1}>
-          <div className="flex gap-3 flex-col mt-5 ">
-            <Controller
-              name="first_name"
-              control={form.control}
-              render={({ field, fieldState, formState }) => (
-                <FormControl error={Boolean(fieldState.error)}>
-                  <FormLabel>First Name</FormLabel>
-                  <Input
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder={"first name"}
-                  />
-                  <FormHelperText>{fieldState.error?.message}</FormHelperText>
-                </FormControl>
-              )}
-            />
-            <Controller
-              name="last_name"
-              control={form.control}
-              render={({ field, fieldState, formState }) => (
-                <FormControl error={Boolean(fieldState.error)}>
-                  <FormLabel>Last Name</FormLabel>
-                  <Input
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder={"last name"}
-                  />
-                  <FormHelperText>{fieldState.error?.message}</FormHelperText>
-                </FormControl>
-              )}
-            />
-            <Controller
-              name="email"
-              control={form.control}
-              render={({ field, fieldState, formState }) => (
-                <FormControl error={Boolean(fieldState.error)}>
-                  <FormLabel>Email</FormLabel>
-                  <Input
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder={"email"}
-                  />
-                  <FormHelperText>{fieldState.error?.message}</FormHelperText>
-                </FormControl>
-              )}
-            />
-            <Controller
-              name="phone_number"
-              control={form.control}
-              render={({ field, fieldState, formState }) => (
-                <FormControl error={Boolean(fieldState.error)}>
-                  <FormLabel>Phone Number</FormLabel>
-                  <Input
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder={"phone number"}
-                  />
-                  <FormHelperText>{fieldState.error?.message}</FormHelperText>
-                </FormControl>
-              )}
-            />
-
-            <Controller
-              name="account_type"
-              control={form.control}
-              render={({ field, fieldState, formState }) => (
-                <FormControl error={Boolean(fieldState.error)}>
-                  <FormLabel>Account Type</FormLabel>
-
-                  <Select
-                    value={field.value}
-                    onChange={(e, newValue) => {
-                      field.onChange(newValue);
-                    }}
-                  >
-                    <Option value={null}>
-                      <em>None</em>
-                    </Option>
-                    {Object.keys($Enums.AccountType).map((res) => (
-                      <Option key={res} value={res}>
-                        {res.replaceAll("_", " ")}
+                    <Select
+                      value={field.value}
+                      onChange={(e, newValue) => {
+                        field.onChange(newValue);
+                      }}
+                    >
+                      <Option value={null}>
+                        <em>None</em>
                       </Option>
-                    ))}
-                  </Select>
-                  <FormHelperText>{fieldState.error?.message}</FormHelperText>
-                </FormControl>
-              )}
-            />
-            <Controller
-              name="business_id"
-              control={form.control}
-              render={({ field, fieldState, formState }) => (
-                <FormControl error={Boolean(fieldState.error)}>
-                  <FormLabel>Business ID</FormLabel>
-                  <Input
-                    placeholder="business id"
-                    value={field.value}
-                    onChange={(event) => {
-                      const inputValue = event.target.value.replace(/\D/g, "");
+                      {Object.keys($Enums.ChartOfAccountType).map((res) => (
+                        <Option key={res} value={res}>
+                          {res.replaceAll("_", " ")}
+                        </Option>
+                      ))}
+                    </Select>
+                    <FormHelperText>{fieldState.error?.message}</FormHelperText>
+                  </FormControl>
+                )}
+              />
+              <Controller
+                name="debit_credit"
+                control={form.control}
+                render={({ field, fieldState, formState }) => (
+                  <FormControl error={Boolean(fieldState.error)}>
+                    <FormLabel required>D/C</FormLabel>
 
-                      field.onChange(inputValue);
-                    }}
-                  />
-                  <FormHelperText> {fieldState.error?.message}</FormHelperText>
-                </FormControl>
-              )}
-            />
-            <Controller
-              name="limit_amount"
-              control={form.control}
-              render={({ field, fieldState, formState }) => (
-                <FormControl error={Boolean(fieldState.error)}>
-                  <FormLabel>Limit Amount</FormLabel>
-                  <Input
-                    placeholder="limit amount"
-                    value={field.value}
-                    slotProps={{
-                      input: {
-                        component: NumericFormatCustom,
-                      },
-                    }}
-                    onChange={(event) => {
-                      const inputValue = event.target.value.replace(/\D/g, "");
+                    <Select
+                      value={field.value}
+                      onChange={(e, newValue) => {
+                        field.onChange(newValue);
+                      }}
+                    >
+                      <Option value={null}>
+                        <em>None</em>
+                      </Option>
+                      {Object.keys($Enums.DebitCreditType).map((res) => (
+                        <Option key={res} value={res}>
+                          {res.replaceAll("_", " ")}
+                        </Option>
+                      ))}
+                    </Select>
+                    <FormHelperText>{fieldState.error?.message}</FormHelperText>
+                  </FormControl>
+                )}
+              />
+              <Controller
+                name="currency_id"
+                control={form.control}
+                render={({ field, fieldState, formState }) => (
+                  <FormControl error={Boolean(fieldState.error)}>
+                    <FormLabel>Currency</FormLabel>
 
-                      field.onChange(inputValue);
-                    }}
-                  />
-                  <FormHelperText> {fieldState.error?.message}</FormHelperText>
-                </FormControl>
-              )}
-            />
-          </div>
-        </TabPanel>
-        <TabPanel value={2}>
-          <div className="flex gap-3 flex-col mt-5 ">
-            <Controller
-              name="country"
-              control={form.control}
-              render={({ field, fieldState, formState }) => (
-                <FormControl>
-                  <Controller
-                    name="country"
-                    control={form.control}
-                    render={({ field, fieldState, formState }) => (
-                      <FormControl error={Boolean(fieldState.error)}>
-                        <FormLabel>Country</FormLabel>
-                        <Autocomplete
-                          isOptionEqualToValue={(e) => e === field.value}
-                          placeholder="country"
-                          options={Countries}
-                          multiple={false}
-                          onChange={(e, newVale) => {
-                            field.onChange(newVale);
-                          }}
-                          value={field.value}
-                        ></Autocomplete>
-                        <FormHelperText>
-                          {fieldState.error?.message}
-                        </FormHelperText>
-                      </FormControl>
-                    )}
-                  />
-                </FormControl>
-              )}
-            />
-            <Controller
-              name="address"
-              control={form.control}
-              render={({ field, fieldState, formState }) => (
-                <FormControl error={Boolean(fieldState.error)}>
-                  <FormLabel>Address</FormLabel>
-                  <Input
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder={"address"}
-                  />
-                  <FormHelperText>{fieldState.error?.message}</FormHelperText>
-                </FormControl>
-              )}
-            />
-          </div>
-        </TabPanel>
+                    <Select
+                      value={field.value}
+                      onChange={(e, newValue) => {
+                        field.onChange(newValue);
+                      }}
+                    >
+                      <Option value={null}>
+                        <em>None</em>
+                      </Option>
+                      {props.currencies.map((res) => (
+                        <Option key={res.id} value={res.id}>
+                          {res.name} {res.symbol}
+                        </Option>
+                      ))}
+                    </Select>
+                    <FormHelperText>{fieldState.error?.message}</FormHelperText>
+                  </FormControl>
+                )}
+              />
+            </TabPanel>
+            <TabPanel value={1}>
+              <div className="flex gap-3 flex-col mt-5 ">
+                <Controller
+                  name="first_name"
+                  control={form.control}
+                  render={({ field, fieldState, formState }) => (
+                    <FormControl error={Boolean(fieldState.error)}>
+                      <FormLabel>First Name</FormLabel>
+                      <Input
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder={"first name"}
+                      />
+                      <FormHelperText>
+                        {fieldState.error?.message}
+                      </FormHelperText>
+                    </FormControl>
+                  )}
+                />
+                <Controller
+                  name="last_name"
+                  control={form.control}
+                  render={({ field, fieldState, formState }) => (
+                    <FormControl error={Boolean(fieldState.error)}>
+                      <FormLabel>Last Name</FormLabel>
+                      <Input
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder={"last name"}
+                      />
+                      <FormHelperText>
+                        {fieldState.error?.message}
+                      </FormHelperText>
+                    </FormControl>
+                  )}
+                />
+                <Controller
+                  name="email"
+                  control={form.control}
+                  render={({ field, fieldState, formState }) => (
+                    <FormControl error={Boolean(fieldState.error)}>
+                      <FormLabel>Email</FormLabel>
+                      <Input
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder={"email"}
+                      />
+                      <FormHelperText>
+                        {fieldState.error?.message}
+                      </FormHelperText>
+                    </FormControl>
+                  )}
+                />
+                <Controller
+                  name="phone_number"
+                  control={form.control}
+                  render={({ field, fieldState, formState }) => (
+                    <FormControl error={Boolean(fieldState.error)}>
+                      <FormLabel>Phone Number</FormLabel>
+                      <Input
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder={"phone number"}
+                      />
+                      <FormHelperText>
+                        {fieldState.error?.message}
+                      </FormHelperText>
+                    </FormControl>
+                  )}
+                />
 
-        <NexCiteButton type="submit" isPadding={isPadding}>
-          Save
-        </NexCiteButton>
-      </Tabs>
-    </form>
+                <Controller
+                  name="account_type"
+                  control={form.control}
+                  render={({ field, fieldState, formState }) => (
+                    <FormControl error={Boolean(fieldState.error)}>
+                      <FormLabel>Account Type</FormLabel>
+
+                      <Select
+                        value={field.value}
+                        onChange={(e, newValue) => {
+                          field.onChange(newValue);
+                        }}
+                      >
+                        <Option value={null}>
+                          <em>None</em>
+                        </Option>
+                        {Object.keys($Enums.AccountType).map((res) => (
+                          <Option key={res} value={res}>
+                            {res.replaceAll("_", " ")}
+                          </Option>
+                        ))}
+                      </Select>
+                      <FormHelperText>
+                        {fieldState.error?.message}
+                      </FormHelperText>
+                    </FormControl>
+                  )}
+                />
+                <Controller
+                  name="business_id"
+                  control={form.control}
+                  render={({ field, fieldState, formState }) => (
+                    <FormControl error={Boolean(fieldState.error)}>
+                      <FormLabel>Business ID</FormLabel>
+                      <Input
+                        placeholder="business id"
+                        value={field.value}
+                        onChange={(event) => {
+                          const inputValue = event.target.value.replace(
+                            /\D/g,
+                            ""
+                          );
+
+                          field.onChange(inputValue);
+                        }}
+                      />
+                      <FormHelperText>
+                        {" "}
+                        {fieldState.error?.message}
+                      </FormHelperText>
+                    </FormControl>
+                  )}
+                />
+                <Controller
+                  name="limit_amount"
+                  control={form.control}
+                  render={({ field, fieldState, formState }) => (
+                    <FormControl error={Boolean(fieldState.error)}>
+                      <FormLabel>Limit Amount</FormLabel>
+                      <Input
+                        placeholder="limit amount"
+                        value={field.value}
+                        slotProps={{
+                          input: {
+                            component: NumericFormatCustom,
+                          },
+                        }}
+                        onChange={(event) => {
+                          const inputValue = event.target.value.replace(
+                            /\D/g,
+                            ""
+                          );
+
+                          field.onChange(inputValue);
+                        }}
+                      />
+                      <FormHelperText>
+                        {" "}
+                        {fieldState.error?.message}
+                      </FormHelperText>
+                    </FormControl>
+                  )}
+                />
+              </div>
+            </TabPanel>
+            <TabPanel value={2}>
+              <div className="flex gap-3 flex-col mt-5 ">
+                <Controller
+                  name="country"
+                  control={form.control}
+                  render={({ field, fieldState, formState }) => (
+                    <FormControl>
+                      <Controller
+                        name="country"
+                        control={form.control}
+                        render={({ field, fieldState, formState }) => (
+                          <FormControl error={Boolean(fieldState.error)}>
+                            <FormLabel>Country</FormLabel>
+                            <Autocomplete
+                              isOptionEqualToValue={(e) => e === field.value}
+                              placeholder="country"
+                              options={Countries}
+                              multiple={false}
+                              onChange={(e, newVale) => {
+                                field.onChange(newVale);
+                              }}
+                              value={field.value}
+                            ></Autocomplete>
+                            <FormHelperText>
+                              {fieldState.error?.message}
+                            </FormHelperText>
+                          </FormControl>
+                        )}
+                      />
+                    </FormControl>
+                  )}
+                />
+                <Controller
+                  name="address"
+                  control={form.control}
+                  render={({ field, fieldState, formState }) => (
+                    <FormControl error={Boolean(fieldState.error)}>
+                      <FormLabel>Address</FormLabel>
+                      <Input
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder={"address"}
+                      />
+                      <FormHelperText>
+                        {fieldState.error?.message}
+                      </FormHelperText>
+                    </FormControl>
+                  )}
+                />
+              </div>
+            </TabPanel>
+
+            <NexCiteButton type="submit" isPadding={isPadding}>
+              Save
+            </NexCiteButton>
+          </Tabs>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

@@ -73,6 +73,7 @@ export async function initConfig(props: {
         ],
       },
     });
+
     if (user) {
       if (user.username === props.config.username) {
         throw new Error("Username already used!");

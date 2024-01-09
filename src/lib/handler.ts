@@ -2,13 +2,12 @@
 
 import HttpStatusCode from "@rms/models/HttpStatusCode";
 
-import { $Enums, Prisma, UserType } from "@prisma/client";
-import { revalidatePath } from "next/cache";
-import { checkUserPermissions } from "./auth";
-import { redirect } from "next/navigation";
-import { headers } from "next/headers";
+import { $Enums, Prisma } from "@prisma/client";
 import { createLog } from "@rms/service/log-service";
 import { UserFullInfoType } from "@rms/service/user-service";
+import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { checkUserPermissions } from "./auth";
 
 export async function handlerServiceAction<T>(
   action: (info?: UserFullInfoType, config_id?: number) => Promise<T>,
@@ -16,12 +15,6 @@ export async function handlerServiceAction<T>(
   update?: boolean,
   body?: any
 ) {
-  const urlHeader = headers().get("url") || headers().get("next-url");
-
-  if (!urlHeader) {
-    return;
-  }
-
   if (key === "None") {
     try {
       var result = await action();
@@ -57,6 +50,11 @@ export async function handlerServiceAction<T>(
       }
     }
   } else {
+    const urlHeader = headers().get("url") || headers().get("next-url");
+
+    if (!urlHeader) {
+      return;
+    }
     const resultPermissions = await checkUserPermissions(key);
     const url = new URL(urlHeader);
 

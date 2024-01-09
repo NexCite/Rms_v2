@@ -11,7 +11,6 @@ const nextConfig = {
     cpus: 4,
     instrumentationHook: true,
     nextScriptWorkers: true,
-    swcPlugins: [["@swc-jotai/react-refresh", {}]],
   },
 };
 

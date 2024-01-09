@@ -7,18 +7,23 @@ import z from "zod";
 
 import { createLogin } from "@rms/service/login-service";
 import LoadingButton from "@mui/lab/LoadingButton";
+
+import { useToast } from "@rms/hooks/toast-hook";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
-  CardHeader,
-  TextField,
+  Divider,
+  FormControl,
+  FormHelperText,
+  FormLabel,
+  Input,
   Typography,
-} from "@mui/material";
-import { useToast } from "@rms/hooks/toast-hook";
-import { useRouter } from "next/navigation";
+} from "@mui/joy";
+import NexCiteButton from "@rms/components/button/nexcite-button";
 const formSchema = z.object({
-  username: z.string().min(4),
-  password: z.string().min(4),
+  username: z.string().min(3),
+  password: z.string().min(3),
 });
 export default function ConfigWidget() {
   const [isPadding, setTransition] = useTransition();
@@ -45,68 +50,54 @@ export default function ConfigWidget() {
   return (
     <div className="flex justify-center items-center m-7">
       <Card className="w-[350px]">
-        <CardHeader
-          title={
-            <div>
-              <Typography variant="h4">Welcome Back!</Typography>
-              <Typography variant="h6">Login</Typography>
-            </div>
-          }
-        ></CardHeader>
+        <Typography fontSize={18}>Login</Typography>
+        <Divider />
         <CardContent>
           <form
             autoComplete="off"
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-3 flex flex-col gap-5"
+            className="space-y-1 flex flex-col gap-0"
           >
             <Controller
               control={form.control}
               name="username"
               render={({ field, fieldState }) => (
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Username"
-                  placeholder="username"
-                  InputLabelProps={{ shrink: true }}
-                  {...field}
-                  error={Boolean(fieldState.error)}
-                  helperText={fieldState.error?.message}
-                />
+                <FormControl error={Boolean(fieldState.error)}>
+                  <FormLabel required>Username</FormLabel>
+                  <Input
+                    {...field}
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                  />
+                  <FormHelperText>{fieldState.error?.message}</FormHelperText>
+                </FormControl>
               )}
             />
             <Controller
               control={form.control}
               name="password"
               render={({ field, fieldState }) => (
-                <TextField
-                  label="Password"
-                  fullWidth
-                  type="password"
-                  size="small"
-                  placeholder="password"
-                  InputLabelProps={{ shrink: true }}
-                  {...field}
-                  error={Boolean(fieldState.error)}
-                  helperText={fieldState.error?.message}
-                />
+                <FormControl error={Boolean(fieldState.error)}>
+                  <FormLabel required>Password</FormLabel>
+                  <Input
+                    type="password"
+                    {...field}
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                  />
+                  <FormHelperText>{fieldState.error?.message}</FormHelperText>
+                </FormControl>
               )}
             />
-            <div className="flex justify-end">
-              <LoadingButton
-                variant="contained"
-                fullWidth
-                className={
-                  isPadding
-                    ? ""
-                    : "hover:bg-blue-gray-900   hover:text-brown-50 capitalize bg-black text-white"
-                }
-                disableElevation
+
+            <div className="">
+              <NexCiteButton
+                className="w-full"
                 type="submit"
-                loading={isPadding}
+                isPadding={isPadding}
               >
                 Login
-              </LoadingButton>
+              </NexCiteButton>
             </div>
           </form>
         </CardContent>

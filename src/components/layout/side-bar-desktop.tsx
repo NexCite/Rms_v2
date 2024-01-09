@@ -33,19 +33,17 @@ export default function SideBarDesktop(props: UserAuth & { path: string }) {
   };
   return (
     <div
-      className={`flex h-full  w-full  border bg-white`}
+      className={`flex h-full  w-full   bg-white`}
       style={{
-        maxWidth: tabIndex >= 0 ? 250 : 62,
+        maxWidth: tabIndex >= 0 ? 290 : 86,
       }}
     >
-      <Next13ProgressBar />
-
-      <div className=" w-20 border h-full">
+      <div className=" w-[120px] border h-full flex flex-col justify-start items-center">
         <Image
           src={`/api/media/${props.user.config.logo}`}
-          width={100}
-          height={100}
-          className=" rounded-full  object-cover w-full"
+          width={50}
+          height={50}
+          className=" rounded-full  object-cover  border mb-2"
           alt="logo"
         />
         <Divider />
@@ -63,10 +61,15 @@ export default function SideBarDesktop(props: UserAuth & { path: string }) {
                   key={i}
                   disableIndicator
                   className={` w-full flex items-center justify-center rounded-md p-2 ${
-                    res.index === tabIndex ? "bg-slate-200 rounded-lg" : ""
+                    res.index === tabIndex ? "bg-slate-200 rounded-md" : ""
                   }  p-3`}
                 >
-                  {<res.icon />}
+                  {
+                    <res.icon
+                      className="text-2xl"
+                      color={res.index === tabIndex ? "inherit" : "action"}
+                    />
+                  }
                 </Tab>
               ))}
             </TabList>
@@ -85,26 +88,25 @@ w-full
             <Typography className="text-xl text-gray-700 p-2 mt-3">
               {routers[tabIndex]?.title}
             </Typography>
-            <Divider />
           </div>
           <Tabs
             aria-label="Vertical tabs"
-            className="shadow-none rounded-none w-full bg-transparent"
+            className="shadow-none rounded-none w-full bg-transparent mt-0 "
             orientation="vertical"
           >
-            <TabList className="shadow-none w-full gap-2 rounded-none">
+            <TabList className="shadow-none w-full gap-2 rounded-none px-3">
               {routers[tabIndex]?.children.map((res, i) => (
                 <Link
                   key={i}
                   href={res.path}
-                  className="w-full flex gap-5 items-center  "
+                  className="w-full flex gap-5 items-center "
                 >
                   <Tab
                     disableIndicator
-                    className={`  w-full flex  rounded-none p-0  ${
+                    className={`  w-full flex   p-0  ${
                       segments.includes(res.routeKey)
-                        ? "bg-slate-200 rounded-lg"
-                        : "bg-transparent"
+                        ? "bg-slate-200 rounded-md"
+                        : "bg-transparent  hover:bg-[#e2e8f0] rounded-md"
                     }  p-2`}
                   >
                     {res.icon && <res.icon />}

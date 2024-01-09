@@ -21,7 +21,7 @@ const route: RouteModel[] = [
 
       {
         index: 1,
-        title: "Chart Of Account",
+        title: "Chart Of Accounts",
         path: "/admin/accounting/chart_of_account",
         permission: "View_Chart_Of_Accounts",
         routeKey: "chart_of_account",
@@ -62,11 +62,11 @@ const route: RouteModel[] = [
       },
       {
         index: 6,
-        title: "Balnce Sheet",
-        path: "/admin/accounting/chart_of_account",
-        permission: "View_Chart_Of_Accounts",
-        routeKey: "chart_of_account",
-        addKey: "Add_Chart_Of_Account",
+        title: "Balance Sheet",
+        path: "/admin/accounting/balance_sheet",
+        permission: "View_Balance_Sheets",
+        routeKey: "balance_sheet",
+        addKey: "" as any,
       },
 
       {

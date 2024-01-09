@@ -864,6 +864,11 @@ enum UserPermission {
   Add_Chart_Of_Account
   Edit_Chart_Of_Account
   Delete_Chart_Of_Account
+  View_Balance_Sheets
+  View_Balance_Sheet
+  Add_Balance_Sheet
+  Edit_Balance_Sheet
+  Delete_Balance_Sheet
 }
 
 enum Account_Entry_Type {

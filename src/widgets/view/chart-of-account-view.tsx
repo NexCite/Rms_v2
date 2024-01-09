@@ -43,9 +43,9 @@ export default function ChartOfAccountView(props: Props) {
           accountId: props.id,
         }
       );
-      setChartOfAccounts(chartOfAccounts.result);
-      setChartOfAccount(chartOfAccount.result.chartOfAccount);
-      setVoucher(chartOfAccount.result.voucher);
+      setChartOfAccounts(chartOfAccounts?.result);
+      setChartOfAccount(chartOfAccount?.result?.chartOfAccount);
+      setVoucher(chartOfAccount?.result?.voucher);
     });
   }, [props.id]);
   const { credit, debit } = useMemo(() => {

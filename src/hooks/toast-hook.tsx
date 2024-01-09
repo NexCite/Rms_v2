@@ -1,12 +1,13 @@
 // Toast.tsx
 
 "use client";
-import React, { ReactNode, createContext, useState } from "react";
+import { Alert } from "@mui/joy";
 import Snackbar from "@mui/material/Snackbar";
 import HttpStatusCode from "@rms/models/HttpStatusCode";
-import { Alert, AlertTitle } from "@mui/material";
+import React from "react";
 import { create } from "zustand";
-
+import InfoIcon from "@mui/icons-material/Info";
+import WarningIcon from "@mui/icons-material/Warning";
 type State = {
   message?: string;
   id?: string;
@@ -40,19 +41,19 @@ const AlertProvider: React.FC = () => {
       anchorOrigin={{ horizontal: "right", vertical: "top" }}
       onClose={store.CloseAlert}
     >
-      <div>
-        <Alert
-          elevation={5}
-          variant="standard"
-          onClose={store?.CloseAlert}
-          severity={store?.status === 200 ? "info" : "error"}
-        >
-          <AlertTitle
-            dangerouslySetInnerHTML={{ __html: store.message }}
-          ></AlertTitle>
-        </Alert>
-      </div>
+      <Alert
+        variant="soft"
+        startDecorator={store?.status === 200 ? <InfoIcon /> : <WarningIcon />}
+        color={store?.status === 200 ? "primary" : "danger"}
+      >
+        <div
+          className="text-lg"
+          dangerouslySetInnerHTML={{
+            __html: store.message,
+          }}
+        ></div>
+      </Alert>
     </Snackbar>
   );
 };
-export { useToast, AlertProvider };
+export { AlertProvider, useToast };

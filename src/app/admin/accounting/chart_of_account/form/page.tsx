@@ -46,10 +46,7 @@ export default async function page(props: { searchParams: { id: string } }) {
   }
 
   return (
-    <MainCard
-      className="max-w-[450px] w-full  mx-auto"
-      title="Chart Of Account Form"
-    >
+    <div className="max-w-[450px] w-full  mx-auto">
       <Suspense>
         <ChartOfAccountForm
           canEdit={canEdit}
@@ -58,6 +55,6 @@ export default async function page(props: { searchParams: { id: string } }) {
           chart_of_account={chartOfAccount}
         />
       </Suspense>
-    </MainCard>
+    </div>
   );
 }

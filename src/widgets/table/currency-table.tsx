@@ -135,17 +135,6 @@ const columns = [
     header: "Symbol",
   }),
 
-  columnsHelper.accessor((row) => row.create_date.toLocaleDateString(), {
-    id: "create_date",
-
-    header: "Create Date",
-  }),
-
-  columnsHelper.accessor((row) => row.modified_date.toLocaleDateString(), {
-    id: "modified_date",
-
-    header: "Modified Date",
-  }),
   columnsHelper.accessor("rate", {
     header: "Rate",
     Cell(props) {
