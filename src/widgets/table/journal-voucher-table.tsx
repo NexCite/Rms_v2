@@ -1,5 +1,9 @@
 "use client";
-import { Prisma } from "@prisma/client";
+import Table from "@mui/joy/Table";
+import dayjs from "dayjs";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+
 import {
   MRT_ColumnFiltersState,
   MRT_ExpandedState,
@@ -10,41 +14,68 @@ import {
   createMRTColumnHelper,
   useMaterialReactTable,
 } from "material-react-table";
-import React, { useCallback, useEffect, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 import {
   JournalVouchers,
   VoucherSearchSchema,
 } from "../schema/journal-voucher";
-import dayjs from "dayjs";
-import Table from "@mui/joy/Table";
-import MenuItem from "@mui/joy/MenuItem";
 
-import { FormatNumber } from "@rms/lib/global";
-import Authorized from "@rms/components/ui/authorized";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
 import FormControl from "@mui/joy/FormControl";
 import FormLabel from "@mui/joy/FormLabel";
+import Authorized from "@rms/components/other/authorized";
+import {
+  FormatNumber,
+  FormatNumberWithFixed,
+  exportToExcell,
+} from "@rms/lib/global";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import Input from "@mui/joy/Input";
 
-import NexCiteButton from "@rms/components/button/nexcite-button";
-import { MdSearch } from "react-icons/md";
-import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { findVoucherService } from "@rms/service/voucher-service";
+import {
+  Autocomplete,
+  Card,
+  Modal,
+  ModalClose,
+  ModalDialog,
+  Tab,
+  TabList,
+  TabPanel,
+  Tabs,
+} from "@mui/joy";
+import { MenuItem } from "@mui/material";
+import NexCiteButton from "@rms/components/button/nexcite-button";
+import { useToast } from "@rms/hooks/toast-hook";
 import TableStateModel from "@rms/models/TableStateModel";
+import {
+  deleteVoucherService,
+  findVoucherService,
+} from "@rms/service/voucher-service";
+import { Controller, set, useForm } from "react-hook-form";
+import { MdSearch } from "react-icons/md";
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-import { Card } from "@mui/joy";
+import { createJSONStorage, persist } from "zustand/middleware";
+import NexCiteCard from "@rms/components/card/nexcite-card";
+import Image from "next/image";
 
 const columnHelper = createMRTColumnHelper<JournalVouchers>();
 
-export default function JournalVoucherTable() {
+export default function JournalVoucherTable(props: {
+  config: { logo: string; name: string };
+}) {
   const [data, setData] = useState<JournalVouchers[]>([]);
   const pathName = usePathname();
   const [isPadding, setTransition] = useTransition();
   const filter = useFilter();
+  const toast = useToast();
   const table = useMaterialReactTable({
     columns,
     enableRowActions: true,
@@ -52,80 +83,65 @@ export default function JournalVoucherTable() {
     enableStickyHeader: true,
     enableClickToCopy: true,
     enableGlobalFilter: false,
-    enableGrouping: true,
-    onGlobalFilterChange: filter.setGlobalFilter,
+    enableGrouping: false,
+    // onGlobalFilterChange: filter.setGlobalFilter,
     enableSelectAll: false,
     enableSubRowSelection: false,
     enableStickyFooter: true,
 
-    onGroupingChange: filter.setGroups,
-    onColumnFiltersChange: filter.setColumnsFilter,
-    onSortingChange: filter.setSorting,
+    // onGroupingChange: filter.setGroups,
+    // onColumnFiltersChange: filter.setColumnsFilter,
+    // onSortingChange: filter.setSorting,
     enableExpanding: true,
     enableExpandAll: true,
-    initialState: { showColumnFilters: filter.filterColumns?.length > 0 },
-    onExpandedChange: filter.setExpanded,
-    onPaginationChange: filter.setPagination,
+    // initialState: { showColumnFilters: filter.filterColumns?.length > 0 },
+    // onExpandedChange: filter.setExpanded,
+    // onPaginationChange: filter.setPagination,
     filterFromLeafRows: true,
-    onShowColumnFiltersChange: filter.setShowColumnFilters,
-    state: {
-      expanded: filter.expanded,
-      grouping: filter.groups,
-      showColumnFilters: filter.showColumnFilters,
-      pagination: filter.pagination,
+    // onShowColumnFiltersChange: filter.setShowColumnFilters,
+    // state: {
+    //   expanded: filter.expanded,
+    //   grouping: filter.groups,
+    //   showColumnFilters: filter.showColumnFilters,
+    //   pagination: filter.pagination,
 
-      showLoadingOverlay: isPadding,
-      sorting: filter.sorting,
-      globalFilter: filter.globalFilter,
-      columnFilters: filter.filterColumns,
-    },
-    renderRowActionMenuItems: ({
-      row: {
-        original: { id },
-      },
-    }) => [
-      <Authorized permission="Edit_Chart_Of_Account" key={1}>
-        <div className="w-[100px] text-center">
-          <Link
-            href={pathName + "/form?id=" + id}
-            className="w-full block text-center"
-          >
-            Edit
-          </Link>
-        </div>
+    //   showLoadingOverlay: isPadding,
+    //   sorting: filter.sorting,
+    //   globalFilter: filter.globalFilter,
+    //   columnFilters: filter.filterColumns,
+    // },
+    renderRowActionMenuItems: ({ row: { original } }) => [
+      <Authorized key={1} permission="Update_Chart_Of_Account">
+        <Link
+          href={pathName + "/form?id=" + original.id}
+          className="w-full block text-center"
+        >
+          <MenuItem>Edit</MenuItem>
+        </Link>
       </Authorized>,
-      // <Authorized permission={"Reset"} key={2}>
-      //   <MenuItem
-      //     disabled={isPadding}
-      //     className="cursor-pointer"
-      //     onClick={() => {
-      //       const isConfirm = confirm(
-      //         `Do You sure you want to reset ${name} id:${id} `
-      //       );
-      //       if (isConfirm) {
-      //         setTransition(async () => {
-      //           const result = await reset(id);
+      <Authorized key={2} permission="Update_Chart_Of_Account">
+        <MenuItem
+          onClick={(e) => {
+            setVoucher(original);
+          }}
+        >
+          Export
+        </MenuItem>
+      </Authorized>,
 
-      //           toast.OpenAlert(result);
-      //         });
-      //       }
-      //     }}
-      //   >
-      //     {isPadding ? <> reseting...</> : "Reset"}
-      //   </MenuItem>
-      // </Authorized>,
       <Authorized permission="Delete_Chart_Of_Account" key={3}>
         <MenuItem
           disabled={isPadding}
           className="cursor-pointer"
           onClick={() => {
             const isConfirm = confirm(
-              `Do You sure you want to delete ${name} id:${id} `
+              `Do You sure you want to delete  id:${original.id} `
             );
             if (isConfirm) {
               setTransition(async () => {
-                // const result = await deleteChart(id);
-                // toast.OpenAlert(result);
+                const result = await deleteVoucherService({ id: original.id });
+                handleSubmit(form.getValues());
+                toast.OpenAlert(result);
               });
             }
           }}
@@ -194,8 +210,6 @@ export default function JournalVoucherTable() {
     });
   }, [form.formState.defaultValues]);
 
-  useEffect(() => {}, [filter.pagination]);
-
   const handleSubmit = useCallback((values: VoucherSearchSchema) => {
     setTransition(() => {
       findVoucherService(values).then((res) => {
@@ -203,17 +217,10 @@ export default function JournalVoucherTable() {
       });
     });
   }, []);
-  // useEffect(() => {
-  //   handleSubmit({
-  //     from: filter.fromDate,
-  //     to: filter.toDate,
-  //     pageIndex: filter.pagination.pageSize,
-  //     pageSize: filter.pagination.pageIndex,
-  //   });
-  // }, [filter.fromDate, filter.pagination, filter.toDate, handleSubmit]);
+  const [voucher, setVoucher] = useState<JournalVouchers>(null);
 
   return (
-    <Card>
+    <NexCiteCard title="Journal Voucher Table">
       <form
         className="mb-5 flex flex-col gap-5 "
         onSubmit={form.handleSubmit(handleSubmit)}
@@ -295,63 +302,18 @@ export default function JournalVoucherTable() {
                 </FormControl>
               )}
             />
-            {/* <Controller
-              control={form.control}
-              name="chart_of_accounts"
-              render={({ formState, fieldState, field }) => (
-                <FormControl
-                  className="w-full"
-                  error={Boolean(fieldState.error)}
-                  {...field}
-                >
-                  <FormLabel>For</FormLabel>
-                  <Autocomplete
-                    multiple={true}
-                    disableCloseOnSelect
-                    limitTags={1}
-                    onChange={(_, v) => {
-                      field.onChange(v);
-                    }}
-                    options={props.chartOfAccounts}
-                    getOptionKey={(e) => e.id}
-                    getOptionLabel={(e: any) => `${e.id} ${e.name}`}
-                    isOptionEqualToValue={(e) =>
-                      field.value.find((res) => res.id === e.id) ? true : false
-                    }
-                    placeholder="for"
-                    value={field.value}
-                  />
-                </FormControl>
-              )}
-            /> */}
           </div>
-          {/* <div>
-            <Controller
-              control={form.control}
-              name="include_reffrence"
-              render={({ formState, fieldState, field }) => (
-                <FormControl
-                  className="w-full"
-                  error={Boolean(fieldState.error)}
-                  {...field}
-                >
-                  <Typography
-                    component="label"
-                    endDecorator={
-                      <Switch checked={field.value} sx={{ ml: 1 }} />
-                    }
-                  >
-                    Include Reffrence
-                  </Typography>
-                </FormControl>
-              )}
-            />
-          </div> */}
         </div>
       </form>
-
+      <ExportVoucher
+        config={props.config}
+        voucher={voucher}
+        onClose={() => {
+          setVoucher(null);
+        }}
+      />
       <MaterialReactTable table={table} />
-    </Card>
+    </NexCiteCard>
   );
 }
 
@@ -503,3 +465,366 @@ const useFilter = create<TableStateModel>()(
     }
   )
 );
+const doc = new jsPDF();
+doc.setFont("Arial");
+
+function ExportVoucher(props: {
+  voucher: JournalVouchers;
+  onClose?: () => void;
+  config: {
+    name: string;
+    logo: string;
+  };
+}) {
+  const client = useMemo(
+    () =>
+      props?.voucher?.voucher_items
+        .filter(
+          (res) =>
+            res.chart_of_account.account_type ||
+            res.reference_chart_of_account?.account_type
+        )
+        .map((res) => {
+          if (res.chart_of_account.account_type) {
+            return {
+              label:
+                res.chart_of_account.first_name +
+                " " +
+                res.chart_of_account.last_name,
+              value: res.chart_of_account.id,
+            };
+          } else {
+            return {
+              label:
+                res.reference_chart_of_account.first_name +
+                " " +
+                res.reference_chart_of_account.last_name,
+              value: res.reference_chart_of_account.id,
+            };
+          }
+        }),
+    [props.voucher]
+  );
+  const [tabIndex, setTabIndex] = useState(1);
+  const total = useMemo(
+    () =>
+      props?.voucher?.voucher_items.reduce((a, b) => {
+        if (b.debit_credit === "Debit") {
+          return a + b.amount;
+        }
+        return a + 0;
+      }, 0),
+    [props.voucher]
+  );
+  const [selectedClient, setSelectedClient] = useState<any>(null);
+  return (
+    props.voucher && (
+      <Modal open={props.voucher ? true : false}>
+        <ModalDialog style={{ maxWidth: 1400, width: "100%" }}>
+          <ModalClose
+            onClick={() => {
+              props.onClose();
+            }}
+          />
+          <div className="flex justify-between items-end">
+            <FormControl className="flex">
+              <FormLabel>Select For Client</FormLabel>
+              <Autocomplete
+                options={client}
+                onChange={(e, newValue) => {
+                  setSelectedClient(newValue ?? null);
+                }}
+                value={selectedClient}
+              />
+            </FormControl>
+            <div className="flex gap-5 w-[300px]">
+              <NexCiteButton
+                className="h-[25px] w-full"
+                type="button"
+                disabled={!selectedClient}
+                onClick={(e) => {
+                  exportToExcell({
+                    to: props.voucher.to_date,
+                    from: props.voucher.to_date,
+                    username: selectedClient?.label,
+                    sheet: `${
+                      tabIndex === 1 ? "Receipt Voucher" : "Payment Voucher"
+                    }-${selectedClient.label}-${props.voucher.id}`,
+                    id: tabIndex === 1 ? "receipt-voucher" : "payment-voucher",
+                  });
+                }}
+              >
+                Export Excel
+              </NexCiteButton>
+              <NexCiteButton
+                className="h-[20px] w-full"
+                type="button"
+                disabled={!selectedClient}
+                onClick={async (e) => {
+                  const canvas = await html2canvas(
+                    document.querySelector(
+                      tabIndex === 1 ? "#receipt-voucher" : "#payment-voucher"
+                    ),
+                    {}
+                  );
+                  const pdf = new jsPDF("p", "mm", "a4");
+                  pdf.addImage(
+                    canvas.toDataURL("image/png"),
+                    "PNG",
+                    10,
+                    10,
+                    180,
+                    0
+                  );
+                  pdf.save(
+                    `${
+                      tabIndex === 1 ? "receipt-voucher" : "payment-voucher"
+                    }-${selectedClient.label}-${props.voucher.id}.pdf`
+                  );
+                }}
+              >
+                Export PDF
+              </NexCiteButton>
+            </div>
+          </div>
+          <div>
+            <Tabs value={tabIndex} onChange={(e, v: any) => setTabIndex(v)}>
+              <TabList>
+                <Tab variant="outlined" value={1}>
+                  Receipt voucher
+                </Tab>
+                <Tab variant="outlined" value={2}>
+                  Payment voucher
+                </Tab>
+              </TabList>
+              <TabPanel value={1}>
+                <Table id="receipt-voucher" variant="outlined" dir="rtl">
+                  <tbody>
+                    <tr>
+                      <td colSpan={5}></td>
+                      <td>
+                        <Image
+                          src={`/api/media/${props.config.logo}`}
+                          className="border rounded-full
+                     object-cover"
+                          alt="logo"
+                          width={100}
+                          height={100}
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={6} align="center" style={{ fontSize: 30 }}>
+                        سند قبض
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={6} align="center" style={{ fontSize: 30 }}>
+                        Receipt voucher
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align="center" colSpan={3}>
+                        سند قبض رقم
+                      </td>{" "}
+                      <td colSpan={3} align="center">
+                        {props.voucher.id}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td>
+                        التاريخ:{" "}
+                        {dayjs(props.voucher.to_date).format("DD/MM/YYYY")}
+                      </td>
+                      <td></td>
+                      <td colSpan={3} align="right">
+                        {" "}
+                      </td>
+
+                      <td dir="ltr">
+                        Date:{" "}
+                        {dayjs(props.voucher.to_date).format("DD/MM/YYYY")}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={3}>
+                        استلمت من السيد/السادة: {selectedClient?.label}
+                      </td>
+
+                      <td dir="ltr" colSpan={3}>
+                        Received from Mr./Mrs.: {selectedClient?.label}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={3}>
+                        مبلغ وقدره: {props.voucher?.currency?.symbol}
+                        {FormatNumberWithFixed(total, 2)}
+                      </td>
+
+                      <td dir="ltr" colSpan={3}>
+                        The sum of: {props.voucher?.currency?.symbol}
+                        {FormatNumberWithFixed(total, 2)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        نقدا/شيك رقم:{" "}
+                        <span contentEditable>....................</span>
+                      </td>
+                      <td colSpan={1}> </td>
+                      <td colSpan={2} align="center">
+                        تاريخ: <span contentEditable>....................</span>
+                      </td>
+
+                      <td colSpan={1}> </td>
+                      <td align="left" dir="ltr">
+                        Cash/Cheque No:{" "}
+                        <span contentEditable>....................</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={6}>
+                        <div className="max-w-[550px]">
+                          وذلك عن: {props.voucher.description}
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={6}> </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={3}> </td>
+                      <td align="center">أعدها</td>
+                      <td align="center">المستلم</td>
+                      <td align="center">توقيع المدير</td>
+                    </tr>
+
+                    <tr>
+                      <td colSpan={3}> </td>
+                      <td align="center">Prepared by</td>
+                      <td align="center">Received by</td>
+                      <td align="center">Manager sign</td>
+                    </tr>
+                    <tr>
+                      {" "}
+                      <td colSpan={3}> </td>
+                      <td align="center">
+                        {props.voucher?.user.first_name +
+                          " " +
+                          props.voucher?.user.last_name}
+                      </td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </TabPanel>
+              <TabPanel value={2}>
+                <Table id="payment-voucher" variant="outlined" dir="rtl">
+                  <tbody>
+                    <tr>
+                      <td colSpan={5}></td>
+                      <td>
+                        <Image
+                          src={`/api/media/${props.config.logo}`}
+                          className="border rounded-full
+                     object-cover"
+                          alt="logo"
+                          width={100}
+                          height={100}
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={6} align="center" style={{ fontSize: 30 }}>
+                        سند صرف{" "}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={6} align="center" style={{ fontSize: 30 }}>
+                        Payment voucher{" "}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align="center" colSpan={3}>
+                        سند صرف رقم
+                      </td>{" "}
+                      <td colSpan={3} align="center">
+                        {props.voucher.id}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td>
+                        التاريخ:{" "}
+                        {dayjs(props.voucher.to_date).format("DD/MM/YYYY")}
+                      </td>
+                      <td></td>
+                      <td colSpan={3} align="right">
+                        {" "}
+                      </td>
+
+                      <td dir="ltr">
+                        Date:{" "}
+                        {dayjs(props.voucher.to_date).format("DD/MM/YYYY")}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={3}>
+                        صرفنا إلى السيد/السادة: {selectedClient?.label}
+                      </td>
+
+                      <td dir="ltr" colSpan={3}>
+                        We turned to Mr./Mrs.: {selectedClient?.label}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={3}>
+                        مبلغ وقدره: {props.voucher?.currency?.symbol}
+                        {FormatNumberWithFixed(total, 2)} Cash
+                      </td>
+
+                      <td dir="ltr" colSpan={3}>
+                        The sum of: {props.voucher?.currency?.symbol}
+                        {FormatNumberWithFixed(total, 2)} Cash
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td colSpan={6}> </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={3}> </td>
+                      <td align="center">أعدها</td>
+                      <td align="center">المستلم</td>
+                      <td align="center">توقيع المدير</td>
+                    </tr>
+
+                    <tr>
+                      <td colSpan={3}> </td>
+                      <td align="center">Prepared by</td>
+                      <td align="center">Received by</td>
+                      <td align="center">Manager sign</td>
+                    </tr>
+                    <tr>
+                      {" "}
+                      <td colSpan={3}> </td>
+                      <td align="center">
+                        {props.voucher?.user.first_name +
+                          " " +
+                          props.voucher?.user.last_name}
+                      </td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </TabPanel>
+            </Tabs>
+          </div>
+        </ModalDialog>
+      </Modal>
+    )
+  );
+}

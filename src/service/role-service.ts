@@ -5,19 +5,18 @@ import { handlerServiceAction } from "@rms/lib/handler";
 import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 
-export async function createRole(
-  props: Prisma.RoleUncheckedCreateInput
-): Promise<ServiceActionModel<void>> {
+export async function createRole(props: Prisma.RoleUncheckedCreateInput) {
   return handlerServiceAction(
     async (info, config_id) => {
       props.config_id = config_id;
 
-      await prisma.role.create({ data: props });
-      return;
+      return await prisma.role.create({ data: props });
     },
-    "Add_Role",
-    true,
-    props
+    "Create_Role",
+    {
+      update: true,
+      body: props,
+    }
   );
 }
 
@@ -34,9 +33,12 @@ export async function updateRole(
         data: props,
       });
     },
-    "Edit_Role",
-    true,
-    props
+    "Update_Role",
+    {
+      update: true,
+      body: props,
+      hotReload: true,
+    }
   );
 }
 
@@ -46,20 +48,11 @@ export async function deleteRoleById(
   return handlerServiceAction<void>(
     async (info, config_id) => {
       await prisma.role.delete({ where: { id } });
-      // if (auth.type === "Admin") {
-      //   await prisma.Role.delete({ where: { id } });
-      // } else {
-      //   await prisma.Role.update({
-      //     where: { id },
-      //     data: { status: "Deleted", user_id: info.user.id },
-      //   });
-      // }
 
       return;
     },
     "Delete_Role",
-    true,
-    { id }
+    { update: true }
   );
 }
 export async function resetRole(id: number) {
@@ -74,6 +67,9 @@ export async function resetRole(id: number) {
       });
     },
     "Reset",
-    true
+    {
+      update: true,
+      body: { id },
+    }
   );
 }

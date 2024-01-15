@@ -72,9 +72,8 @@ export async function createSchedule(params: {
 
       return;
     },
-    "Add_Schedule",
-    true,
-    params
+    "Create_Schedule",
+    { update: true }
   );
 }
 
@@ -145,9 +144,8 @@ export async function updateSchedule(
 
       return;
     },
-    "Edit_Schedule",
-    true,
-    params
+    "Update_Schedule",
+    { update: true }
   );
 }
 
@@ -167,8 +165,7 @@ export async function deleteScheduleById(
       return;
     },
     "Delete_Schedule",
-    true,
-    { id }
+    { update: true }
   );
 }
 export async function resetSchedule(id: number) {
@@ -183,6 +180,8 @@ export async function resetSchedule(id: number) {
       });
     },
     "Reset",
-    true
+    {
+      update: true,
+    }
   );
 }

@@ -30,6 +30,6 @@ export function useAuthorized(permissions: ($Enums.UserPermission | "None")[]) {
       temp[res] = cookies["rms-permissions"]?.includes(res);
     });
     setIsAuthorized(temp);
-  }, [cookies]);
+  }, [cookies, permissions]);
   return isAuthorized;
 }

@@ -62,9 +62,10 @@ export async function updateScheuleConfig(
         data: props,
       });
     },
-    "Edit_Schedule_Config",
-    true,
-    props
+    "Update_Schedule_Config",
+    {
+      update: true,
+    }
   );
 }
 
@@ -85,8 +86,7 @@ export async function deleteScheuleConfig(id: number) {
       //   });
     },
     "Delete_Schedules_Config",
-    true,
-    { id }
+    { update: true }
   );
 }
 export async function resetScheduleConfig(id: number) {
@@ -101,6 +101,8 @@ export async function resetScheduleConfig(id: number) {
       });
     },
     "Reset",
-    true
+    {
+      update: true,
+    }
   );
 }

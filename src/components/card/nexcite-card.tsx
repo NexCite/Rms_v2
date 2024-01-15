@@ -1,5 +1,5 @@
 "use client";
-import { Card, CardHeader, Divider } from "@mui/material";
+import { Card, Typography } from "@mui/joy";
 import React from "react";
 
 export default function NexCiteCard(props: {
@@ -8,13 +8,9 @@ export default function NexCiteCard(props: {
   className?: string;
 }) {
   return (
-    <Card
-      elevation={0}
-      variant="outlined"
-      className={`rounded-xl ${props.className ?? ""}`}
-    >
-      <CardHeader title={props.title} />
-      <Divider />
+    <Card>
+      <Typography fontSize={23}>{props.title}</Typography>
+
       {props.children}
     </Card>
   );

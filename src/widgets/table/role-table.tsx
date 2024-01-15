@@ -4,12 +4,14 @@ import { Prisma } from "@prisma/client";
 import { usePathname } from "next/navigation";
 import { useMemo, useTransition } from "react";
 
-import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
-import Authorized from "@rms/components/ui/authorized";
+import Authorized from "@rms/components/other/authorized";
 import { useToast } from "@rms/hooks/toast-hook";
 import { deleteRoleById, resetRole } from "@rms/service/role-service";
 import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
 import Link from "next/link";
+import { Card, Typography } from "@mui/joy";
+import { MenuItem } from "@mui/material";
+import NexCiteCard from "@rms/components/card/nexcite-card";
 
 type Props = {
   data: Prisma.RoleGetPayload<{}>[];
@@ -32,18 +34,6 @@ export default function RoleTable(props: Props) {
         muiTableBodyCellProps: {
           align: "center",
         },
-        Cell: ({ row: { original } }) => (
-          <div
-            className={`text-center rounded-sm ${
-              original.create_date.toLocaleTimeString() !==
-              original.modified_date.toLocaleTimeString()
-                ? "bg-yellow-400"
-                : ""
-            }`}
-          >
-            {original.id}
-          </div>
-        ),
       },
       {
         accessorKey: "name",
@@ -83,10 +73,7 @@ export default function RoleTable(props: Props) {
   );
 
   return (
-    <Card variant="outlined">
-      <CardHeader
-        title={<Typography variant="h5">Role Table</Typography>}
-      ></CardHeader>
+    <NexCiteCard title="Role Table">
       <MaterialReactTable
         initialState={{ pagination: { pageSize: 100, pageIndex: 0 } }}
         state={{ showProgressBars: isPadding }}
@@ -97,33 +84,33 @@ export default function RoleTable(props: Props) {
             original: { id, name },
           },
         }) => [
-          <Authorized permission="Edit_Role" key={1}>
+          <Authorized permission="Update_Role" key={1}>
             <Link href={pathName + "/form?id=" + id}>
               <MenuItem className="cursor-pointer" disabled={isPadding}>
                 Edit
               </MenuItem>
             </Link>
           </Authorized>,
-          <Authorized permission={"Reset"} key={2}>
-            <MenuItem
-              disabled={isPadding}
-              className="cursor-pointer"
-              onClick={() => {
-                const isConfirm = confirm(
-                  `Do You sure you want to reset  ${name} id:${id} `
-                );
-                if (isConfirm) {
-                  setTransition(async () => {
-                    const result = await resetRole(id);
+          // <Authorized permission={"Reset"} key={2}>
+          //   <MenuItem
+          //     disabled={isPadding}
+          //     className="cursor-pointer"
+          //     onClick={() => {
+          //       const isConfirm = confirm(
+          //         `Do You sure you want to reset  ${name} id:${id} `
+          //       );
+          //       if (isConfirm) {
+          //         setTransition(async () => {
+          //           const result = await resetRole(id);
 
-                    toast.OpenAlert(result);
-                  });
-                }
-              }}
-            >
-              {isPadding ? <> reseting...</> : "Reset"}
-            </MenuItem>
-          </Authorized>,
+          //           toast.OpenAlert(result);
+          //         });
+          //       }
+          //     }}
+          //   >
+          //     {isPadding ? <> reseting...</> : "Reset"}
+          //   </MenuItem>
+          // </Authorized>,
           <Authorized permission="Delete_Role" key={3}>
             <MenuItem
               disabled={isPadding}
@@ -148,6 +135,6 @@ export default function RoleTable(props: Props) {
         data={props.data}
         enableGlobalFilter
       />
-    </Card>
+    </NexCiteCard>
   );
 }

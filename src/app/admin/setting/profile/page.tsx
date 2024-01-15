@@ -1,4 +1,6 @@
-import Authorized from "@rms/components/ui/authorized";
+import { Card } from "@mui/joy";
+import NexCiteButton from "@rms/components/button/nexcite-button";
+import Authorized from "@rms/components/other/authorized";
 import { getConfigId } from "@rms/lib/config";
 import prisma from "@rms/prisma/prisma";
 import getUserFullInfo from "@rms/service/user-service";
@@ -15,7 +17,7 @@ export default async function page() {
   });
 
   return (
-    <div className="m-auto max-w-[350px] hadow-sm border p-5 w-full ">
+    <Card className="m-auto max-w-[350px] hadow-sm border p-5 w-full ">
       <div className="flex gap-6    justify-between">
         <Image
           src={`/api/media/${info.config.logo}`}
@@ -33,12 +35,12 @@ export default async function page() {
           </div>
 
           <h3 className="opacity-90">@{user.username}</h3>
-          <Authorized permission="Edit_Profile" className="w-full">
-            <Link
-              href={`/admin/setting/user/form?id=${info.user.id}`}
-              className="bg-black w-full text-white p-2 rounded-md text-center inline-block"
-            >
-              Edit
+          <Authorized permission="Update_Profile" className="w-full">
+            <Link href={`/admin/setting/user/form?id=${info.user.id}`}>
+              {" "}
+              <NexCiteButton className="bg-black w-full text-white p-2 rounded-md text-center inline-block">
+                Edit
+              </NexCiteButton>
             </Link>
           </Authorized>
         </div>
@@ -60,6 +62,6 @@ export default async function page() {
           <h1 className="text-lg">{user.modified_date.toDateString()}</h1>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

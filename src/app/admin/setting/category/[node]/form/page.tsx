@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import BackButton from "@rms/components/ui/back-button";
+import BackButton from "@rms/components/button/back-button";
 import { getConfigId } from "@rms/lib/config";
 import prisma from "@rms/prisma/prisma";
 import CategoryForm from "@rms/widgets/form/category-form";

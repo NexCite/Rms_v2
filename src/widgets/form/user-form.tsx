@@ -112,7 +112,7 @@ export default function UserFormComponent(props: Props) {
         });
       }
     },
-    [back, toast, form, props.value]
+    [props.value, toast, form, replace, pathName]
   );
 
   return (
@@ -124,7 +124,7 @@ export default function UserFormComponent(props: Props) {
     >
       <Card variant="outlined">
         <CardContent className="flex flex-col gap-5">
-          <Typography>Currency Form</Typography>
+          <Typography>User Form</Typography>
           <Controller
             control={form.control}
             name="username"

@@ -18,9 +18,10 @@ export async function createAccount(
       await prisma.account.create({ data: props });
       return;
     },
-    "Add_Account",
-    true,
-    props
+    "Create_Account",
+    {
+      update: true,
+    }
   );
 }
 
@@ -40,9 +41,10 @@ export async function updateAccount(
 
       return result;
     },
-    "Edit_Account",
-    true,
-    props
+    "Update_Account",
+    {
+      update: true,
+    }
   );
 }
 
@@ -64,8 +66,7 @@ export async function deleteAccountById(
       return;
     },
     "Delete_Account",
-    true,
-    { id }
+    { update: true }
   );
 }
 export async function resetTraderAccount(id: number) {
@@ -80,6 +81,8 @@ export async function resetTraderAccount(id: number) {
       });
     },
     "Reset",
-    true
+    {
+      update: true,
+    }
   );
 }

@@ -38,10 +38,10 @@ export async function middleware(request: NextRequest) {
       }
     ).then((res) => res.json());
 
-    if (!checkAuth.permissions) {
+    if (!checkAuth.permissions && !response.cookies.get("rms-permissions")) {
       return NextResponse.redirect(url);
     }
-
+    response.cookies.delete("rms-permissions");
     response.cookies.set(
       "rms-permissions",
       JSON.stringify(checkAuth.permissions)
@@ -49,7 +49,6 @@ export async function middleware(request: NextRequest) {
 
     return response;
   } catch (error) {
-    console.log(error);
     return NextResponse.redirect(url);
   }
 }

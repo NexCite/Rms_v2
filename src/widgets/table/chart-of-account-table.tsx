@@ -1,27 +1,23 @@
 "use client";
 import { MenuItem } from "@mui/material";
-import Authorized from "@rms/components/ui/authorized";
+import { $Enums, Prisma } from "@prisma/client";
+import Authorized from "@rms/components/other/authorized";
 import { useToast } from "@rms/hooks/toast-hook";
 import TableStateModel from "@rms/models/TableStateModel";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Button from "@mui/joy/Button";
 import Card from "@mui/joy/Card";
+import CardContent from "@mui/joy/CardContent";
 import FormControl from "@mui/joy/FormControl";
 import FormLabel from "@mui/joy/FormLabel";
 import Input from "@mui/joy/Input";
-
-import { Option, Select } from "@mui/joy";
-import { $Enums } from "@prisma/client";
+import Table from "@mui/joy/Table";
+import Typography from "@mui/joy/Typography";
+import { FormatNumberWithFixed, exportToExcell } from "@rms/lib/global";
 import {
-  AccountGrouped,
-  FormatNumberWithFixed,
-  exportToExcell,
-  totalChartOfAccountVouchers,
-} from "@rms/lib/global";
-import {
-  findChartOfAccountByGrouping,
-  findChartOfAccountForAccountsServiceGrouded,
+  deleteChartOfAccountService,
+  findChartOfAccounts,
 } from "@rms/service/chart-of-account-service";
 import dayjs from "dayjs";
 import {
@@ -37,14 +33,13 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  ReactHTMLElement,
   useCallback,
   useEffect,
   useMemo,
   useState,
   useTransition,
 } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { AiFillFileExcel } from "react-icons/ai";
 import { MdSearch } from "react-icons/md";
 import { create } from "zustand";
@@ -52,27 +47,34 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { ChartOfAccountSearchSchema } from "../schema/chart-of-account";
 
 type Props = {
-  accountId?: string;
-  accountType?: $Enums.AccountType;
-  onDateChange?: (from: Date, to: Date) => void;
-  currenices?: {
-    id?: number;
-    name?: string;
-    symbol?: string;
-    rate?: number;
-  }[];
-  currency?: {
-    id?: number;
-    name?: string;
-    symbol?: string;
-    rate?: number;
-  };
+  node: $Enums.AccountType;
+  parents: Prisma.ChartOfAccountGetPayload<{}>[];
+  currencies: Prisma.CurrencyGetPayload<{}>[];
 };
 
+type ChartOfAccounts = Prisma.ChartOfAccountGetPayload<{
+  include: {
+    currency: true;
+    voucher_items: {
+      include: {
+        voucher: { include: { currency: true } };
+
+        currency: true;
+      };
+    };
+    reffrence_voucher_items: {
+      include: {
+        voucher: { include: { currency: true } };
+
+        currency: true;
+      };
+    };
+  };
+}> & { total?: number };
 export default function ChartOfAccountTable(props: Props) {
   const toast = useToast();
   const [isPadding, setTransition] = useTransition();
-  const [data, setData] = useState<AccountGrouped[]>([]);
+  const [data, setData] = useState<ChartOfAccounts[]>([]);
   const filter = useFilter();
   const pathName = usePathname();
   const form = useForm<ChartOfAccountSearchSchema>({
@@ -81,143 +83,208 @@ export default function ChartOfAccountTable(props: Props) {
       include_reffrence: false,
       from: dayjs(filter.fromDate).startOf("d").toDate(),
       to: dayjs(filter.toDate).endOf("d").toDate(),
-      classLevel: ["1"],
+      id: undefined,
+      type: props.node,
     },
   });
-  const [currency, setCurrency] = useState<{
-    id?: number;
-    name?: string;
-    symbol?: string;
-    rate?: number;
-  }>(props.currency ?? undefined);
+
   const columns = useMemo(
-    () => [
-      columnGroupedDataHelper.accessor("id", {
-        header: "ID",
-        enableGrouping: false,
-      }),
-      columnGroupedDataHelper.accessor("name", {
-        header: "Name",
-        enableGrouping: false,
-      }),
+    () =>
+      [
+        columnGroupedDataHelper.accessor("id", {
+          header: "ID",
+          filterVariant: "autocomplete",
 
-      columnGroupedDataHelper.accessor("class", {
-        filterVariant: "multi-select",
-        filterSelectOptions: Array.from({ length: 9 }).map((res, i) => i + ""),
-        GroupedCell: ({ row, cell }) => {
-          return <span>{cell.getValue()}</span>;
-        },
-        header: "Class",
-      }),
-      columnGroupedDataHelper.accessor(
-        (row) => row.chart_of_account_type?.replaceAll("_", " "),
-        {
-          id: "chart_of_account_type",
-          header: "Account Type",
-          GroupedCell: ({ row, cell }) => {
-            return cell.getValue();
-          },
-        }
-      ),
-      columnGroupedDataHelper.accessor(
-        (row) => row.debit_credit?.replaceAll("_", "/"),
-        {
-          id: "debit_credit",
-          header: "D/C",
-          enableGrouping: false,
-        }
-      ),
-      columnGroupedDataHelper.accessor(
-        (row) => {
-          const result = totalChartOfAccountVouchers([row]);
-          return result;
-        },
-        {
-          enableGrouping: false,
-          Cell(params) {
-            const total = parseFloat(
-              params.row.getAllCells()[7].getValue() as string
-            );
+          enableColumnActions: true,
+        }),
+        columnGroupedDataHelper.accessor("business_id", {
+          header: "Business ID",
+          filterVariant: "autocomplete",
 
-            return (
-              <span
-                className={`${
-                  total >= 0 ? "bg-green-400" : "bg-red-400"
-                }  rounded-lg px-3 text-white`}
-              >
-                {currency?.symbol ?? "$"}
-                {FormatNumberWithFixed(total * (currency?.rate ?? 1), 2)}{" "}
-              </span>
-            );
-          },
-          id: "total",
-          header: "Total",
-          AggregatedCell: ({ row }) => {
-            if (row.getIsGrouped()) {
-              const result = row._getAllCellsByColumnId();
-              var total = 0;
-              result["total"].row.subRows.map((res) => {
-                if (
-                  (res._getAllCellsByColumnId()["total"].getValue() as any)
-                    ?.props
-                ) {
-                  return (total += parseFloat(
-                    (
-                      res
-                        ._getAllCellsByColumnId()
-                        ["total"].getValue() as ReactHTMLElement<any>
-                    )?.props?.children[1].replace(/[$,]/g, "")
-                  ));
-                } else {
-                  return (total += parseFloat(
-                    res._getAllCellsByColumnId()["total"].getValue() as string
-                  ));
+          enableColumnActions: true,
+        }),
+        columnGroupedDataHelper.accessor("name", {
+          header: "Name",
+          filterVariant: "autocomplete",
+        }),
+        columnGroupedDataHelper.accessor((row) => row.currency?.name, {
+          id: "currency.name",
+          filterVariant: "multi-select",
+
+          filterSelectOptions: props.currencies.map((res) => res.name),
+
+          header: "Currency",
+        }),
+
+        columnGroupedDataHelper.accessor("class", {
+          filterVariant: "multi-select",
+          filterSelectOptions: Array.from({ length: 9 }).map(
+            (res, i) => i + ""
+          ),
+
+          header: "Class",
+        }),
+        columnGroupedDataHelper.accessor(
+          (row) => row.chart_of_account_type?.replaceAll("_", " "),
+          {
+            id: "chart_of_account_type",
+            header: "Account Type",
+            filterVariant: "multi-select",
+
+            filterSelectOptions: Object.keys($Enums.ChartOfAccountType),
+            GroupedCell: ({ row, cell }) => {
+              return cell.getValue();
+            },
+          }
+        ),
+        columnGroupedDataHelper.accessor(
+          (row) => row.debit_credit?.replaceAll("_", "/"),
+          {
+            id: "debit_credit",
+            filterVariant: "multi-select",
+
+            header: "D/C",
+          }
+        ),
+      ].concat(
+        props.node
+          ? ([
+              columnGroupedDataHelper.accessor(
+                (row) => {
+                  var total = 0;
+
+                  row.voucher_items.map((res) => {
+                    if (res.debit_credit === "Debit") {
+                      total += res.amount / res.rate;
+                    } else {
+                      total -= res.amount / res.rate;
+                    }
+                  });
+                  row.reffrence_voucher_items?.map((res) => {
+                    if (res.debit_credit === "Debit") {
+                      total += res.amount / res.rate;
+                    } else {
+                      total -= res.amount / res.rate;
+                    }
+                  });
+
+                  return total * (row.currency?.rate ?? 1);
+                },
+                {
+                  id: "total",
+                  header: "Total",
+                  filterVariant: "range",
+                  filterFn: (row, name, range: string[]) => {
+                    const total = row.getAllCells()[9].getValue() as string;
+                    //
+
+                    const minNumber = range[0];
+                    const maxNumber = range[1];
+                    // console.log(name);
+
+                    if (minNumber && maxNumber) {
+                      console.log(minNumber);
+
+                      return total >= minNumber && total <= maxNumber;
+                    } else if (minNumber) {
+                      console.log(1);
+
+                      return total >= minNumber;
+                    } else if (maxNumber) {
+                      console.log(maxNumber);
+
+                      return total <= maxNumber;
+                    }
+
+                    // const minNumber=parseFloat(min)
+                    return true;
+                  },
+                  Cell({
+                    row: {
+                      getAllCells,
+                      original: { currency },
+                    },
+                  }) {
+                    const total = parseFloat(
+                      getAllCells()[9].getValue() as string
+                    );
+
+                    return (
+                      <span
+                        className={`${
+                          total >= 0 ? "bg-green-400" : "bg-red-400"
+                        }  rounded-lg px-3 text-white`}
+                      >
+                        {currency?.symbol ?? "$"}
+                        {FormatNumberWithFixed(total, 2)}
+                      </span>
+                    );
+                  },
                 }
-              });
-
-              return (
-                <span
-                  className={`${
-                    total >= 0 ? "bg-green-400" : "bg-red-400"
-                  }  rounded-lg px-3 text-white`}
-                >
-                  {currency?.symbol ?? "$"}
-                  {FormatNumberWithFixed(total * (currency?.rate ?? 1), 2)}
-                </span>
-              );
-            }
-            return undefined;
-          },
-        }
+              ) as any,
+            ] as any)
+          : []
       ),
-    ],
-    [currency?.rate, currency?.symbol]
+    [props.currencies, props.node]
   );
-  const watch = useWatch({ control: form.control, name: ["from", "to"] });
-
   const table = useMaterialReactTable({
     columns,
     data,
     muiTableHeadCellProps: {
       align: "left",
     },
-    muiTableProps: { id: "chart-of-account-table" },
+
+    muiTableProps: { id: "chart-of-account-table-" + props.node },
     enableRowSelection: false,
     enableStickyHeader: true,
     enableClickToCopy: true,
     enableGlobalFilter: false,
-    enableGrouping: true,
-    onGlobalFilterChange: filter.setGlobalFilter,
+    enableGrouping: false,
+    // onGlobalFilterChange: filter.setGlobalFilter,
     enableSelectAll: false,
     enableSubRowSelection: false,
     enableStickyFooter: true,
-
-    onGroupingChange: filter.setGroups,
-    onColumnFiltersChange: filter.setColumnsFilter,
-    onSortingChange: filter.setSorting,
+    // onGroupingChange: filter.setGroups,
+    // onColumnFiltersChange: filter.setColumnsFilter,
+    // onSortingChange: filter.setSorting,
     enableExpanding: true,
     enableRowActions: true,
     enableExpandAll: true,
+    renderDetailPanel({ row: { original } }) {
+      return (
+        <Table align="center">
+          <thead>
+            <tr>
+              <th>Full Name</th>
+              <th>Phone Number</th>
+              <th>Create Date</th>
+              <th>Parent</th>
+              <th>Email</th>
+              <th>Country</th>
+              <th>Address</th>
+            </tr>
+            <tr>
+              <td>
+                {original.first_name} {original.last_name}
+              </td>
+              <td>{original.phone_number}</td>
+              <td>{original.create_date.toLocaleDateString()}</td>
+              <td>
+                ({original.id}){" "}
+                {
+                  props.parents.find((res) => res.id === original.parent_id)
+                    ?.name
+                }
+              </td>
+
+              <td> {original.email}</td>
+              <td> {original.country}</td>
+              <td> {original.address}</td>
+            </tr>
+          </thead>
+        </Table>
+      );
+    },
 
     renderRowActionMenuItems({
       row: {
@@ -225,14 +292,19 @@ export default function ChartOfAccountTable(props: Props) {
       },
     }) {
       return [
-        <Authorized permission="Edit_Chart_Of_Account" key={1}>
+        <Authorized permission="Update_Chart_Of_Account" key={1}>
           <Link href={pathName + "/form?id=" + id}>
             <MenuItem className="cursor-pointer" disabled={isPadding}>
               Edit
             </MenuItem>
           </Link>
         </Authorized>,
-        <Authorized permission="Delete_Chart_Of_Account" key={2}>
+        <Authorized permission="View_Chart_Of_Account" key={2}>
+          <MenuItem disabled={isPadding} className="cursor-pointer">
+            <Link href={pathName + "/" + id}>View</Link>
+          </MenuItem>
+        </Authorized>,
+        <Authorized permission="Delete_Chart_Of_Account" key={3}>
           <MenuItem
             disabled={isPadding}
             className="cursor-pointer"
@@ -242,8 +314,8 @@ export default function ChartOfAccountTable(props: Props) {
               );
               if (isConfirm) {
                 setTransition(async () => {
-                  // const result = await deleteChart(id);
-                  // toast.OpenAlert(result);
+                  const result = await deleteChartOfAccountService(id);
+                  toast.OpenAlert(result);
                 });
               }
             }}
@@ -258,82 +330,60 @@ export default function ChartOfAccountTable(props: Props) {
       align: "left",
     },
 
-    onExpandedChange: filter.setExpanded,
-    enablePagination: false,
-    initialState: { showColumnFilters: filter.filterColumns?.length > 0 },
+    // onExpandedChange: filter.setExpanded,
+    enablePagination: true,
+    // initialState: { showColumnFilters: filter.filterColumns?.length > 0 },
 
     filterFromLeafRows: true,
-    onShowColumnFiltersChange: filter.setShowColumnFilters,
+    // onPaginationChange: filter.setPagination,
+    // onShowColumnFiltersChange: filter.setShowColumnFilters,
     state: {
-      expanded: filter.expanded,
-      grouping: filter.groups,
-      showColumnFilters: filter.showColumnFilters,
+      // pagination: filter.pagination,
+      // expanded: filter.expanded,
+      // grouping: filter.groups,
+      // showColumnFilters: filter.showColumnFilters,
 
       showLoadingOverlay: isPadding,
-      sorting: filter.sorting,
-      globalFilter: filter.globalFilter,
-      columnFilters: filter.filterColumns,
+      // sorting: filter.sorting,
+      // globalFilter: filter.globalFilter,
+      // columnFilters: filter.filterColumns,
     },
   });
-
   useEffect(() => {
     setTransition(() => {
-      if (props.accountId) {
-        findChartOfAccountForAccountsServiceGrouded({
-          accountId: props.accountId,
-          from: form.formState.defaultValues.from,
-          to: form.formState.defaultValues.to,
-          classLevel: form.formState.defaultValues.classLevel,
-        }).then((res) => {
-          setData(res.result);
-        });
-      } else {
-        findChartOfAccountByGrouping(form.formState.defaultValues, true).then(
-          (res) => {
-            setData(res.result.groupedTabls);
-          }
-        );
-      }
-    });
-  }, [form.formState.defaultValues, props.accountId]);
-
-  useEffect(() => {
-    props.onDateChange?.(watch[0], watch[1]);
-  }, [props, watch]);
-
-  const handleSubimt = useCallback(
-    (values: ChartOfAccountSearchSchema) => {
-      setTransition(() => {
-        if (props.accountId) {
-          findChartOfAccountForAccountsServiceGrouded({
-            accountId: props.accountId,
-            classLevel: values.classLevel,
-            from: values.from,
-            to: values.to,
-          }).then((res) => {
-            setData(res.result);
-          });
-        } else {
-          findChartOfAccountByGrouping(
-            {
-              from: values.from,
-              to: values.to,
-              classLevel: values.classLevel,
-            },
-            true
-          ).then((res) => {
-            setData(res.result.groupedTabls);
-          });
-        }
+      findChartOfAccounts(form.formState.defaultValues).then((res) => {
+        setData(res.result);
       });
-    },
-    [props.accountId]
-  );
+    });
+  }, [form.formState.defaultValues]);
 
+  const handleSubimt = useCallback((values: ChartOfAccountSearchSchema) => {
+    setTransition(() => {
+      findChartOfAccounts({
+        from: values.from,
+        to: values.to,
+        id: values.id,
+        include_reffrence: values.include_reffrence,
+        type: values.type,
+      }).then((res) => {
+        setData(res.result);
+      });
+    });
+  }, []);
   return (
     <Card>
+      <Card className="mb-5">
+        <CardContent>
+          <Typography className="text-2xl capitalize">
+            Total {props.node?.replaceAll("_", " ") ?? "Chart Of Account"}s
+          </Typography>
+          <Typography className="text-end text-3xl">
+            {FormatNumberWithFixed(data.length, 0)}
+          </Typography>
+        </CardContent>
+      </Card>
       <form
-        className=" p-5  gap-2 flex flex-col  "
+        className=" p-5  gap-2 flex flex-col "
         onSubmit={form.handleSubmit(handleSubimt)}
       >
         <div className="flex-col md:flex-row flex justify-between items-center gap-5">
@@ -345,13 +395,13 @@ export default function ChartOfAccountTable(props: Props) {
                 exportToExcell({
                   to: form.getValues("to"),
                   from: form.getValues("from"),
-                  sheet: "chart of account",
-                  id: "chart-of-account-table",
+                  sheet: "chart of account " + props.node,
+                  id: "chart-of-account-table-" + props.node,
                 });
               });
             }}
           >
-            Export Excal
+            Export Excel
           </Button>
           <Button
             loading={isPadding}
@@ -407,53 +457,6 @@ export default function ChartOfAccountTable(props: Props) {
               </FormControl>
             )}
           />
-          <Controller
-            name="classLevel"
-            control={form.control}
-            render={({ field, fieldState, formState }) => (
-              <FormControl>
-                <FormLabel>Class</FormLabel>
-                <Select
-                  multiple
-                  value={field.value}
-                  defaultValue={field.value}
-                  onChange={(e, newValue) => {
-                    field.onChange(newValue);
-                  }}
-                >
-                  {Array.from({ length: 9 }).map((res, i) => {
-                    return (
-                      <Option value={i + 1 + ""} key={i}>
-                        {i + 1}
-                      </Option>
-                    );
-                  })}
-                </Select>
-              </FormControl>
-            )}
-          />
-
-          {props.currenices?.length > 1 && (
-            <div>
-              <FormControl>
-                <FormLabel>Curreny</FormLabel>
-                <Select
-                  value={currency}
-                  onChange={(e, n) => {
-                    setCurrency(n);
-                  }}
-                >
-                  {props.currenices.map((res, i) => {
-                    return (
-                      <Option value={res} key={i}>
-                        {res.symbol}
-                      </Option>
-                    );
-                  })}
-                </Select>
-              </FormControl>
-            </div>
-          )}
         </div>
       </form>
 
@@ -461,7 +464,7 @@ export default function ChartOfAccountTable(props: Props) {
     </Card>
   );
 }
-const columnGroupedDataHelper = createMRTColumnHelper<AccountGrouped>();
+const columnGroupedDataHelper = createMRTColumnHelper<ChartOfAccounts>();
 
 const useFilter = create<TableStateModel>()(
   persist(
@@ -587,8 +590,41 @@ const useFilter = create<TableStateModel>()(
       },
     }),
     {
-      name: "chart-of-account-table",
+      name: "chart-of-account-table-account",
       storage: createJSONStorage(() => localStorage),
     }
   )
 );
+{
+  /* <tbody>
+{original.voucher_items
+  .concat(original.reffrence_voucher_items)
+  .map((res) => (
+    <tr>
+      <td>
+        {/* <Link
+          href={`/admin/accounting/journal_voucher/form?id=${res.voucher_id}`}
+        > */
+}
+//   {res.voucher.id}
+//   {/* </Link> */}
+// </td>
+
+//   <td>{res.voucher.title}</td>
+//   <td>{res.voucher.description}</td>
+//   <td>{res.voucher.to_date.toLocaleDateString()}</td>
+//   <td>{res.debit_credit}</td>
+
+//   <td>
+//     {res.currency?.symbol ?? res.voucher.currency.symbol}
+//     {FormatNumberWithFixed(res.amount, 2)}
+//   </td>
+//   <td>
+//     {FormatNumberWithFixed(
+//       res.currency?.rate ?? res.voucher.currency.rate,
+//       2
+//     )}
+//   </td>
+// </tr>
+// ))}
+// </tbody> */}

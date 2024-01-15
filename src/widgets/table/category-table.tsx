@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useTransition } from "react";
 
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
-import Authorized from "@rms/components/ui/authorized";
+import Authorized from "@rms/components/other/authorized";
 import { useToast } from "@rms/hooks/toast-hook";
 import {
   deleteCategoryById,
@@ -113,7 +113,7 @@ export default function CategoryTable(props: Props) {
             original: { id, name },
           },
         }) => [
-          <Authorized permission="Edit_Currency" key={1}>
+          <Authorized permission="Update_Currency" key={1}>
             <Link href={pathName + "/form?id=" + id}>
               <MenuItem className="cursor-pointer" disabled={isPadding}>
                 Edit

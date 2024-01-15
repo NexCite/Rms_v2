@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
-import Authorized from "@rms/components/ui/authorized";
+import Authorized from "@rms/components/other/authorized";
 import { useToast } from "@rms/hooks/toast-hook";
 import { FormatNumberWithFixed } from "@rms/lib/global";
 import { Activity, ActivityStatus } from "@rms/models/CommonModel";
@@ -19,7 +19,7 @@ import {
 import Link from "next/link";
 import ExportData from "@rms/components/other/export-data";
 import useHistoryStore from "@rms/hooks/history-hook";
-import Loading from "@rms/components/ui/loading";
+import Loading from "@rms/components/other/loading";
 import LoadingClient from "@rms/components/other/loading-client";
 
 type Props = {
@@ -186,7 +186,7 @@ export default function ActivityTable(props: Props) {
       },
     }) {
       return [
-        <Authorized key={1} permission={"Edit_Activity"}>
+        <Authorized key={1} permission={"Update_Activity"}>
           <Link href={"/admin/accounting/entry" + "/form?activity_id=" + id}>
             <MenuItem className="cursor-pointer" disabled={isPadding}>
               Edit

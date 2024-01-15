@@ -2,7 +2,6 @@
 
 import { Prisma } from "@prisma/client";
 import { handlerServiceAction } from "@rms/lib/handler";
-import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 /**
  *
@@ -20,9 +19,10 @@ export async function createCategory(
       await prisma.category.create({ data: props });
       return;
     },
-    "Add_Category",
-    true,
-    props
+    "Create_Category",
+    {
+      update: true,
+    }
   );
 }
 
@@ -45,9 +45,10 @@ export async function updateCategory(
         data: props,
       });
     },
-    "Edit_Category",
-    true,
-    props
+    "Update_Category",
+    {
+      update: true,
+    }
   );
 }
 /**
@@ -62,8 +63,7 @@ export async function deleteCategoryById(id: number) {
       await prisma.category.delete({ where: { id } });
     },
     "Delete_Category",
-    true,
-    { id }
+    { update: true }
   );
 }
 export async function resetCategory(id: number) {
@@ -78,6 +78,8 @@ export async function resetCategory(id: number) {
       });
     },
     "Reset",
-    true
+    {
+      update: true,
+    }
   );
 }

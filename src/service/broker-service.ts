@@ -15,9 +15,10 @@ export async function createBroker(props: Prisma.BrokerUncheckedCreateInput) {
       await prisma.broker.create({ data: props });
       return;
     },
-    "Add_Broker",
-    true,
-    props
+    "Create_Broker",
+    {
+      update: true,
+    }
   );
 }
 
@@ -35,9 +36,10 @@ export async function updateBroker(
         data: props,
       });
     },
-    "Edit_Broker",
-    true,
-    props
+    "Update_Broker",
+    {
+      update: true,
+    }
   );
 }
 
@@ -57,8 +59,7 @@ export async function deleteBrokerById(id: number) {
       return;
     },
     "Delete_Broker",
-    true,
-    { id }
+    { update: true }
   );
 }
 export async function resetBroker(id: number) {
@@ -73,6 +74,8 @@ export async function resetBroker(id: number) {
       });
     },
     "Reset",
-    true
+    {
+      update: true,
+    }
   );
 }

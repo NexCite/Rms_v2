@@ -21,8 +21,11 @@ export default async function page(props: { searchParams: { id: string } }) {
           currency: true,
           voucher_items: {
             include: {
-              chart_of_account: true,
-              reference_chart_of_account: true,
+              chart_of_account: {
+                include: { currency: true },
+              },
+              reference_chart_of_account: { include: { currency: true } },
+              currency: true,
             },
           },
         },
@@ -46,6 +49,7 @@ export default async function page(props: { searchParams: { id: string } }) {
             reffrence_chart_of_account: res.reference_chart_of_account,
             debit_credit: res.debit_credit,
             rate: res.rate,
+            currency: res.currency,
           })),
         };
       });

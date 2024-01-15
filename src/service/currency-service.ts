@@ -11,15 +11,11 @@ import prisma from "@rms/prisma/prisma";
  */
 
 export async function findCurrenciesService() {
-  return handlerServiceAction(
-    async (user, config_id) => {
-      return await prisma.currency.findMany({
-        where: { config_id: config_id },
-      });
-    },
-    "View_Currencies",
-    false
-  );
+  return handlerServiceAction(async (user, config_id) => {
+    return await prisma.currency.findMany({
+      where: { config_id: config_id },
+    });
+  }, "View_Currencies");
 }
 
 export async function createCurrency(
@@ -32,9 +28,11 @@ export async function createCurrency(
 
       return await prisma.currency.create({ data: props });
     },
-    "Add_Currency",
-    true,
-    props
+    "Create_Currency",
+    {
+      update: true,
+      body: props,
+    }
   );
 }
 
@@ -56,9 +54,11 @@ export async function updateCurrency(
         data: props,
       });
     },
-    "Edit_Currency",
-    true,
-    props
+    "Update_Currency",
+    {
+      update: true,
+      body: props,
+    }
   );
 }
 
@@ -73,8 +73,7 @@ export async function deleteCurrency(id: number) {
       return await prisma.currency.delete({ where: { id: id, config_id } });
     },
     "Delete_Currency",
-    true,
-    { id }
+    { update: true }
   );
 }
 export async function resetCurrency(id: number) {
@@ -89,6 +88,9 @@ export async function resetCurrency(id: number) {
       });
     },
     "Reset",
-    true
+    {
+      update: true,
+      body: { id: id },
+    }
   );
 }

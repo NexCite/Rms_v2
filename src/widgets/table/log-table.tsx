@@ -2,18 +2,15 @@
 
 import { Prisma } from "@prisma/client";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { Card, CardHeader, Typography } from "@mui/material";
+import dayjs from "dayjs";
 import {
-  MRT_ColumnDef,
-  MRT_ColumnFiltersState,
   MaterialReactTable,
   createMRTColumnHelper,
   useMaterialReactTable,
 } from "material-react-table";
-import dayjs from "dayjs";
-import useHistoryStore from "@rms/hooks/history-hook";
+import { Card, Typography } from "@mui/joy";
 
 type Props = {
   data: Prisma.LogGetPayload<{ include: { user: true } }>[];
@@ -53,14 +50,8 @@ export default function LogTable(props: Props) {
   });
 
   return (
-    <Card variant="outlined">
-      <CardHeader
-        title={
-          <Typography variant="h5" color="blue-gray">
-            Recent Logs
-          </Typography>
-        }
-      />
+    <Card className="w-full">
+      <Typography>Recent Logs</Typography>
 
       <MaterialReactTable table={table} />
     </Card>

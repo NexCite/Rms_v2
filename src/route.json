@@ -2,181 +2,173 @@
   {
     "index": 0,
     "title": "Accounting",
-
+    "routeKey": "accounting",
     "children": [
       {
         "index": 0,
-        "title": "Entries",
-        "path": "/admin/accounting/entry",
-        "key": "View_Entries",
-        "addKey": "Add_Entry"
+        "title": "Journal Voucher",
+        "path": "/admin/accounting/journal_voucher",
+        "permission": "View_Voucher",
+        "routeKey": "journal_voucher",
+        "addKey": "Create_Voucher"
       },
       {
         "index": 1,
-        "title": "Clients",
-        "path": "/admin/accounting/account/Client",
-        "key": "View_Entry_Clients",
-        "addKey": "Add_Entry_Client"
+        "title": "Chart Of Accounts",
+        "path": "/admin/accounting/chart_of_account",
+        "permission": "View_Chart_Of_Accounts",
+        "routeKey": "chart_of_account",
+        "addKey": "Create_Chart_Of_Account"
       },
       {
         "index": 2,
-        "title": "IBs",
-        "path": "/admin/accounting/account/IB",
-        "key": "View_Entry_IBs",
-        "addKey": "Add_Entry_IB"
+        "title": "Clients",
+        "routeKey": "client",
+        "path": "/admin/accounting/account/client",
+        "permission": "View_Chart_Of_Accounts"
       },
       {
         "index": 3,
-        "title": "Suppliers",
-        "path": "/admin/accounting/account/Supplier",
-        "key": "View_Entry_Suppliers",
-        "addKey": "Add_Entry_Supplier"
+        "title": "IBs",
+        "routeKey": "ib",
+        "path": "/admin/accounting/account/ib",
+        "permission": "View_Chart_Of_Accounts"
       },
       {
         "index": 4,
-        "title": "Two Digit Or More",
-        "path": "/admin/accounting/digit/two",
-        "key": "View_Twos_Digit",
-        "addKey": "Add_Two_Digit"
+        "routeKey": "supplier",
+        "title": "Suppliers",
+        "path": "/admin/accounting/account/supplier",
+        "permission": "View_Chart_Of_Accounts"
       },
       {
         "index": 5,
-        "title": "Three Digit Or More",
-        "path": "/admin/accounting/digit/three",
-        "key": "View_Threes_Digit",
-        "addKey": "Add_Three_Digit"
+        "routeKey": "employee",
+        "title": "Employee",
+        "path": "/admin/accounting/account/employee",
+        "permission": "View_Employees",
+        "addKey": "Create_Employee"
       },
       {
         "index": 6,
-        "title": "Four Digit Or More",
-        "path": "/admin/accounting/digit/more",
-        "key": "View_More_Than_Four_Digit",
-        "addKey": "Add_More_Than_Four_Digit"
+        "title": "Balance Sheet",
+        "path": "/admin/accounting/balance_sheet",
+        "permission": "View_Chart_Of_Accounts",
+        "routeKey": "balance_sheet"
       },
       {
         "index": 7,
-        "title": "Sheet State",
-        "path": "/admin/accounting/sheet_state",
-        "key": "View_Sheet_State"
-      },
-      {
-        "index": 8,
         "title": "Activities",
         "path": "/admin/accounting/activity",
-        "key": "View_Activities"
-      },
-      {
-        "index": 9,
-        "title": "View Entry",
-        "path": "/admin/accounting/entry/[id]",
-        "key": "View_Entry",
-        "hide": true
+        "permission": "View_Activities",
+        "routeKey": "Activity"
       }
     ],
-    "key": "Accounting",
+    "permission": "Accounting",
     "path": "/admin/accounting",
-    "icon": "Calculator"
+    "icon": "Calculate"
   },
   {
     "index": 1,
     "title": "Trading",
-    "icon": "LineChart",
+    "icon": "Receipt",
+    "routeKey": "trading",
     "children": [
       {
         "index": 0,
         "title": "Invoices",
         "path": "/admin/trading/invoice",
-        "key": "View_Invoices",
-        "addKey": "Add_Invoice"
+        "permission": "View_Invoices",
+        "addKey": "Create_Invoice"
       },
       {
         "index": 1,
         "title": "Payments",
         "path": "/admin/trading/payment",
-        "key": "View_Payments",
-        "addKey": "Add_Payment"
+        "permission": "View_Payments",
+        "addKey": "Create_Payment"
       },
       {
         "index": 2,
         "title": "Traders",
         "path": "/admin/trading/accounts/trader",
-        "key": "View_Traders",
-        "addKey": "Add_Trader"
+        "permission": "View_Chart_Of_Accounts"
       },
       {
         "index": 3,
         "title": "Accounts",
         "path": "/admin/trading/accounts/account",
-        "key": "View_Account",
-        "addKey": "Add_Accounts"
+        "permission": "View_Account",
+        "addKey": "Create_Account"
       },
-
       {
         "index": 4,
         "title": "Broker",
         "path": "/admin/trading/accounts/broker",
-        "key": "View_Brokers",
-        "addKey": "Add_Broker"
+        "permission": "View_Brokers",
+        "addKey": "Create_Broker"
       }
     ],
-    "key": "Trading",
+    "permission": "Trading",
     "path": "/admin/trading"
   },
   {
     "index": 2,
-    "icon": "Landmark",
-
+    "icon": "Payments",
     "title": "Payments Box",
+    "routeKey": "payment_box",
     "children": [
       {
         "index": 0,
         "title": "Equities",
         "path": "/admin/payment_box/equity",
-        "key": "View_Equities",
-        "addKey": "Add_Equity"
+        "permission": "View_Equities",
+        "addKey": "Create_Equity"
       },
       {
         "index": 1,
         "title": "Equities",
         "path": "/admin/payment_box/equity/[id]",
-        "key": "View_Equity",
+        "permission": "View_Equity",
         "hide": true
       }
     ],
-    "key": "PaymentBox",
+    "permission": "PaymentBox",
     "path": "/admin/payment_box"
   },
   {
     "index": 3,
     "title": "Human Resources",
-    "icon": "Users",
+    "icon": "Person",
+    "routeKey": "human_resources",
     "children": [
       {
         "index": 0,
         "title": "Employees",
         "path": "/admin/human_resources/employee",
-        "key": "View_Employees",
-        "addKey": "Add_Employee"
+        "permission": "View_Employees",
+        "addKey": "Create_Employee"
       },
       {
         "index": 1,
         "title": "Schedules",
         "path": "/admin/human_resources/schedule",
-        "key": "View_Schedules",
-        "addKey": "Add_Schedule"
+        "permission": "View_Schedules",
+        "addKey": "Create_Schedule"
       },
       {
         "index": 1,
         "title": "Vacations",
         "path": "/admin/human_resources/vacation",
-        "key": "View_Vacations",
-        "addKey": "Add_Vacation"
+        "permission": "View_Vacations",
+        "addKey": "Create_Vacation"
       }
     ],
-    "key": "Human_Resources",
+    "permission": "Human_Resources",
     "path": "/admin/human_resources"
   },
   {
+    "routeKey": "setting",
     "index": 4,
     "title": "Settings",
     "end": true,
@@ -185,74 +177,69 @@
         "index": 0,
         "title": "Currencies",
         "path": "/admin/setting/currency",
-        "key": "View_Currencies",
-        "addKey": "Add_Currency",
-        "icon": "Coins"
+        "permission": "View_Currencies",
+        "addKey": "Create_Currency",
+        "routeKey": "currency"
       },
       {
         "index": 1,
-        "title": "Users",
+        "title": "User",
         "path": "/admin/setting/user",
-        "key": "View_Users",
-        "addKey": "Add_User",
-        "icon": "Users2"
+        "permission": "View_Users",
+        "addKey": "Create_User",
+        "routeKey": "user"
       },
       {
         "index": 2,
         "title": "Logs",
         "path": "/admin/setting/log",
-        "key": "View_Log",
-        "icon": "ScrollText"
+        "permission": "View_Log",
+        "routeKey": "log"
       },
       {
         "index": 3,
         "title": "Profile",
         "path": "/admin/setting/profile",
-        "key": "View_Profile",
-        "icon": "UserCircle"
+        "permission": "View_Profile",
+        "routeKey": "profile"
       },
       {
         "index": 4,
         "title": "Categories",
         "path": "/admin/setting/category/category",
-        "key": "View_Categories",
-        "addKey": "Add_Category",
-        "icon": "Book"
+        "permission": "View_Categories",
+        "addKey": "Create_Category"
       },
       {
         "index": 5,
         "title": "Sub Categories",
         "path": "/admin/setting/category/sub_category",
-        "key": "View_SubCategories",
-        "addKey": "Add_SubCategory",
-        "icon": "BookCopy"
+        "permission": "View_SubCategories",
+        "addKey": "Create_SubCategory"
       },
       {
         "index": 6,
         "title": "Schedule Config",
         "path": "/admin/setting/schedule_config",
-        "key": "View_Schedules_Config",
-        "addKey": "None",
-        "icon": "CalendarClock"
+        "permission": "View_Schedules_Config"
       },
       {
         "index": 7,
         "title": "Configuration",
         "path": "/admin/setting/configuration",
-        "key": "View_Config",
-        "addKey": "Add_Config",
-        "icon": "SlidersHorizontal"
+        "permission": "View_Config"
       },
       {
         "index": 8,
         "title": "Roles",
         "path": "/admin/setting/role",
-        "key": "View_Role",
-        "addKey": "Add_Role",
-        "icon": "UserCog"
+        "permission": "View_Role",
+        "addKey": "Create_Role",
+        "routeKey": "role"
       }
     ],
-    "key": "Setting",
+    "permission": "Setting",
+    "icon": "Settings",
     "path": "/admin/setting"
   }
 ]

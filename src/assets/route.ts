@@ -1,10 +1,6 @@
 import RouteModel from "@rms/models/RouteModel";
-import CalculateIcon from "@mui/icons-material/CalculateRounded";
-import ReceiptIcon from "@mui/icons-material/ReceiptRounded";
-import PaymentsIcon from "@mui/icons-material/PaymentsRounded";
-import PersonIcon from "@mui/icons-material/PersonRounded";
-import SettingsIcon from "@mui/icons-material/SettingsRounded";
-const route: RouteModel[] = [
+
+var route: RouteModel[] = [
   {
     index: 0,
     title: "Accounting",
@@ -16,7 +12,7 @@ const route: RouteModel[] = [
         path: "/admin/accounting/journal_voucher",
         permission: "View_Voucher",
         routeKey: "journal_voucher",
-        addKey: "Add_Voucher",
+        addKey: "Create_Voucher",
       },
 
       {
@@ -25,15 +21,14 @@ const route: RouteModel[] = [
         path: "/admin/accounting/chart_of_account",
         permission: "View_Chart_Of_Accounts",
         routeKey: "chart_of_account",
-        addKey: "Add_Chart_Of_Account",
+        addKey: "Create_Chart_Of_Account",
       },
       {
         index: 2,
         title: "Clients",
         routeKey: "client",
         path: "/admin/accounting/account/client",
-        permission: "View_Entry_Clients",
-        addKey: "Add_Entry_Client",
+        permission: "View_Chart_Of_Accounts",
       },
       {
         index: 3,
@@ -41,16 +36,14 @@ const route: RouteModel[] = [
         routeKey: "ib",
 
         path: "/admin/accounting/account/ib",
-        permission: "View_Entry_IBs",
-        addKey: "Add_Entry_IB",
+        permission: "View_Chart_Of_Accounts",
       },
       {
         index: 4,
         routeKey: "supplier",
         title: "Suppliers",
         path: "/admin/accounting/account/supplier",
-        permission: "View_Entry_Suppliers",
-        addKey: "Add_Entry_Supplier",
+        permission: "View_Chart_Of_Accounts",
       },
       {
         index: 5,
@@ -58,15 +51,14 @@ const route: RouteModel[] = [
         title: "Employee",
         path: "/admin/accounting/account/employee",
         permission: "View_Employees",
-        addKey: "Add_Employee",
+        addKey: "Create_Employee",
       },
       {
         index: 6,
         title: "Balance Sheet",
         path: "/admin/accounting/balance_sheet",
-        permission: "View_Balance_Sheets",
+        permission: "View_Chart_Of_Accounts",
         routeKey: "balance_sheet",
-        addKey: "" as any,
       },
 
       {
@@ -79,12 +71,12 @@ const route: RouteModel[] = [
     ],
     permission: "Accounting",
     path: "/admin/accounting",
-    icon: CalculateIcon,
+    icon: "Calculate",
   },
   {
     index: 1,
     title: "Trading",
-    icon: ReceiptIcon,
+    icon: "Receipt",
     routeKey: "trading",
 
     children: [
@@ -93,28 +85,27 @@ const route: RouteModel[] = [
         title: "Invoices",
         path: "/admin/trading/invoice",
         permission: "View_Invoices",
-        addKey: "Add_Invoice",
+        addKey: "Create_Invoice",
       },
       {
         index: 1,
         title: "Payments",
         path: "/admin/trading/payment",
         permission: "View_Payments",
-        addKey: "Add_Payment",
+        addKey: "Create_Payment",
       },
       {
         index: 2,
         title: "Traders",
         path: "/admin/trading/accounts/trader",
-        permission: "View_Traders",
-        addKey: "Add_Trader",
+        permission: "View_Chart_Of_Accounts",
       },
       {
         index: 3,
         title: "Accounts",
         path: "/admin/trading/accounts/account",
         permission: "View_Account",
-        addKey: "Add_Account",
+        addKey: "Create_Account",
       },
 
       {
@@ -122,7 +113,7 @@ const route: RouteModel[] = [
         title: "Broker",
         path: "/admin/trading/accounts/broker",
         permission: "View_Brokers",
-        addKey: "Add_Broker",
+        addKey: "Create_Broker",
       },
     ],
     permission: "Trading",
@@ -130,7 +121,7 @@ const route: RouteModel[] = [
   },
   {
     index: 2,
-    icon: PaymentsIcon,
+    icon: "Payments",
 
     title: "Payments Box",
     routeKey: "payment_box",
@@ -141,7 +132,7 @@ const route: RouteModel[] = [
         title: "Equities",
         path: "/admin/payment_box/equity",
         permission: "View_Equities",
-        addKey: "Add_Equity",
+        addKey: "Create_Equity",
       },
       {
         index: 1,
@@ -157,7 +148,7 @@ const route: RouteModel[] = [
   {
     index: 3,
     title: "Human Resources",
-    icon: PersonIcon,
+    icon: "Person",
     routeKey: "human_resources",
     children: [
       {
@@ -165,21 +156,21 @@ const route: RouteModel[] = [
         title: "Employees",
         path: "/admin/human_resources/employee",
         permission: "View_Employees",
-        addKey: "Add_Employee",
+        addKey: "Create_Employee",
       },
       {
         index: 1,
         title: "Schedules",
         path: "/admin/human_resources/schedule",
         permission: "View_Schedules",
-        addKey: "Add_Schedule",
+        addKey: "Create_Schedule",
       },
       {
         index: 1,
         title: "Vacations",
         path: "/admin/human_resources/vacation",
         permission: "View_Vacations",
-        addKey: "Add_Vacation",
+        addKey: "Create_Vacation",
       },
     ],
     permission: "Human_Resources",
@@ -197,7 +188,7 @@ const route: RouteModel[] = [
         title: "Currencies",
         path: "/admin/setting/currency",
         permission: "View_Currencies",
-        addKey: "Add_Currency",
+        addKey: "Create_Currency",
 
         routeKey: "currency",
       },
@@ -207,7 +198,7 @@ const route: RouteModel[] = [
 
         path: "/admin/setting/user",
         permission: "View_Users",
-        addKey: "Add_User",
+        addKey: "Create_User",
         routeKey: "user",
       },
       {
@@ -215,6 +206,7 @@ const route: RouteModel[] = [
         title: "Logs",
         path: "/admin/setting/log",
         permission: "View_Log",
+        routeKey: "log",
       },
       {
         index: 3,
@@ -228,14 +220,14 @@ const route: RouteModel[] = [
         title: "Categories",
         path: "/admin/setting/category/category",
         permission: "View_Categories",
-        addKey: "Add_Category",
+        addKey: "Create_Category",
       },
       {
         index: 5,
         title: "Sub Categories",
         path: "/admin/setting/category/sub_category",
         permission: "View_SubCategories",
-        addKey: "Add_SubCategory",
+        addKey: "Create_SubCategory",
       },
       {
         index: 6,
@@ -254,11 +246,12 @@ const route: RouteModel[] = [
         title: "Roles",
         path: "/admin/setting/role",
         permission: "View_Role",
-        addKey: "Add_Role",
+        addKey: "Create_Role",
+        routeKey: "role",
       },
     ],
     permission: "Setting",
-    icon: SettingsIcon,
+    icon: "Settings",
     path: "/admin/setting",
   },
 ];

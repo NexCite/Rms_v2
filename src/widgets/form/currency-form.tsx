@@ -19,7 +19,7 @@ import {
   Typography,
 } from "@mui/joy";
 import NexCiteButton from "@rms/components/button/nexcite-button";
-import NumericFormatCustom from "@rms/components/ui/text-field-number";
+import NumericFormatCustom from "@rms/components/input/text-field-number";
 import { useToast } from "@rms/hooks/toast-hook";
 import { createCurrency, updateCurrency } from "@rms/service/currency-service";
 type Props = { value: Prisma.CurrencyGetPayload<{}> };
@@ -86,7 +86,7 @@ export default function CurrencyForm(props: Props) {
         }
       });
     },
-    [back, props.value, form, toast]
+    [props.value, toast, form, replace, pathName]
   );
   return (
     <>

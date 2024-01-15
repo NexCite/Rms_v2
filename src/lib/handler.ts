@@ -12,8 +12,11 @@ import { checkUserPermissions } from "./auth";
 export async function handlerServiceAction<T>(
   action: (info?: UserFullInfoType, config_id?: number) => Promise<T>,
   key: $Enums.UserPermission | "None",
-  update?: boolean,
-  body?: any
+  props?: {
+    update?: boolean;
+    hotReload?: boolean;
+    body?: any;
+  }
 ) {
   if (key === "None") {
     try {
@@ -64,7 +67,7 @@ export async function handlerServiceAction<T>(
           resultPermissions.data!,
           resultPermissions.data.config.id
         );
-        if (!url.pathname.includes("/log")) {
+        if (!url.pathname.includes("/log") && props?.body) {
           await createLog({
             action: key.includes("Add")
               ? "Add"
@@ -75,12 +78,19 @@ export async function handlerServiceAction<T>(
               : "View",
             page: url.toString(),
             user_id: resultPermissions.data.user.id,
-            body: JSON.stringify(body),
+            body: JSON.stringify(props.body),
           });
         }
 
-        if (update) {
-          revalidatePath(urlHeader, "layout");
+        if (props?.update) {
+          console.log(urlHeader);
+          if (props.hotReload) {
+            generatePaths(urlHeader).forEach((res) => {
+              revalidatePath(res, "layout");
+            });
+          } else {
+            revalidatePath(urlHeader, "layout");
+          }
         }
         return {
           status: HttpStatusCode.OK,
@@ -88,7 +98,6 @@ export async function handlerServiceAction<T>(
           message: "Operation Successfully",
         };
       } catch (error: any) {
-        console.log(error);
         if ((error as any).meta && (error as any).message) {
           await createLog({
             action: key.includes("Add")
@@ -100,7 +109,7 @@ export async function handlerServiceAction<T>(
               : "View",
             page: url.toString(),
             user_id: resultPermissions.data.user.id,
-            body: JSON.stringify(body),
+            body: JSON.stringify(props?.body),
             error: JSON.stringify(error.message),
           });
           if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -142,7 +151,6 @@ export async function handlerServiceAction<T>(
     }
   }
 }
-
 function generatePaths(inputPath: string) {
   const paths = inputPath.split("/").filter(Boolean);
   const result = [];

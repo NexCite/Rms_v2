@@ -5,7 +5,23 @@ import { $Enums } from "@prisma/client";
 export default interface RouteModel {
   title: string;
   path: string;
-  icon?: OverridableComponent<SvgIconTypeMap<{}, "svg">>;
+  icon?:
+    | "Person"
+    | "Payments"
+    | "Calculate"
+    | "Receipt"
+    | "Settings"
+    | "Dashboard"
+    | "People"
+    | "LocalOffer"
+    | "Schedule"
+    | "ListAlt"
+    | "AssignmentInd"
+    | "Assignment"
+    | "AssignmentTurnedIn"
+    | "AssignmentLate"
+    | "AssignmentReturned"
+    | "AssignmentRe";
   routeKey?: string;
   index: number;
   permission: $Enums.UserPermission;

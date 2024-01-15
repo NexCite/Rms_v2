@@ -26,7 +26,7 @@ export async function createEquity(
             createMany: { data: params.adjustment_boxes as any },
           },
 
-          credit_boxes: { createMany: { data: params.credit_boxes as any } },
+          // credit_boxes: { createMany: { data: params.credit_boxes as any } },
 
           p_l: { createMany: { data: params.p_l as any } },
           coverage_boxes: {
@@ -37,9 +37,8 @@ export async function createEquity(
 
       return;
     },
-    "Add_Equity",
-    true,
-    params
+    "Create_Equity",
+    { update: true }
   );
 }
 
@@ -84,7 +83,7 @@ export async function updateEquity(
             createMany: { data: params.adjustment_boxes as any },
           },
 
-          credit_boxes: { createMany: { data: params.credit_boxes as any } },
+          // credit_boxes: { createMany: { data: params.credit_boxes as any } },
 
           p_l: { createMany: { data: params.p_l as any } },
           coverage_boxes: {
@@ -95,9 +94,8 @@ export async function updateEquity(
 
       return;
     },
-    "Edit_Equity",
-    true,
-    params
+    "Update_Equity",
+    { update: true }
   );
 }
 
@@ -122,8 +120,7 @@ export async function deleteEquityById(
       return;
     },
     "Delete_Equity",
-    true,
-    { id }
+    { update: true }
   );
 }
 export async function resetEquity(id: number) {
@@ -138,6 +135,8 @@ export async function resetEquity(id: number) {
       });
     },
     "Reset",
-    true
+    {
+      update: true,
+    }
   );
 }

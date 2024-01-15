@@ -2,7 +2,7 @@
 
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import { Prisma } from "@prisma/client";
-import Authorized from "@rms/components/ui/authorized";
+import Authorized from "@rms/components/other/authorized";
 import { useToast } from "@rms/hooks/toast-hook";
 import {
   deleteEmployeeById,
@@ -209,7 +209,7 @@ export default function EmployeesTable(props: Props) {
               original: { id, username },
             },
           }) => [
-            <Authorized permission="Edit_Employee" key={1}>
+            <Authorized permission="Update_Employee" key={1}>
               <Link href={pathName + "/form?id=" + id}>
                 <MenuItem className="cursor-pointer" disabled={isPadding}>
                   Edit

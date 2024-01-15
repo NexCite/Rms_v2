@@ -42,7 +42,7 @@ export async function editConfig(props: {
     });
 
     return "Config Updated";
-  }, "Edit_Config");
+  }, "Update_Config");
 }
 
 /**
@@ -135,15 +135,10 @@ export async function initConfig(props: {
  *
  */
 export async function getConfig() {
-  return handlerServiceAction(
-    async (info, config_id) => {
-      return prisma.config.findFirst({
-        where: { id: config_id },
-        select: { name: true, email: true, logo: true, phone_number: true },
-      });
-    },
-    "None",
-    false,
-    {}
-  );
+  return handlerServiceAction(async (info, config_id) => {
+    return prisma.config.findFirst({
+      where: { id: config_id },
+      select: { name: true, email: true, logo: true, phone_number: true },
+    });
+  }, "None");
 }

@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Loading from "../ui/loading";
+import Loading from "./loading";
 
 export default function LoadingClient(props: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);

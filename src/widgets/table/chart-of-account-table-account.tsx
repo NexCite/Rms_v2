@@ -2,7 +2,7 @@
 import { MenuItem } from "@mui/material";
 import { $Enums, Prisma } from "@prisma/client";
 import LoadingClient from "@rms/components/other/loading-client";
-import Authorized from "@rms/components/ui/authorized";
+import Authorized from "@rms/components/other/authorized";
 import { useToast } from "@rms/hooks/toast-hook";
 import TableStateModel from "@rms/models/TableStateModel";
 
@@ -228,13 +228,13 @@ export default function ChartOfAccountAccountsTable(props: Props) {
     enableClickToCopy: true,
     enableGlobalFilter: false,
     enableGrouping: false,
-    onGlobalFilterChange: filter.setGlobalFilter,
+    // onGlobalFilterChange: filter.setGlobalFilter,
     enableSelectAll: false,
     enableSubRowSelection: false,
     enableStickyFooter: true,
-    onGroupingChange: filter.setGroups,
-    onColumnFiltersChange: filter.setColumnsFilter,
-    onSortingChange: filter.setSorting,
+    // onGroupingChange: filter.setGroups,
+    // onColumnFiltersChange: filter.setColumnsFilter,
+    // onSortingChange: filter.setSorting,
     enableExpanding: true,
     enableRowActions: true,
     enableExpandAll: true,
@@ -253,7 +253,7 @@ export default function ChartOfAccountAccountsTable(props: Props) {
             </tr>
             <tr>
               <td>
-                {original.first_name} - {original.last_name}
+                {original.first_name} {original.last_name}
               </td>
               <td>{original.phone_number}</td>
               <td>{original.create_date.toLocaleDateString()}</td>
@@ -280,7 +280,7 @@ export default function ChartOfAccountAccountsTable(props: Props) {
       },
     }) {
       return [
-        <Authorized permission="Edit_Chart_Of_Account" key={1}>
+        <Authorized permission="Update_Chart_Of_Account" key={1}>
           <Link href={pathName + "/form?id=" + id}>
             <MenuItem className="cursor-pointer" disabled={isPadding}>
               Edit
@@ -318,23 +318,23 @@ export default function ChartOfAccountAccountsTable(props: Props) {
       align: "left",
     },
 
-    onExpandedChange: filter.setExpanded,
+    // onExpandedChange: filter.setExpanded,
     enablePagination: true,
-    initialState: { showColumnFilters: filter.filterColumns?.length > 0 },
+    // initialState: { showColumnFilters: filter.filterColumns?.length > 0 },
 
     filterFromLeafRows: true,
-    onPaginationChange: filter.setPagination,
-    onShowColumnFiltersChange: filter.setShowColumnFilters,
+    // onPaginationChange: filter.setPagination,
+    // onShowColumnFiltersChange: filter.setShowColumnFilters,
     state: {
-      pagination: filter.pagination,
-      expanded: filter.expanded,
-      grouping: filter.groups,
-      showColumnFilters: filter.showColumnFilters,
+      // pagination: filter.pagination,
+      // expanded: filter.expanded,
+      // grouping: filter.groups,
+      // showColumnFilters: filter.showColumnFilters,
 
       showLoadingOverlay: isPadding,
-      sorting: filter.sorting,
-      globalFilter: filter.globalFilter,
-      columnFilters: filter.filterColumns,
+      // sorting: filter.sorting,
+      // globalFilter: filter.globalFilter,
+      // columnFilters: filter.filterColumns,
     },
   });
   useEffect(() => {
@@ -389,7 +389,7 @@ export default function ChartOfAccountAccountsTable(props: Props) {
               });
             }}
           >
-            Export Excal
+            Export Excel
           </Button>
           <Button
             loading={isPadding}

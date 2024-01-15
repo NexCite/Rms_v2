@@ -31,9 +31,10 @@ export async function confirmActivity({
       });
       return result.status;
     },
-    status === ActivityStatus.Provided ? "Edit_Activity" : "Delete_Activity",
-    true,
-    { id, status }
+    status === ActivityStatus.Provided ? "Update_Activity" : "Delete_Activity",
+    {
+      update: true,
+    }
   );
 }
 /**
@@ -59,7 +60,6 @@ export async function getActivities(id?: number, config_id?: number) {
       return result.json();
     },
     id ? "View_Activity" : "View_Activities",
-    true,
-    {}
+    { update: false }
   );
 }

@@ -16,7 +16,7 @@ import Select from "@mui/joy/Select";
 import FormLabel from "@mui/joy/FormLabel";
 
 import NexCiteButton from "@rms/components/button/nexcite-button";
-import NumericFormatCustom from "@rms/components/ui/text-field-number";
+import NumericFormatCustom from "@rms/components/input/text-field-number";
 import { useToast } from "@rms/hooks/toast-hook";
 import {
   createChartOfAccountService,

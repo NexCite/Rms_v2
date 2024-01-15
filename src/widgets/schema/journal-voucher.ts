@@ -12,6 +12,17 @@ export const ChartOfAccountSchema = z.object({
   name: z.string(),
   account_type: z.nativeEnum($Enums.AccountType).optional().nullable(),
   currency: CurrencySchema.optional().nullable(),
+  first_name: z.string().optional().nullable(),
+  chart_of_account_type: z
+    .nativeEnum($Enums.ChartOfAccountType)
+    .optional()
+    .nullable(),
+  debit_credit: z.nativeEnum($Enums.DebitCreditType).optional().nullable(),
+  last_name: z.string().optional().nullable(),
+  phone: z.string().optional().nullable(),
+  email: z.string().optional().nullable(),
+  address: z.string().optional().nullable(),
+  country: z.string().optional().nullable(),
 });
 export type CurrencySchema = z.infer<typeof CurrencySchema>;
 export type ChartOfAccountSchema = z.infer<typeof ChartOfAccountSchema>;
@@ -109,7 +120,7 @@ export { JournalVoucherInputSchema };
 type JournalVouchers = Prisma.VoucherGetPayload<{
   include: {
     currency: true;
-
+    user: true;
     voucher_items: {
       include: {
         reference_chart_of_account: {
@@ -117,6 +128,8 @@ type JournalVouchers = Prisma.VoucherGetPayload<{
             name: true;
             id: true;
             account_type: true;
+            first_name: true;
+            last_name: true;
             currency: {
               select: {
                 name: true;
@@ -131,6 +144,8 @@ type JournalVouchers = Prisma.VoucherGetPayload<{
             name: true;
             id: true;
             account_type: true;
+            first_name: true;
+            last_name: true;
             currency: {
               select: {
                 name: true;

@@ -2,15 +2,14 @@
 
 import { Prisma } from "@prisma/client";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useTransition } from "react";
 
 import { MenuItem } from "@mui/material";
-import Authorized from "@rms/components/ui/authorized";
+import Authorized from "@rms/components/other/authorized";
 import { useToast } from "@rms/hooks/toast-hook";
-import { AccountGrouped, FormatNumberWithFixed } from "@rms/lib/global";
-import { deleteCurrency, resetCurrency } from "@rms/service/currency-service";
+import { FormatNumberWithFixed } from "@rms/lib/global";
+import { deleteCurrency } from "@rms/service/currency-service";
 import {
-  MRT_ColumnDef,
   MRT_ColumnFiltersState,
   MRT_ExpandedState,
   MRT_GroupingState,
@@ -21,15 +20,12 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import Link from "next/link";
-import useHistoryStore from "@rms/hooks/history-hook";
-import ExportData from "@rms/components/other/export-data";
-import { deleteAccountEntry } from "@rms/service/account-entry-service";
-import LoadingClient from "@rms/components/other/loading-client";
+
+import NexCiteCard from "@rms/components/card/nexcite-card";
 import TableStateModel from "@rms/models/TableStateModel";
 import dayjs from "dayjs";
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-import { Card, Typography } from "@mui/joy";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 type Props = {
   currencies: Prisma.CurrencyGetPayload<{}>[];
@@ -39,15 +35,9 @@ export default function CurrencyTable(props: Props) {
   const pathName = usePathname();
   const [isPadding, setTransition] = useTransition();
   const toast = useToast();
-  const historyTablePageStore = useHistoryStore<MRT_PaginationState>(
-    "currency-table-page",
-    { pageIndex: 0, pageSize: 100 }
-  )();
-  const [loading, setLoading] = useState(true);
+
   const filter = useFilter();
-  useEffect(() => {
-    setLoading(false);
-  }, []);
+
   const table = useMaterialReactTable({
     columns,
     data: props.currencies,
@@ -59,24 +49,24 @@ export default function CurrencyTable(props: Props) {
       align: "center",
     },
 
-    onExpandedChange: filter.setExpanded,
+    // onExpandedChange: filter.setExpanded,
     enablePagination: false,
-    initialState: { showColumnFilters: filter.filterColumns?.length > 0 },
+    // initialState: { showColumnFilters: filter.filterColumns?.length > 0 },
 
-    filterFromLeafRows: true,
-    onShowColumnFiltersChange: filter.setShowColumnFilters,
-    state: {
-      expanded: filter.expanded,
-      grouping: filter.groups,
-      showColumnFilters: filter.showColumnFilters,
-      pagination: filter.pagination,
-      showLoadingOverlay: isPadding,
-      sorting: filter.sorting,
-      globalFilter: filter.globalFilter,
-      columnFilters: filter.filterColumns,
-    },
+    // filterFromLeafRows: true,
+    // onShowColumnFiltersChange: filter.setShowColumnFilters,
+    // state: {
+    //   expanded: filter.expanded,
+    //   grouping: filter.groups,
+    //   showColumnFilters: filter.showColumnFilters,
+    //   pagination: filter.pagination,
+    //   showLoadingOverlay: isPadding,
+    //   sorting: filter.sorting,
+    //   globalFilter: filter.globalFilter,
+    //   columnFilters: filter.filterColumns,
+    // },
     editDisplayMode: "row",
-    onPaginationChange: filter.setPagination,
+    // onPaginationChange: filter.setPagination,
 
     renderRowActionMenuItems({
       row: {
@@ -84,7 +74,7 @@ export default function CurrencyTable(props: Props) {
       },
     }) {
       return [
-        <Authorized permission="Edit_Currency" key={1}>
+        <Authorized permission="Update_Currency" key={1}>
           <Link href={pathName + "/form?id=" + id}>
             <MenuItem className="cursor-pointer" disabled={isPadding}>
               Edit
@@ -116,10 +106,9 @@ export default function CurrencyTable(props: Props) {
   });
 
   return (
-    <Card variant="outlined">
-      <Typography fontSize={23}>Currency Table</Typography>
+    <NexCiteCard title="Currency Table">
       <MaterialReactTable table={table} />
-    </Card>
+    </NexCiteCard>
   );
 }
 

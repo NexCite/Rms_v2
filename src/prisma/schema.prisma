@@ -43,7 +43,7 @@ model Config {
   pl_boxes             P_LBox[]
   agent_boxes          AgentBox[]
   client_boxes         ManagerBox[]
-  credit_boxes         CreditBox[]
+  crUpdate_boxes       CreditBox[]
   adgjustment_boxes    AdjustmentBox[]
   schedule_configes    ScheduleConfig[]
   schedules            Schedule[]
@@ -433,9 +433,9 @@ enum ChartOfAccountType {
   Bank_Overdraft
   Cash_and_Cash_Equivalent
   Other_Revenue_and_Expenses
-  Credit_Card
+  CrUpdate_Card
   Personnel_Charges
-  Other_Credit_Balances
+  Other_CrUpdate_Balances
   Financial_Charges
   Payable
   External_Services
@@ -717,158 +717,106 @@ enum UserPermission {
   PaymentBox
   View_Equity
   View_Equities
-  Add_Equity
-  Edit_Equity
+  Create_Equity
+  Update_Equity
   Delete_Equity
-  Add_Two_Digit
-  View_Sheet_State
-  Edit_Two_Digit
-  Delete_Two_Digit
-  View_Three_Digit
-  View_Threes_Digit
-  View_Twos_Digit
-  View_More_Than_Fours_Digit
-  View_Two_Digit
-  Edit_Three_Digit
-  Delete_Three_Digit
-  Add_More_Than_Four_Digit
-  View_More_Than_Four_Digit
-  View_Levels_Digit
-  Edit_More_Than_Four_Digit
-  Delete_More_Than_Four_Digit
-  Add_Three_Digit
-  Add_Entry
-  Edit_Entry
-  Delete_Entry
-  View_Entry
-  View_Entries
   Accounting
   Trading
   Setting
   View_Invoice
-  Edit_Invoice
+  Update_Invoice
   Delete_Invoice
-  Add_Invoice
+  Create_Invoice
   View_Invoices
   View_Payment
-  Edit_Payment
+  Update_Payment
   Delete_Payment
-  Add_Payment
+  Create_Payment
   View_Payments
   View_Profile
-  Edit_Profile
+  Update_Profile
   View_Users
   View_User
-  Edit_User
+  Update_User
   Delete_User
-  Add_User
-  Add_SubCategory
+  Create_User
+  Create_SubCategory
   Delete_SubCategory
-  Edit_SubCategory
+  Update_SubCategory
   View_SubCategory
   View_SubCategories
-  Add_Category
+  Create_Category
   Delete_Category
-  Edit_Category
+  Update_Category
   View_Category
   View_Categories
-  Add_Currency
+  Create_Currency
   Delete_Currency
-  Edit_Currency
+  Update_Currency
   View_Currency
   View_Currencies
-  View_Trader
-  View_Traders
-  Edit_Trader
-  Delete_Trader
-  Add_Trader
   View_Account
   View_Accounts
-  Edit_Account
+  Update_Account
   Delete_Account
-  Add_Account
+  Create_Account
   View_Broker
   View_Brokers
-  Edit_Broker
+  Update_Broker
   Delete_Broker
-  Add_Broker
+  Create_Broker
   View_Medias
   Delete_Media
   View_Log
-  View_Entry_Client
-  View_Entry_Clients
-  Delete_Entry_Client
-  Edit_Entry_Client
-  Add_Entry_Client
-  View_Entry_IB
-  View_Entry_IBs
-  Delete_Entry_IB
-  Edit_Entry_IB
-  Add_Entry_IB
   View_Activity
   View_Activities
   Delete_Activity
-  Edit_Activity
-  View_Entry_Supplier
-  View_Entry_Suppliers
-  Delete_Entry_Supplier
-  Edit_Entry_Supplier
-  Add_Entry_Supplier
+  Update_Activity
   Human_Resources
-  Add_Employee
-  Edit_Employee
+  Create_Employee
+  Update_Employee
   Delete_Employee
   View_Employee
   View_Employees
-  Add_Schedule
-  Edit_Schedule
+  Create_Schedule
+  Update_Schedule
   Delete_Schedule
   View_Schedule
   View_Schedules
-  Add_Advance_Payment
-  Edit_Advance_Payment
+  Create_Advance_Payment
+  Update_Advance_Payment
   Delete_Advance_Payment
   View_Advance_Payment
   View_Advance_Payments
-  Add_Vacation
-  Edit_Vaction_Status
-  Edit_Vacation
+  Create_Vacation
+  Update_Vaction_Status
+  Update_Vacation
   Delete_Vacation
   View_Vacation
   View_Vacations
-  Edit_Config
+  Update_Config
   View_Config
   View_Schedules_Config
   Delete_Schedules_Config
   View_Schedule_Config
-  Edit_Schedule_Config
-  Add_Schedule_Config
-  Add_Role
+  Update_Schedule_Config
+  Create_Schedule_Config
+  Create_Role
   View_Role
   View_Roles
-  Edit_Role
+  Update_Role
   Delete_Role
   Reset
-  View_Levels
-  View_Level
-  Add_Level
-  Edit_Level
-  Delete_Level
   View_Vouchers
   View_Voucher
-  Add_Voucher
-  Edit_Voucher
+  Create_Voucher
+  Update_Voucher
   Delete_Voucher
   View_Chart_Of_Accounts
   View_Chart_Of_Account
-  Add_Chart_Of_Account
-  Edit_Chart_Of_Account
+  Create_Chart_Of_Account
+  Update_Chart_Of_Account
   Delete_Chart_Of_Account
-  View_Balance_Sheets
-  View_Balance_Sheet
-  Add_Balance_Sheet
-  Edit_Balance_Sheet
-  Delete_Balance_Sheet
 }
 
 enum Account_Entry_Type {
@@ -903,7 +851,7 @@ model Equity {
   expensive_box    ExpensiveBox[]
   config_id        Int?
   config           Config?         @relation(fields: [config_id], references: [id], onDelete: Cascade)
-  credit_boxes     CreditBox[]
+  crUpdate_boxes   CreditBox[]
   adjustment_boxes AdjustmentBox[]
 
   @@unique([id, config_id], name: "unique_combination")

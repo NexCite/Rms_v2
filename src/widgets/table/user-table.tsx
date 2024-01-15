@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useMemo, useTransition } from "react";
 
 import { Prisma } from "@prisma/client";
-import Authorized from "@rms/components/ui/authorized";
+import Authorized from "@rms/components/other/authorized";
 import { useToast } from "@rms/hooks/toast-hook";
 import { deleteUserById, resetUser } from "@rms/service/user-service";
 import {
@@ -50,25 +50,25 @@ export default function UserTable(props: Props) {
       align: "center",
     },
 
-    onExpandedChange: filter.setExpanded,
+    // onExpandedChange: filter.setExpanded,
     enablePagination: false,
-    initialState: { showColumnFilters: filter.filterColumns?.length > 0 },
+    // initialState: { showColumnFilters: filter.filterColumns?.length > 0 },
 
     filterFromLeafRows: true,
-    onShowColumnFiltersChange: filter.setShowColumnFilters,
+    // onShowColumnFiltersChange: filter.setShowColumnFilters,
     state: {
-      expanded: filter.expanded,
-      grouping: filter.groups,
-      showColumnFilters: filter.showColumnFilters,
-      pagination: filter.pagination,
+      // expanded: filter.expanded,
+      // grouping: filter.groups,
+      // showColumnFilters: filter.showColumnFilters,
+      // pagination: filter.pagination,
 
       showLoadingOverlay: isPadding,
-      sorting: filter.sorting,
-      globalFilter: filter.globalFilter,
-      columnFilters: filter.filterColumns,
+      // sorting: filter.sorting,
+      // globalFilter: filter.globalFilter,
+      // columnFilters: filter.filterColumns,
     },
     editDisplayMode: "row",
-    onPaginationChange: filter.setPagination,
+    // onPaginationChange: filter.setPagination,
 
     renderRowActionMenuItems({
       row: {
@@ -76,7 +76,7 @@ export default function UserTable(props: Props) {
       },
     }) {
       return [
-        <Authorized permission="Edit_User" key={1}>
+        <Authorized permission="Update_User" key={1}>
           <Link href={pathName + "/form?id=" + id}>
             <MenuItem className="cursor-pointer" disabled={isPadding}>
               Edit

@@ -1,5 +1,4 @@
 import { $Enums, Prisma } from "@prisma/client";
-import GetRoutes from "@rms/config/route-config";
 import { UserSelectCommon } from "@rms/models/CommonModel";
 import HttpStatusCode from "@rms/models/HttpStatusCode";
 import prisma from "@rms/prisma/prisma";
@@ -7,9 +6,7 @@ import getUserFullInfo, {
   type UserFullInfoType,
 } from "@rms/service/user-service";
 import { sign, verify } from "jsonwebtoken";
-import { RedirectType } from "next/dist/client/components/redirect";
-import { cookies, headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
 export type AuthLogged =
   | { status: HttpStatusCode.UNAUTHORIZED }
@@ -83,79 +80,6 @@ export async function checkUserPermissions(
         data: userInfo,
       }
     : { status: HttpStatusCode.UNAUTHORIZED };
-}
-
-export async function GetUserRoute(middleware?: boolean): Promise<
-  | $Enums.UserPermission[]
-  | {
-      id: number;
-      username: string;
-      type: $Enums.UserType;
-      permissions: $Enums.UserPermission[];
-    }
-> {
-  var token = cookies().get("rms-auth");
-
-  if (middleware) {
-    if (!token) {
-      return undefined;
-    }
-
-    if (!token.value) {
-      return undefined;
-    }
-    if (!verifyToken(token.value)) {
-      return undefined;
-    }
-
-    const auth = await prisma.auth.findMany({
-      where: { token: token.value },
-      include: {
-        user: {
-          select: { permissions: true, username: true, id: true, type: true },
-        },
-      },
-    });
-    if (auth.length === 0) return undefined;
-
-    const routes = await GetRoutes();
-    const url = new URL(headers().get("url") ?? "");
-    if (RouteSkip?.includes(url.pathname)) return auth[0].user.permissions;
-
-    if (routes.length === 0) return undefined;
-    const pathRotues: string[] = [];
-    routes.map((res) => {
-      pathRotues.push(res.path);
-      res.children.map((res) => pathRotues.push(res.path));
-    });
-
-    if (pathRotues.filter((res) => url.pathname.startsWith(res)).length === 0)
-      return undefined;
-    return auth[0].user.permissions;
-  }
-
-  if (!token) {
-    redirect("/login", RedirectType.replace);
-  }
-
-  if (!token.value) {
-    redirect("/login", RedirectType.replace);
-  }
-  if (!verifyToken(token.value)) {
-    redirect("/login", RedirectType.replace);
-  }
-  const auth = await prisma.auth.findMany({
-    where: { token: token.value },
-    include: {
-      user: {
-        select: { permissions: true, username: true, id: true, type: true },
-      },
-    },
-  });
-
-  if (auth.length === 0) redirect("/login", RedirectType.replace);
-
-  return auth[0].user;
 }
 
 type UserRotue = {

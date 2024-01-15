@@ -1,10 +1,8 @@
 import { $Enums } from "@prisma/client";
-import Loading from "@rms/components/ui/loading";
-import { getConfigId } from "@rms/lib/config";
+import Loading from "@rms/components/other/loading";
 import prisma from "@rms/prisma/prisma";
 import getUserFullInfo from "@rms/service/user-service";
-import Account_EntryTable from "@rms/widgets/table/account-entry-table";
-import ChartOfAccountAccountsTable from "@rms/widgets/table/chart-of-account-table-account";
+import ChartOfAccountTable from "@rms/widgets/table/chart-of-account-table";
 import { Suspense } from "react";
 
 export default async function page(props: {
@@ -19,7 +17,7 @@ export default async function page(props: {
   });
   return (
     <Suspense fallback={<Loading />}>
-      <ChartOfAccountAccountsTable
+      <ChartOfAccountTable
         currencies={currencies}
         parents={parents}
         node={

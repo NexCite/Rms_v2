@@ -1,15 +1,16 @@
 "use server";
 
 import { $Enums, Prisma } from "@prisma/client";
-import route from "@rms/assets/route";
+import route from "@rms/route.json";
 import { getUserInfo } from "@rms/lib/auth";
 import { handlerServiceAction } from "@rms/lib/handler";
-
 import { hashPassword } from "@rms/lib/hash";
 import RouteModel from "@rms/models/RouteModel";
 import prisma from "@rms/prisma/prisma";
+import { unstable_noStore } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { RedirectType, redirect } from "next/navigation";
+import { writeFile } from "fs";
 export async function createUser(props: Prisma.UserUncheckedCreateInput) {
   return handlerServiceAction(
     async (info, config_id) => {
@@ -19,9 +20,11 @@ export async function createUser(props: Prisma.UserUncheckedCreateInput) {
 
       return await prisma.user.create({ data: props, select: { id: true } });
     },
-    "Add_User",
-    true,
-    props
+    "Create_User",
+    {
+      update: true,
+      body: props,
+    }
   );
 }
 
@@ -64,9 +67,12 @@ export async function updateUser(
 
       return await prisma.user.update({ data: props, where: { id } });
     },
-    "Edit_User",
-    true,
-    props
+    "Update_User",
+    {
+      update: true,
+      body: props,
+      hotReload: true,
+    }
   );
 }
 
@@ -87,95 +93,24 @@ export async function deleteUserById(id: number) {
       return;
     },
     "Delete_User",
-    true,
-    { id }
+    { update: true }
   );
 }
 
-export type UserAuth = {
-  user: Prisma.UserGetPayload<{
-    include: {
-      role: {};
-      config: {
-        select: {
-          id: true;
-          name: true;
-          email: true;
-          logo: true;
-          phone_number: true;
-        };
+export type UserAuth = Prisma.UserGetPayload<{
+  include: {
+    role: {};
+    config: {
+      select: {
+        id: true;
+        name: true;
+        email: true;
+        logo: true;
+        phone_number: true;
       };
     };
-  }>;
-  routes: RouteModel[];
-};
-export async function userAuth(): Promise<UserAuth> {
-  const token = cookies().get("rms-auth");
-  if (!token?.value) {
-    redirect("/login", RedirectType.replace);
-  }
-  const user = await prisma.user.findFirst({
-    where: { auth: { some: { token: token.value } } },
-    include: {
-      role: {},
-      config: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          logo: true,
-          phone_number: true,
-        },
-      },
-    },
-  });
-  if (!user) {
-    redirect("/login", RedirectType.replace);
-  }
-  const url = new URL(headers().get("url"));
-  const routes = route.filter((res) =>
-    user.role.permissions.includes(res.permission)
-  );
-
-  if (url.pathname === "/admin") {
-    return { user, routes };
-  }
-
-  const findRoute = route.find((res) => {
-    return url.pathname === res.path;
-  });
-
-  const findSubRouter: RouteModel[] = route.reduce(
-    (a, b) => a.concat(b.children),
-    []
-  );
-
-  var findSubRoute = findSubRouter.find((res) => {
-    if (url.pathname.endsWith("form")) {
-      return url.pathname.replace("/form", "").startsWith(res.path);
-    } else {
-      return url.pathname.startsWith(res.path) || res.path === url.pathname;
-    }
-  });
-
-  if (findRoute) {
-    if (!user.role.permissions.includes(findRoute.permission)) {
-      redirect("/login", RedirectType.replace);
-    }
-  } else if (findSubRoute) {
-    if (url.pathname.endsWith("form")) {
-      if (!user.role.permissions.includes(findSubRoute.addKey)) {
-        redirect("/login", RedirectType.replace);
-      }
-    } else if (!user.role.permissions.includes(findSubRoute.permission)) {
-      redirect("/login", RedirectType.replace);
-    }
-  } else {
-    redirect("/login", RedirectType.replace);
-  }
-
-  return { user, routes };
-}
+  };
+}>;
 
 export default async function getUserFullInfo(
   props: {
@@ -195,7 +130,14 @@ export default async function getUserFullInfo(
     handleMissingToken(props);
   }
 
-  const routes = filterRoutes(auth);
+  const routes = route.filter((res) => {
+    if (auth?.user.role.permissions?.includes(res.permission as any)) {
+      res.children = res.children?.filter((r) =>
+        auth.user.role.permissions?.includes(r.permission as any)
+      );
+      return res;
+    }
+  }) as RouteModel[];
 
   const user = {
     id: auth.user_id,
@@ -281,16 +223,6 @@ async function getAuthenticatedUser(
   });
 }
 
-function filterRoutes(auth: AuthType | null): RouteModel[] {
-  return route.filter((res) => {
-    if (auth?.user.role.permissions?.includes(res.permission as any)) {
-      res.children = res.children?.filter((r) =>
-        auth.user.role.permissions?.includes(r.permission as any)
-      );
-      return res;
-    }
-  }) as RouteModel[];
-}
 export type UserFullInfoType = {
   user: {
     id: number;
@@ -321,6 +253,9 @@ export async function resetUser(id: number) {
       });
     },
     "Reset",
-    true
+    {
+      update: true,
+      body: { id },
+    }
   );
 }

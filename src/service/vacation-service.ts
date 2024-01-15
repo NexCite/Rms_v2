@@ -69,9 +69,10 @@ export async function createVacation(
 
       return;
     },
-    "Add_Vacation",
-    true,
-    props
+    "Create_Vacation",
+    {
+      update: true,
+    }
   );
 }
 
@@ -120,9 +121,10 @@ export async function updateVacation(
       return;
     },
 
-    "Edit_Vacation",
-    true,
-    props
+    "Update_Vacation",
+    {
+      update: true,
+    }
   );
 }
 
@@ -139,8 +141,7 @@ export async function deleteVacationById(
       return;
     },
     "Delete_Vacation",
-    true,
-    { id }
+    { update: true }
   );
 }
 export async function resetVaction(id: number) {
@@ -155,6 +156,8 @@ export async function resetVaction(id: number) {
       });
     },
     "Reset",
-    true
+    {
+      update: true,
+    }
   );
 }

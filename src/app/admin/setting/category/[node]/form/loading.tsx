@@ -1,4 +1,4 @@
-import Loading from "@rms/components/ui/loading";
+import Loading from "@rms/components/other/loading";
 import React from "react";
 
 export default function loading() {

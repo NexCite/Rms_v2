@@ -91,7 +91,7 @@ export default function AttendanceTable(props: Props) {
           }`,
       },
     ],
-    [toast.OpenAlert, , toast]
+    []
   );
 
   return (

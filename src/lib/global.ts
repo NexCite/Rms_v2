@@ -54,7 +54,8 @@ export const groupChartOfAccountByParentId = (
 };
 export function totalChartOfAccountVouchers(props: AccountGrouped[]) {
   var total = 0;
-  if (props.length > 0) {
+  console.log(props);
+  if (props?.length > 0) {
     props.map((res) => {
       res.voucher_items.map((res) => {
         if (res.debit_credit === "Debit") {

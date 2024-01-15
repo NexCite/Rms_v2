@@ -1,8 +1,7 @@
-export function register() {
-  //   const gen = asyncGenerator();
-  //   processGenerator(gen);
-}
+import { Prisma } from "@prisma/client";
+import prisma from "./prisma/prisma";
 
+export async function register() {}
 // function* asyncGenerator() {
 //   yield new Promise((resolve) => setTimeout(() => resolve("Result 1"), 1000));
 //   yield new Promise((resolve) => setTimeout(() => resolve("Result 1"), 1000));

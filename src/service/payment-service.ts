@@ -51,9 +51,10 @@ export async function createPayment(
 
       return;
     },
-    "Add_Payment",
-    true,
-    props
+    "Create_Payment",
+    {
+      update: true,
+    }
   );
 }
 
@@ -197,9 +198,10 @@ export async function updatePayment(
       //   });
       // }
     },
-    "Edit_Payment",
-    true,
-    props
+    "Update_Payment",
+    {
+      update: true,
+    }
   );
 }
 
@@ -222,8 +224,7 @@ export async function deletePaymentById(
       return;
     },
     "Delete_Payment",
-    true,
-    { id }
+    { update: true }
   );
 }
 export async function resetPayment(id: number) {
@@ -238,6 +239,8 @@ export async function resetPayment(id: number) {
       });
     },
     "Reset",
-    true
+    {
+      update: true,
+    }
   );
 }

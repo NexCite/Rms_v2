@@ -8,7 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Prisma } from "@prisma/client";
-import Authorized from "@rms/components/ui/authorized";
+import Authorized from "@rms/components/other/authorized";
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
@@ -57,7 +57,7 @@ export default function VacationView(props: Props) {
           className="flex justify-between items-end"
           style={{ width: "100%" }}
         >
-          <Authorized className="w-fit" permission="Edit_Vacation">
+          <Authorized className="w-fit" permission="Update_Vacation">
             <Link
               href={`/admin/human_resources/vacation/form?id=${vacation.id}`}
             >

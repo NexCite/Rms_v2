@@ -16,9 +16,10 @@ export async function createSubCategory(
       await prisma.subCategory.create({ data: props });
       return;
     },
-    "Add_SubCategory",
-    true,
-    props
+    "Create_SubCategory",
+    {
+      update: true,
+    }
   );
 }
 
@@ -35,9 +36,10 @@ export async function updateSubCategory(
         data: props,
       });
     },
-    "Edit_SubCategory",
-    true,
-    props
+    "Update_SubCategory",
+    {
+      update: true,
+    }
   );
 }
 
@@ -59,8 +61,7 @@ export async function deleteSubCategoryById(
       return;
     },
     "Delete_SubCategory",
-    true,
-    { id }
+    { update: true }
   );
 }
 export async function resetSubCategory(id: number) {
@@ -75,6 +76,8 @@ export async function resetSubCategory(id: number) {
       });
     },
     "Reset",
-    true
+    {
+      update: true,
+    }
   );
 }

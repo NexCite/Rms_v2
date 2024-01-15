@@ -17,9 +17,10 @@ export async function createInvoice(
 
       return;
     },
-    "Add_Invoice",
-    true,
-    props
+    "Create_Invoice",
+    {
+      update: true,
+    }
   );
 }
 
@@ -59,9 +60,10 @@ export async function updateInvoice(
       return;
     },
 
-    "Edit_Invoice",
-    true,
-    props
+    "Update_Invoice",
+    {
+      update: true,
+    }
   );
 }
 
@@ -84,8 +86,7 @@ export async function deleteInvoiceById(
       return;
     },
     "Delete_Invoice",
-    true,
-    { id }
+    { update: true }
   );
 }
 export async function resetInvoice(id: number) {
@@ -100,6 +101,8 @@ export async function resetInvoice(id: number) {
       });
     },
     "Reset",
-    true
+    {
+      update: true,
+    }
   );
 }

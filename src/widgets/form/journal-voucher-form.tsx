@@ -16,7 +16,7 @@ import Typography from "@mui/joy/Typography";
 import Alert from "@mui/joy/Alert";
 import NexCiteButton from "@rms/components/button/nexcite-button";
 
-import NumericFormatCustom from "@rms/components/ui/text-field-number";
+import NumericFormatCustom from "@rms/components/input/text-field-number";
 import { useToast } from "@rms/hooks/toast-hook";
 import { FormatNumber, FormatNumberWithFixed } from "@rms/lib/global";
 import {
@@ -55,21 +55,16 @@ export default function JournalVoucherForm(props: Props) {
   const chartOfAccountClients = useMemo(() => {
     return props.chartOfAccounts.filter((res) => res.account_type);
   }, [props.chartOfAccounts]);
+  const chartOfAccounts = useMemo(() => {
+    return props.chartOfAccounts.filter(
+      (res) =>
+        !watch.voucher_items
+          .map((res) => res?.chart_of_account?.id)
+          .includes(res.id)
+    );
+  }, [props.chartOfAccounts, watch.voucher_items]);
+  console.log(props.voucher);
 
-  const handleDelete = useCallback(
-    (index: number) => {
-      const confirm = window.confirm(
-        "Are you sure to delete index " + index + 1
-      );
-      if (confirm) {
-        form.setValue(
-          "voucher_items",
-          watch.voucher_items.filter((res, i) => i !== index)
-        );
-      }
-    },
-    [form, watch.voucher_items]
-  );
   const voucherState = useFormState({
     control: form.control,
     name: "voucher_items",
@@ -77,8 +72,6 @@ export default function JournalVoucherForm(props: Props) {
   const toast = useToast();
   const pathName = usePathname();
   const { replace } = useRouter();
-
-  console.log(props.voucher);
 
   const [isPadding, setTransition] = useTransition();
   const handleSubmit = useCallback(
@@ -399,11 +392,11 @@ export default function JournalVoucherForm(props: Props) {
                                 startDecorator={
                                   value.chart_of_account?.currency?.symbol ?? ""
                                 }
-                                options={props.chartOfAccounts}
+                                options={chartOfAccounts}
                                 multiple={false}
                                 getOptionLabel={(e) => {
                                   if (typeof e === "object") {
-                                    return `${e.id}-${e.name}`;
+                                    return `${e.id} ${e.name}`;
                                   }
                                 }}
                                 isOptionEqualToValue={(e) =>

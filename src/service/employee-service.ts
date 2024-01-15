@@ -20,9 +20,10 @@ export async function createEmployee(
       await prisma.employee.create({ data: props });
       return;
     },
-    "Add_Employee",
-    true,
-    props
+    "Create_Employee",
+    {
+      update: true,
+    }
   );
 }
 
@@ -41,9 +42,10 @@ export async function updateEmployee(
 
       return await prisma.employee.update({ data: props, where: { id } });
     },
-    "Edit_Employee",
-    true,
-    props
+    "Update_Employee",
+    {
+      update: true,
+    }
   );
 }
 
@@ -61,8 +63,7 @@ export async function deleteEmployeeById(
       return;
     },
     "Delete_Employee",
-    true,
-    { id }
+    { update: true }
   );
 }
 export async function resetEmployee(id: number) {
@@ -77,6 +78,8 @@ export async function resetEmployee(id: number) {
       });
     },
     "Reset",
-    true
+    {
+      update: true,
+    }
   );
 }

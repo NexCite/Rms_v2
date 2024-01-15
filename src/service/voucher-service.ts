@@ -11,48 +11,43 @@ import {
 import dayjs from "dayjs";
 
 export async function findVoucherItemsService(props: { id: number }) {
-  return await handlerServiceAction(
-    async (user, config_id) => {
-      const result = await prisma.voucher.findUnique({
-        where: { id: props.id, config_id },
-        include: {
-          currency: true,
-          voucher_items: {
-            include: {
-              chart_of_account: true,
-              reference_chart_of_account: true,
-            },
+  return await handlerServiceAction(async (user, config_id) => {
+    const result = await prisma.voucher.findUnique({
+      where: { id: props.id, config_id },
+      include: {
+        currency: true,
+        voucher_items: {
+          include: {
+            chart_of_account: true,
+            reference_chart_of_account: true,
           },
         },
-      });
+      },
+    });
 
-      var voucher: JournalVoucherInputSchema = {
-        currency: {
-          id: result.currency.id,
-          name: result.currency.name,
-          rate: result.currency.rate,
-          symbol: result.currency.symbol,
-        },
-        description: result.description,
-        note: result.note,
-        title: result.title,
-        rate: result.rate,
-        to_date: result.to_date,
-        voucher_items: result.voucher_items.map((res) => ({
-          amount: res.amount,
-          chart_of_account: res.chart_of_account,
-          reffrence_chart_of_account: res.reference_chart_of_account,
-          debit_credit: res.debit_credit,
-          rate: res.rate,
-        })),
-      };
+    var voucher: JournalVoucherInputSchema = {
+      currency: {
+        id: result.currency.id,
+        name: result.currency.name,
+        rate: result.currency.rate,
+        symbol: result.currency.symbol,
+      },
+      description: result.description,
+      note: result.note,
+      title: result.title,
+      rate: result.rate,
+      to_date: result.to_date,
+      voucher_items: result.voucher_items.map((res) => ({
+        amount: res.amount,
+        chart_of_account: res.chart_of_account,
+        reffrence_chart_of_account: res.reference_chart_of_account,
+        debit_credit: res.debit_credit,
+        rate: res.rate,
+      })),
+    };
 
-      return voucher;
-    },
-    "View_Voucher",
-    false,
-    {}
-  );
+    return voucher;
+  }, "View_Voucher");
 }
 
 export async function findVoucherService(props: VoucherSearchSchema) {
@@ -82,7 +77,7 @@ export async function findVoucherService(props: VoucherSearchSchema) {
         include: {
           _count: true,
           currency: true,
-
+          user: true,
           voucher_items: {
             include: {
               reference_chart_of_account: {
@@ -90,6 +85,8 @@ export async function findVoucherService(props: VoucherSearchSchema) {
                   name: true,
                   id: true,
                   account_type: true,
+                  first_name: true,
+                  last_name: true,
                   currency: {
                     select: {
                       name: true,
@@ -104,6 +101,8 @@ export async function findVoucherService(props: VoucherSearchSchema) {
                   name: true,
                   id: true,
                   account_type: true,
+                  first_name: true,
+                  last_name: true,
                   currency: {
                     select: {
                       name: true,
@@ -120,26 +119,19 @@ export async function findVoucherService(props: VoucherSearchSchema) {
       });
     },
 
-    "View_Voucher",
-    false,
-    {}
+    "View_Voucher"
   );
 }
 
 export async function findVouchersService(props: { from: Date; to: Date }) {
-  return handlerServiceAction(
-    async (user, config_id) => {
-      return prisma.voucher.findFirst({
-        where: { config_id },
-        include: {
-          currency: true,
-        },
-      });
-    },
-    "View_Vouchers",
-    false,
-    props
-  );
+  return handlerServiceAction(async (user, config_id) => {
+    return prisma.voucher.findFirst({
+      where: { config_id },
+      include: {
+        currency: true,
+      },
+    });
+  }, "View_Vouchers");
 }
 
 export async function createVoucherService(props: {
@@ -207,9 +199,11 @@ export async function createVoucherService(props: {
         },
       });
     },
-    "Add_Voucher",
-    true,
-    props
+    "Create_Voucher",
+    {
+      update: true,
+      body: props,
+    }
   );
 }
 export async function updateVoucherService(props: {
@@ -287,9 +281,11 @@ export async function updateVoucherService(props: {
         }),
       ]);
     },
-    "Edit_Level",
-    true,
-    props
+    "Update_Voucher",
+    {
+      update: true,
+      body: props,
+    }
   );
 }
 
@@ -307,8 +303,10 @@ export async function deleteVoucherService(props: { id: number }) {
         }),
       ]);
     },
-    "Edit_Level",
-    true,
-    props
+    "Delete_Voucher",
+    {
+      update: true,
+      body: props,
+    }
   );
 }
