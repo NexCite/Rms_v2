@@ -16,12 +16,12 @@ export default async function page() {
           OR: [
             {
               name: {
-                equals: "Admin",
+                not: "Admin",
               },
             },
             {
               name: {
-                equals: "admin",
+                not: "admin",
               },
             },
           ],
