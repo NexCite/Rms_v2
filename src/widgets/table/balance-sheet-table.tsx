@@ -132,20 +132,34 @@ export default function BalanceSheetTable(props: Props) {
         {
           enableGrouping: false,
           Cell(params) {
-            const total = parseFloat(
-              (params.row.getAllCells()[7]?.getValue() as string) ?? "0"
-            );
+            if (params.row.getAllCells()[7]?.getValue()) {
+              const total = parseFloat(
+                (params.row.getAllCells()[7]?.getValue() as string) ?? "0"
+              );
 
-            return (
-              <span
-                className={`${
-                  total >= 0 ? "bg-green-400" : "bg-red-400"
-                }  rounded-lg px-3 text-white`}
-              >
-                {currency?.symbol ?? "$"}
-                {FormatNumberWithFixed(total * (currency?.rate ?? 1), 2)}{" "}
-              </span>
-            );
+              return (
+                <span
+                  className={`${
+                    total >= 0 ? "bg-green-400" : "bg-red-400"
+                  }  rounded-lg px-3 text-white`}
+                >
+                  {currency?.symbol ?? "$"}
+                  {FormatNumberWithFixed(total * (currency?.rate ?? 1), 2)}{" "}
+                </span>
+              );
+            } else {
+              const total = params.cell.renderValue();
+              return (
+                <span
+                  className={`${
+                    params.cell.getValue() >= 0 ? "bg-green-400" : "bg-red-400"
+                  }  rounded-lg px-3 text-white`}
+                >
+                  {currency?.symbol ?? "$"}
+                  {FormatNumberWithFixed(total * (currency?.rate ?? 1), 2)}{" "}
+                </span>
+              );
+            }
           },
           id: "total",
           header: "Total",

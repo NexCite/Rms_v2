@@ -54,16 +54,15 @@ export const groupChartOfAccountByParentId = (
 };
 export function totalChartOfAccountVouchers(props: AccountGrouped[]) {
   var total = 0;
-  console.log(props);
   if (props?.length > 0) {
     props.map((res) => {
-      res.voucher_items.map((res) => {
+      total += res.voucher_items.reduce((a, res) => {
         if (res.debit_credit === "Debit") {
-          total += res.amount / res.currency.rate;
+          return (a += res.amount / res.currency.rate);
         } else if (res.debit_credit === "Credit") {
-          total -= res.amount / res.currency.rate;
+          return (a -= res.amount / res.currency.rate);
         }
-      });
+      }, 0);
       return (total += totalChartOfAccountVouchers(res.subRows));
     });
     return total;
