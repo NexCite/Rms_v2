@@ -213,7 +213,7 @@ export default function BalanceSheetTable(props: Props) {
     // onColumnFiltersChange: filter.setColumnsFilter,
     // onSortingChange: filter.setSorting,
     enableExpanding: true,
-    enableRowActions: true,
+    enableRowActions: false,
     enableExpandAll: true,
 
     renderRowActionMenuItems({

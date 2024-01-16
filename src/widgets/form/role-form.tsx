@@ -222,6 +222,10 @@ const permissions: Permissions[] = [
             name: "Update",
             value: "Update_Chart_Of_Account",
           },
+          {
+            name: "Delete",
+            value: "Delete_Chart_Of_Account",
+          },
         ],
         value: "View_Chart_Of_Accounts",
       },
@@ -243,6 +247,10 @@ const permissions: Permissions[] = [
           {
             name: "Update",
             value: "Update_Voucher",
+          },
+          {
+            name: "Delete",
+            value: "Delete_Voucher",
           },
         ],
       },
@@ -285,6 +293,10 @@ const permissions: Permissions[] = [
             name: "Update",
             value: "Update_Currency",
           },
+          {
+            name: "Delete",
+            value: "Delete_Currency",
+          },
         ],
       },
       {
@@ -305,6 +317,10 @@ const permissions: Permissions[] = [
           {
             name: "Update",
             value: "Update_User",
+          },
+          {
+            name: "Delete",
+            value: "Delete_User",
           },
         ],
       },

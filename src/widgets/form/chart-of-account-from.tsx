@@ -244,7 +244,6 @@ export default function ChartOfAccountForm(props: Props) {
                     <FormControl error={Boolean(fieldState.error)}>
                       <FormLabel required>Parent</FormLabel>
                       <Autocomplete
-                        disabled={!props.canEdit}
                         options={parentOptions}
                         multiple={false}
                         onChange={(e, newVale) => {
