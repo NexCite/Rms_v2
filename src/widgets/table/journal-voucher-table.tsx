@@ -520,7 +520,14 @@ function ExportVoucher(props: {
   return (
     props.voucher && (
       <Modal open={props.voucher ? true : false}>
-        <ModalDialog style={{ maxWidth: 1400, width: "100%" }}>
+        <ModalDialog
+          style={{
+            maxWidth: 1400,
+            width: "100%",
+            height: "100%",
+            overflow: "auto",
+          }}
+        >
           <ModalClose
             onClick={() => {
               props.onClose();

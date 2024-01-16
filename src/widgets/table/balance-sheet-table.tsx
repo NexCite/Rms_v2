@@ -133,7 +133,7 @@ export default function BalanceSheetTable(props: Props) {
           enableGrouping: false,
           Cell(params) {
             const total = parseFloat(
-              params.row.getAllCells()[7].getValue() as string
+              (params.row.getAllCells()[7]?.getValue() as string) ?? "0"
             );
 
             return (

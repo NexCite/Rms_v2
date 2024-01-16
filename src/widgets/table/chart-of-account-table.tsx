@@ -269,8 +269,9 @@ export default function ChartOfAccountTable(props: Props) {
               </td>
               <td>{original.phone_number}</td>
               <td>{original.create_date.toLocaleDateString()}</td>
+
               <td>
-                ({original.id}){" "}
+                {original.parent_id}{" "}
                 {
                   props.parents.find((res) => res.id === original.parent_id)
                     ?.name

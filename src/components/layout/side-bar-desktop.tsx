@@ -38,7 +38,12 @@ export default function SideBarDesktop(props: {
     [props.user.permissions]
   );
   const tab = useMemo(
-    () => userRoutes.find((res) => segments.includes(res.routeKey)),
+    () =>
+      userRoutes.find(
+        (res) =>
+          segments.includes(res.routeKey) ||
+          res.children.find((res) => segments.includes(res.routeKey))
+      ),
     [userRoutes, segments]
   );
 
@@ -47,6 +52,7 @@ export default function SideBarDesktop(props: {
   const handleChange = (event: any, newValue: number) => {
     setTabIndex(newValue);
   };
+  console.log(tabIndex, tab, userRoutes);
   return (
     <div
       className={`flex h-full  w-full   bg-white`}
