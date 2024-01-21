@@ -15,7 +15,7 @@ import { $Enums } from "@prisma/client";
 import {
   AccountGrouped,
   FormatNumberWithFixed,
-  exportToExcell,
+  exportToExcel,
   totalChartOfAccountVouchers,
 } from "@rms/lib/global";
 import { findBalanceSheet } from "@rms/service/chart-of-account-service";
@@ -45,7 +45,7 @@ import { AiFillFileExcel } from "react-icons/ai";
 import { MdSearch } from "react-icons/md";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { ChartOfAccountSearchSchema } from "../schema/chart-of-account";
+import { ChartOfAccountSearchSchema } from "../../schema/chart-of-account";
 
 type Props = {
   accountId?: string;
@@ -77,7 +77,7 @@ export default function BalanceSheetTable(props: Props) {
       include_reffrence: false,
       from: dayjs(filter.fromDate).startOf("d").toDate(),
       to: dayjs(filter.toDate).endOf("d").toDate(),
-      classLevel: ["1"],
+      classes: ["1"],
       accountId: props.accountId,
     },
   });
@@ -301,7 +301,7 @@ export default function BalanceSheetTable(props: Props) {
           from: values.from,
           to: values.to,
           accountId: values.accountId,
-          classLevel: values.classLevel,
+          classes: values.classes,
         },
         true
       ).then((res) => {
@@ -323,7 +323,7 @@ export default function BalanceSheetTable(props: Props) {
               startDecorator={<AiFillFileExcel />}
               onClick={(e) => {
                 setTransition(() => {
-                  exportToExcell({
+                  exportToExcel({
                     to: form.getValues("to"),
                     from: form.getValues("from"),
                     sheet: "chart of account",
@@ -389,7 +389,7 @@ export default function BalanceSheetTable(props: Props) {
               )}
             />
             <Controller
-              name="classLevel"
+              name="classes"
               control={form.control}
               render={({ field, fieldState, formState }) => (
                 <FormControl>

@@ -1,10 +1,10 @@
 import { $Enums, Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
-import getUserFullInfo, { getUserStatus } from "@rms/service/user-service";
+import getAuth, { getUserStatus } from "@rms/service/user-service";
 import UserTableComponent from "@rms/widgets/table/user-table";
 
 export default async function page() {
-  const info = await getUserFullInfo();
+  const info = await getAuth();
   const userStates = getUserStatus(info.user);
   var value: Prisma.UserGetPayload<{ include: { role: true } }>[] =
     await prisma.user.findMany({

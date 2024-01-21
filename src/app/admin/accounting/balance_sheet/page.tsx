@@ -1,5 +1,5 @@
 import prisma from "@rms/prisma/prisma";
-import getUserFullInfo from "@rms/service/user-service";
+import getAuth from "@rms/service/user-service";
 import BalanceSheetTable from "@rms/widgets/table/balance-sheet-table";
 
 export default async function page() {
@@ -13,7 +13,7 @@ export default async function page() {
 
   // await prisma.voucher.createMany({ data: m });
   // console.log("done");
-  const info = await getUserFullInfo();
+  const info = await getAuth();
 
   return (
     <BalanceSheetTable

@@ -34,7 +34,6 @@ var route: RouteModel[] = [
         index: 3,
         title: "IBs",
         routeKey: "ib",
-
         path: "/admin/accounting/account/ib",
         permission: "View_Chart_Of_Accounts",
       },
@@ -50,8 +49,7 @@ var route: RouteModel[] = [
         routeKey: "employee",
         title: "Employee",
         path: "/admin/accounting/account/employee",
-        permission: "View_Employees",
-        addKey: "Create_Employee",
+        permission: "View_Chart_Of_Accounts",
       },
       {
         index: 6,
@@ -133,6 +131,7 @@ var route: RouteModel[] = [
         path: "/admin/payment_box/equity",
         permission: "View_Equities",
         addKey: "Create_Equity",
+        routeKey: "equity",
       },
       {
         index: 1,

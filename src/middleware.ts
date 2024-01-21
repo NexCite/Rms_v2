@@ -1,5 +1,6 @@
 "use server";
 import { NextRequest, NextResponse } from "next/server";
+import prisma from "./prisma/prisma";
 
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();

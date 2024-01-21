@@ -14,7 +14,7 @@ import FormLabel from "@mui/joy/FormLabel";
 import Input from "@mui/joy/Input";
 import Table from "@mui/joy/Table";
 import Typography from "@mui/joy/Typography";
-import { FormatNumberWithFixed, exportToExcell } from "@rms/lib/global";
+import { FormatNumberWithFixed, exportToExcel } from "@rms/lib/global";
 import {
   deleteChartOfAccountService,
   findChartOfAccounts,
@@ -44,7 +44,7 @@ import { AiFillFileExcel } from "react-icons/ai";
 import { MdSearch } from "react-icons/md";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { ChartOfAccountSearchSchema } from "../schema/chart-of-account";
+import { ChartOfAccountSearchSchema } from "../../schema/chart-of-account";
 
 type Props = {
   node: $Enums.AccountType;
@@ -124,6 +124,10 @@ export default function ChartOfAccountTable(props: Props) {
 
           header: "Class",
         }),
+        columnGroupedDataHelper.accessor("parent_id", {
+          header: "Parent ID",
+          enableGrouping: true,
+        }),
         columnGroupedDataHelper.accessor(
           (row) => row.chart_of_account_type?.replaceAll("_", " "),
           {
@@ -152,7 +156,7 @@ export default function ChartOfAccountTable(props: Props) {
               columnGroupedDataHelper.accessor(
                 (row) => {
                   var total = 0;
-
+                  console.log(row.voucher_items);
                   row.voucher_items.map((res) => {
                     if (res.debit_credit === "Debit") {
                       total += res.amount / res.rate;
@@ -167,6 +171,7 @@ export default function ChartOfAccountTable(props: Props) {
                       total -= res.amount / res.rate;
                     }
                   });
+                  console.log(total);
 
                   return total * (row.currency?.rate ?? 1);
                 },
@@ -200,14 +205,13 @@ export default function ChartOfAccountTable(props: Props) {
                     return true;
                   },
                   Cell({
+                    cell,
                     row: {
                       getAllCells,
                       original: { currency },
                     },
                   }) {
-                    const total = parseFloat(
-                      getAllCells()[9].getValue() as string
-                    );
+                    const total = cell.renderValue() as number;
 
                     return (
                       <span
@@ -294,7 +298,7 @@ export default function ChartOfAccountTable(props: Props) {
     }) {
       return [
         <Authorized permission="Update_Chart_Of_Account" key={1}>
-          <Link href={pathName + "/form?id=" + id}>
+          <Link href={"/admin/accounting/chart_of_account" + "/form?id=" + id}>
             <MenuItem className="cursor-pointer" disabled={isPadding}>
               Edit
             </MenuItem>
@@ -302,7 +306,7 @@ export default function ChartOfAccountTable(props: Props) {
         </Authorized>,
         <Authorized permission="View_Chart_Of_Account" key={2}>
           <MenuItem disabled={isPadding} className="cursor-pointer">
-            <Link href={pathName + "/" + id}>View</Link>
+            <Link href={"/admin/accounting/chart_of_account/" + id}>View</Link>
           </MenuItem>
         </Authorized>,
         <Authorized permission="Delete_Chart_Of_Account" key={3}>
@@ -317,6 +321,7 @@ export default function ChartOfAccountTable(props: Props) {
                 setTransition(async () => {
                   const result = await deleteChartOfAccountService(id);
                   toast.OpenAlert(result);
+                  handleSubimt(form.getValues());
                 });
               }
             }}
@@ -393,7 +398,7 @@ export default function ChartOfAccountTable(props: Props) {
             startDecorator={<AiFillFileExcel />}
             onClick={(e) => {
               setTransition(() => {
-                exportToExcell({
+                exportToExcel({
                   to: form.getValues("to"),
                   from: form.getValues("from"),
                   sheet: "chart of account " + props.node,

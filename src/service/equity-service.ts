@@ -4,17 +4,48 @@ import { handlerServiceAction } from "@rms/lib/handler";
 import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 
+export async function getEquityById(id: number) {
+  return handlerServiceAction(async (info, config_id) => {
+    return await prisma.equity.findFirst({
+      where: {
+        id,
+        config_id,
+      },
+    });
+  }, "View_Equity");
+}
+
+export async function findEquities(props: { from: Date; to: Date }) {
+  return handlerServiceAction(async (info, config_id) => {
+    return await prisma.equity.findMany({
+      include: {
+        adjustment_boxes: true,
+        agent_boxes: true,
+        coverage_boxes: true,
+        expensive_box: true,
+        manager_boxes: true,
+        p_l: true,
+        credit_boxes: true,
+      },
+      where: {
+        config_id,
+        to_date: {
+          gte: props.from,
+          lte: props.to,
+        },
+      },
+    });
+  }, "View_Equities");
+}
 /**
  *
  * Done
  *
  */
-export async function createEquity(
-  params: Prisma.EquityUncheckedCreateInput
-): Promise<ServiceActionModel<void>> {
+export async function createEquity(params: Prisma.EquityUncheckedCreateInput) {
   return handlerServiceAction(
     async (info, config_id) => {
-      await prisma.equity.create({
+      return await prisma.equity.create({
         data: {
           config_id,
           to_date: params.to_date,

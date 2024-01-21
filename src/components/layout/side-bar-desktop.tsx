@@ -15,7 +15,7 @@ import Tab from "@mui/joy/Tab";
 import TabList from "@mui/joy/TabList";
 import Tabs from "@mui/joy/Tabs";
 import Typography from "@mui/joy/Typography";
-import route from "@rms/assets/route";
+import route from "@rms/config/route";
 import Link from "next/link";
 import { useSelectedLayoutSegments } from "next/navigation";
 

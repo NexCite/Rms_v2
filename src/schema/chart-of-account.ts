@@ -68,10 +68,11 @@ type ChartOfAccountInputSchema = z.infer<typeof ChartOfAccountInputSchema>;
 const ChartOfAccountSearchSchema = z.object({
   from: z.date(),
   accountId: z.string().optional().nullable(),
-  classLevel: z.string().array().optional().nullable(),
+  classes: z.string().array().optional().nullable(),
+  level: z.number().optional().nullable(),
   include_reffrence: z.boolean().optional().nullable(),
   id: z.string().optional().nullable(),
-  chartOfAccounts: z.string().array().optional().nullable(),
+  chartOfAccountIds: z.string().array().optional().nullable(),
   to: z.date(),
   type: z.nativeEnum($Enums.AccountType).optional().nullable(),
 });

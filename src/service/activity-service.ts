@@ -2,11 +2,12 @@
 
 import { handlerServiceAction } from "@rms/lib/handler";
 import { ActivityStatus } from "@rms/models/CommonModel";
-
 /**
+ * Perform confirmation of an activity by updating its status.
  *
- * Done
- *
+ * @param id - The ID of the activity to be confirmed.
+ * @param status - (Optional) The new status of the activity (default: undefined).
+ * @returns The HTTP status code after the confirmation request.
  */
 export async function confirmActivity({
   id,
@@ -17,18 +18,18 @@ export async function confirmActivity({
 }) {
   return handlerServiceAction(
     async () => {
-      var result = await fetch(process.env["APEX_URL"], {
-        body: JSON.stringify({
-          id,
-          status,
-          key: process.env["APEX_KEY"],
-        }),
+      const result = await fetch(process.env.APEX_URL!, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          // 'Content-Type': 'application/x-www-form-urlencoded',
         },
+        body: JSON.stringify({
+          id,
+          status,
+          key: process.env.APEX_KEY!,
+        }),
       });
+
       return result.status;
     },
     status === ActivityStatus.Provided ? "Update_Activity" : "Delete_Activity",
@@ -37,24 +38,27 @@ export async function confirmActivity({
     }
   );
 }
+
 /**
+ * Retrieve activities based on optional ID and configuration ID.
  *
- * Done
- *
+ * @param id - (Optional) The ID of a specific activity to retrieve (default: undefined).
+ * @param config_id - (Optional) The configuration ID related to the activities (default: undefined).
+ * @returns The JSON representation of the retrieved activities.
  */
 export async function getActivities(id?: number, config_id?: number) {
   return handlerServiceAction(
     async () => {
-      var result = await fetch(process.env["APEX_URL"], {
-        body: JSON.stringify({
-          key: process.env["APEX_KEY"],
-
-          id,
-        }),
+      const result = await fetch(process.env.APEX_URL!, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          key: process.env.APEX_KEY!,
+          id,
+          config_id,
+        }),
       });
 
       return result.json();

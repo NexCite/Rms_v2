@@ -1,5 +1,6 @@
 "use client";
 
+import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import {
   Autocomplete,
   Button,
@@ -8,7 +9,6 @@ import {
   Dropdown,
   FormControl,
   FormLabel,
-  IconButton,
   Menu,
   MenuButton,
   MenuItem,
@@ -19,44 +19,55 @@ import {
   Typography,
 } from "@mui/joy";
 import { Prisma } from "@prisma/client";
-import NexCiteButton from "@rms/components/button/nexcite-button";
-import Loading from "@rms/components/other/loading";
+import Authorized from "@rms/components/other/authorized";
 import {
   FormatNumberWithFixed,
   VoucherSchema,
-  exportToExcell,
+  exportToExcel,
 } from "@rms/lib/global";
-import { findChartOfAccountByClientId } from "@rms/service/chart-of-account-service";
 import {
   MaterialReactTable,
   createMRTColumnHelper,
   useMaterialReactTable,
 } from "material-react-table";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useTransition,
-} from "react";
-import { AiFillFileExcel } from "react-icons/ai";
-import { ChartOfAccountSchema } from "../schema/journal-voucher";
-import BalanceSheetTable from "../table/balance-sheet-table";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import SearchIcon from "@mui/icons-material/Search";
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import Authorized from "@rms/components/other/authorized";
 import Link from "next/link";
+import { useMemo, useState } from "react";
+import { AiFillFileExcel } from "react-icons/ai";
+import BalanceSheetTable from "../table/balance-sheet-table";
 type Props = {
   id: string;
+  chartOfAccount: Prisma.ChartOfAccountGetPayload<{
+    include: {
+      currency: true;
+      voucher_items: {
+        include: {
+          currency: true;
+          chart_of_account: true;
+          reference_chart_of_account: true;
+        };
+      };
+    };
+  }>;
+
   chartOfAccounts: Prisma.ChartOfAccountGetPayload<{}>[];
+  vouchers: Prisma.VoucherGetPayload<{
+    include: {
+      currency: true;
+      voucher_items: {
+        include: {
+          currency: true;
+          chart_of_account: true;
+          reference_chart_of_account: true;
+        };
+      };
+    };
+  }>[];
 };
 
 export default function ChartOfAccountView(props: Props) {
-  const [chartOfAccount, setChartOfAccount] = useState<ChartOfAccountSchema>();
-  const [vouchers, setVouchers] = useState<VoucherSchema[]>();
-
-  const [isPadding, setTransation] = useTransition();
+  const [selectedChartOfAccounts, setSelectedChartOfAccounts] = useState<
+    typeof props.chartOfAccounts
+  >([]);
   const columns = useMemo(
     () => [
       columnGroupedDataHelper.accessor("id", { header: "ID" }),
@@ -65,81 +76,44 @@ export default function ChartOfAccountView(props: Props) {
         header: "Currency",
       }),
       columnGroupedDataHelper.accessor(
-        (row) => {
-          let debit = 0;
-          row.voucher_items.forEach((res) => {
-            if (res.debit_credit == "Debit") {
-              debit += res.amount / res.currency.rate;
-            }
-          });
-          return debit;
-        },
+        (row) => row.to_date.toLocaleDateString(),
         {
-          header: "Amount/Rate",
-          Cell: ({ cell }) =>
-            `${
-              cell.row.original.currency?.symbol ?? "$"
-            }${FormatNumberWithFixed(cell.getValue(), 2)}`,
-        }
-      ),
-      columnGroupedDataHelper.accessor(
-        (row) => {
-          return 0;
-        },
-        {
-          header: "Amount",
-          Cell: ({ cell, row }) => {
-            return (
-              <>
-                {chartOfAccount?.currency?.symbol ?? "$"}
-                {FormatNumberWithFixed(
-                  row.getAllCells()[3].getValue<number>() *
-                    (chartOfAccount?.currency?.rate ?? 1),
-                  2
-                )}
-              </>
-            );
-          },
+          header: "Date",
+          id: "date",
         }
       ),
     ],
-    [chartOfAccount?.currency]
+    [props.chartOfAccount.currency]
   );
-
+  const filtedVoucher = useMemo(() => {
+    if (selectedChartOfAccounts.length == 0) return props.vouchers;
+    return props.vouchers.filter((res) => {
+      let isFound = false;
+      res.voucher_items.forEach((res) => {
+        if (
+          selectedChartOfAccounts.find((res2) =>
+            res.chart_of_account_id.startsWith(res2.id)
+          )
+        ) {
+          isFound = true;
+        }
+      });
+      return isFound;
+    });
+  }, [selectedChartOfAccounts, props.vouchers]);
   const table = useMaterialReactTable({
     columns,
     muiTableProps: {
       id: "chart-of-account-table-account",
     },
 
-    data: vouchers ?? [],
+    data: filtedVoucher ?? [],
   });
-  const [chartOfAccounts, setChartOfAccounts] = useState<
-    typeof props.chartOfAccounts
-  >([]);
-  const handleData = useCallback(
-    (chartOfAccounts: any) => {
-      findChartOfAccountByClientId({
-        id: props.id,
-        include_reffrence: true,
-        chartOfAccounts: chartOfAccounts?.map((res) => res.id),
-      }).then((result) => {
-        setChartOfAccount(result?.result.chartOfAccount);
-        setVouchers(result?.result.vouchers);
-      });
-    },
-    [props.id]
-  );
 
-  useEffect(() => {
-    setTransation(() => {
-      handleData(props.chartOfAccounts);
-    });
-  }, [handleData, props.chartOfAccounts]);
   const { credit, debit } = useMemo(() => {
     let debit: number = 0,
       credit: number = 0;
-    vouchers?.forEach((res) => {
+    filtedVoucher?.forEach((res) => {
       res.voucher_items.forEach((res) => {
         if (
           res.chart_of_account_id === props.id ||
@@ -154,205 +128,180 @@ export default function ChartOfAccountView(props: Props) {
       });
     });
     return { debit, credit };
-  }, [props.id, vouchers]);
+  }, [props.id, filtedVoucher]);
 
   const [activeTab, setActiveTab] = useState(0);
-  return !chartOfAccount ? (
-    <Loading />
-  ) : (
-    <div className="flex gap-5 flex-col">
-      <>
-        <Card>
-          <CardContent>
-            <Typography level="h2">Account Details</Typography>
-            <div className="overflow-x-auto w-full">
-              <Table size="lg" stickyHeader className="w-screen">
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>Account ID</th>
-                    <th>Account Name</th>
-                    <th>Type</th>
-                    <th>Debit/Credit</th>
-                    <th>Currency</th> <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Email</th>
-                    <th>Phone Number</th>
-                    <th>Account Type</th>
-                    <th>Business ID</th>
-                    <th>Limit Amount</th>
-                    <th>Country</th>
-                    <th>Address</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>
-                      <Dropdown>
-                        <MenuButton>
-                          <MoreHoriz />
-                        </MenuButton>
-                        <Menu>
-                          <Authorized permission="Update_Chart_Of_Account">
-                            <MenuItem>
-                              <Link
-                                href={
-                                  "/admin/accounting/chart_of_account/form?id=" +
-                                  props.id
-                                }
-                              >
-                                Edit
-                              </Link>
-                            </MenuItem>
-                          </Authorized>
-                        </Menu>
-                      </Dropdown>
-                    </td>
-                    <td>{chartOfAccount.id}</td>
-                    <td>{chartOfAccount.name}</td>
-                    <td>{chartOfAccount.chart_of_account_type}</td>
-                    <td>{chartOfAccount.debit_credit}</td>
-                    <td>{chartOfAccount.currency?.name}</td>
-                    <td>{chartOfAccount.id}</td>
-                    <td>{chartOfAccount.name}</td>
-                    <td>{chartOfAccount.chart_of_account_type}</td>
-                    <td>{chartOfAccount.debit_credit}</td>
-                    <td>{chartOfAccount.currency?.name}</td>
-                  </tr>
-                </tbody>
-              </Table>
-            </div>
-
-            {/* <Typography level="h4">
-              First Name: {chartOfAccount.first_name}
-            </Typography> */}
-          </CardContent>
-        </Card>
-        <Tabs
-          onChange={(e, v) => {
-            setActiveTab(v as any);
-          }}
-          aria-label="Basic tabs"
-          value={activeTab}
+  return (
+    <>
+      <Card>
+        <CardContent>
+          <Typography level="h2">Account Details</Typography>
+          <div className="overflow-x-auto w-full">
+            <Table size="lg" stickyHeader className="w-screen">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Account ID</th>
+                  <th>Account Name</th>
+                  <th>Type</th>
+                  <th>Debit/Credit</th>
+                  <th>Currency</th> <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>Email</th>
+                  <th>Phone Number</th>
+                  <th>Account Type</th>
+                  <th>Business ID</th>
+                  <th>Limit Amount</th>
+                  <th>Country</th>
+                  <th>Address</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <Dropdown>
+                      <MenuButton>
+                        <MoreHoriz />
+                      </MenuButton>
+                      <Menu>
+                        <Authorized permission="Update_Chart_Of_Account">
+                          <MenuItem>
+                            <Link
+                              href={
+                                "/admin/accounting/chart_of_account/form?id=" +
+                                props.id
+                              }
+                            >
+                              Edit
+                            </Link>
+                          </MenuItem>
+                        </Authorized>
+                      </Menu>
+                    </Dropdown>
+                  </td>
+                  <td>{props.chartOfAccount.id}</td>
+                  <td>{props.chartOfAccount.name}</td>
+                  <td>{props.chartOfAccount.chart_of_account_type}</td>
+                  <td>{props.chartOfAccount.debit_credit}</td>
+                  <td>{props.chartOfAccount.currency?.name}</td>
+                  <td>{props.chartOfAccount.id}</td>
+                  <td>{props.chartOfAccount.name}</td>
+                  <td>{props.chartOfAccount.chart_of_account_type}</td>
+                  <td>{props.chartOfAccount.debit_credit}</td>
+                  <td>{props.chartOfAccount.currency?.name}</td>
+                </tr>
+              </tbody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+      <Tabs
+        onChange={(e, v) => {
+          setActiveTab(v as any);
+        }}
+        aria-label="Basic tabs"
+        value={activeTab}
+      >
+        <TabList>
+          <Tab>Voucher Table</Tab>
+          <Tab>Chart Of Account Table</Tab>
+        </TabList>
+        <div
+          className={`${activeTab == 0 ? "p-5 flex flex-col gap-5" : "hidden"}`}
         >
-          <TabList>
-            <Tab>Voucher Table</Tab>
-            <Tab>Chart Of Account Table</Tab>
-          </TabList>
-          <div
-            className={`${
-              activeTab == 0 ? "p-5 flex flex-col gap-5" : "hidden"
-            }`}
-          >
-            <div className="grid grid-cols-1   lg:grid-cols-3 gap-5">
-              <Card variant="outlined" invertedColors>
-                <CardContent orientation="horizontal">
-                  <CardContent>
-                    <Typography level="body-md">Total Debit</Typography>
-                    <Typography level="h2">
-                      {chartOfAccount?.currency?.symbol ?? "$"}
-                      {FormatNumberWithFixed(
-                        debit * (chartOfAccount?.currency?.rate ?? 1),
-                        2
-                      )}
-                    </Typography>
-                  </CardContent>
+          <div className="grid grid-cols-1   lg:grid-cols-3 gap-5">
+            <Card variant="outlined" invertedColors>
+              <CardContent orientation="horizontal">
+                <CardContent>
+                  <Typography level="body-md">Total Debit</Typography>
+                  <Typography level="h2">
+                    {props.chartOfAccount.currency?.symbol ?? "$"}
+                    {FormatNumberWithFixed(
+                      debit * (props.chartOfAccount.currency?.rate ?? 1),
+                      2
+                    )}
+                  </Typography>
                 </CardContent>
-              </Card>
-              <Card variant="outlined" invertedColors>
-                <CardContent orientation="horizontal">
-                  <CardContent>
-                    <Typography level="body-md">Total Credit</Typography>
-                    <Typography level="h2">
-                      {chartOfAccount?.currency?.symbol ?? "$"}
-                      {FormatNumberWithFixed(
-                        credit * (chartOfAccount?.currency?.rate ?? 1),
-                        2
-                      )}
-                    </Typography>
-                  </CardContent>
+              </CardContent>
+            </Card>
+            <Card variant="outlined" invertedColors>
+              <CardContent orientation="horizontal">
+                <CardContent>
+                  <Typography level="body-md">Total Credit</Typography>
+                  <Typography level="h2">
+                    {props.chartOfAccount.currency?.symbol ?? "$"}
+                    {FormatNumberWithFixed(
+                      credit * (props.chartOfAccount.currency?.rate ?? 1),
+                      2
+                    )}
+                  </Typography>
                 </CardContent>
-              </Card>
-              <Card variant="outlined" invertedColors>
-                <CardContent orientation="horizontal">
-                  <CardContent>
-                    <Typography level="body-md">Total</Typography>
-                    <Typography
-                      level="h2"
-                      color={debit - credit > 0 ? "success" : "danger"}
-                    >
-                      {chartOfAccount?.currency?.symbol ?? "$"}
-                      {FormatNumberWithFixed(
-                        (debit - credit) *
-                          (chartOfAccount?.currency?.rate ?? 1),
-                        2
-                      )}
-                    </Typography>
-                  </CardContent>
+              </CardContent>
+            </Card>
+            <Card variant="outlined" invertedColors>
+              <CardContent orientation="horizontal">
+                <CardContent>
+                  <Typography level="body-md">Total</Typography>
+                  <Typography level="h2">
+                    {debit - credit > 0 ? "Debit" : "Credit"}{" "}
+                    {props.chartOfAccount.currency?.symbol ?? "$"}
+                    {FormatNumberWithFixed(
+                      (debit - credit) *
+                        (props.chartOfAccount.currency?.rate ?? 1),
+                      2
+                    )}
+                  </Typography>
                 </CardContent>
-              </Card>
-            </div>
-            <div className="flex gap-5   flex-col justify-between w-full">
-              <FormControl className="w-full">
-                <FormLabel>Chartd of Accounts</FormLabel>
-                <Autocomplete
-                  isOptionEqualToValue={(e) =>
-                    e.id === chartOfAccounts.find((res) => res.id === e.id)?.id
-                  }
-                  className="w-full"
-                  name="chart_of_accounts"
-                  disableCloseOnSelect
-                  options={props.chartOfAccounts}
-                  value={chartOfAccounts}
-                  getOptionLabel={(option: any) =>
-                    `${option.id} ${option.name}`
-                  }
-                  onChange={(e, newValue) => {
-                    setChartOfAccounts(newValue as any);
-                  }}
-                  multiple
-                  placeholder="chart of accounts"
-                />{" "}
-              </FormControl>
-              <div className="flex justify-between">
-                <Button
-                  className="nexcite-btn sm:w-full md:w-fit"
-                  startDecorator={<AiFillFileExcel />}
-                  onClick={(e) => {
-                    exportToExcell({
-                      sheet: "chart of account",
-                      id: "chart-of-account-table-account",
-                    });
-                  }}
-                >
-                  Export Excel
-                </Button>
-                <NexCiteButton
-                  onClick={(e) => {
-                    setTransation(async () => {
-                      handleData(chartOfAccounts);
-                    });
-                  }}
-                  icon={<SearchIcon />}
-                  type="button"
-                  isPadding={isPadding}
-                >
-                  Search
-                </NexCiteButton>
-              </div>
-            </div>
-            <div className="flex-col md:flex-row flex justify-between items-center gap-5"></div>
-            <MaterialReactTable table={table} />
+              </CardContent>
+            </Card>
           </div>
-          <div className={`${activeTab == 1 ? "" : "hidden"} p-5`}>
-            <BalanceSheetTable
-              currency={chartOfAccount?.currency}
-              accountId={props.id}
-            />
+          <div className="flex gap-5   flex-col justify-between w-full">
+            <FormControl className="w-full">
+              <FormLabel>Chartd of Accounts</FormLabel>
+              <Autocomplete
+                // isOptionEqualToValue={(e) =>
+                //   e.id ===
+                //   props.chartOfAccounts.find((res) => res.id === e.id)?.id
+                // }
+                className="w-full"
+                name="chart_of_accounts"
+                disableCloseOnSelect
+                options={props.chartOfAccounts}
+                value={selectedChartOfAccounts}
+                getOptionLabel={(option: any) => `${option.id} ${option.name}`}
+                onChange={(e, newValue) => {
+                  setSelectedChartOfAccounts(newValue as any);
+                }}
+                multiple
+                placeholder="chart of accounts"
+              />{" "}
+            </FormControl>
+            <div className="flex justify-between">
+              <Button
+                className="nexcite-btn sm:w-full md:w-fit"
+                startDecorator={<AiFillFileExcel />}
+                onClick={(e) => {
+                  exportToExcel({
+                    sheet: "chart of account",
+                    id: "chart-of-account-table-account",
+                  });
+                }}
+              >
+                Export Excel
+              </Button>
+            </div>
           </div>
-        </Tabs>
-      </>
-    </div>
+          <div className="flex-col md:flex-row flex justify-between items-center gap-5"></div>
+          <MaterialReactTable table={table} />
+        </div>
+        <div className={`${activeTab == 1 ? "" : "hidden"} p-5`}>
+          <BalanceSheetTable
+            currency={props.chartOfAccount.currency}
+            accountId={props.id}
+          />
+        </div>
+      </Tabs>
+    </>
   );
 }
 const columnGroupedDataHelper = createMRTColumnHelper<VoucherSchema>();

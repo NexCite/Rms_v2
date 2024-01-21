@@ -3,13 +3,13 @@ import NexCiteButton from "@rms/components/button/nexcite-button";
 import Authorized from "@rms/components/other/authorized";
 import { getConfigId } from "@rms/lib/config";
 import prisma from "@rms/prisma/prisma";
-import getUserFullInfo from "@rms/service/user-service";
+import getAuth from "@rms/service/user-service";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
 export default async function page() {
-  const info = await getUserFullInfo();
+  const info = await getAuth();
 
   const user = await prisma.user.findFirst({
     where: { id: info.user.id, config_id: info.config.id },

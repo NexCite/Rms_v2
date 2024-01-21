@@ -1,14 +1,14 @@
 import prisma from "@rms/prisma/prisma";
-import getUserFullInfo from "@rms/service/user-service";
+import getAuth from "@rms/service/user-service";
 import JournalVoucherForm from "@rms/widgets/form/journal-voucher-form";
-import { JournalVoucherInputSchema } from "@rms/widgets/schema/journal-voucher";
+import { JournalVoucherInputSchema } from "@rms/schema/journal-voucher";
 import React from "react";
 import { z } from "zod";
 
 export default async function page(props: { searchParams: { id: string } }) {
   console.log(props.searchParams.id);
   var voucher: JournalVoucherInputSchema;
-  const info = await getUserFullInfo();
+  const info = await getAuth();
 
   var id = parseInt(props.searchParams.id);
   var idSchema = z.number().safeParse(id);

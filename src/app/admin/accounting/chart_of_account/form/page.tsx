@@ -1,10 +1,8 @@
-import MainCard from "@rms/components/card/main-card";
 import prisma from "@rms/prisma/prisma";
-import { createChartOfAccountService } from "@rms/service/chart-of-account-service";
-import getUserFullInfo from "@rms/service/user-service";
+import getAuth from "@rms/service/user-service";
 import ChartOfAccountForm from "@rms/widgets/form/chart-of-account-from";
-import { notFound, redirect } from "next/navigation";
-import React, { Suspense } from "react";
+import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { z } from "zod";
 
 export default async function page(props: { searchParams: { id: string } }) {
@@ -24,7 +22,7 @@ export default async function page(props: { searchParams: { id: string } }) {
       })
     : undefined;
 
-  const info = await getUserFullInfo();
+  const info = await getAuth();
 
   const currencies = await prisma.currency.findMany({
     where: { config_id: info.config.id },

@@ -71,7 +71,7 @@ export function totalChartOfAccountVouchers(props: AccountGrouped[]) {
   }
 }
 
-export function exportToExcell({
+export function exportToExcel({
   to,
   from,
   id,

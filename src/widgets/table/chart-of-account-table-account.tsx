@@ -37,8 +37,8 @@ import { AiFillFileExcel } from "react-icons/ai";
 import { MdSearch } from "react-icons/md";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { ChartOfAccountSearchSchema } from "../schema/chart-of-account";
-import { FormatNumberWithFixed, exportToExcell } from "@rms/lib/global";
+import { ChartOfAccountSearchSchema } from "../../schema/chart-of-account";
+import { FormatNumberWithFixed, exportToExcel } from "@rms/lib/global";
 import Card from "@mui/joy/Card";
 import CardContent from "@mui/joy/CardContent";
 import Typography from "@mui/joy/Typography";
@@ -380,7 +380,7 @@ export default function ChartOfAccountAccountsTable(props: Props) {
             startDecorator={<AiFillFileExcel />}
             onClick={(e) => {
               setTransition(() => {
-                exportToExcell({
+                exportToExcel({
                   to: form.getValues("to"),
                   from: form.getValues("from"),
                   sheet: "chart of account " + props.node,

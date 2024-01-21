@@ -7,7 +7,7 @@ import prisma from "@rms/prisma/prisma";
 import {
   JournalVoucherInputSchema,
   VoucherSearchSchema,
-} from "@rms/widgets/schema/journal-voucher";
+} from "@rms/schema/journal-voucher";
 import dayjs from "dayjs";
 
 export async function findVoucherItemsService(props: { id: number }) {

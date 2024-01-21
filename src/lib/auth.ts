@@ -2,9 +2,7 @@ import { $Enums, Prisma } from "@prisma/client";
 import { UserSelectCommon } from "@rms/models/CommonModel";
 import HttpStatusCode from "@rms/models/HttpStatusCode";
 import prisma from "@rms/prisma/prisma";
-import getUserFullInfo, {
-  type UserFullInfoType,
-} from "@rms/service/user-service";
+import getAuth, { type UserFullInfoType } from "@rms/service/user-service";
 import { sign, verify } from "jsonwebtoken";
 import { cookies } from "next/headers";
 
@@ -56,13 +54,11 @@ export function generateToken(
 
 export function verifyToken(token: string) {
   try {
-    verify(token, process.env["HASHKEY"]!);
-    return true;
+    return verify(token, process.env["HASHKEY"]!);
   } catch (e) {
-    return false;
+    return undefined;
   }
 }
-const RouteSkip = ["/admin"];
 
 export async function checkUserPermissions(
   permission: $Enums.UserPermission
@@ -70,7 +66,7 @@ export async function checkUserPermissions(
   | { status: HttpStatusCode.UNAUTHORIZED }
   | { status: HttpStatusCode.OK; data: UserFullInfoType }
 > {
-  const userInfo = await getUserFullInfo();
+  const userInfo = await getAuth();
   if (!userInfo) {
     return { status: HttpStatusCode.UNAUTHORIZED };
   }

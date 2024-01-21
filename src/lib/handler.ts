@@ -4,10 +4,9 @@ import HttpStatusCode from "@rms/models/HttpStatusCode";
 
 import { $Enums, Prisma } from "@prisma/client";
 import { createLog } from "@rms/service/log-service";
-import { UserFullInfoType } from "@rms/service/user-service";
+import getAuth, { UserFullInfoType } from "@rms/service/user-service";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { checkUserPermissions } from "./auth";
 
 export async function handlerServiceAction<T>(
   action: (info?: UserFullInfoType, config_id?: number) => Promise<T>,
@@ -58,32 +57,29 @@ export async function handlerServiceAction<T>(
     if (!urlHeader) {
       return;
     }
-    const resultPermissions = await checkUserPermissions(key);
+    const auth = await getAuth();
+
     const url = new URL(urlHeader);
 
-    if (resultPermissions.status === HttpStatusCode.OK) {
+    if (auth) {
       try {
-        var result = await action(
-          resultPermissions.data!,
-          resultPermissions.data.config.id
-        );
+        var result = await action(auth, auth.config.id);
         if (!url.pathname.includes("/log") && props?.body) {
           await createLog({
             action: key.includes("Add")
               ? "Add"
-              : key.includes("Edit")
-              ? "Edit"
+              : key.includes("Update")
+              ? "Update"
               : key.includes("Delete")
               ? "Delete"
-              : "View",
+              : ("View" as $Enums.Action), // Update the type of action to include "Update"
             page: url.toString(),
-            user_id: resultPermissions.data.user.id,
+            user_id: auth.user.id,
             body: JSON.stringify(props.body),
           });
         }
 
         if (props?.update) {
-          console.log(urlHeader);
           if (props.hotReload) {
             generatePaths(urlHeader).forEach((res) => {
               revalidatePath(res, "layout");
@@ -102,13 +98,13 @@ export async function handlerServiceAction<T>(
           await createLog({
             action: key.includes("Add")
               ? "Add"
-              : key.includes("Edit")
-              ? "Edit"
+              : key.includes("Update")
+              ? "Update"
               : key.includes("Delete")
               ? "Delete"
               : "View",
             page: url.toString(),
-            user_id: resultPermissions.data.user.id,
+            user_id: auth.user.id,
             body: JSON.stringify(props?.body),
             error: JSON.stringify(error.message),
           });

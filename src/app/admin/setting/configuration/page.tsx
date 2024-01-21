@@ -3,10 +3,10 @@ import { getConfigId } from "@rms/lib/config";
 import { Prisma } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
 import React from "react";
-import getUserFullInfo from "@rms/service/user-service";
+import getAuth from "@rms/service/user-service";
 
 export default async function page() {
-  const info = await getUserFullInfo({ withRedirect: true, withMedia: true });
+  const info = await getAuth({ withRedirect: true, withMedia: true });
   var value: Prisma.ConfigGetPayload<{
     select: {
       name: true;

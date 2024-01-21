@@ -14,7 +14,7 @@ import Menu, { menuClasses } from "@mui/joy/Menu";
 import MenuButton from "@mui/joy/MenuButton";
 import MenuItem from "@mui/joy/MenuItem";
 import Sheet from "@mui/joy/Sheet";
-import route from "@rms/assets/route";
+import route from "@rms/config/route";
 import { UserAuth } from "@rms/service/user-service";
 import Image from "next/image";
 import Link from "next/link";
@@ -215,7 +215,7 @@ export default function MenuIconSideNav(props: {
               menu={
                 <Menu onClose={() => setMenuIndex(null)}>
                   {res.children?.map((res) => (
-                    <Link href={res.path} key={res.routeKey}>
+                    <Link href={res.path} key={res.path}>
                       <MenuItem
                         {...itemProps}
                         color={

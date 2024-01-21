@@ -43,7 +43,7 @@ model Config {
   pl_boxes             P_LBox[]
   agent_boxes          AgentBox[]
   client_boxes         ManagerBox[]
-  crUpdate_boxes       CreditBox[]
+  credit_boxes         CreditBox[]
   adgjustment_boxes    AdjustmentBox[]
   schedule_configes    ScheduleConfig[]
   schedules            Schedule[]
@@ -184,7 +184,7 @@ model Log {
 
 enum Action {
   Add
-  Edit
+  Update
   Delete
   View
 }
@@ -851,7 +851,7 @@ model Equity {
   expensive_box    ExpensiveBox[]
   config_id        Int?
   config           Config?         @relation(fields: [config_id], references: [id], onDelete: Cascade)
-  crUpdate_boxes   CreditBox[]
+  credit_boxes     CreditBox[]
   adjustment_boxes AdjustmentBox[]
 
   @@unique([id, config_id], name: "unique_combination")

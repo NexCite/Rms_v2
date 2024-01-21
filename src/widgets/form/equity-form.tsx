@@ -1,39 +1,29 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+
 import {
-  Alert,
-  AlertTitle,
-  Card,
   CardContent,
-  CardHeader,
   Divider,
   FormControl,
+  FormLabel,
   IconButton,
-  TextField,
-  Tooltip,
-  Typography,
-} from "@mui/material";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+  Input,
+  Table,
+  Textarea,
+} from "@mui/joy";
 import { Prisma } from "@prisma/client";
-import NexciteButton from "@rms/components/button/nexcite-button";
 import NexCiteButton from "@rms/components/button/nexcite-button";
-import Loading from "@rms/components/other/loading";
+import NexCiteCard from "@rms/components/card/nexcite-card";
 import NumericFormatCustom from "@rms/components/input/text-field-number";
 import { useToast } from "@rms/hooks/toast-hook";
+import { EquitySchema } from "@rms/schema/equity";
 import { createEquity, updateEquity } from "@rms/service/equity-service";
 import dayjs from "dayjs";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import {
-  MdClose,
-  MdInfo,
-  MdPlusOne,
-  MdPrivacyTip,
-  MdTipsAndUpdates,
-} from "react-icons/md";
-import { z } from "zod";
 
 interface Props {
   id?: number;
@@ -56,141 +46,12 @@ interface Props {
 
 export default function EquityForm(props: Props) {
   const [isPadding, setTransition] = useTransition();
-  const { back } = useRouter();
-
-  const formSchema = z.object({
-    description: z.string().min(3),
-    to_date: z.date(),
-    coverage: z.array(
-      z.object({
-        account: z.string(),
-        starting_float: z.number().or(
-          z
-            .string()
-            .regex(/^-?\d+(\.\d{1,2})?$/)
-            .transform(Number)
-        ),
-        current_float: z.number().or(
-          z
-            .string()
-            .regex(/^-?\d+(\.\d{1,2})?$/)
-            .transform(Number)
-        ),
-        closed_p_l: z.number().or(
-          z
-            .string()
-            .regex(/^-?\d+(\.\d{1,2})?$/)
-            .transform(Number)
-        ),
-      })
-    ),
-    managers: z.array(
-      z.object({
-        manger: z
-          .string()
-          .min(1, { message: "Manager must be at least 1 characters" }),
-        starting_float: z.number().or(
-          z
-            .string()
-            .regex(/^-?\d+(\.\d{1,2})?$/)
-            .transform(Number)
-        ),
-        current_float: z.number().or(
-          z
-            .string()
-            .regex(/^-?\d+(\.\d{1,2})?$/)
-            .transform(Number)
-        ),
-        p_l: z.number().or(
-          z
-            .string()
-            .regex(/^-?\d+(\.\d{1,2})?$/)
-            .transform(Number)
-        ),
-        commission: z.number().or(
-          z
-            .string()
-            .regex(/^-?\d+(\.\d{1,2})?$/)
-            .transform(Number)
-        ),
-        swap: z.number().or(
-          z
-            .string()
-            .regex(/^-?\d+(\.\d{1,2})?$/)
-            .transform(Number)
-        ),
-      })
-    ),
-    agents: z.array(
-      z.object({
-        name: z
-          .string()
-          .min(1, { message: "Name must be at least 1 characters" }),
-        commission: z.number().or(
-          z
-            .string()
-            .regex(/^-?\d+(\.\d{1,2})?$/)
-            .transform(Number)
-        ),
-      })
-    ),
-    p_l: z.array(
-      z.object({
-        name: z
-          .string()
-          .min(1, { message: "Name must be at least 1 characters" }),
-        p_l: z.number().or(
-          z
-            .string()
-            .regex(/^-?\d+(\.\d{1,2})?$/)
-            .transform(Number)
-        ),
-      })
-    ),
-    expensive: z.array(
-      z.object({
-        name: z
-          .string()
-          .min(1, { message: "Name must be at least 1 characters" }),
-        expensive: z.number().or(
-          z
-            .string()
-            .regex(/^-?\d+(\.\d{1,2})?$/)
-            .transform(Number)
-        ),
-      })
-    ),
-    credit: z.array(
-      z.object({
-        name: z
-          .string()
-          .min(1, { message: "Name must be at least 1 characters" }),
-        credit: z.number().or(
-          z
-            .string()
-            .regex(/^-?\d+(\.\d{1,2})?$/)
-            .transform(Number)
-        ),
-      })
-    ),
-    adjustment: z.array(
-      z.object({
-        name: z
-          .string()
-          .min(1, { message: "Name must be at least 1 characters" }),
-        adjustment: z.number().or(
-          z
-            .string()
-            .regex(/^-?\d+(\.\d{1,2})?$/)
-            .transform(Number)
-        ),
-      })
-    ),
-  });
+  const { replace } = useRouter();
+  const pathName = usePathname();
 
   const toast = useToast();
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<EquitySchema>({
+    resolver: zodResolver(EquitySchema),
     defaultValues: {
       description: props.value?.description || "",
       to_date: props.value?.to_date || new Date(),
@@ -206,7 +67,7 @@ export default function EquityForm(props: Props) {
   });
 
   const handleSubmit = useCallback(
-    (values) => {
+    (values: EquitySchema) => {
       var formsData = {
         description: values.description,
         to_date: values.to_date,
@@ -220,1052 +81,759 @@ export default function EquityForm(props: Props) {
       };
 
       setTransition(async () => {
-        // if (props.id) {
-        //   [
-        //     "p_l",
-        //     "expensive_box",
-        //     "manager_boxes",
-        //     "coverage_boxes",
-        //     "agent_boxes",
-        //     "adjustment_boxes",
-        //     "credit_boxes",
-        //   ].forEach((item) => {
-        //     formsData[item].map((element) => {
-        //       element["payment_box_id"] = props.id;
-        //     });
-        //   });
-        // }
-
         if (props.isEditMode) {
           const result = await updateEquity(props.id, formsData as any);
           toast.OpenAlert(result);
-          if (result.status === 200) {
-            back();
-          }
         } else {
           const result = await createEquity(formsData as any);
           toast.OpenAlert(result);
           if (result.status === 200) {
-            back();
+            replace(pathName + "?id=" + result.result.id);
           }
         }
       });
       // }
     },
-    [props, toast, back]
+    [props, toast, replace]
   );
 
-  const [loadingUi, setLoadingUi] = useState(true);
-  useEffect(() => {
-    setLoadingUi(false);
-  }, [props.value]);
-
-  const handleInput = useCallback((value: any, onChange: any) => {
-    onChange(value);
-  }, []);
   const watch = useWatch({ control: form.control });
+  console.log(watch.coverage);
+  const handleDelete = useCallback(
+    (
+      index: number,
+      name:
+        | "coverage"
+        | "managers"
+        | "expensive"
+        | "p_l"
+        | "agents"
+        | "adjustment"
+        | "credit"
+    ) => {
+      form.getValues()[name].splice(index, 1);
+      form.setValue(name, form.getValues()[name]);
+    },
+    [form]
+  );
+
+  const handleAdd = useCallback(
+    (
+      name:
+        | "coverage"
+        | "managers"
+        | "expensive"
+        | "p_l"
+        | "agents"
+        | "adjustment"
+        | "credit"
+    ) => {
+      switch (name) {
+        case "coverage":
+          form.setValue(
+            name,
+            form.getValues().coverage.concat([
+              {
+                starting_float: 0,
+                current_float: 0,
+                closed_p_l: 0,
+                account: "",
+              },
+            ])
+          );
+          break;
+        case "managers":
+          form.setValue(
+            name,
+            form.getValues().managers.concat([
+              {
+                starting_float: 0,
+                current_float: 0,
+                commission: 0,
+                p_l: 0,
+                swap: 0,
+                manger: "",
+              },
+            ])
+          );
+          break;
+        case "expensive":
+          form.setValue(
+            name,
+            form.getValues().expensive.concat([
+              {
+                name: "",
+                expensive: 0,
+              },
+            ])
+          );
+          break;
+        case "p_l":
+          form.setValue(
+            name,
+            form.getValues().p_l.concat([
+              {
+                name: "",
+                p_l: 0,
+              },
+            ])
+          );
+          break;
+        case "agents":
+          form.setValue(
+            name,
+            form.getValues().agents.concat([
+              {
+                name: "",
+                commission: 0,
+              },
+            ])
+          );
+          break;
+        case "adjustment":
+          form.setValue(
+            name,
+            form.getValues().adjustment.concat([
+              {
+                name: "",
+                adjustment: 0,
+              },
+            ])
+          );
+          break;
+        case "credit":
+          form.setValue(
+            name,
+            form.getValues().credit.concat([
+              {
+                name: "",
+                credit: 0,
+              },
+            ])
+          );
+          break;
+        default:
+          break;
+      }
+    },
+    [form]
+  );
 
   return (
-    <form
-      className="max-w-[550px] w-full m-auto"
-      noValidate
-      onSubmit={form.handleSubmit(handleSubmit)}
-    >
-      {loadingUi ? (
-        <Loading />
-      ) : (
-        <Card variant="outlined">
-          <CardHeader
-            title={
-              <div className="flex justify-between items-center flex-row">
-                <Typography variant="h5" className="w-full">
-                  Equity Form
-                </Typography>
-                <NexCiteButton isPadding={isPadding} />
-              </div>
-            }
-          ></CardHeader>
-          <Divider />
-          <CardContent className="flex gap-2 flex-col">
-            <div className="flex gap-3 flex-col">
-              <Controller
-                control={form.control}
-                name="description"
-                render={({ field, fieldState }) => (
-                  <TextField
-                    {...field}
-                    required
-                    multiline
-                    minRows={3}
-                    maxRows={5}
-                    error={Boolean(fieldState.error)}
-                    label="Description"
-                    size="small"
-                    InputLabelProps={{ shrink: true }}
-                    fullWidth
+    <form noValidate onSubmit={form.handleSubmit(handleSubmit)}>
+      <NexCiteCard title="Equity Form">
+        <CardContent className="flex gap-2 flex-col">
+          <div className="flex gap-3 flex-col">
+            <Controller
+              control={form.control}
+              name="description"
+              render={({ field, fieldState }) => (
+                <FormControl error={Boolean(fieldState.error)}>
+                  <FormLabel required>Description</FormLabel>
+                  <Textarea
                     value={field.value}
-                    helperText={fieldState?.error?.message}
+                    onChange={field.onChange}
+                    minRows={3}
+                    placeholder="Description"
                   />
-                )}
-              />
-              <Controller
-                control={form.control}
-                name={"to_date"}
-                render={({ field, fieldState }) => (
-                  <FormControl {...field} size="small">
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DatePicker
-                        label="Date"
-                        slotProps={{
-                          textField: {
-                            InputLabelProps: { shrink: true },
-                            size: "small",
-                            required: true,
-                            error: Boolean(fieldState?.error),
-                            helperText: fieldState?.error?.message,
-                          },
-                        }}
-                        defaultValue={dayjs(field.value)}
-                        onChange={(e) => {
-                          field.onChange(e?.toDate());
-                        }}
-                      />
-                    </LocalizationProvider>
-                  </FormControl>
-                )}
-              />
-            </div>
-            {/* ************Coverage Boxes Start************ */}
-
-            <div style={{ margin: "0px 0px 0px" }} className="mt-4">
-              <h1 className="text-2xl">Coverage Account</h1>
-            </div>
-            <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
-
-            <Controller
-              control={form.control}
-              name="coverage"
-              render={({ field, fieldState }) => {
-                return (
-                  <>
-                    {Boolean(fieldState.error?.message) && (
-                      <Alert variant="outlined" severity="error">
-                        <AlertTitle>
-                          {fieldState.error.message.replaceAll("#space#", "\n")}
-                        </AlertTitle>
-                      </Alert>
-                    )}
-                    {field.value?.map((res, i) => (
-                      <div key={i}>
-                        <div className="flex justify-between items-center">
-                          <h1>Index: {i + 1}</h1>
-                          <NexciteButton
-                            onClick={() => {
-                              field.onChange(
-                                field.value.filter((res, ii) => i !== ii)
-                              );
-                            }}
-                            className="bg-black"
-                            type="button"
-                          >
-                            <MdClose size="15" />
-                          </NexciteButton>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            type="text"
-                            label="Account"
-                            value={res.account}
-                            required
-                            onChange={(e) => {
-                              field.value[i].account = e.target.value;
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "account")
-                            )}
-                          />
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            InputProps={{
-                              inputComponent: NumericFormatCustom as any,
-                            }}
-                            label="Starting Float"
-                            value={res.starting_float}
-                            required
-                            onChange={(e) => {
-                              field.value[i].starting_float = e.target
-                                .value as any;
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "starting_float")
-                            )}
-                            helperText={`${checkBoxesError(
-                              fieldState,
-                              i,
-                              "starting_float"
-                            )}`}
-                          />
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            label="Current Float"
-                            value={res.current_float}
-                            InputProps={{
-                              inputComponent: NumericFormatCustom as any,
-                            }}
-                            required
-                            onChange={(e) => {
-                              field.value[i].current_float = e.target
-                                .value as any;
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "current_float")
-                            )}
-                            helperText={`  ${checkBoxesError(
-                              fieldState,
-                              i,
-                              "current_float"
-                            )}`}
-                          />
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            label="Closed P_l"
-                            value={res.closed_p_l}
-                            InputProps={{
-                              inputComponent: NumericFormatCustom as any,
-                            }}
-                            required
-                            onChange={(e) => {
-                              field.value[i].closed_p_l = e.target.value as any;
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "closed_p_l")
-                            )}
-                            helperText={`${checkBoxesError(
-                              fieldState,
-                              i,
-                              "closed_p_l"
-                            )}`}
-                          />
-                        </div>
-                        {/* {i !== forms.coverage.length - 1 && (
-                          <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
-                        )} */}
-                      </div>
-                    ))}
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        marginTop: 10,
-                      }}
-                    >
-                      <NexciteButton
-                        type="button"
-                        className="bg-black"
-                        onClick={() => {
-                          form.setValue(
-                            "coverage",
-                            watch.coverage.concat([
-                              {
-                                starting_float: 0,
-                                current_float: 0,
-                                closed_p_l: 0,
-                                account: "",
-                              },
-                            ])
-                          );
-                        }}
-                      >
-                        <MdPlusOne />
-                      </NexciteButton>
-                    </div>
-                  </>
-                );
-              }}
+                </FormControl>
+              )}
             />
-            {/* ************Coverage Boxes End************ */}
-
-            {/* ************Manager Boxes start************ */}
-            <div style={{ margin: "0px 0px 0px" }}>
-              <h1 className="text-2xl">Manager</h1>
-            </div>
-            <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
             <Controller
+              name="to_date"
               control={form.control}
-              name="managers"
-              render={({ field, fieldState }) => {
-                return (
-                  <>
-                    {Boolean(fieldState.error?.message) && (
-                      <Alert variant="outlined" severity="error">
-                        <AlertTitle>
-                          {fieldState.error.message.replaceAll("#space#", "\n")}
-                        </AlertTitle>
-                      </Alert>
-                    )}
-
-                    {field.value?.map((res, i) => (
-                      <div key={i}>
-                        <div className="flex justify-between items-center">
-                          <h1>Index: {i + 1}</h1>
-                          <NexciteButton
-                            onClick={() => {
-                              field.onChange(
-                                field.value.filter((res, ii) => i !== ii)
-                              );
-                            }}
-                            className="bg-black"
-                            type="button"
-                          >
-                            <MdClose size="15" />
-                          </NexciteButton>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            type="text"
-                            label="Manger"
-                            value={res.manger}
-                            required
-                            onChange={(e) => {
-                              field.value[i].manger = e.target.value;
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "manger")
-                            )}
-                          />
-
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            label="Starting Float"
-                            value={res.starting_float}
-                            InputProps={{
-                              inputComponent: NumericFormatCustom as any,
-                            }}
-                            required
-                            onChange={(e) => {
-                              field.value[i].starting_float = e.target
-                                .value as any;
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "starting_float")
-                            )}
-                            helperText={`  ${checkBoxesError(
-                              fieldState,
-                              i,
-                              "starting_float"
-                            )}`}
-                          />
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            label="Current Float"
-                            value={res.current_float}
-                            InputProps={{
-                              inputComponent: NumericFormatCustom as any,
-                            }}
-                            required
-                            onChange={(e) => {
-                              field.value[i].current_float = e.target
-                                .value as any;
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "current_float")
-                            )}
-                            helperText={` ${checkBoxesError(
-                              fieldState,
-                              i,
-                              "current_float"
-                            )}`}
-                          />
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            label="P_L"
-                            value={res.p_l}
-                            InputProps={{
-                              inputComponent: NumericFormatCustom as any,
-                            }}
-                            required
-                            onChange={(e) => {
-                              field.value[i].p_l = e.target.value as any;
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "p_l")
-                            )}
-                            helperText={`  ${checkBoxesError(
-                              fieldState,
-                              i,
-                              "p_l"
-                            )}`}
-                          />
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            label="Commission"
-                            value={res.commission}
-                            InputProps={{
-                              inputComponent: NumericFormatCustom as any,
-                            }}
-                            required
-                            onChange={(e) => {
-                              field.value[i].commission = e.target.value as any;
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "commission")
-                            )}
-                            helperText={` ${checkBoxesError(
-                              fieldState,
-                              i,
-                              "commission"
-                            )}`}
-                          />
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            label="Swap"
-                            value={res.swap}
-                            InputProps={{
-                              inputComponent: NumericFormatCustom as any,
-                            }}
-                            required
-                            onChange={(e) => {
-                              field.value[i].swap = e.target.value as any;
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "swap")
-                            )}
-                            helperText={`  ${checkBoxesError(
-                              fieldState,
-                              i,
-                              "swap"
-                            )}`}
-                          />
-                        </div>
-                        {/* {i !== forms.clients.length - 1 && (
-                          <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
-                        )} */}
-                      </div>
-                    ))}
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        marginTop: 10,
-                      }}
-                    >
-                      <NexciteButton
-                        type="button"
-                        className="bg-black"
-                        onClick={() => {
-                          form.setValue(
-                            "managers",
-                            watch.managers.concat([
-                              {
-                                starting_float: 0,
-                                current_float: 0,
-                                p_l: 0,
-                                commission: 0,
-                                swap: 0,
-                                manger: "",
-                              },
-                            ])
-                          );
-                        }}
-                      >
-                        <MdPlusOne />
-                      </NexciteButton>
-                    </div>
-                  </>
-                );
-              }}
+              render={({ field, fieldState, formState }) => (
+                <FormControl error={Boolean(fieldState.error)} required>
+                  <FormLabel>Date</FormLabel>
+                  <Input
+                    fullWidth
+                    type="date"
+                    size="lg"
+                    value={dayjs(field.value).format("YYYY-MM-DD")}
+                    onChange={(e) => {
+                      field.onChange(e.target.valueAsDate);
+                    }}
+                    placeholder={field.name.replaceAll("_", " ")}
+                  />
+                </FormControl>
+              )}
             />
-            {/* ************Manager Boxes End************ */}
-
-            {/* ************Expensive Boxes start************ */}
+          </div>
+          {/* ************Coverage Boxes Start************ */}
+          <div>
             <div
               style={{ margin: "0px 0px 0px" }}
-              className="flex items-center"
+              className="mt-4 flex justify-between"
+            >
+              <h1 className="text-2xl">Coverage Account</h1>
+              <IconButton onClick={() => handleAdd("coverage")}>
+                <AddIcon />
+              </IconButton>
+            </div>
+            <Divider className="mb-5" />
+            <Table variant="outlined">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Account</th>
+                  <th>Starting Float</th>
+                  <th>Current Float</th>
+                  <th>Closed PL</th>
+                </tr>
+              </thead>
+              <tbody>
+                {watch.coverage?.map((res, i) => (
+                  <tr key={i}>
+                    <td>
+                      <IconButton onClick={() => handleDelete(i, "coverage")}>
+                        <DeleteIcon color="error" />
+                      </IconButton>
+                    </td>
+                    <td>
+                      <Controller
+                        control={form.control}
+                        name={`coverage.${i}.account` as any}
+                        render={({ fieldState, field }) => (
+                          <FormControl error={Boolean(fieldState.error)}>
+                            <Input
+                              value={res.account}
+                              onChange={({ target: { value } }) => {
+                                console.log(value);
+                                field.onChange(value);
+                              }}
+                              placeholder={"account"}
+                            />
+                          </FormControl>
+                        )}
+                      />
+                    </td>
+                    {["starting_float", "current_float", "closed_p_l"].map(
+                      (item, index) => (
+                        <td key={index}>
+                          <Controller
+                            control={form.control}
+                            name={`coverage.${i}.${item}` as any}
+                            render={({ fieldState, field }) => (
+                              <FormControl error={Boolean(fieldState.error)}>
+                                <Input
+                                  value={res[item]}
+                                  onChange={({ target: { value } }) => {
+                                    if (Number.isNaN(value)) {
+                                      field.onChange(0);
+                                    } else {
+                                      field.onChange(parseFloat(value));
+                                    }
+                                  }}
+                                  placeholder={item.replaceAll("_", " ")}
+                                  slotProps={{
+                                    input: {
+                                      component: NumericFormatCustom,
+                                    },
+                                  }}
+                                />
+                              </FormControl>
+                            )}
+                          />
+                        </td>
+                      )
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+          {/* ************Coverage Boxes End************ */}
+          {/* ************Manager Boxes start************ */}
+          <div>
+            <div
+              style={{ margin: "0px 0px 0px" }}
+              className="mt-4 flex justify-between"
+            >
+              <h1 className="text-2xl">Manager</h1>
+              <IconButton onClick={() => handleAdd("managers")}>
+                <AddIcon />
+              </IconButton>
+            </div>
+            <Divider className="mb-5" />
+            <Table variant="outlined">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Manger</th>
+                  <th>Starting Float</th>
+                  <th>Current Float</th>
+                  <th>PL</th>
+                  <th>Commission</th>
+                  <th>Swap</th>
+                </tr>
+              </thead>
+              <tbody>
+                {watch.managers?.map((res, i) => (
+                  <tr key={i}>
+                    <td>
+                      <IconButton onClick={() => handleDelete(i, "managers")}>
+                        <DeleteIcon color="error" />
+                      </IconButton>
+                    </td>
+                    <td>
+                      <Controller
+                        control={form.control}
+                        name={`managers.${i}.manger` as any}
+                        render={({ fieldState, field }) => (
+                          <FormControl error={Boolean(fieldState.error)}>
+                            <Input
+                              value={res.manger}
+                              onChange={({ target: { value } }) => {
+                                field.onChange(value);
+                              }}
+                              placeholder={"manger"}
+                            />
+                          </FormControl>
+                        )}
+                      />
+                    </td>
+                    {[
+                      "starting_float",
+                      "current_float",
+                      "p_l",
+                      "commission",
+                      "swap",
+                    ].map((item, index) => (
+                      <td key={index}>
+                        <Controller
+                          control={form.control}
+                          name={`managers.${i}.${item}` as any}
+                          render={({ fieldState, field }) => (
+                            <FormControl error={Boolean(fieldState.error)}>
+                              <Input
+                                value={res[item]}
+                                onChange={({ target: { value } }) => {
+                                  if (Number.isNaN(value)) {
+                                    field.onChange(0);
+                                  } else {
+                                    field.onChange(parseFloat(value));
+                                  }
+                                }}
+                                placeholder={item.replaceAll("_", " ")}
+                                slotProps={{
+                                  input: {
+                                    component: NumericFormatCustom,
+                                  },
+                                }}
+                              />
+                            </FormControl>
+                          )}
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+          {/* ************Manager Boxes End************ */}
+          {/* ************Expensive Boxes start************ */}
+          <div>
+            <div
+              style={{ margin: "0px 0px 0px" }}
+              className="mt-4 flex justify-between"
             >
               <h1 className="text-2xl">Expensive</h1>
-              <Tooltip title="Commissions Salary">
-                <IconButton size="small">
-                  <MdInfo />
-                </IconButton>
-              </Tooltip>
+              <IconButton onClick={() => handleAdd("expensive")}>
+                <AddIcon />
+              </IconButton>
             </div>
-            <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
-            <Controller
-              control={form.control}
-              name="expensive"
-              render={({ field, fieldState }) => {
-                return (
-                  <>
-                    {Boolean(fieldState.error?.message) && (
-                      <Alert variant="outlined" severity="error">
-                        <AlertTitle>
-                          {fieldState.error.message.replaceAll("#space#", "\n")}
-                        </AlertTitle>
-                      </Alert>
-                    )}
-
-                    {field.value?.map((res, i) => (
-                      <div key={i}>
-                        <div className="flex justify-between items-center">
-                          <h1>Index: {i + 1}</h1>
-                          <NexciteButton
-                            onClick={() => {
-                              field.onChange(
-                                field.value.filter((res, ii) => i !== ii)
-                              );
-                            }}
-                            className="bg-black"
-                            type="button"
-                          >
-                            <MdClose size="15" />
-                          </NexciteButton>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
-                          <TextField
-                            size="small"
-                            type="text"
-                            label="Name"
-                            InputLabelProps={{ shrink: true }}
-                            value={res.name}
-                            required
-                            onChange={(e) => {
-                              field.value[i].name = e.target.value;
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "name")
-                            )}
-                          />
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            label="Expensive"
-                            value={res.expensive}
-                            InputProps={{
-                              inputComponent: NumericFormatCustom as any,
-                            }}
-                            required
-                            onChange={(e) => {
-                              field.value[i].expensive = e.target.value as any;
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "expensive")
-                            )}
-                            helperText={` ${checkBoxesError(
-                              fieldState,
-                              i,
-                              "expensive"
-                            )}`}
-                          />
-                        </div>
-                        {/* {i !== forms.expensive.length - 1 && (
-                          <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
-                        )} */}
-                      </div>
+            <Divider className="mb-5" />
+            <Table variant="outlined">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Name</th>
+                  <th>Expensive</th>
+                </tr>
+              </thead>
+              <tbody>
+                {watch.expensive?.map((res, i) => (
+                  <tr key={i}>
+                    <td>
+                      <IconButton onClick={() => handleDelete(i, "expensive")}>
+                        <DeleteIcon color="error" />
+                      </IconButton>
+                    </td>
+                    <td>
+                      <Controller
+                        control={form.control}
+                        name={`expensive.${i}.name` as any}
+                        render={({ fieldState, field }) => (
+                          <FormControl error={Boolean(fieldState.error)}>
+                            <Input
+                              value={res.name}
+                              onChange={({ target: { value } }) => {
+                                field.onChange(value);
+                              }}
+                              placeholder={"name"}
+                            />
+                          </FormControl>
+                        )}
+                      />
+                    </td>
+                    {["expensive"].map((item, index) => (
+                      <td key={index}>
+                        <Controller
+                          control={form.control}
+                          name={`expensive.${i}.${item}` as any}
+                          render={({ fieldState, field }) => (
+                            <FormControl error={Boolean(fieldState.error)}>
+                              <Input
+                                value={res[item]}
+                                onChange={({ target: { value } }) => {
+                                  if (Number.isNaN(value)) {
+                                    field.onChange(0);
+                                  } else {
+                                    field.onChange(parseFloat(value));
+                                  }
+                                }}
+                                placeholder={item.replaceAll("_", " ")}
+                                slotProps={{
+                                  input: {
+                                    component: NumericFormatCustom,
+                                  },
+                                }}
+                              />
+                            </FormControl>
+                          )}
+                        />
+                      </td>
                     ))}
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        marginTop: 10,
-                      }}
-                    >
-                      <NexciteButton
-                        type="button"
-                        className="bg-black"
-                        onClick={() => {
-                          form.setValue(
-                            "expensive",
-                            watch.expensive.concat([
-                              {
-                                expensive: 0,
-                                name: "",
-                              },
-                            ])
-                          );
-                        }}
-                      >
-                        <MdPlusOne />
-                      </NexciteButton>
-                    </div>
-                  </>
-                );
-              }}
-            />
-            {/* ************Expensive Boxes End************ */}
-
-            {/* ************P_L Boxes start************ */}
-            <div style={{ margin: "0px 0px 0px" }}>
-              <h1 className="text-2xl">P_L</h1>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+          {/* ************Expensive Boxes End************ */}
+          {/* ************P_L Boxes start************ */}
+          <div>
+            <div
+              style={{ margin: "0px 0px 0px" }}
+              className="mt-4 flex justify-between"
+            >
+              <h1 className="text-2xl">PL</h1>
+              <IconButton onClick={() => handleAdd("p_l")}>
+                <AddIcon />
+              </IconButton>
             </div>
-            <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
-            <Controller
-              control={form.control}
-              name="p_l"
-              render={({ field, fieldState }) => {
-                return (
-                  <>
-                    {Boolean(fieldState.error?.message) && (
-                      <Alert variant="outlined" severity="error">
-                        <AlertTitle>
-                          {fieldState.error.message.replaceAll("#space#", "\n")}
-                        </AlertTitle>
-                      </Alert>
-                    )}
-
-                    {field.value?.map((res, i) => (
-                      <div key={i}>
-                        <div className="flex justify-between items-center">
-                          <h1>Index: {i + 1}</h1>
-                          <NexciteButton
-                            onClick={() => {
-                              field.onChange(
-                                field.value.filter((res, ii) => i !== ii)
-                              );
-                            }}
-                            className="bg-black"
-                            type="button"
-                          >
-                            <MdClose size="15" />
-                          </NexciteButton>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            type="text"
-                            label="Name"
-                            placeholder="name"
-                            value={res.name}
-                            required
-                            onChange={(e) => {
-                              field.value[i].name = e.target.value;
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "name")
-                            )}
-                          />
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            label="P_l"
-                            value={res.p_l}
-                            InputProps={{
-                              inputComponent: NumericFormatCustom as any,
-                            }}
-                            required
-                            onChange={(e) => {
-                              field.value[i].p_l = e.target.value as any;
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "p_l")
-                            )}
-                            helperText={` ${checkBoxesError(
-                              fieldState,
-                              i,
-                              "p_l"
-                            )}`}
-                          />
-                        </div>
-                        {/* {i !== forms.p_l.length - 1 && (
-                          <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
-                        )} */}
-                      </div>
+            <Divider className="mb-5" />
+            <Table variant="outlined">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Name</th>
+                  <th>p_l</th>
+                </tr>
+              </thead>
+              <tbody>
+                {watch.p_l?.map((res, i) => (
+                  <tr key={i}>
+                    <td>
+                      <IconButton onClick={() => handleDelete(i, "p_l")}>
+                        <DeleteIcon color="error" />
+                      </IconButton>
+                    </td>
+                    <td>
+                      <Controller
+                        control={form.control}
+                        name={`p_l.${i}.name` as any}
+                        render={({ fieldState, field }) => (
+                          <FormControl error={Boolean(fieldState.error)}>
+                            <Input
+                              value={res.name}
+                              onChange={({ target: { value } }) => {
+                                field.onChange(value);
+                              }}
+                              placeholder={"name"}
+                            />
+                          </FormControl>
+                        )}
+                      />
+                    </td>
+                    {["p_l"].map((item, index) => (
+                      <td key={index}>
+                        <Controller
+                          control={form.control}
+                          name={`p_l.${i}.${item}` as any}
+                          render={({ fieldState, field }) => (
+                            <FormControl error={Boolean(fieldState.error)}>
+                              <Input
+                                value={res[item]}
+                                onChange={({ target: { value } }) => {
+                                  if (Number.isNaN(value)) {
+                                    field.onChange(0);
+                                  } else {
+                                    field.onChange(parseFloat(value));
+                                  }
+                                }}
+                                placeholder={item.replaceAll("_", " ")}
+                                slotProps={{
+                                  input: {
+                                    component: NumericFormatCustom,
+                                  },
+                                }}
+                              />
+                            </FormControl>
+                          )}
+                        />
+                      </td>
                     ))}
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        marginTop: 10,
-                      }}
-                    >
-                      <NexciteButton
-                        type="button"
-                        className="bg-black"
-                        onClick={() => {
-                          form.setValue(
-                            "p_l",
-                            watch.p_l.concat([
-                              {
-                                p_l: 0,
-                                name: "",
-                              },
-                            ])
-                          );
-                        }}
-                      >
-                        <MdPlusOne />
-                      </NexciteButton>
-                    </div>
-                  </>
-                );
-              }}
-            />
-            {/* ************P_L Boxes End************ */}
-
-            {/* ************Agent Boxes start************ */}
-            <div style={{ margin: "0px 0px 0px" }}>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+          {/* ************P_L Boxes End************ */}
+          {/* ************Agent Boxes start************ */}
+          <div>
+            <div
+              style={{ margin: "0px 0px 0px" }}
+              className="mt-4 flex justify-between"
+            >
               <h1 className="text-2xl">Agent</h1>
+              <IconButton onClick={() => handleAdd("agents")}>
+                <AddIcon />
+              </IconButton>
             </div>
-            <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
-            <Controller
-              control={form.control}
-              name="agents"
-              render={({ field, fieldState }) => {
-                return (
-                  <>
-                    {Boolean(fieldState.error?.message) && (
-                      <Alert variant="outlined" severity="error">
-                        <AlertTitle>
-                          {fieldState.error.message.replaceAll("#space#", "\n")}
-                        </AlertTitle>
-                      </Alert>
-                    )}
-                    {field.value?.map((res, i) => (
-                      <div key={i}>
-                        <div className="flex justify-between items-center">
-                          <h1>Index: {i + 1}</h1>
-                          <NexciteButton
-                            onClick={() => {
-                              field.onChange(
-                                field.value.filter((res, ii) => i !== ii)
-                              );
-                            }}
-                            className="bg-black"
-                            type="button"
-                          >
-                            <MdClose size="15" />
-                          </NexciteButton>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            type="text"
-                            label="Name"
-                            value={res.name}
-                            required
-                            onChange={(e) => {
-                              field.value[i].name = e.target.value;
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "name")
-                            )}
-                          />
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            label="Commission"
-                            value={res.commission}
-                            InputProps={{
-                              inputComponent: NumericFormatCustom as any,
-                            }}
-                            required
-                            onChange={(e) => {
-                              field.value[i].commission = e.target.value as any;
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "commission")
-                            )}
-                            helperText={`  ${checkBoxesError(
-                              fieldState,
-                              i,
-                              "commission"
-                            )}`}
-                          />
-                        </div>
-                        {/* {i !== forms.agents.length - 1 && (
-                          <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
-                        )} */}
-                      </div>
+            <Divider className="mb-5" />
+            <Table variant="outlined">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Name</th>
+                  <th>Commission</th>
+                </tr>
+              </thead>
+              <tbody>
+                {watch.agents?.map((res, i) => (
+                  <tr key={i}>
+                    <td>
+                      <IconButton onClick={() => handleDelete(i, "agents")}>
+                        <DeleteIcon color="error" />
+                      </IconButton>
+                    </td>
+                    <td>
+                      <Controller
+                        control={form.control}
+                        name={`agents.${i}.name` as any}
+                        render={({ fieldState, field }) => (
+                          <FormControl error={Boolean(fieldState.error)}>
+                            <Input
+                              value={res.name}
+                              onChange={({ target: { value } }) => {
+                                field.onChange(value);
+                              }}
+                              placeholder={"name"}
+                            />
+                          </FormControl>
+                        )}
+                      />
+                    </td>
+                    {["commission"].map((item, index) => (
+                      <td key={index}>
+                        <Controller
+                          control={form.control}
+                          name={`agents.${i}.${item}` as any}
+                          render={({ fieldState, field }) => (
+                            <FormControl error={Boolean(fieldState.error)}>
+                              <Input
+                                value={res[item]}
+                                onChange={({ target: { value } }) => {
+                                  if (Number.isNaN(value)) {
+                                    field.onChange(0);
+                                  } else {
+                                    field.onChange(parseFloat(value));
+                                  }
+                                }}
+                                placeholder={item.replaceAll("_", " ")}
+                                slotProps={{
+                                  input: {
+                                    component: NumericFormatCustom,
+                                  },
+                                }}
+                              />
+                            </FormControl>
+                          )}
+                        />
+                      </td>
                     ))}
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        marginTop: 10,
-                      }}
-                    >
-                      <NexciteButton
-                        type="button"
-                        className="bg-black"
-                        onClick={() => {
-                          form.setValue(
-                            "agents",
-                            watch.agents.concat([
-                              {
-                                commission: 0,
-                                name: "",
-                              },
-                            ])
-                          );
-                        }}
-                      >
-                        <MdPlusOne />
-                      </NexciteButton>
-                    </div>
-                  </>
-                );
-              }}
-            />
-            {/* ************Agent Boxes End************ */}
-
-            {/* ************Adjustment Boxes start************ */}
-
-            <div style={{ margin: "0px 0px 0px" }}>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+          {/* ************Agent Boxes End************ */}
+          {/* ************Adjustment Boxes start************ */}
+          <div>
+            <div
+              style={{ margin: "0px 0px 0px" }}
+              className="mt-4 flex justify-between"
+            >
               <h1 className="text-2xl">Adjustment</h1>
+              <IconButton onClick={() => handleAdd("adjustment")}>
+                <AddIcon />
+              </IconButton>
             </div>
-            <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
-            <Controller
-              control={form.control}
-              name="adjustment"
-              render={({ field, fieldState }) => {
-                return (
-                  <>
-                    {Boolean(fieldState.error?.message) && (
-                      <Alert variant="outlined" severity="error">
-                        <AlertTitle>
-                          {fieldState.error.message.replaceAll("#space#", "\n")}
-                        </AlertTitle>
-                      </Alert>
-                    )}
-                    {field.value?.map((res, i) => (
-                      <div key={i}>
-                        <div className="flex justify-between items-center">
-                          <h1>Index: {i + 1}</h1>
-                          <NexciteButton
-                            onClick={() => {
-                              field.onChange(
-                                field.value.filter((res, ii) => i !== ii)
-                              );
-                            }}
-                            className="bg-black"
-                            type="button"
-                          >
-                            <MdClose size="15" />
-                          </NexciteButton>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            type="text"
-                            label="Name"
-                            value={res.name}
-                            required
-                            onChange={(e) => {
-                              field.value[i].name = e.target.value;
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "name")
-                            )}
-                          />
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            label="Adjustment"
-                            value={res.adjustment}
-                            InputProps={{
-                              inputComponent: NumericFormatCustom as any,
-                            }}
-                            required
-                            onChange={(e) => {
-                              field.value[i].adjustment = e.target.value as any;
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "adjustment")
-                            )}
-                            helperText={` ${checkBoxesError(
-                              fieldState,
-                              i,
-                              "adjustment"
-                            )}`}
-                          />
-                        </div>
-                        {/* {i !== forms.agents.length - 1 && (
-                          <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
-                        )} */}
-                      </div>
+            <Divider className="mb-5" />
+            <Table variant="outlined">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Name</th>
+                  <th>Commission</th>
+                </tr>
+              </thead>
+              <tbody>
+                {watch.adjustment?.map((res, i) => (
+                  <tr key={i}>
+                    <td>
+                      <IconButton onClick={() => handleDelete(i, "adjustment")}>
+                        <DeleteIcon color="error" />
+                      </IconButton>
+                    </td>
+                    <td>
+                      <Controller
+                        control={form.control}
+                        name={`adjustment.${i}.name` as any}
+                        render={({ fieldState, field }) => (
+                          <FormControl error={Boolean(fieldState.error)}>
+                            <Input
+                              value={res.name}
+                              onChange={({ target: { value } }) => {
+                                field.onChange(value);
+                              }}
+                              placeholder={"name"}
+                            />
+                          </FormControl>
+                        )}
+                      />
+                    </td>
+                    {["adjustment"].map((item, index) => (
+                      <td key={index}>
+                        <Controller
+                          control={form.control}
+                          name={`adjustment.${i}.${item}` as any}
+                          render={({ fieldState, field }) => (
+                            <FormControl error={Boolean(fieldState.error)}>
+                              <Input
+                                value={res[item]}
+                                onChange={({ target: { value } }) => {
+                                  if (Number.isNaN(value)) {
+                                    field.onChange(0);
+                                  } else {
+                                    field.onChange(parseFloat(value));
+                                  }
+                                }}
+                                placeholder={item.replaceAll("_", " ")}
+                                slotProps={{
+                                  input: {
+                                    component: NumericFormatCustom,
+                                  },
+                                }}
+                              />
+                            </FormControl>
+                          )}
+                        />
+                      </td>
                     ))}
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        marginTop: 10,
-                      }}
-                    >
-                      <NexciteButton
-                        type="button"
-                        className="bg-black"
-                        onClick={() => {
-                          form.setValue(
-                            "adjustment",
-                            watch.adjustment.concat([
-                              {
-                                adjustment: 0,
-                                name: "",
-                              },
-                            ])
-                          );
-                        }}
-                      >
-                        <MdPlusOne />
-                      </NexciteButton>
-                    </div>
-                  </>
-                );
-              }}
-            />
-            {/* ************Adjustment Boxes End************ */}
-
-            {/* ************Credit Boxes start************ */}
-
-            <div style={{ margin: "0px 0px 0px" }}>
-              <h1 className="text-2xl">Credit</h1>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+          {/* ************Adjustment Boxes End************ */}
+          {/* ************Credit Boxes start************ */}
+          <div>
+            <div
+              style={{ margin: "0px 0px 0px" }}
+              className="mt-4 flex justify-between"
+            >
+              <h1 className="text-2xl">credit</h1>
+              <IconButton onClick={() => handleAdd("credit")}>
+                <AddIcon />
+              </IconButton>
             </div>
-            <hr className=" h-[0.3px] border-t-0 bg-gray-600 opacity-25 dark:opacity-50 mt-50mb-4" />
-            <Controller
-              control={form.control}
-              name="credit"
-              render={({ field, fieldState }) => {
-                return (
-                  <>
-                    {Boolean(fieldState.error?.message) && (
-                      <Alert variant="outlined" severity="error">
-                        <AlertTitle>
-                          {fieldState.error.message.replaceAll("#space#", "\n")}
-                        </AlertTitle>
-                      </Alert>
-                    )}
-                    {field.value?.map((res, i) => (
-                      <div key={i}>
-                        <div className="flex justify-between items-center">
-                          <h1>Index: {i + 1}</h1>
-                          <NexciteButton
-                            onClick={() => {
-                              field.onChange(
-                                field.value.filter((res, ii) => i !== ii)
-                              );
-                            }}
-                            className="bg-black"
-                            type="button"
-                          >
-                            <MdClose size="15" />
-                          </NexciteButton>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            type="text"
-                            label="Name"
-                            value={res.name}
-                            required
-                            onChange={(e) => {
-                              field.value[i].name = e.target.value;
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "name")
-                            )}
-                          />
-                          <TextField
-                            InputLabelProps={{ shrink: true }}
-                            size="small"
-                            label="Credit"
-                            value={res.credit}
-                            InputProps={{
-                              inputComponent: NumericFormatCustom as any,
-                            }}
-                            required
-                            onChange={(e) => {
-                              field.value[i].credit = e.target.value as any;
-                              field.onChange(field.value);
-                            }}
-                            error={Boolean(
-                              checkBoxesError(fieldState, i, "credit")
-                            )}
-                            helperText={`  ${checkBoxesError(
-                              fieldState,
-                              i,
-                              "credit"
-                            )}`}
-                          />
-                        </div>
-                        {/* {i !== forms.agents.length - 1 && (
-                          <hr className="my-1 h-0.5 border-t-0 bg-gray-100 opacity-100 dark:opacity-50 mt-5" />
-                        )} */}
-                      </div>
+            <Divider className="mb-5" />
+            <Table variant="outlined">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Name</th>
+                  <th>Credit</th>
+                </tr>
+              </thead>
+              <tbody>
+                {watch.credit?.map((res, i) => (
+                  <tr key={i}>
+                    <td>
+                      <IconButton onClick={() => handleDelete(i, "credit")}>
+                        <DeleteIcon color="error" />
+                      </IconButton>
+                    </td>
+                    <td>
+                      <Controller
+                        control={form.control}
+                        name={`credit.${i}.name` as any}
+                        render={({ fieldState, field }) => (
+                          <FormControl error={Boolean(fieldState.error)}>
+                            <Input
+                              value={res.name}
+                              onChange={({ target: { value } }) => {
+                                field.onChange(value);
+                              }}
+                              placeholder={"name"}
+                            />
+                          </FormControl>
+                        )}
+                      />
+                    </td>
+                    {["credit"].map((item, index) => (
+                      <td key={index}>
+                        <Controller
+                          control={form.control}
+                          name={`credit.${i}.${item}` as any}
+                          render={({ fieldState, field }) => (
+                            <FormControl error={Boolean(fieldState.error)}>
+                              <Input
+                                value={res[item]}
+                                onChange={({ target: { value } }) => {
+                                  if (Number.isNaN(value)) {
+                                    field.onChange(0);
+                                  } else {
+                                    field.onChange(parseFloat(value));
+                                  }
+                                }}
+                                placeholder={item.replaceAll("_", " ")}
+                                slotProps={{
+                                  input: {
+                                    component: NumericFormatCustom,
+                                  },
+                                }}
+                              />
+                            </FormControl>
+                          )}
+                        />
+                      </td>
                     ))}
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        marginTop: 10,
-                      }}
-                    >
-                      <NexciteButton
-                        type="button"
-                        className="bg-black"
-                        onClick={() => {
-                          form.setValue(
-                            "credit",
-                            watch.credit.concat([
-                              {
-                                credit: 0,
-                                name: "",
-                              },
-                            ])
-                          );
-                        }}
-                      >
-                        <MdPlusOne />
-                      </NexciteButton>
-                    </div>
-                  </>
-                );
-              }}
-            />
-            {/* ************Credit Boxes End************ */}
-          </CardContent>
-        </Card>
-      )}
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+          {/* ************Credit Boxes End************ */}
+          <div className="flex flex-row-reverse">
+            <NexCiteButton isPadding={isPadding} type="submit">
+              Save
+            </NexCiteButton>
+          </div>{" "}
+        </CardContent>
+      </NexCiteCard>
     </form>
   );
 }

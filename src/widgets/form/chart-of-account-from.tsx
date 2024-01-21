@@ -25,7 +25,7 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useTransition } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { ChartOfAccountInputSchema } from "../schema/chart-of-account";
+import { ChartOfAccountInputSchema } from "../../schema/chart-of-account";
 import Typography from "@mui/joy/Typography";
 import Tabs from "@mui/joy/Tabs";
 import TabList from "@mui/joy/TabList";
@@ -174,7 +174,7 @@ export default function ChartOfAccountForm(props: Props) {
               });
 
               toast.OpenAlert(res);
-              replace(pathName + "?id=" + res.result.id);
+              // replace(pathName + "?id=" + res.result.id);
             });
           });
         } else {

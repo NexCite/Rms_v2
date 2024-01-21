@@ -4,23 +4,22 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import Authorized from "@rms/components/other/authorized";
+import ExportData from "@rms/components/other/export-data";
+import LoadingClient from "@rms/components/other/loading-client";
+import useHistoryStore from "@rms/hooks/history-hook";
 import { useToast } from "@rms/hooks/toast-hook";
 import { FormatNumberWithFixed } from "@rms/lib/global";
 import { Activity, ActivityStatus } from "@rms/models/CommonModel";
 import { confirmActivity } from "@rms/service/activity-service";
 import {
-  createMRTColumnHelper,
+  MRT_ColumnFiltersState,
+  MRT_PaginationState,
   MaterialReactTable,
+  createMRTColumnHelper,
   useMaterialReactTable,
   type MRT_ColumnDef,
-  MRT_PaginationState,
-  MRT_ColumnFiltersState,
 } from "material-react-table";
 import Link from "next/link";
-import ExportData from "@rms/components/other/export-data";
-import useHistoryStore from "@rms/hooks/history-hook";
-import Loading from "@rms/components/other/loading";
-import LoadingClient from "@rms/components/other/loading-client";
 
 type Props = {
   data: Activity[];
@@ -161,10 +160,7 @@ export default function ActivityTable(props: Props) {
     "activity-table-filter",
     []
   )();
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    setLoading(false);
-  }, []);
+
   const table = useMaterialReactTable({
     columns,
     data: props.data,

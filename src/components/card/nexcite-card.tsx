@@ -9,7 +9,9 @@ export default function NexCiteCard(props: {
 }) {
   return (
     <Card>
-      <Typography fontSize={23}>{props.title}</Typography>
+      <Typography fontSize={23} className={props.className ?? ""}>
+        {props.title}
+      </Typography>
 
       {props.children}
     </Card>

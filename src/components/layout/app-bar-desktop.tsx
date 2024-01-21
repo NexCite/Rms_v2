@@ -8,7 +8,7 @@ import { usePathname, useSelectedLayoutSegments } from "next/navigation";
 import NexCiteButton from "../button/nexcite-button";
 import Typography from "@mui/joy/Typography";
 import BackButton from "../button/back-button";
-import route from "@rms/assets/route";
+import route from "@rms/config/route";
 
 export default function AppBarDesktop(props: UserAuth) {
   const path = usePathname();
@@ -35,7 +35,7 @@ export default function AppBarDesktop(props: UserAuth) {
 
   return (
     currentRoute && (
-      <div className="w-full border p-5 flex justify-between  items-center sticky top-0 z-10 bg-white">
+      <div className="w-full border p-5 flex justify-between  items-center sticky top-0 z-10 bg-[#fbfcfe]">
         <div className="flex items-center gap-1">
           {segments.length > 2 && <BackButton />}
 

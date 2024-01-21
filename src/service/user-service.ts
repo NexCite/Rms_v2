@@ -43,11 +43,6 @@ export const getUserStatus = (
   return props.type === "Admin" ? undefined : $Enums.Status.Enable;
 };
 
-export async function getUserType() {
-  const user = await getUserInfo();
-  return user.type;
-}
-
 export async function updateUser(
   id: number,
   props: Prisma.UserUncheckedUpdateInput
@@ -112,7 +107,7 @@ export type UserAuth = Prisma.UserGetPayload<{
   };
 }>;
 
-export default async function getUserFullInfo(
+export default async function getAuth(
   props: {
     withRedirect?: boolean;
     withMedia?: boolean;

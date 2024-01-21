@@ -2,7 +2,7 @@ import { $Enums } from "@prisma/client";
 import Loading from "@rms/components/other/loading";
 import { getUserInfo } from "@rms/lib/auth";
 import prisma from "@rms/prisma/prisma";
-import getUserFullInfo from "@rms/service/user-service";
+import getAuth from "@rms/service/user-service";
 import ChartOfAccountTable from "@rms/widgets/table/chart-of-account-table";
 import { Suspense } from "react";
 
@@ -17,7 +17,7 @@ export default async function page() {
 
   // await prisma.voucher.createMany({ data: m });
   // console.log("done");
-  const info = await getUserFullInfo();
+  const info = await getAuth();
   const currencies = await prisma.currency.findMany({
     where: { config_id: info.config.id },
   });

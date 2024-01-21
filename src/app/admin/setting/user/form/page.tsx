@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { getUserInfo } from "@rms/lib/auth";
 import prisma from "@rms/prisma/prisma";
-import getUserFullInfo, { getUserStatus } from "@rms/service/user-service";
+import getAuth, { getUserStatus } from "@rms/service/user-service";
 import UserFormComponent from "@rms/widgets/form/user-form";
 
 export default async function page(props: {
@@ -21,7 +21,7 @@ export default async function page(props: {
       id: true;
     };
   }>;
-  const info = await getUserFullInfo();
+  const info = await getAuth();
 
   if (isEditMode) {
     value = await prisma.user.findFirst({

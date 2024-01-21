@@ -24,7 +24,7 @@ import {
 import {
   JournalVouchers,
   VoucherSearchSchema,
-} from "../schema/journal-voucher";
+} from "../../schema/journal-voucher";
 
 import FormControl from "@mui/joy/FormControl";
 import FormLabel from "@mui/joy/FormLabel";
@@ -32,7 +32,7 @@ import Authorized from "@rms/components/other/authorized";
 import {
   FormatNumber,
   FormatNumberWithFixed,
-  exportToExcell,
+  exportToExcel,
 } from "@rms/lib/global";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -179,7 +179,7 @@ export default function JournalVoucherTable(props: {
                 {res.reference_chart_of_account?.id}{" "}
                 {res.reference_chart_of_account?.name}
               </td>
-              <td>${res.amount / res.rate}</td>
+              <td>${FormatNumberWithFixed(res.amount / res.rate, 2)}</td>
             </tr>
           ))}
           <tr></tr>
@@ -550,7 +550,7 @@ function ExportVoucher(props: {
                 type="button"
                 disabled={!selectedClient}
                 onClick={(e) => {
-                  exportToExcell({
+                  exportToExcel({
                     to: props.voucher.to_date,
                     from: props.voucher.to_date,
                     username: selectedClient?.label,
