@@ -10,7 +10,7 @@ const nextConfig = {
     workerThreads: true,
     cpus: 4,
     instrumentationHook: true,
-    nextScriptWorkers: true,
+    missingSuspenseWithCSRBailout: false,
   },
 };
 
