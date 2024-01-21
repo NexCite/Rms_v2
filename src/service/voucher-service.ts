@@ -7,7 +7,7 @@ import prisma from "@rms/prisma/prisma";
 import {
   JournalVoucherInputSchema,
   VoucherSearchSchema,
-} from "@rms/schema/journal-voucher";
+} from "@rms/schema/journal-voucher-schema";
 import dayjs from "dayjs";
 
 export async function findVoucherItemsService(props: { id: number }) {
@@ -54,6 +54,8 @@ export async function findVoucherService(props: VoucherSearchSchema) {
   return handlerServiceAction(
     async (user, config_id) => {
       return prisma.voucher.findMany({
+        orderBy: { id: "desc" },
+
         where: {
           config_id,
           id: props.id || undefined,
@@ -126,6 +128,8 @@ export async function findVoucherService(props: VoucherSearchSchema) {
 export async function findVouchersService(props: { from: Date; to: Date }) {
   return handlerServiceAction(async (user, config_id) => {
     return prisma.voucher.findFirst({
+      orderBy: { id: "desc" },
+
       where: { config_id },
       include: {
         currency: true,

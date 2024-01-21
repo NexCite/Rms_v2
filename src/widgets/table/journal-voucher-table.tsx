@@ -24,7 +24,7 @@ import {
 import {
   JournalVouchers,
   VoucherSearchSchema,
-} from "../../schema/journal-voucher";
+} from "../../schema/journal-voucher-schema";
 
 import FormControl from "@mui/joy/FormControl";
 import FormLabel from "@mui/joy/FormLabel";

@@ -44,7 +44,7 @@ import { AiFillFileExcel } from "react-icons/ai";
 import { MdSearch } from "react-icons/md";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { ChartOfAccountSearchSchema } from "../../schema/chart-of-account";
+import { ChartOfAccountSearchSchema } from "../../schema/chart-of-account-schema";
 
 type Props = {
   node: $Enums.AccountType;
@@ -76,7 +76,6 @@ export default function ChartOfAccountTable(props: Props) {
   const [isPadding, setTransition] = useTransition();
   const [data, setData] = useState<ChartOfAccounts[]>([]);
   const filter = useFilter();
-  const pathName = usePathname();
   const form = useForm<ChartOfAccountSearchSchema>({
     resolver: zodResolver(ChartOfAccountSearchSchema),
     defaultValues: {

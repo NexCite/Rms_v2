@@ -184,11 +184,16 @@ export default function ChartOfAccountView(props: Props) {
                   <td>{props.chartOfAccount.chart_of_account_type}</td>
                   <td>{props.chartOfAccount.debit_credit}</td>
                   <td>{props.chartOfAccount.currency?.name}</td>
-                  <td>{props.chartOfAccount.id}</td>
-                  <td>{props.chartOfAccount.name}</td>
-                  <td>{props.chartOfAccount.chart_of_account_type}</td>
-                  <td>{props.chartOfAccount.debit_credit}</td>
-                  <td>{props.chartOfAccount.currency?.name}</td>
+                  <td>{props.chartOfAccount.first_name}</td>
+                  <td>{props.chartOfAccount.last_name}</td>
+
+                  <td>{props.chartOfAccount.email}</td>
+                  <td>{props.chartOfAccount.phone_number}</td>
+                  <td>{props.chartOfAccount.account_type}</td>
+                  <td>{props.chartOfAccount.business_id}</td>
+                  <td>{props.chartOfAccount.limit_amount}</td>
+                  <td>{props.chartOfAccount.country}</td>
+                  <td>{props.chartOfAccount.address}</td>
                 </tr>
               </tbody>
             </Table>

@@ -18,7 +18,7 @@ import NexCiteCard from "@rms/components/card/nexcite-card";
 import Authorized from "@rms/components/other/authorized";
 import { useToast } from "@rms/hooks/toast-hook";
 import { FormatNumberWithFixed, exportToExcel } from "@rms/lib/global";
-import { Search } from "@rms/schema/search";
+import { Search } from "@rms/schema/search-schema";
 import { deleteEquityById, findEquities } from "@rms/service/equity-service";
 import dayjs from "dayjs";
 import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
@@ -54,252 +54,6 @@ export default function EquityTable(props: Props) {
   const toast = useToast();
 
   const [data, setData] = useState<CommonPayload[]>([]);
-
-  const columns = useMemo<MRT_ColumnDef<CommonPayload>[]>(
-    () => [
-      {
-        accessorKey: "id",
-        muiTableHeadCellProps: {
-          align: "center",
-        },
-        muiTableBodyCellProps: {
-          align: "center",
-        },
-        header: "ID",
-      },
-      { accessorKey: "description", header: "Description" },
-      {
-        accessorKey: "to_date",
-        muiTableHeadCellProps: {
-          align: "center",
-        },
-        muiTableBodyCellProps: {
-          align: "center",
-        },
-        header: "To Date",
-        accessorFn: (e) => e.to_date.toLocaleDateString(),
-      },
-      {
-        accessorKey: "coverage_boxes",
-        header: "Total Coverage",
-
-        accessorFn(originalRow) {
-          const total = originalRow.coverage_boxes.reduce((a, b) => {
-            return a + b.current_float - b.starting_float + b.closed_p_l;
-          }, 0);
-
-          return FormatNumberWithFixed(total, 2);
-        },
-        Cell(props) {
-          return <span> ${props.cell.getValue() as string}</span>;
-        },
-      },
-
-      {
-        accessorKey: "manager_boxes",
-        header: "Total Clients",
-        muiTableHeadCellProps: {
-          align: "center",
-        },
-        muiTableBodyCellProps: {
-          align: "center",
-        },
-
-        accessorFn(originalRow) {
-          const total = originalRow.manager_boxes.reduce((a, b) => {
-            return (
-              a +
-              b.starting_float -
-              b.current_float +
-              b.commission +
-              b.p_l +
-              b.swap
-            );
-          }, 0);
-
-          return FormatNumberWithFixed(total, 2);
-        },
-        Cell(props) {
-          return <span> ${props.cell.getValue() as string}</span>;
-        },
-      },
-      {
-        accessorKey: "agent_boxes",
-        header: "Total Agent",
-        muiTableHeadCellProps: {
-          align: "center",
-        },
-        muiTableBodyCellProps: {
-          align: "center",
-        },
-
-        accessorFn(originalRow) {
-          const total = originalRow.agent_boxes.reduce((a, b) => {
-            return a + b.commission;
-          }, 0);
-
-          return FormatNumberWithFixed(total, 2);
-        },
-        Cell(props) {
-          return <span> ${props.cell.getValue() as string}</span>;
-        },
-      },
-      {
-        accessorKey: "p_l",
-        header: " Total P&L",
-        muiTableHeadCellProps: {
-          align: "center",
-        },
-        muiTableBodyCellProps: {
-          align: "center",
-        },
-
-        accessorFn(originalRow) {
-          const total = originalRow.p_l.reduce((a, b) => {
-            return a + b.p_l;
-          }, 0);
-
-          return FormatNumberWithFixed(total, 2);
-        },
-        Cell(props) {
-          return <span> ${props.cell.getValue() as string}</span>;
-        },
-      },
-
-      {
-        accessorKey: "expensive_box",
-        header: "Total Expensive",
-        muiTableHeadCellProps: {
-          align: "center",
-        },
-        muiTableBodyCellProps: {
-          align: "center",
-        },
-
-        accessorFn(originalRow) {
-          const total = originalRow.expensive_box.reduce((a, b) => {
-            return a + b.expensive;
-          }, 0);
-
-          return FormatNumberWithFixed(total, 2);
-        },
-        Cell(props) {
-          return <span> ${props.cell.getValue() as string}</span>;
-        },
-      },
-      {
-        accessorKey: "adjustment_boxes",
-        header: "Total Adjustments",
-        muiTableHeadCellProps: {
-          align: "center",
-        },
-        muiTableBodyCellProps: {
-          align: "center",
-        },
-
-        accessorFn(originalRow) {
-          const total = originalRow.adjustment_boxes.reduce((a, b) => {
-            return a + b.adjustment;
-          }, 0);
-
-          return FormatNumberWithFixed(total);
-        },
-        Cell(props) {
-          return <span> ${props.cell.getValue() as string}</span>;
-        },
-      },
-      {
-        accessorKey: "credit_boxes",
-        header: "Total Credites",
-        muiTableHeadCellProps: {
-          align: "center",
-        },
-        muiTableBodyCellProps: {
-          align: "center",
-        },
-
-        accessorFn(originalRow) {
-          const total = originalRow.credit_boxes.reduce((a, b) => {
-            return a + b.credit;
-          }, 0);
-
-          return FormatNumberWithFixed(total);
-        },
-        Cell(props) {
-          return <span> ${props.cell.getValue() as string}</span>;
-        },
-      },
-      {
-        accessorKey: "total",
-        header: "Total",
-        muiTableHeadCellProps: {
-          align: "center",
-        },
-        muiTableBodyCellProps: {
-          align: "center",
-        },
-
-        Cell(props) {
-          const coverage = parseFloat(
-              (props.row.getAllCells()[4].getValue() as string).replace(
-                /[$,]/g,
-                ""
-              )
-            ),
-            manager = parseFloat(
-              (props.row.getAllCells()[5].getValue() as string).replace(
-                /[$,]/g,
-                ""
-              )
-            ),
-            agent = parseFloat(
-              (props.row.getAllCells()[6].getValue() as string).replace(
-                /[$,]/g,
-                ""
-              )
-            ),
-            p_l = parseFloat(
-              (props.row.getAllCells()[7].getValue() as string).replace(
-                /[$,]/g,
-                ""
-              )
-            ),
-            expensive = parseFloat(
-              (props.row.getAllCells()[8].getValue() as string).replace(
-                /[$,]/g,
-                ""
-              )
-            ),
-            adjustment = parseFloat(
-              (props.row.getAllCells()[9].getValue() as string).replace(
-                /[$,]/g,
-                ""
-              )
-            ),
-            credit = parseFloat(
-              (props.row.getAllCells()[10].getValue() as string).replace(
-                /[$,]/g,
-                ""
-              )
-            );
-
-          const total =
-            coverage - manager - agent + p_l - expensive - adjustment - credit;
-
-          return (
-            <span
-              className={`${
-                total >= 0 ? "bg-green-400" : "bg-red-400"
-              } font-bold p-1 border rounded-md`}
-            >
-              ${FormatNumberWithFixed(total)}
-            </span>
-          );
-        },
-      },
-    ],
-    []
-  );
 
   useEffect(() => {
     setPadding(async () => {
@@ -429,3 +183,222 @@ export default function EquityTable(props: Props) {
     </NexCiteCard>
   );
 }
+const columns: MRT_ColumnDef<CommonPayload>[] = [
+  {
+    accessorKey: "id",
+    muiTableHeadCellProps: {
+      align: "center",
+    },
+    muiTableBodyCellProps: {
+      align: "center",
+    },
+    header: "ID",
+  },
+  { accessorKey: "description", header: "Description" },
+  {
+    accessorKey: "to_date",
+    muiTableHeadCellProps: {
+      align: "center",
+    },
+    muiTableBodyCellProps: {
+      align: "center",
+    },
+    header: "To Date",
+    accessorFn: (e) => e.to_date.toLocaleDateString(),
+  },
+  {
+    accessorKey: "coverage_boxes",
+    header: "Total Coverage",
+
+    accessorFn(originalRow) {
+      const total = originalRow.coverage_boxes.reduce((a, b) => {
+        return a + b.current_float - b.starting_float + b.closed_p_l;
+      }, 0);
+
+      return FormatNumberWithFixed(total, 2);
+    },
+    Cell(props) {
+      return <span> ${props.cell.getValue() as string}</span>;
+    },
+  },
+
+  {
+    accessorKey: "manager_boxes",
+    header: "Total Clients",
+    muiTableHeadCellProps: {
+      align: "center",
+    },
+    muiTableBodyCellProps: {
+      align: "center",
+    },
+
+    accessorFn(originalRow) {
+      const total = originalRow.manager_boxes.reduce((a, b) => {
+        return (
+          a + b.starting_float - b.current_float + b.commission + b.p_l + b.swap
+        );
+      }, 0);
+
+      return FormatNumberWithFixed(total, 2);
+    },
+    Cell(props) {
+      return <span> ${props.cell.getValue() as string}</span>;
+    },
+  },
+  {
+    accessorKey: "agent_boxes",
+    header: "Total Agent",
+    muiTableHeadCellProps: {
+      align: "center",
+    },
+    muiTableBodyCellProps: {
+      align: "center",
+    },
+
+    accessorFn(originalRow) {
+      const total = originalRow.agent_boxes.reduce((a, b) => {
+        return a + b.commission;
+      }, 0);
+
+      return FormatNumberWithFixed(total, 2);
+    },
+    Cell(props) {
+      return <span> ${props.cell.getValue() as string}</span>;
+    },
+  },
+  {
+    accessorKey: "p_l",
+    header: " Total P&L",
+    muiTableHeadCellProps: {
+      align: "center",
+    },
+    muiTableBodyCellProps: {
+      align: "center",
+    },
+
+    accessorFn(originalRow) {
+      const total = originalRow.p_l.reduce((a, b) => {
+        return a + b.p_l;
+      }, 0);
+
+      return FormatNumberWithFixed(total, 2);
+    },
+    Cell(props) {
+      return <span> ${props.cell.getValue() as string}</span>;
+    },
+  },
+
+  {
+    accessorKey: "expensive_box",
+    header: "Total Expensive",
+    muiTableHeadCellProps: {
+      align: "center",
+    },
+    muiTableBodyCellProps: {
+      align: "center",
+    },
+
+    accessorFn(originalRow) {
+      const total = originalRow.expensive_box.reduce((a, b) => {
+        return a + b.expensive;
+      }, 0);
+
+      return FormatNumberWithFixed(total, 2);
+    },
+    Cell(props) {
+      return <span> ${props.cell.getValue() as string}</span>;
+    },
+  },
+  {
+    accessorKey: "adjustment_boxes",
+    header: "Total Adjustments",
+    muiTableHeadCellProps: {
+      align: "center",
+    },
+    muiTableBodyCellProps: {
+      align: "center",
+    },
+
+    accessorFn(originalRow) {
+      const total = originalRow.adjustment_boxes.reduce((a, b) => {
+        return a + b.adjustment;
+      }, 0);
+
+      return FormatNumberWithFixed(total);
+    },
+    Cell(props) {
+      return <span> ${props.cell.getValue() as string}</span>;
+    },
+  },
+  {
+    accessorKey: "credit_boxes",
+    header: "Total Credites",
+    muiTableHeadCellProps: {
+      align: "center",
+    },
+    muiTableBodyCellProps: {
+      align: "center",
+    },
+
+    accessorFn(originalRow) {
+      const total = originalRow.credit_boxes.reduce((a, b) => {
+        return a + b.credit;
+      }, 0);
+
+      return FormatNumberWithFixed(total);
+    },
+    Cell(props) {
+      return <span> ${props.cell.getValue() as string}</span>;
+    },
+  },
+  {
+    accessorKey: "total",
+    header: "Total",
+    muiTableHeadCellProps: {
+      align: "center",
+    },
+    muiTableBodyCellProps: {
+      align: "center",
+    },
+
+    Cell(props) {
+      const coverage = parseFloat(
+          (props.row.getAllCells()[4].getValue() as string).replace(/[$,]/g, "")
+        ),
+        manager = parseFloat(
+          (props.row.getAllCells()[5].getValue() as string).replace(/[$,]/g, "")
+        ),
+        agent = parseFloat(
+          (props.row.getAllCells()[6].getValue() as string).replace(/[$,]/g, "")
+        ),
+        p_l = parseFloat(
+          (props.row.getAllCells()[7].getValue() as string).replace(/[$,]/g, "")
+        ),
+        expensive = parseFloat(
+          (props.row.getAllCells()[8].getValue() as string).replace(/[$,]/g, "")
+        ),
+        adjustment = parseFloat(
+          (props.row.getAllCells()[9].getValue() as string).replace(/[$,]/g, "")
+        ),
+        credit = parseFloat(
+          (props.row.getAllCells()[10].getValue() as string).replace(
+            /[$,]/g,
+            ""
+          )
+        );
+
+      const total =
+        coverage - manager - agent + p_l - expensive - adjustment - credit;
+
+      return (
+        <span
+          className={`${
+            total >= 0 ? "bg-green-400" : "bg-red-400"
+          } font-bold p-1 border rounded-md`}
+        >
+          ${FormatNumberWithFixed(total)}
+        </span>
+      );
+    },
+  },
+];

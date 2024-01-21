@@ -26,7 +26,7 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useTransition } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { ChartOfAccountInputSchema } from "../../schema/chart-of-account";
+import { ChartOfAccountInputSchema } from "../../schema/chart-of-account-schema";
 type Props = {
   canEdit?: boolean;
   currencies: Prisma.CurrencyGetPayload<{}>[];

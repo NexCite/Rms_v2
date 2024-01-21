@@ -271,6 +271,37 @@ const permissions: Permissions[] = [
     ],
   },
   {
+    name: "Payment Box",
+    value: "PaymentBox",
+    childrens: [
+      {
+        name: "Equity",
+        childrens: [
+          {
+            name: "View All",
+            value: "View_Equities",
+          },
+          {
+            name: "View By Id",
+            value: "View_Equity",
+          },
+          {
+            name: "Create",
+            value: "Create_Equity",
+          },
+          {
+            name: "Update",
+            value: "Update_Equity",
+          },
+          {
+            name: "Delete",
+            value: "Delete_Equity",
+          },
+        ],
+      },
+    ],
+  },
+  {
     name: "Setting",
     value: "Setting",
     childrens: [

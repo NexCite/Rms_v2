@@ -4,7 +4,7 @@ import { handlerServiceAction } from "@rms/lib/handler";
 import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 
-export async function getEquityById(id: number) {
+export async function findEquityById(id: number) {
   return handlerServiceAction(async (info, config_id) => {
     return await prisma.equity.findFirst({
       where: {
@@ -27,6 +27,8 @@ export async function findEquities(props: { from: Date; to: Date }) {
         p_l: true,
         credit_boxes: true,
       },
+      orderBy: { to_date: "desc" },
+
       where: {
         config_id,
         to_date: {

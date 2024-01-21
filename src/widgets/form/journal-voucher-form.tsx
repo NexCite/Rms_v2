@@ -32,7 +32,7 @@ import {
   ChartOfAccountSchema,
   CurrencySchema,
   JournalVoucherInputSchema,
-} from "../../schema/journal-voucher";
+} from "../../schema/journal-voucher-schema";
 import { Card, CardContent } from "@mui/joy";
 type Props = {
   chartOfAccounts: ChartOfAccountSchema[];

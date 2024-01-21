@@ -611,7 +611,6 @@ model ChartOfAccount {
   voucher_items           VoucherItem[]
   reffrence_voucher_items VoucherItem[]       @relation("reference")
 
-  @@unique([config_id, name], name: "unique_name")
   @@unique([config_id, id], name: "unique_id")
   @@unique([config_id, business_id], name: "unique_business_id")
 }

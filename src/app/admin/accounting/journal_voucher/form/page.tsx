@@ -1,7 +1,7 @@
 import prisma from "@rms/prisma/prisma";
 import getAuth from "@rms/service/user-service";
 import JournalVoucherForm from "@rms/widgets/form/journal-voucher-form";
-import { JournalVoucherInputSchema } from "@rms/schema/journal-voucher";
+import { JournalVoucherInputSchema } from "@rms/schema/journal-voucher-schema";
 import React from "react";
 import { z } from "zod";
 

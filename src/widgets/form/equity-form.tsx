@@ -18,7 +18,7 @@ import NexCiteButton from "@rms/components/button/nexcite-button";
 import NexCiteCard from "@rms/components/card/nexcite-card";
 import NumericFormatCustom from "@rms/components/input/text-field-number";
 import { useToast } from "@rms/hooks/toast-hook";
-import { EquitySchema } from "@rms/schema/equity";
+import { EquitySchema } from "@rms/schema/equity-schema";
 import { createEquity, updateEquity } from "@rms/service/equity-service";
 import dayjs from "dayjs";
 import { usePathname, useRouter } from "next/navigation";

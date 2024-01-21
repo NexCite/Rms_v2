@@ -6,7 +6,7 @@ import prisma from "@rms/prisma/prisma";
 import {
   ChartOfAccountInputSchema,
   ChartOfAccountSearchSchema,
-} from "@rms/schema/chart-of-account";
+} from "@rms/schema/chart-of-account-schema";
 
 /**
  * Find all chart of accounts based on the provided configuration ID.
@@ -16,7 +16,7 @@ import {
 export async function findChartOfAccountService() {
   return handlerServiceAction(async (user, config_id) => {
     const chartOfAccounts = await prisma.chartOfAccount.findMany({
-      orderBy: { id: "asc" },
+      orderBy: { id: "desc" },
       where: { config_id },
       include: { currency: true },
     });
@@ -73,6 +73,7 @@ export async function findChartOfAccounts(props: ChartOfAccountSearchSchema) {
             }
           : undefined,
       },
+      orderBy: { id: "desc" },
     });
   }, "View_Chart_Of_Accounts");
 }
@@ -95,6 +96,8 @@ export async function findChartOfAccountByClientId(
     });
 
     const vouchers = await prisma.voucher.findMany({
+      orderBy: { id: "desc" },
+
       where: {
         config_id,
         to_date: { gte: from, lte: to },
@@ -143,6 +146,8 @@ export async function findLevelService(props: { id: string }) {
     async (user, config_id) => {
       const { id } = props;
       return prisma.chartOfAccount.findFirst({
+        orderBy: { id: "desc" },
+
         where: { id, config_id },
         include: {
           currency: true,
@@ -183,9 +188,10 @@ export async function createChartOfAccountService(props: {
           parent_id: chartOfAccount.parent_id,
           phone_number: chartOfAccount.phone_number,
           email: chartOfAccount.email,
-          class: chartOfAccount.id[0],
           config_id,
           debit_credit: chartOfAccount.debit_credit,
+          class: chartOfAccount.id[0],
+
           currency_id: chartOfAccount.currency_id,
           id: chartOfAccount.id,
         },
@@ -213,10 +219,24 @@ export async function updateChartOfAccountService(props: {
     async (user, config_id) => {
       const { chartOfAccount, id } = props;
       return await prisma.chartOfAccount.update({
-        where: { id: id },
+        where: { id: id, config_id: config_id },
         data: {
           name: chartOfAccount.name,
-          // ... (add other properties)
+          account_type: chartOfAccount.account_type,
+          address: chartOfAccount.address,
+          last_name: chartOfAccount.last_name,
+          first_name: chartOfAccount.first_name,
+          business_id: chartOfAccount.business_id,
+          chart_of_account_type: chartOfAccount.chart_of_account_type,
+          country: chartOfAccount.country,
+          limit_amount: chartOfAccount.limit_amount,
+          parent_id: chartOfAccount.parent_id,
+          phone_number: chartOfAccount.phone_number,
+          email: chartOfAccount.email,
+          class: chartOfAccount.id[0],
+          currency_id: chartOfAccount.currency_id,
+          debit_credit: chartOfAccount.debit_credit,
+          id: chartOfAccount.id,
         },
       });
     },
@@ -244,6 +264,8 @@ export async function findBalanceSheet(
       params;
     const vouchers: VoucherSchema[] = [];
     const chartOfAccounts = await prisma.chartOfAccount.findMany({
+      orderBy: { id: "desc" },
+
       where: {
         config_id,
         class:
