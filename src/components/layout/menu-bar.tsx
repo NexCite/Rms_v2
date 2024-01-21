@@ -14,7 +14,7 @@ import Menu, { menuClasses } from "@mui/joy/Menu";
 import MenuButton from "@mui/joy/MenuButton";
 import MenuItem from "@mui/joy/MenuItem";
 import Sheet from "@mui/joy/Sheet";
-import route from "@rms/config/route";
+import route from "@rms/routes";
 import { UserAuth } from "@rms/service/user-service";
 import Image from "next/image";
 import Link from "next/link";

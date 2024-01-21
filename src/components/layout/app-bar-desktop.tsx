@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import Authorized from "../other/authorized";
 
 import Typography from "@mui/joy/Typography";
-import route from "@rms/config/route";
+import route from "@rms/routes";
 import { usePathname, useSelectedLayoutSegments } from "next/navigation";
 import BackButton from "../button/back-button";
 import NexCiteButton from "../button/nexcite-button";

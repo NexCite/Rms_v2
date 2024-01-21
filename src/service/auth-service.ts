@@ -5,7 +5,7 @@ import { cookies, headers } from "next/headers";
 import { RedirectType, redirect } from "next/navigation";
 import prisma from "@rms/prisma/prisma";
 import RouteModel from "@rms/models/RouteModel";
-import route from "@rms/config/route";
+import route from "@rms/routes";
 import { $Enums } from "@prisma/client";
 
 /**

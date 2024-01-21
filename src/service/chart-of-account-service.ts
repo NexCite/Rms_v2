@@ -1,5 +1,5 @@
 "use server";
-import { VoucherItem, ChartOfAccount, Prisma } from "@prisma/client";
+import { VoucherItem } from "@prisma/client";
 import { VoucherSchema, groupChartOfAccountByParentId } from "@rms/lib/global";
 import { handlerServiceAction } from "@rms/lib/handler";
 import prisma from "@rms/prisma/prisma";

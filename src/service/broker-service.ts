@@ -3,7 +3,6 @@
 import { Prisma } from "@prisma/client";
 import { handlerServiceAction } from "@rms/lib/handler";
 
-import ServiceActionModel from "@rms/models/ServiceActionModel";
 import prisma from "@rms/prisma/prisma";
 
 export async function createBroker(props: Prisma.BrokerUncheckedCreateInput) {

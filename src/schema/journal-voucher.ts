@@ -1,5 +1,5 @@
 import { $Enums, Prisma } from "@prisma/client";
-import { ZodString, ZodType, z } from "zod";
+import { z } from "zod";
 const CurrencySchema = z.object({
   id: z.number(),
   name: z.string(),
@@ -174,4 +174,4 @@ const VoucherSearchSchema = z.object({
 });
 
 type VoucherSearchSchema = z.infer<typeof VoucherSearchSchema>;
-export { type JournalVouchers, VoucherSearchSchema };
+export { VoucherSearchSchema, type JournalVouchers };

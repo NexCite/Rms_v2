@@ -5,14 +5,7 @@ import { createUser, updateUser } from "@rms/service/user-service";
 
 import { usePathname, useRouter } from "next/navigation";
 
-import NexCiteButton from "@rms/components/button/nexcite-button";
-import { useToast } from "@rms/hooks/toast-hook";
-import Countries from "@rms/lib/country";
-import { useCallback, useMemo, useTransition } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
 import {
-  Autocomplete,
   Card,
   CardContent,
   FormControl,
@@ -23,6 +16,11 @@ import {
   Select,
   Typography,
 } from "@mui/joy";
+import NexCiteButton from "@rms/components/button/nexcite-button";
+import { useToast } from "@rms/hooks/toast-hook";
+import { useCallback, useMemo, useTransition } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { z } from "zod";
 
 type Props = {
   user?: {

@@ -5,7 +5,6 @@ import { hashPassword } from "@rms/lib/hash";
 import { CommonRouteKeys } from "@rms/models/CommonModel";
 import prisma from "@rms/prisma/prisma";
 import { saveFile, uploadMediaTemp } from "./media-service";
-import { createScheuleConfig } from "./schedule-config-service";
 
 /**
  *
