@@ -1,8 +1,7 @@
-import EquityForm from "@rms/widgets/form/equity-form";
 import { Prisma } from "@prisma/client";
-import prisma from "@rms/prisma/prisma";
-import React from "react";
 import { getConfigId } from "@rms/lib/config";
+import prisma from "@rms/prisma/prisma";
+import EquityForm from "@rms/widgets/form/equity-form";
 
 export default async function page(props: {
   params: {};

@@ -1,13 +1,11 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { useMemo, useTransition } from "react";
+import { Card, CardHeader, Typography } from "@mui/material";
 import { Prisma } from "@prisma/client";
 import { useToast } from "@rms/hooks/toast-hook";
-import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
-import { Card, CardHeader, Typography } from "@mui/material";
 import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
+import { useMemo } from "react";
 type CommonType = Prisma.AttendanceGetPayload<{ include: { schedule: true } }>;
 type Props = {
   attendance: CommonType[];

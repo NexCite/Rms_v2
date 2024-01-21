@@ -4,14 +4,13 @@ import { Prisma } from "@prisma/client";
 import { usePathname } from "next/navigation";
 import { useMemo, useTransition } from "react";
 
-import Authorized from "@rms/components/other/authorized";
-import { useToast } from "@rms/hooks/toast-hook";
-import { deleteRoleById, resetRole } from "@rms/service/role-service";
-import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
-import Link from "next/link";
-import { Card, Typography } from "@mui/joy";
 import { MenuItem } from "@mui/material";
 import NexCiteCard from "@rms/components/card/nexcite-card";
+import Authorized from "@rms/components/other/authorized";
+import { useToast } from "@rms/hooks/toast-hook";
+import { deleteRoleById } from "@rms/service/role-service";
+import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
+import Link from "next/link";
 
 type Props = {
   data: Prisma.RoleGetPayload<{}>[];

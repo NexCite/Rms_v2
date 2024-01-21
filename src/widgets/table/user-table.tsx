@@ -1,14 +1,17 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useMemo, useTransition } from "react";
+import { useTransition } from "react";
 
+import { Card, Typography } from "@mui/joy";
+import { MenuItem } from "@mui/material";
 import { Prisma } from "@prisma/client";
 import Authorized from "@rms/components/other/authorized";
 import { useToast } from "@rms/hooks/toast-hook";
-import { deleteUserById, resetUser } from "@rms/service/user-service";
+import TableStateModel from "@rms/models/TableStateModel";
+import { deleteUserById } from "@rms/service/user-service";
+import dayjs from "dayjs";
 import {
-  MRT_ColumnDef,
   MRT_ColumnFiltersState,
   MRT_ExpandedState,
   MRT_GroupingState,
@@ -19,13 +22,8 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import Link from "next/link";
-import TableStateModel from "@rms/models/TableStateModel";
-import { deleteCurrency } from "@rms/service/currency-service";
-import dayjs from "dayjs";
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-import { MenuItem } from "@mui/material";
-import { Card, Typography } from "@mui/joy";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 type Props = {
   users: Prisma.UserGetPayload<{ include: { role: true } }>[];

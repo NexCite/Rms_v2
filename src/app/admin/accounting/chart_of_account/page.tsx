@@ -1,6 +1,4 @@
-import { $Enums } from "@prisma/client";
 import Loading from "@rms/components/other/loading";
-import { getUserInfo } from "@rms/lib/auth";
 import prisma from "@rms/prisma/prisma";
 import getAuth from "@rms/service/user-service";
 import ChartOfAccountTable from "@rms/widgets/table/chart-of-account-table";

@@ -83,7 +83,7 @@ export default function ChartOfAccountView(props: Props) {
         }
       ),
     ],
-    [props.chartOfAccount.currency]
+    []
   );
   const filtedVoucher = useMemo(() => {
     if (selectedChartOfAccounts.length == 0) return props.vouchers;

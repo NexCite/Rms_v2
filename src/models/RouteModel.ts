@@ -1,5 +1,3 @@
-import { SvgIconTypeMap } from "@mui/material";
-import { OverridableComponent } from "@mui/material/OverridableComponent";
 import { $Enums } from "@prisma/client";
 
 export default interface RouteModel {

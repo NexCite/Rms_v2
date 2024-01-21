@@ -152,7 +152,7 @@ export default function MenuIconSideNav(props: {
           );
           return res;
         }),
-    [props.user.permissions]
+    [props.user.role.permissions]
   );
   const pathName = usePathname();
 
@@ -165,7 +165,7 @@ export default function MenuIconSideNav(props: {
     });
 
     return index;
-  }, [userRoutes, segments, pathName]);
+  }, [userRoutes, pathName]);
 
   const [menuIndex, setMenuIndex] = React.useState(-1);
   const createHandleLeaveMenu =

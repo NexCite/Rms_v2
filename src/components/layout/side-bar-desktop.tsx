@@ -35,7 +35,7 @@ export default function SideBarDesktop(props: {
           );
           return res;
         }),
-    [props.user.permissions]
+    [props.user.role.permissions]
   );
   const tab = useMemo(
     () =>

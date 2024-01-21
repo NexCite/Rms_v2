@@ -1,6 +1,5 @@
 import { $Enums } from "@prisma/client";
 import prisma from "@rms/prisma/prisma";
-import { findChartOfAccountByClientId } from "@rms/service/chart-of-account-service";
 import getAuth from "@rms/service/user-service";
 import ChartOfAccountView from "@rms/widgets/view/chart-of-account-view";
 

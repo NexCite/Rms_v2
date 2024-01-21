@@ -1,14 +1,14 @@
 "use client";
-import { UserAuth, UserFullInfoType } from "@rms/service/user-service";
-import React, { useMemo } from "react";
-import Authorized from "../other/authorized";
+import { UserAuth } from "@rms/service/user-service";
 import Link from "next/link";
+import { useMemo } from "react";
+import Authorized from "../other/authorized";
 
-import { usePathname, useSelectedLayoutSegments } from "next/navigation";
-import NexCiteButton from "../button/nexcite-button";
 import Typography from "@mui/joy/Typography";
-import BackButton from "../button/back-button";
 import route from "@rms/config/route";
+import { usePathname, useSelectedLayoutSegments } from "next/navigation";
+import BackButton from "../button/back-button";
+import NexCiteButton from "../button/nexcite-button";
 
 export default function AppBarDesktop(props: UserAuth) {
   const path = usePathname();

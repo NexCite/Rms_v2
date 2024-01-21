@@ -1,5 +1,3 @@
-import NexCiteCard from "@rms/components/card/nexcite-card";
-
 import { Typography } from "@mui/material";
 export default function EquityChart() {
   return (

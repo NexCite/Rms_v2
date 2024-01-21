@@ -2,7 +2,7 @@ import Loading from "@rms/components/other/loading";
 import { Activity } from "@rms/models/CommonModel";
 import { getActivities } from "@rms/service/activity-service";
 import ActivityTable from "@rms/widgets/table/activity-table";
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 
 export default async function page() {
   const result = await getActivities();

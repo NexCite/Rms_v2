@@ -4,13 +4,13 @@ import { Prisma } from "@prisma/client";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { Card, Typography } from "@mui/joy";
 import dayjs from "dayjs";
 import {
   MaterialReactTable,
   createMRTColumnHelper,
   useMaterialReactTable,
 } from "material-react-table";
-import { Card, Typography } from "@mui/joy";
 
 type Props = {
   data: Prisma.LogGetPayload<{ include: { user: true } }>[];
@@ -69,7 +69,7 @@ const columns = [
         className={`text-center rounded-md  ${
           row.action === "Add"
             ? "bg-green-500"
-            : row.action == "Edit"
+            : row.action == "Update"
             ? "bg-yellow-400"
             : row.action == "Delete"
             ? "bg-red-500"
@@ -88,7 +88,7 @@ const columns = [
             className={`text-center rounded-md  ${
               original.action === "Add"
                 ? "bg-green-500"
-                : original.action == "Edit"
+                : original.action == "Update"
                 ? "bg-yellow-400"
                 : original.action == "Delete"
                 ? "bg-red-500"

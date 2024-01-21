@@ -94,7 +94,7 @@ export default function EquityForm(props: Props) {
       });
       // }
     },
-    [props, toast, replace]
+    [props.isEditMode, props.id, toast, replace, pathName]
   );
 
   const watch = useWatch({ control: form.control });
