@@ -63,7 +63,6 @@ export default function JournalVoucherForm(props: Props) {
           .includes(res.id)
     );
   }, [props.chartOfAccounts, watch.voucher_items]);
-  console.log(props.voucher);
 
   const voucherState = useFormState({
     control: form.control,
@@ -396,7 +395,9 @@ export default function JournalVoucherForm(props: Props) {
                                 multiple={false}
                                 getOptionLabel={(e) => {
                                   if (typeof e === "object") {
-                                    return `${e.id} ${e.name}`;
+                                    return `${e.id} ${e.name} ${
+                                      e.currency?.symbol ?? ""
+                                    }`;
                                   }
                                 }}
                                 isOptionEqualToValue={(e) =>
@@ -433,7 +434,9 @@ export default function JournalVoucherForm(props: Props) {
                                 multiple={false}
                                 getOptionLabel={(e) => {
                                   if (typeof e === "object") {
-                                    return `${e.id} ${e.name}`;
+                                    return `${e.id} ${e.name} ${
+                                      e.currency?.symbol ?? ""
+                                    }`;
                                   }
                                 }}
                                 isOptionEqualToValue={(e) =>

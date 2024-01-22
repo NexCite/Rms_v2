@@ -255,14 +255,9 @@ export async function updateChartOfAccountService(props: {
  * @param withGroup - Whether to include grouping information.
  * @returns The balance sheet data.
  */
-export async function findBalanceSheet(
-  params: ChartOfAccountSearchSchema,
-  withGroup?: boolean
-): Promise<any> {
+export async function findBalanceSheet(params: ChartOfAccountSearchSchema) {
   return handlerServiceAction(async (user, config_id) => {
-    const { id, from, to, include_reffrence, type, classes, accountId, level } =
-      params;
-    const vouchers: VoucherSchema[] = [];
+    const { from, to, classes } = params;
     const chartOfAccounts = await prisma.chartOfAccount.findMany({
       orderBy: { id: "desc" },
 
@@ -274,26 +269,28 @@ export async function findBalanceSheet(
                 in: classes,
               }
             : undefined,
-        id: id
-          ? {
-              startsWith: id,
-            }
-          : undefined,
       },
       include: {
         currency: true,
+        reffrence_voucher_items: {
+          include: {
+            currency: true,
+          },
+          where: {
+            voucher: {
+              to_date: { gte: from, lte: to },
+            },
+          },
+        },
         voucher_items: {
           where: {
-            chart_of_account_id: params.accountId,
-            reffrence_chart_of_account_id: include_reffrence
-              ? params.accountId
-              : null,
             voucher: {
               to_date: { gte: from, lte: to },
             },
           },
           include: {
             currency: true,
+
             voucher: {
               include: {
                 currency: true,
@@ -303,28 +300,8 @@ export async function findBalanceSheet(
         },
       },
     });
-    const voucher_items: VoucherItem[] = [];
 
-    chartOfAccounts.forEach((res) => {
-      voucher_items.push(...(res.voucher_items as any));
-      res.voucher_items.forEach((res) => {
-        vouchers.push(res.voucher as any);
-      });
-    });
-
-    if (withGroup) {
-      const groupedTabls = groupChartOfAccountByParentId(chartOfAccounts);
-      return {
-        chartOfAccounts,
-        groupedTabls,
-        vouchers,
-        voucher_items,
-      };
-    } else {
-      return {
-        chartOfAccounts,
-      };
-    }
+    return groupChartOfAccountByParentId(chartOfAccounts);
   }, "View_Chart_Of_Accounts");
 }
 

@@ -88,7 +88,6 @@ export function InitConfig() {
           file: dataForm,
         });
         toast.OpenAlert({ ...res });
-        console.log(res);
         if (res?.status === 200) replace("/login");
         Object.keys(res?.errors ?? []).map((e) => {
           form.setError(e as any, res[e]);

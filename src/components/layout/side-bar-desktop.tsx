@@ -52,7 +52,6 @@ export default function SideBarDesktop(props: {
   const handleChange = (event: any, newValue: number) => {
     setTabIndex(newValue);
   };
-  console.log(tabIndex, tab, userRoutes);
   return (
     <div
       className={`flex h-full  w-full   bg-white`}

@@ -167,23 +167,15 @@ export default function ChartOfAccountAccountsTable(props: Props) {
           filterVariant: "range",
           filterFn: (row, name, range: string[]) => {
             const total = row.getAllCells()[9].getValue() as string;
-            //
 
             const minNumber = range[0];
             const maxNumber = range[1];
-            // console.log(name);
 
             if (minNumber && maxNumber) {
-              console.log(minNumber);
-
               return total >= minNumber && total <= maxNumber;
             } else if (minNumber) {
-              console.log(1);
-
               return total >= minNumber;
             } else if (maxNumber) {
-              console.log(maxNumber);
-
               return total <= maxNumber;
             }
 

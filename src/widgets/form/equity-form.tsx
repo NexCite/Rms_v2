@@ -98,7 +98,6 @@ export default function EquityForm(props: Props) {
   );
 
   const watch = useWatch({ control: form.control });
-  console.log(watch.coverage);
   const handleDelete = useCallback(
     (
       index: number,
@@ -298,7 +297,6 @@ export default function EquityForm(props: Props) {
                             <Input
                               value={res.account}
                               onChange={({ target: { value } }) => {
-                                console.log(value);
                                 field.onChange(value);
                               }}
                               placeholder={"account"}

@@ -288,24 +288,21 @@ export default function BalanceSheetTable(props: Props) {
 
   useEffect(() => {
     setTransition(() => {
-      findBalanceSheet(form.formState.defaultValues, true).then((res) => {
-        setData(res.result.groupedTabls);
+      findBalanceSheet(form.formState.defaultValues).then((res) => {
+        setData(res.result);
       });
     });
   }, [form.formState.defaultValues, props.accountId]);
 
   const handleSubimt = useCallback((values: ChartOfAccountSearchSchema) => {
     setTransition(() => {
-      findBalanceSheet(
-        {
-          from: values.from,
-          to: values.to,
-          accountId: values.accountId,
-          classes: values.classes,
-        },
-        true
-      ).then((res) => {
-        setData(res.result.groupedTabls);
+      findBalanceSheet({
+        from: values.from,
+        to: values.to,
+        accountId: values.accountId,
+        classes: values.classes,
+      }).then((res) => {
+        setData(res.result);
       });
     });
   }, []);

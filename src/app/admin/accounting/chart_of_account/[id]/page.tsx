@@ -8,21 +8,6 @@ export default async function page(props: {
   searchParams: {};
 }) {
   const auth = await getAuth();
-
-  const chartOfAccounts = await prisma.chartOfAccount.findMany({
-    where: { id: { not: props.params.id }, account_type: null },
-
-    include: {
-      currency: true,
-      voucher_items: {
-        include: {
-          currency: true,
-          chart_of_account: true,
-          reference_chart_of_account: true,
-        },
-      },
-    },
-  });
   const chartOfAccount = await prisma.chartOfAccount.findUnique({
     where: { id: props.params.id },
     include: {
@@ -36,7 +21,16 @@ export default async function page(props: {
       },
     },
   });
-  console.log(chartOfAccount);
+  const chartOfAccounts = await prisma.chartOfAccount.findMany({
+    where: {
+      id: { not: props.params.id },
+      account_type: chartOfAccount.account_type ? null : undefined,
+    },
+
+    include: {
+      currency: true,
+    },
+  });
   const vouchers = await prisma.voucher.findMany({
     where: {
       config_id: auth.config.id,
@@ -45,10 +39,14 @@ export default async function page(props: {
         some: {
           OR: [
             {
-              chart_of_account_id: props.params.id,
+              chart_of_account_id: {
+                startsWith: props.params.id,
+              },
             },
             {
-              reffrence_chart_of_account_id: props.params.id,
+              reffrence_chart_of_account_id: {
+                startsWith: props.params.id,
+              },
             },
           ],
         },
@@ -65,13 +63,16 @@ export default async function page(props: {
       },
     },
   });
-
+  const currencies = await prisma.currency.findMany({
+    where: { config_id: auth.config.id },
+  });
   if (!chartOfAccount) {
     return <div>Not Found</div>;
   }
   return (
     <div>
       <ChartOfAccountView
+        currencies={currencies}
         chartOfAccount={chartOfAccount}
         vouchers={vouchers}
         chartOfAccounts={chartOfAccounts}

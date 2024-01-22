@@ -155,7 +155,6 @@ export default function ChartOfAccountTable(props: Props) {
               columnGroupedDataHelper.accessor(
                 (row) => {
                   var total = 0;
-                  console.log(row.voucher_items);
                   row.voucher_items.map((res) => {
                     if (res.debit_credit === "Debit") {
                       total += res.amount / res.rate;
@@ -170,7 +169,6 @@ export default function ChartOfAccountTable(props: Props) {
                       total -= res.amount / res.rate;
                     }
                   });
-                  console.log(total);
 
                   return total * (row.currency?.rate ?? 1);
                 },
@@ -184,19 +182,12 @@ export default function ChartOfAccountTable(props: Props) {
 
                     const minNumber = range[0];
                     const maxNumber = range[1];
-                    // console.log(name);
 
                     if (minNumber && maxNumber) {
-                      console.log(minNumber);
-
                       return total >= minNumber && total <= maxNumber;
                     } else if (minNumber) {
-                      console.log(1);
-
                       return total >= minNumber;
                     } else if (maxNumber) {
-                      console.log(maxNumber);
-
                       return total <= maxNumber;
                     }
 

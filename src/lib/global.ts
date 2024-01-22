@@ -16,7 +16,10 @@ export function FormatNumberWithFixed(data: number, digit?: number) {
 
 interface ChartOfAccount
   extends Prisma.ChartOfAccountGetPayload<{
-    include: { voucher_items: { include: { currency: true } } };
+    include: {
+      voucher_items: { include: { currency: true } };
+      reffrence_voucher_items: { include: { currency: true } };
+    };
   }> {}
 export type AccountGrouped = ChartOfAccount & {
   subRows?: AccountGrouped[];
@@ -56,13 +59,26 @@ export function totalChartOfAccountVouchers(props: AccountGrouped[]) {
   var total = 0;
   if (props?.length > 0) {
     props.map((res) => {
-      total += res.voucher_items.reduce((a, res) => {
-        if (res.debit_credit === "Debit") {
-          return (a += res.amount / res.currency.rate);
-        } else if (res.debit_credit === "Credit") {
-          return (a -= res.amount / res.currency.rate);
-        }
-      }, 0);
+      total += res.voucher_items
+        .filter((ress) => {
+          return !ress.reffrence_chart_of_account_id;
+        })
+        .reduce((a, res) => {
+          if (res.debit_credit === "Debit") {
+            return (a += res.amount / res.currency.rate);
+          } else if (res.debit_credit === "Credit") {
+            return (a -= res.amount / res.currency.rate);
+          }
+        }, 0);
+      if (res.account_type) {
+        total += res.reffrence_voucher_items.reduce((a, res) => {
+          if (res.debit_credit === "Debit") {
+            return (a += res.amount / res.currency.rate);
+          } else if (res.debit_credit === "Credit") {
+            return (a -= res.amount / res.currency.rate);
+          }
+        }, 0);
+      }
       return (total += totalChartOfAccountVouchers(res.subRows));
     });
     return total;
