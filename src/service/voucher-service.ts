@@ -50,7 +50,10 @@ export async function findVoucherItemsService(props: { id: number }) {
   }, "View_Voucher");
 }
 
-export async function findVoucherService(props: VoucherSearchSchema) {
+export async function findVoucherService(props: {
+  id?: number;
+  date?: { from: Date; to: Date };
+}) {
   return handlerServiceAction(
     async (user, config_id) => {
       return prisma.voucher.findMany({
@@ -60,20 +63,12 @@ export async function findVoucherService(props: VoucherSearchSchema) {
           config_id,
           id: props.id || undefined,
 
-          AND: props.id
+          to_date: props.id
             ? undefined
-            : [
-                {
-                  to_date: {
-                    gte: dayjs(props.from).startOf("d").toDate(),
-                  },
-                },
-                {
-                  to_date: {
-                    lte: dayjs(props.to).endOf("d").toDate(),
-                  },
-                },
-              ],
+            : {
+                gte: dayjs(props.date.from).startOf("day").toDate(),
+                lte: dayjs(props.date.to).endOf("day").toDate(),
+              },
         },
 
         include: {

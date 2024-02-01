@@ -3,7 +3,6 @@
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import {
   Autocomplete,
-  Box,
   Button,
   Card,
   CardContent,
@@ -11,32 +10,35 @@ import {
   FormControl,
   FormLabel,
   Grid,
+  Input,
   Menu,
   MenuButton,
   MenuItem,
   Option,
   Select,
   Stack,
-  Tab,
-  TabList,
   Table,
-  Tabs,
   Typography,
 } from "@mui/joy";
+import { ModalBackdrop } from "@mui/joy/Modal/Modal";
 import { Prisma } from "@prisma/client";
+import NexCiteButton from "@rms/components/button/nexcite-button";
 import Authorized from "@rms/components/other/authorized";
+import Loading from "@rms/components/other/loading";
 import {
   FormatNumberWithFixed,
   VoucherSchema,
   exportToExcel,
 } from "@rms/lib/global";
+import dayjs from "dayjs";
 import {
   MaterialReactTable,
   createMRTColumnHelper,
   useMaterialReactTable,
 } from "material-react-table";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { AiFillFileExcel } from "react-icons/ai";
 type Props = {
   id: string;
@@ -101,14 +103,6 @@ export default function ChartOfAccountView(props: Props) {
       return isFound;
     });
   }, [selectedChartOfAccounts, props.vouchers]);
-  const table = useMaterialReactTable({
-    columns,
-    muiTableProps: {
-      id: "chart-of-account-table-account",
-    },
-
-    data: filtedVoucher ?? [],
-  });
 
   const { credit, debit } = useMemo(() => {
     let debit: number = 0,
@@ -129,18 +123,58 @@ export default function ChartOfAccountView(props: Props) {
     });
     return { debit, credit };
   }, [props.id, filtedVoucher]);
+  const [selectData, setSelectData] = useState({
+    from: dayjs().startOf("month").toDate(),
+    to: dayjs().endOf("month").toDate(),
+  });
+  const { replace } = useRouter();
+  const pathName = usePathname();
+  const [isPadding, setTransition] = useTransition();
+  useEffect(() => {
+    const channel = new BroadcastChannel("voucher");
 
+    channel.addEventListener("message", () => {
+      setTransition(() => {
+        replace(pathName);
+      });
+    });
+    return () => {
+      channel.removeEventListener("message", () => {
+        channel.close();
+      });
+    };
+  }, [pathName, replace]);
   return (
     <Grid container spacing={2} sx={{ flexGrow: 1 }}>
       <Grid xs={12}>
         <Stack
-          direction="row"
-          justifyContent="flex-end"
-          alignItems="center"
+          direction={{ xs: "column", md: "row" }}
+          alignItems="start"
           spacing={2}
         >
+          <FormControl sx={{ width: "100%" }}>
+            <FormLabel>Chart of Accounts</FormLabel>
+            <Autocomplete
+              className="w-full"
+              name="chart_of_accounts"
+              disableCloseOnSelect
+              options={props.chartOfAccounts}
+              value={selectedChartOfAccounts}
+              getOptionLabel={(option: any) =>
+                `${option.id} ${option.name} ${option.currency?.symbol ?? ""}`
+              }
+              onChange={(e, newValue) => {
+                setSelectedChartOfAccounts(newValue as any);
+              }}
+              multiple
+              placeholder="chart of accounts"
+            />{" "}
+          </FormControl>
+
           <FormControl sx={{}}>
+            <FormLabel>Currency</FormLabel>
             <Select
+              sx={{ minWidth: 120 }}
               disabled={props.chartOfAccount.currency ? true : false}
               defaultValue={selectedCurrency?.id}
             >
@@ -160,9 +194,54 @@ export default function ChartOfAccountView(props: Props) {
             </Select>
           </FormControl>
         </Stack>
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          alignItems="end"
+          spacing={2}
+        >
+          {" "}
+          <FormControl sx={{}}>
+            <FormLabel>From</FormLabel>
+            <Input
+              fullWidth
+              type="date"
+              value={dayjs(selectData.from).format("YYYY-MM-DD")}
+              onChange={(e) => {
+                setSelectData((prev) => ({
+                  ...prev,
+                  from: e.target.valueAsDate,
+                }));
+              }}
+            />
+          </FormControl>
+          <FormControl sx={{}}>
+            <FormLabel>To</FormLabel>
+            <Input
+              fullWidth
+              type="date"
+              value={dayjs(selectData.to).format("YYYY-MM-DD")}
+              onChange={(e) => {
+                setSelectData((prev) => ({
+                  ...prev,
+                  to: e.target.valueAsDate,
+                }));
+              }}
+            />
+          </FormControl>
+          <NexCiteButton
+            isPadding={isPadding}
+            onClick={(e) => {
+              replace(
+                window.location.pathname +
+                  `?from=${selectData.from.getTime()}&to=${selectData.to.getTime()}`
+              );
+            }}
+          >
+            Search
+          </NexCiteButton>
+        </Stack>
       </Grid>
       <Grid xs={12}>
-        {" "}
         <div className="grid grid-cols-1   lg:grid-cols-3 gap-5 w-full">
           <Card variant="outlined" invertedColors>
             <CardContent orientation="horizontal">
@@ -210,7 +289,6 @@ export default function ChartOfAccountView(props: Props) {
         </div>
       </Grid>
       <Grid>
-        {" "}
         <Card>
           <CardContent>
             <Typography level="h2">Account Details</Typography>
@@ -236,7 +314,7 @@ export default function ChartOfAccountView(props: Props) {
                 </thead>
                 <tbody>
                   <tr>
-                    <td>
+                    <td align="center">
                       <Dropdown>
                         <MenuButton>
                           <MoreHoriz />
@@ -257,21 +335,23 @@ export default function ChartOfAccountView(props: Props) {
                         </Menu>
                       </Dropdown>
                     </td>
-                    <td>{props.chartOfAccount.id}</td>
-                    <td>{props.chartOfAccount.name}</td>
-                    <td>{props.chartOfAccount.chart_of_account_type}</td>
-                    <td>{props.chartOfAccount.debit_credit}</td>
-                    <td>{selectedCurrency?.name}</td>
-                    <td>{props.chartOfAccount.first_name}</td>
-                    <td>{props.chartOfAccount.last_name}</td>
+                    <td align="center">{props.chartOfAccount.id}</td>
+                    <td align="center">{props.chartOfAccount.name}</td>
+                    <td align="center">
+                      {props.chartOfAccount.chart_of_account_type}
+                    </td>
+                    <td align="center">{props.chartOfAccount.debit_credit}</td>
+                    <td align="center">{selectedCurrency?.name}</td>
+                    <td align="center">{props.chartOfAccount.first_name}</td>
+                    <td align="center">{props.chartOfAccount.last_name}</td>
 
-                    <td>{props.chartOfAccount.email}</td>
-                    <td>{props.chartOfAccount.phone_number}</td>
-                    <td>{props.chartOfAccount.account_type}</td>
-                    <td>{props.chartOfAccount.business_id}</td>
-                    <td>{props.chartOfAccount.limit_amount}</td>
-                    <td>{props.chartOfAccount.country}</td>
-                    <td>{props.chartOfAccount.address}</td>
+                    <td align="center">{props.chartOfAccount.email}</td>
+                    <td align="center">{props.chartOfAccount.phone_number}</td>
+                    <td align="center">{props.chartOfAccount.account_type}</td>
+                    <td align="center">{props.chartOfAccount.business_id}</td>
+                    <td align="center">{props.chartOfAccount.limit_amount}</td>
+                    <td align="center">{props.chartOfAccount.country}</td>
+                    <td align="center">{props.chartOfAccount.address}</td>
                   </tr>
                 </tbody>
               </Table>
@@ -284,26 +364,6 @@ export default function ChartOfAccountView(props: Props) {
         <Card>
           <CardContent>
             <div className="flex gap-5   flex-col justify-between w-full">
-              <FormControl className="w-full">
-                <FormLabel>Chart of Accounts</FormLabel>
-                <Autocomplete
-                  className="w-full"
-                  name="chart_of_accounts"
-                  disableCloseOnSelect
-                  options={props.chartOfAccounts}
-                  value={selectedChartOfAccounts}
-                  getOptionLabel={(option: any) =>
-                    `${option.id} ${option.name} ${
-                      option.currency?.symbol ?? ""
-                    }`
-                  }
-                  onChange={(e, newValue) => {
-                    setSelectedChartOfAccounts(newValue as any);
-                  }}
-                  multiple
-                  placeholder="chart of accounts"
-                />{" "}
-              </FormControl>
               <div className="flex justify-between">
                 <Button
                   className="nexcite-btn sm:w-full md:w-fit"
@@ -319,7 +379,119 @@ export default function ChartOfAccountView(props: Props) {
                 </Button>
               </div>
             </div>
-            <MaterialReactTable table={table} />
+            <Table
+              borderAxis="both"
+              stickyFooter
+              stickyHeader
+              id="chart-of-account-table-account"
+            >
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th align="center" colSpan={3}>
+                    <Typography order={1} textAlign={"center"}>
+                      Debit
+                    </Typography>
+                  </th>
+                  <th align="center" colSpan={3}>
+                    {" "}
+                    <Typography textAlign={"center"}>Credit</Typography>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtedVoucher.map((item) => {
+                  const data = item.voucher_items.filter(
+                    (res) =>
+                      !res.chart_of_account_id.startsWith(
+                        props.chartOfAccount.id
+                      )
+                  );
+
+                  return data.map((res) => (
+                    <tr key={res.id}>
+                      <td align="center">
+                        {item.to_date.toLocaleDateString()}{" "}
+                        {item.to_date.toLocaleTimeString()}
+                      </td>
+                      {res.debit_credit === "Credit" && (
+                        <td align="center" colSpan={3}>
+                          {" "}
+                        </td>
+                      )}
+                      <td align="center" key={res.id} colSpan={3}>
+                        <Stack
+                          direction={"row"}
+                          justifyContent={"space-around"}
+                          sx={{
+                            "& p": {
+                              textAlign: "center",
+                              width: "100%",
+                            },
+                          }}
+                        >
+                          {" "}
+                          <Typography>
+                            {" "}
+                            {res.currency?.symbol}
+                            {FormatNumberWithFixed(res.amount, 2)}
+                          </Typography>
+                          <Typography>
+                            {" "}
+                            {res.chart_of_account.name}{" "}
+                            {res.chart_of_account_id}
+                          </Typography>
+                        </Stack>
+                      </td>
+                      {res.debit_credit === "Debit" && (
+                        <td align="center" colSpan={3}>
+                          {" "}
+                        </td>
+                      )}
+                    </tr>
+                  ));
+                })}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td> </td>
+                  <td align="center" colSpan={3}>
+                    {" "}
+                    {selectedCurrency?.symbol ?? "$"}
+                    {FormatNumberWithFixed(
+                      credit * (selectedCurrency?.rate ?? 1),
+                      2
+                    )}
+                  </td>
+                  <td align="center" colSpan={3}>
+                    {selectedCurrency?.symbol ?? "$"}
+                    {FormatNumberWithFixed(
+                      debit * (selectedCurrency?.rate ?? 1),
+                      2
+                    )}
+                  </td>
+                </tr>
+                <tr>
+                  {" "}
+                  <td> </td>
+                  <td align="center" colSpan={6}>
+                    {" "}
+                    Total
+                  </td>
+                </tr>
+                <tr>
+                  <td> </td>
+                  <td align="center" colSpan={6}>
+                    {debit - credit > 0 ? "Debit" : "Credit"}{" "}
+                    {selectedCurrency?.symbol ?? "$"}
+                    {FormatNumberWithFixed(
+                      (debit - credit) * (selectedCurrency?.rate ?? 1),
+                      2
+                    )}
+                  </td>
+                </tr>
+              </tfoot>
+            </Table>
           </CardContent>
         </Card>{" "}
       </Grid>

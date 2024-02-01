@@ -5,6 +5,7 @@ import { Metadata } from "next";
 import { headers } from "next/headers";
 
 import PageLoader from "@rms/components/other/page-loader";
+import { initCache } from "@rms/service/cache-service";
 import procces from "process";
 export async function generateMetadata({ params }): Promise<Metadata> {
   var reqUrl = headers().get("url") || headers().get("host");
@@ -22,7 +23,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const v = procces.env.vesrion;
-
+  await initCache();
   return (
     <html
       lang="en"
@@ -37,8 +38,8 @@ export default async function RootLayout({
           <h1 className="text-black">version {v}</h1>
         </div>
         <PageLoader />
-        {children}
 
+        {children}
         <AlertProvider />
       </body>
     </html>

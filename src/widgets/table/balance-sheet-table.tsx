@@ -1,7 +1,7 @@
 "use client";
 import { MenuItem } from "@mui/material";
 import Authorized from "@rms/components/other/authorized";
-import TableStateModel from "@rms/models/TableStateModel";
+import CacheStateModel from "@rms/models/CacheStateModel";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Button from "@mui/joy/Button";
@@ -442,7 +442,7 @@ export default function BalanceSheetTable(props: Props) {
 }
 const columnGroupedDataHelper = createMRTColumnHelper<AccountGrouped>();
 
-const useFilter = create<TableStateModel>()(
+const useFilter = create<CacheStateModel>()(
   persist(
     (set, get) => ({
       filterColumns: [],

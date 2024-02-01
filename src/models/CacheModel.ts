@@ -6,7 +6,7 @@ import {
   MRT_SortingState,
 } from "material-react-table";
 type StateSetter<T> = (newValue: T | ((prevValue: T) => T)) => void;
-export default interface TableStateModel {
+export default interface CacheModelState {
   fromDate?: Date;
   toDate?: Date;
   showColumnFilters?: boolean;

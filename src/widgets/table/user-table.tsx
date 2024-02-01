@@ -8,7 +8,7 @@ import { MenuItem } from "@mui/material";
 import { Prisma } from "@prisma/client";
 import Authorized from "@rms/components/other/authorized";
 import { useToast } from "@rms/hooks/toast-hook";
-import TableStateModel from "@rms/models/TableStateModel";
+import CacheStateModel from "@rms/models/CacheStateModel";
 import { deleteUserById } from "@rms/service/user-service";
 import dayjs from "dayjs";
 import {
@@ -116,7 +116,7 @@ export default function UserTable(props: Props) {
 const columnGroupedDataHelper =
   createMRTColumnHelper<Prisma.UserGetPayload<{ include: { role: true } }>>();
 
-const useFilter = create<TableStateModel>()(
+const useFilter = create<CacheStateModel>()(
   persist(
     (set, get) => ({
       filterColumns: [],

@@ -1,4 +1,6 @@
 import { Prisma } from "@prisma/client";
+import { IChartOfAccountGrouped } from "@rms/Interfaces/IChartOfAccount";
+import ChartOfAccountGrouped from "@rms/models/ChartOfAccountModel";
 import dayjs from "dayjs";
 import { utils, write, writeFile } from "xlsx";
 
@@ -115,8 +117,47 @@ export function exportToExcel({
   });
   writeFile(
     xlsxTable,
-    `${dayjs(from).format("DD-MM-YYYY")}-${dayjs(to).format("DD-MM-YYYY")}-${
-      username ?? ""
-    }-${type ?? ""}.xlsx`
+    `${
+      from && to
+        ? `${dayjs(from).format("DD-MM-YYYY")}-${dayjs(to).format(
+            "DD-MM-YYYY"
+          )}`
+        : ""
+    }-${username ?? ""}-${type ?? ""}.xlsx`
   );
+}
+
+export function BalanceSheetTotal(data: ChartOfAccountGrouped) {
+  let totalAmount = data.voucher_items.reduce((sum, voucher) => {
+    if (voucher.debit_credit === "Debit") {
+      return (sum + voucher.amount) / (voucher.rate ?? 1);
+    } else if (voucher.debit_credit === "Credit") {
+      return (sum - voucher.amount) / (voucher.rate ?? 1);
+    }
+  }, 0);
+  if (data.subRows.length > 0) {
+    // Recursively calculate total voucher amounts for each sub-row
+    data.subRows.forEach((subRow) => {
+      totalAmount += BalanceSheetTotal(subRow);
+    });
+  }
+
+  return totalAmount;
+}
+export function cleanUpGroupChartOfAccount(data: IChartOfAccountGrouped[]) {
+  return data.filter(
+    (res) => data.filter((p) => res.parent_id === p.id).length === 0
+  );
+}
+export function groupChartOfAccount(data: IChartOfAccountGrouped[]) {
+  if (data.length === 0) return [];
+  else {
+    return data.map((res) => {
+      const subRows = data.filter((res2) => res2.parent_id === res.id);
+
+      res.subRows = groupChartOfAccount(subRows);
+
+      return res;
+    });
+  }
 }

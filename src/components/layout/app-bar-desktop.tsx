@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useMemo } from "react";
 import Authorized from "../other/authorized";
 
-import Typography from "@mui/joy/Typography";
 import route from "@rms/routes";
 import { usePathname, useSelectedLayoutSegments } from "next/navigation";
 import BackButton from "../button/back-button";
@@ -35,16 +34,19 @@ export default function AppBarDesktop(props: UserAuth) {
 
   return (
     currentRoute && (
-      <div className="w-full border p-5 flex justify-between  items-center sticky top-0 z-10 bg-[#fbfcfe]">
+      <div className="w-full  p-2 flex justify-between  items-center  ">
         <div className="flex items-center gap-1">
           {segments.length > 2 && <BackButton />}
-
-          <Typography fontSize={22}>{currentRoute?.title}</Typography>
         </div>
         {!segments.includes("form") && !isRouteEndNumber && (
           <Authorized permission={currentRoute?.addKey}>
             <Link href={path + "/form"}>
-              <NexCiteButton className="px-2  border w-[140px]  rounded-md ">
+              <NexCiteButton
+                // onClick={(e) => {
+                //   open(path + "/form", "Form", "width=560,height=340");
+                // }}
+                className="px-2  border w-[140px]  rounded-md "
+              >
                 Create
               </NexCiteButton>
             </Link>

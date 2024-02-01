@@ -16,6 +16,7 @@ import Typography from "@mui/joy/Typography";
 import Alert from "@mui/joy/Alert";
 import NexCiteButton from "@rms/components/button/nexcite-button";
 
+import { Card, CardContent } from "@mui/joy";
 import NumericFormatCustom from "@rms/components/input/text-field-number";
 import { useToast } from "@rms/hooks/toast-hook";
 import { FormatNumber, FormatNumberWithFixed } from "@rms/lib/global";
@@ -33,7 +34,6 @@ import {
   CurrencySchema,
   JournalVoucherInputSchema,
 } from "../../schema/journal-voucher-schema";
-import { Card, CardContent } from "@mui/joy";
 type Props = {
   chartOfAccounts: ChartOfAccountSchema[];
   currencies: CurrencySchema[];
@@ -109,6 +109,7 @@ export default function JournalVoucherForm(props: Props) {
           });
           return;
         }
+        const channel = new BroadcastChannel("voucher");
 
         if (props.id) {
           updateVoucherService({ voucher: values, id: props.id }).then(
@@ -116,6 +117,8 @@ export default function JournalVoucherForm(props: Props) {
               toast.OpenAlert(res);
               if (res.status === 200) {
                 replace(pathName + "?id=" + props.id);
+                channel.postMessage("update");
+                channel.close();
               }
             }
           );
@@ -125,6 +128,8 @@ export default function JournalVoucherForm(props: Props) {
           }).then((res) => {
             toast.OpenAlert(res);
             if (res.status === 200) {
+              channel.postMessage("update");
+              channel.close();
               replace(pathName + "?id=" + res.result.id);
             }
           });
@@ -295,7 +300,7 @@ export default function JournalVoucherForm(props: Props) {
                     <th>Amount</th>
                     <th>D/C</th>
                     <th>Account</th>
-                    <th>Reffencer Account</th>
+                    {/* <th>Reffencer Account</th> */}
                   </tr>
                 </thead>
                 <tbody>
@@ -419,7 +424,7 @@ export default function JournalVoucherForm(props: Props) {
                           }}
                         />
                       </td>
-                      <td>
+                      {/* <td>
                         <Controller
                           control={form.control}
                           name={`voucher_items.${index}.reffrence_chart_of_account`}
@@ -458,7 +463,7 @@ export default function JournalVoucherForm(props: Props) {
                             );
                           }}
                         />
-                      </td>
+                      </td> */}
                     </tr>
                   ))}
                 </tbody>

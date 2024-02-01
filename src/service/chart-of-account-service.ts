@@ -1,7 +1,13 @@
 "use server";
 import { VoucherItem } from "@prisma/client";
-import { VoucherSchema, groupChartOfAccountByParentId } from "@rms/lib/global";
+import { ChartOfAccountInclude } from "@rms/Interfaces/IChartOfAccount";
+import {
+  VoucherSchema,
+  groupChartOfAccount,
+  groupChartOfAccountByParentId,
+} from "@rms/lib/global";
 import { handlerServiceAction } from "@rms/lib/handler";
+import ChartOfAccountGrouped from "@rms/models/ChartOfAccountModel";
 import prisma from "@rms/prisma/prisma";
 import {
   ChartOfAccountInputSchema,
@@ -324,4 +330,11 @@ export async function deleteChartOfAccountService(id: string) {
       body: { id },
     }
   );
+}
+
+export async function findChartOfAccountVouchers() {
+  const result = await prisma.chartOfAccount.findMany({
+    include: ChartOfAccountInclude,
+  });
+  return groupChartOfAccount(result);
 }

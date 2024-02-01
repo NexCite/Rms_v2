@@ -1,6 +1,7 @@
 import prisma from "@rms/prisma/prisma";
 import getAuth from "@rms/service/user-service";
 import BalanceSheetTable from "@rms/widgets/table/balance-sheet-table";
+import BalanceSheetTableTest from "@rms/widgets/table/test-table";
 
 export default async function page() {
   // Array.from({ length: 10 }).map((res, index) => {
@@ -16,7 +17,7 @@ export default async function page() {
   const info = await getAuth();
 
   return (
-    <BalanceSheetTable
+    <BalanceSheetTableTest
       currenices={await prisma.currency.findMany({
         where: { config_id: info.config.id },
       })}
