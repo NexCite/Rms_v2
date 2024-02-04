@@ -1,13 +1,10 @@
 "use server";
 
-import { Prisma } from "@prisma/client";
 import { FileMapper } from "@nexcite/lib/common";
 import { handlerServiceAction } from "@nexcite/lib/handler";
 import prisma from "@nexcite/prisma/prisma";
-import {
-  JournalVoucherInputSchema,
-  VoucherSearchSchema,
-} from "@nexcite/schema/journal-voucher-schema";
+import { JournalVoucherInputSchema } from "@nexcite/schema/JournalVoucherSchema";
+import { Prisma } from "@prisma/client";
 import dayjs from "dayjs";
 
 export async function findVoucherItemsService(props: { id: number }) {

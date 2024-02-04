@@ -3,10 +3,9 @@
 import { useMemo, useTransition } from "react";
 
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
-import Authorized from "@nexcite/components/other/authorized";
-import ExportData from "@nexcite/components/other/export-data";
-import LoadingClient from "@nexcite/components/other/loading-client";
-import useHistoryStore from "@nexcite/hooks/history-hook";
+import Authorized from "@nexcite/components/other/Authorized";
+import ExportData from "@nexcite/components/other/ExportData";
+import LoadingClient from "@nexcite/components/other/LoadingClient";
 import { useToast } from "@nexcite/hooks/toast-hook";
 import { FormatNumberWithFixed } from "@nexcite/lib/global";
 import { Activity, ActivityStatus } from "@nexcite/models/CommonModel";
@@ -152,15 +151,6 @@ export default function ActivityTable(props: Props) {
     []
   );
 
-  const historyTablePageStore = useHistoryStore<MRT_PaginationState>(
-    "activity-table-page",
-    { pageIndex: 0, pageSize: 100 }
-  )();
-  const historyTableFilterStore = useHistoryStore<MRT_ColumnFiltersState>(
-    "activity-table-filter",
-    []
-  )();
-
   const table = useMaterialReactTable({
     columns,
     data: props.data,
@@ -217,15 +207,11 @@ export default function ActivityTable(props: Props) {
       <ExportData data={props.data} table={table} />
     ),
 
-    onPaginationChange: historyTablePageStore.set,
     state: {
       showLoadingOverlay: isPadding,
-      pagination: historyTablePageStore.data,
-      showColumnFilters: historyTableFilterStore.data.length > 0,
 
       // columnFilters: historyTableFilterStore.data,
     },
-    onColumnFiltersChange: historyTableFilterStore.set,
     initialState: {
       density: "comfortable",
 

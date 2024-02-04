@@ -16,8 +16,8 @@ import Tab from "@mui/joy/Tab";
 import TabList from "@mui/joy/TabList";
 import TabPanel from "@mui/joy/TabPanel";
 import Tabs from "@mui/joy/Tabs";
-import NexCiteButton from "@nexcite/components/button/nexcite-button";
-import NumericFormatCustom from "@nexcite/components/input/text-field-number";
+import NexCiteButton from "@nexcite/components/button/NexCiteButton";
+import NumericFormatCustom from "@nexcite/components/input/TextFieldNumber";
 import { useToast } from "@nexcite/hooks/toast-hook";
 import {
   createChartOfAccountService,
@@ -26,7 +26,7 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useTransition } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { ChartOfAccountInputSchema } from "../../schema/chart-of-account-schema";
+import { ChartOfAccountInputSchema } from "../../schema/ChartOfAccountSchema";
 type Props = {
   canEdit?: boolean;
   currencies: Prisma.CurrencyGetPayload<{}>[];

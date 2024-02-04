@@ -5,8 +5,8 @@ import Input from "@mui/joy/Input";
 
 import { Stack } from "@mui/joy";
 import { $Enums } from "@prisma/client";
-import NexCiteButton from "@nexcite/components/button/nexcite-button";
-import NexCiteCard from "@nexcite/components/card/nexcite-card";
+import NexCiteButton from "@nexcite/components/button/NexCiteButton";
+import NexCiteCard from "@nexcite/components/card/NexCiteCard";
 import { IChartOfAccountGrouped } from "@nexcite/Interfaces/IChartOfAccount";
 import {
   BalanceSheetTotal,

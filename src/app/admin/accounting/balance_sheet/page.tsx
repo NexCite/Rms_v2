@@ -27,7 +27,7 @@ export default async function page(props: {
 
   return (
     <BalanceSheetTableTest
-      currencies={currencies}
+      currencies={currencies.body}
       data={cleanUpGroupChartOfAccount(chartOfAccounts.body)}
     />
   );

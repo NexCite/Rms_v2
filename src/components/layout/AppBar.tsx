@@ -7,8 +7,8 @@ import route from "@nexcite/routes";
 import Link from "next/link";
 import { usePathname, useSelectedLayoutSegments } from "next/navigation";
 import { useMemo } from "react";
-import BackButton from "../button/back-button";
-import Authorized from "../other/authorized";
+import BackButton from "../button/BackButton";
+import Authorized from "../other/Authorized";
 
 export default function AppBar(props: IAuth) {
   const path = usePathname();

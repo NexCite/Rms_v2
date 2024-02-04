@@ -1,7 +1,7 @@
 import prisma from "@nexcite/prisma/prisma";
 import getAuth from "@nexcite/service/user-service";
 import JournalVoucherForm from "@nexcite/widgets/form/journal-voucher-form";
-import { JournalVoucherInputSchema } from "@nexcite/schema/journal-voucher-schema";
+import { JournalVoucherInputSchema } from "@nexcite/schema/JournalVoucherSchema";
 import React from "react";
 import { z } from "zod";
 

@@ -1,4 +1,4 @@
-import EquityTable from "@nexcite/widgets/table/equity-table";
+import EquityTable from "@nexcite/widgets/table/EquityTable";
 import React from "react";
 
 export default function page() {

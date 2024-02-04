@@ -5,6 +5,7 @@ import {
   AccordionGroup,
   AccordionSummary,
   Card,
+  IconButton,
   List,
   ListItem,
   ListItemButton,
@@ -24,8 +25,9 @@ import ReceiptIcon from "@mui/icons-material/ReceiptRounded";
 import SettingsIcon from "@mui/icons-material/SettingsRounded";
 import LogOutIcon from "@mui/icons-material/Logout";
 import Link from "next/link";
+import { IoMdLogOut } from "react-icons/io";
 import { usePathname } from "next/navigation";
-
+import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
 export default function SideBar(props: IAuth) {
   const { config, user } = props;
   const pathName = usePathname();
@@ -50,6 +52,10 @@ export default function SideBar(props: IAuth) {
       sx={{
         borderRadius: 0,
         position: "fixed",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "start",
+
         bottom: 0,
         top: 0,
         left: 0,
@@ -62,9 +68,10 @@ export default function SideBar(props: IAuth) {
       <Stack
         direction={"row"}
         alignItems={"center"}
+        justifyContent={"space-between"}
         sx={{
-          mb: 4,
-
+          width: "100%",
+          mb: 2,
           "& img": {
             width: 30,
             height: 30,
@@ -73,20 +80,35 @@ export default function SideBar(props: IAuth) {
         }}
         gap={1}
       >
-        <Image alt={config.name} src={`/logo.png`} width={60} height={60} />
-        <Typography level="h4" fontWeight={600}>
-          {" "}
-          {config.name} For Trading
-        </Typography>
+        <Stack direction={"row"} alignItems={"center"} spacing={1}>
+          <Image
+            alt={config.name}
+            src={`/api/media/${config.logo}`}
+            width={60}
+            height={60}
+          />
+          <Typography level="h4" fontWeight={600}>
+            {" "}
+            {config.name}
+          </Typography>
+        </Stack>
+        <Link href={"/logout"}>
+          <IconButton size="sm">
+            <IoMdLogOut fontSize={20} />
+          </IconButton>
+        </Link>
       </Stack>
 
       <Stack
         direction={"column"}
         spacing={3}
         sx={{
+          width: "100%",
+
           "& a": {
             "& h4": {
-              fontSize: 15,
+              fontWeight: 600,
+              fontSize: 16,
             },
             color: "#56575a",
             "& :hover": {
@@ -101,28 +123,34 @@ export default function SideBar(props: IAuth) {
         }}
       >
         <AccordionGroup
-          size="lg"
-          sx={{ gap: 1 }}
+          size="sm"
+          sx={{
+            width: "100%",
+            "& svg": {
+              fontSize: 18,
+              color: "#3e3b3b",
+            },
+            gap: 1,
+            "& h4": {
+              fontSize: 20,
+            },
+          }}
           transition="0.2s ease"
           disableDivider
         >
           {userRoutes.map((res) => (
-            <Accordion key={res.title}>
-              <AccordionSummary sx={{ padding: 0, paddingBottom: 2 }}>
+            <Accordion
+              key={res.title}
+              defaultExpanded={true}
+              sx={{ width: "100%" }}
+            >
+              <AccordionSummary sx={{ padding: 0, paddingBottom: 1 }}>
                 <Stack direction={"row"} spacing={1}>
-                  <SwitchIcon color={"action"} icon={res.icon} />
-                  <Typography>{res.title}</Typography>
+                  <Typography level="h4">{res.title}</Typography>
                 </Stack>
               </AccordionSummary>
               <AccordionDetails>
-                <Stack
-                  direction={"column"}
-                  spacing={2}
-                  alignItems={"start"}
-                  sx={{
-                    paddingLeft: 2,
-                  }}
-                >
+                <Stack direction={"column"} spacing={2} alignItems={"start"}>
                   {res.children.map((res) => (
                     <Link
                       key={res.title}
@@ -133,7 +161,7 @@ export default function SideBar(props: IAuth) {
                     >
                       <Typography level="h4">{res.title}</Typography>
                     </Link>
-                  ))}{" "}
+                  ))}
                 </Stack>
               </AccordionDetails>
             </Accordion>

@@ -14,11 +14,11 @@ import {
   Textarea,
 } from "@mui/joy";
 import { Prisma } from "@prisma/client";
-import NexCiteButton from "@nexcite/components/button/nexcite-button";
-import NexCiteCard from "@nexcite/components/card/nexcite-card";
-import NumericFormatCustom from "@nexcite/components/input/text-field-number";
+import NexCiteButton from "@nexcite/components/button/NexCiteButton";
+import NexCiteCard from "@nexcite/components/card/NexCiteCard";
+import NumericFormatCustom from "@nexcite/components/input/TextFieldNumber";
 import { useToast } from "@nexcite/hooks/toast-hook";
-import { EquitySchema } from "@nexcite/schema/equity-schema";
+import { EquitySchema } from "@nexcite/schema/EquitySchema";
 import { createEquity, updateEquity } from "@nexcite/service/equity-service";
 import dayjs from "dayjs";
 import { usePathname, useRouter } from "next/navigation";
@@ -526,7 +526,7 @@ export default function EquityForm(props: Props) {
                 <tr>
                   <th></th>
                   <th>Name</th>
-                  <th>p_l</th>
+                  <th>PL</th>
                 </tr>
               </thead>
               <tbody>
@@ -752,7 +752,7 @@ export default function EquityForm(props: Props) {
               style={{ margin: "0px 0px 0px" }}
               className="mt-4 flex justify-between"
             >
-              <h1 className="text-2xl">credit</h1>
+              <h1 className="text-2xl">Credit</h1>
               <IconButton onClick={() => handleAdd("credit")}>
                 <AddIcon />
               </IconButton>

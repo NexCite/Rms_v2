@@ -1,7 +1,7 @@
 "use client";
 import { MenuItem } from "@mui/material";
 import { $Enums, Prisma } from "@prisma/client";
-import Authorized from "@nexcite/components/other/authorized";
+import Authorized from "@nexcite/components/other/Authorized";
 import { useToast } from "@nexcite/hooks/toast-hook";
 
 import { Stack } from "@mui/joy";

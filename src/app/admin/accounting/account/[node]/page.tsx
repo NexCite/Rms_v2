@@ -1,13 +1,12 @@
-import { $Enums } from "@prisma/client";
-import Loading from "@nexcite/components/other/loading";
+import Loading from "@nexcite/components/other/LoadingUi";
 import prisma from "@nexcite/prisma/prisma";
 import { findChartOfAccountsV1 } from "@nexcite/service/ChartOfAccountService";
-import { findChartOfAccountVouchers } from "@nexcite/service/chart-of-account-service";
 import getAuth from "@nexcite/service/user-service";
-import ChartOfAccountTable from "@nexcite/widgets/table/chart-of-account-table";
-import { Suspense } from "react";
+import ChartOfAccountTable from "@nexcite/widgets/table/ChartOfAccountTable";
+import { $Enums } from "@prisma/client";
 import { headers } from "next/headers";
 import { RedirectType, redirect } from "next/navigation";
+import { Suspense } from "react";
 
 export default async function page(props: {
   params: {

@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import { useMemo, useTransition } from "react";
 
 import { MenuItem } from "@mui/material";
-import NexCiteCard from "@nexcite/components/card/nexcite-card";
-import Authorized from "@nexcite/components/other/authorized";
+import NexCiteCard from "@nexcite/components/card/NexCiteCard";
+import Authorized from "@nexcite/components/other/Authorized";
 import { useToast } from "@nexcite/hooks/toast-hook";
 import { deleteRoleById } from "@nexcite/service/role-service";
 import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";

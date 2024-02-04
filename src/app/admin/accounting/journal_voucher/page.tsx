@@ -1,7 +1,7 @@
 import IVoucher, { IVoucherInclude } from "@nexcite/models/VoucherModel";
 import prisma from "@nexcite/prisma/prisma";
 import { userAuth } from "@nexcite/service/auth-service";
-import JournalVoucherTable from "@nexcite/widgets/table/journal-voucher-table";
+import JournalVoucherTable from "@nexcite/widgets/table/JournalVoucherTable";
 import dayjs from "dayjs";
 
 export default async function page(props: {

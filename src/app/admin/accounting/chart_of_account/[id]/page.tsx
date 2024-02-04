@@ -1,7 +1,7 @@
 import { $Enums } from "@prisma/client";
 import prisma from "@nexcite/prisma/prisma";
 import getAuth from "@nexcite/service/user-service";
-import ChartOfAccountView from "@nexcite/widgets/view/chart-of-account-view";
+import ChartOfAccountView from "@nexcite/widgets/view/ChartOfAccountView";
 import dayjs from "dayjs";
 import {
   findChartOfAccountByIdV1,

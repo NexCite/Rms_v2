@@ -3,9 +3,9 @@
 import { Card, CardContent, Divider, Table, Typography } from "@mui/joy";
 
 import { Prisma } from "@prisma/client";
-import NexCiteButton from "@nexcite/components/button/nexcite-button";
-import NexCiteCard from "@nexcite/components/card/nexcite-card";
-import Authorized from "@nexcite/components/other/authorized";
+import NexCiteButton from "@nexcite/components/button/NexCiteButton";
+import NexCiteCard from "@nexcite/components/card/NexCiteCard";
+import Authorized from "@nexcite/components/other/Authorized";
 import { useToast } from "@nexcite/hooks/toast-hook";
 import { FormatNumberWithFixed } from "@nexcite/lib/global";
 import { deleteEquityById } from "@nexcite/service/equity-service";

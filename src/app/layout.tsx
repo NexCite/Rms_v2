@@ -4,8 +4,7 @@ import { AlertProvider } from "@nexcite/hooks/toast-hook";
 import { Metadata } from "next";
 import { headers } from "next/headers";
 
-import PageLoader from "@nexcite/components/other/page-loader";
-import { initCache } from "@nexcite/service/cache-service";
+import PageLoader from "@nexcite/components/other/PageLoader";
 import procces from "process";
 export async function generateMetadata({ params }): Promise<Metadata> {
   var reqUrl = headers().get("url") || headers().get("host");
@@ -18,13 +17,14 @@ export async function generateMetadata({ params }): Promise<Metadata> {
     icons: [url],
   };
 }
+
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const v = procces.env.vesrion;
-  await initCache();
+
   return (
     <html
       lang="en"

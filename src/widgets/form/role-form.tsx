@@ -9,7 +9,7 @@ import { useCallback, useMemo, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import NexCiteButton from "@nexcite/components/button/nexcite-button";
+import NexCiteButton from "@nexcite/components/button/NexCiteButton";
 import { useToast } from "@nexcite/hooks/toast-hook";
 import { createRole, updateRole } from "@nexcite/service/role-service";
 import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";

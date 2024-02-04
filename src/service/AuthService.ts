@@ -2,7 +2,7 @@
 
 import IAuth, { AuthInclude } from "@nexcite/Interfaces/IAuth";
 import prisma from "@nexcite/prisma/prisma";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 
 class AuthService {
   static async findAuth(): Promise<IAuth | null> {

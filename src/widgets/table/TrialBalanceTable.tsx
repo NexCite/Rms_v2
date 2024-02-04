@@ -6,9 +6,9 @@ import Input from "@mui/joy/Input";
 import { Option, Select, Stack } from "@mui/joy";
 import Table from "@mui/joy/Table";
 import IChartOfAccount from "@nexcite/Interfaces/IChartOfAccount";
-import NexCiteButton from "@nexcite/components/button/nexcite-button";
-import NexCiteCard from "@nexcite/components/card/nexcite-card";
-import NumericFormatCustom from "@nexcite/components/input/text-field-number";
+import NexCiteButton from "@nexcite/components/button/NexCiteButton";
+import NexCiteCard from "@nexcite/components/card/NexCiteCard";
+import NumericFormatCustom from "@nexcite/components/input/TextFieldNumber";
 import { FormatNumberWithFixed, exportToExcel } from "@nexcite/lib/global";
 import dayjs from "dayjs";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -181,26 +181,24 @@ export default function TrialBalanceTable(props: Props) {
         </NexCiteButton>
       </Stack>
 
-      <Table borderAxis="both" stickyFooter stickyHeader id="TrialTable">
+      <Table borderAxis="both" stickyFooter id="TrialTable">
         <thead>
           <tr>
             <th> </th>
-            <th colSpan={2} align="center">
-              Totals
-            </th>{" "}
-            <th colSpan={2} align="center">
-              Balances
-            </th>
-          </tr>
-          <tr>
-            <th>Account</th>
-            <th>Debit</th>
-            <th>Credit</th>
-            <th>Debit</th>
-            <th>Credit</th>
+            <th align="center">Totals Debit</th>
+            <th align="center">Totals Credit</th>
+            <th align="center">Balances Debit</th>
+            <th align="center">Balances Credit</th>
           </tr>
         </thead>
         <tbody>
+          <tr>
+            <td>Account</td>
+            <td>Debit</td>
+            <td>Credit</td>
+            <td>Debit</td>
+            <td>Credit</td>
+          </tr>
           {props.data.map((item) => (
             <tr key={item.id}>
               <td>
@@ -279,14 +277,14 @@ export default function TrialBalanceTable(props: Props) {
               )}
             </td>
             <td>
-              {" "}
+              {selectedCurrency?.symbol ?? "$"}
               {FormatNumberWithFixed(
                 total.totalBalance * (selectedCurrency?.rate ?? 1),
                 2
               )}
             </td>{" "}
             <td>
-              {" "}
+              {selectedCurrency?.symbol ?? "$"}
               {FormatNumberWithFixed(
                 total.totalBalance * (selectedCurrency?.rate ?? 1),
                 2

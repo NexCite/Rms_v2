@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { LocalizationProvider, TimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Prisma } from "@prisma/client";
-import NexCiteButton from "@nexcite/components/button/nexcite-button";
+import NexCiteButton from "@nexcite/components/button/NexCiteButton";
 import { useToast } from "@nexcite/hooks/toast-hook";
 import { updateScheuleConfig } from "@nexcite/service/schedule-config-service";
 import dayjs from "dayjs";

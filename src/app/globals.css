@@ -49,9 +49,16 @@ body {
 button {
   text-transform: capitalize !important;
 }
-
+@font-face {
+  font-family: "Montserrat";
+  src: url("/Montserrat-VariableFont_wght.ttf");
+}
+@font-face {
+  font-family: "Cairo";
+  src: url("/Cairo-VariableFont_slnt,wght.ttf");
+}
 * {
-  font-family: "Montserrat", sans-serif !important;
+  font-family: "Montserrat", "Cairo", sans-serif !important;
   font-weight: 500 !important;
 }
 body {

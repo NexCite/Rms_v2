@@ -1,19 +1,14 @@
 "use client";
 
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import {
   Autocomplete,
   Box,
   Card,
   CardContent,
-  Dropdown,
   FormControl,
   FormLabel,
   Grid,
   Input,
-  Menu,
-  MenuButton,
-  MenuItem,
   Option,
   Select,
   Stack,
@@ -22,9 +17,8 @@ import {
 } from "@mui/joy";
 import IChartOfAccount from "@nexcite/Interfaces/IChartOfAccount";
 import ICurrency from "@nexcite/Interfaces/ICurrency";
-import NexCiteButton from "@nexcite/components/button/nexcite-button";
-import NexCiteCard from "@nexcite/components/card/nexcite-card";
-import Authorized from "@nexcite/components/other/authorized";
+import NexCiteButton from "@nexcite/components/button/NexCiteButton";
+import NexCiteCard from "@nexcite/components/card/NexCiteCard";
 import {
   FormatNumberWithFixed,
   VoucherSchema,
@@ -33,7 +27,6 @@ import {
 import { Prisma } from "@prisma/client";
 import dayjs from "dayjs";
 import { createMRTColumnHelper } from "material-react-table";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { AiFillFileExcel } from "react-icons/ai";
@@ -350,7 +343,10 @@ export default function ChartOfAccountView(props: Props) {
                   onClick={(e) => {
                     exportToExcel({
                       sheet: "chart of account",
-                      id: "chart-of-account-table-account",
+                      fileName: "ChartOfAccount",
+                      from: selectData.from,
+                      to: selectData.to,
+                      id: "ChartOfAccount_" + props.chartOfAccount.name,
                     });
                   }}
                 >
@@ -362,7 +358,7 @@ export default function ChartOfAccountView(props: Props) {
               borderAxis="both"
               stickyFooter
               stickyHeader
-              id="chart-of-account-table-account"
+              id={"ChartOfAccount_" + props.chartOfAccount.name}
             >
               <thead>
                 <tr>

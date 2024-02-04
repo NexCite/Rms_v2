@@ -14,10 +14,10 @@ import TextArea from "@mui/joy/Textarea";
 import Typography from "@mui/joy/Typography";
 
 import Alert from "@mui/joy/Alert";
-import NexCiteButton from "@nexcite/components/button/nexcite-button";
+import NexCiteButton from "@nexcite/components/button/NexCiteButton";
 
 import { Card, CardContent } from "@mui/joy";
-import NumericFormatCustom from "@nexcite/components/input/text-field-number";
+import NumericFormatCustom from "@nexcite/components/input/TextFieldNumber";
 import { useToast } from "@nexcite/hooks/toast-hook";
 import { FormatNumber, FormatNumberWithFixed } from "@nexcite/lib/global";
 import {
@@ -33,7 +33,7 @@ import {
   ChartOfAccountSchema,
   CurrencySchema,
   JournalVoucherInputSchema,
-} from "../../schema/journal-voucher-schema";
+} from "../../schema/JournalVoucherSchema";
 type Props = {
   chartOfAccounts: ChartOfAccountSchema[];
   currencies: CurrencySchema[];
@@ -52,9 +52,6 @@ export default function JournalVoucherForm(props: Props) {
 
   const watch = useWatch({ control: form.control });
 
-  const chartOfAccountClients = useMemo(() => {
-    return props.chartOfAccounts.filter((res) => res.account_type);
-  }, [props.chartOfAccounts]);
   const chartOfAccounts = useMemo(() => {
     return props.chartOfAccounts.filter(
       (res) =>

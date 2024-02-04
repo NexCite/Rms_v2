@@ -1,6 +1,6 @@
 "use client";
 import { $Enums } from "@prisma/client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 
 type Props = {

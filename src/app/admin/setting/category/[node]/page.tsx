@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { getConfigId } from "@nexcite/lib/config";
 import prisma from "@nexcite/prisma/prisma";
-import CategoryTable from "@nexcite/widgets/table/category-table";
+import CategoryTable from "@nexcite/widgets/table/CategoryTable";
 
 export default async function page(props: {
   params: { node: "category" | "sub_category" };

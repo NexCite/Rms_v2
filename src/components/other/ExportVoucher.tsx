@@ -15,7 +15,7 @@ import {
   Table,
   Tabs,
 } from "@mui/joy";
-import NexCiteButton from "@nexcite/components/button/nexcite-button";
+import NexCiteButton from "@nexcite/components/button/NexCiteButton";
 
 import IVoucher from "@nexcite/models/VoucherModel";
 import dayjs from "dayjs";

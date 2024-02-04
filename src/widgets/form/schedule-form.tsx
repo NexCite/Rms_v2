@@ -20,8 +20,8 @@ import {
 } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Prisma } from "@prisma/client";
-import NexCiteButton from "@nexcite/components/button/nexcite-button";
-import Loading from "@nexcite/components/other/loading";
+import NexCiteButton from "@nexcite/components/button/NexCiteButton";
+import Loading from "@nexcite/components/other/LoadingUi";
 import { useToast } from "@nexcite/hooks/toast-hook";
 import { fileZod, mediaZod } from "@nexcite/lib/common";
 import {

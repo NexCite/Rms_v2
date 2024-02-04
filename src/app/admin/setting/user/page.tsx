@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import prisma from "@nexcite/prisma/prisma";
 import getAuth, { getUserStatus } from "@nexcite/service/user-service";
-import UserTableComponent from "@nexcite/widgets/table/user-table";
+import UserTableComponent from "@nexcite/widgets/table/UserTable";
 
 export default async function page() {
   const info = await getAuth();

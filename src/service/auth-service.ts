@@ -1,6 +1,5 @@
 "use server";
 
-import { UserAuth } from "./user-service";
 import { cookies, headers } from "next/headers";
 import { RedirectType, redirect } from "next/navigation";
 import prisma from "@nexcite/prisma/prisma";

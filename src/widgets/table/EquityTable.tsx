@@ -13,12 +13,12 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormControl, FormLabel, Input } from "@mui/joy";
 import { MenuItem } from "@mui/material";
-import NexCiteButton from "@nexcite/components/button/nexcite-button";
-import NexCiteCard from "@nexcite/components/card/nexcite-card";
-import Authorized from "@nexcite/components/other/authorized";
+import NexCiteButton from "@nexcite/components/button/NexCiteButton";
+import NexCiteCard from "@nexcite/components/card/NexCiteCard";
+import Authorized from "@nexcite/components/other/Authorized";
 import { useToast } from "@nexcite/hooks/toast-hook";
 import { FormatNumberWithFixed, exportToExcel } from "@nexcite/lib/global";
-import { Search } from "@nexcite/schema/search-schema";
+import { Search } from "@nexcite/schema/SearchSchema";
 import {
   deleteEquityById,
   findEquities,

@@ -2,7 +2,7 @@
 
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import { Prisma } from "@prisma/client";
-import Authorized from "@nexcite/components/other/authorized";
+import Authorized from "@nexcite/components/other/Authorized";
 import { useToast } from "@nexcite/hooks/toast-hook";
 import {
   deleteEmployeeById,

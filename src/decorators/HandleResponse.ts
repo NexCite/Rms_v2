@@ -1,5 +1,5 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import ResponseModel from "@nexcite/Interfaces/Response";
+import IResponse from "@nexcite/Interfaces/IResponse";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { $Enums } from "@prisma/client";
 import { cookies } from "next/headers";
@@ -8,7 +8,7 @@ import prisma from "@nexcite/prisma/prisma";
 
 function HandleResponse(props?: {
   paths?: string[];
-  permission: $Enums.UserPermission;
+  permission?: $Enums.UserPermission;
 }) {
   return function handleResult(
     target: any,
@@ -19,7 +19,7 @@ function HandleResponse(props?: {
 
     descriptor.value = async function (
       ...args: any[]
-    ): Promise<ResponseModel | undefined> {
+    ): Promise<IResponse | undefined> {
       try {
         const token = cookies().get("rms-auth");
         if (!token) {
@@ -28,13 +28,15 @@ function HandleResponse(props?: {
         const auth = await prisma.auth.findFirst({
           where: {
             token: token.value,
-            user: {
-              role: {
-                permissions: {
-                  has: props?.permission,
-                },
-              },
-            },
+            user: props.permission
+              ? {
+                  role: {
+                    permissions: {
+                      has: props?.permission,
+                    },
+                  },
+                }
+              : undefined,
           },
         });
         if (!auth) {

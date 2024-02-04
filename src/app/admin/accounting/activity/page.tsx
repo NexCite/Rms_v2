@@ -1,7 +1,7 @@
-import Loading from "@nexcite/components/other/loading";
+import Loading from "@nexcite/components/other/LoadingUi";
 import { Activity } from "@nexcite/models/CommonModel";
 import { getActivities } from "@nexcite/service/activity-service";
-import ActivityTable from "@nexcite/widgets/table/activity-table";
+import ActivityTable from "@nexcite/widgets/table/ActivityTable";
 import { Suspense } from "react";
 
 export default async function page() {

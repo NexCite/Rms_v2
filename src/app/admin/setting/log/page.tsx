@@ -1,5 +1,5 @@
 import { getLogs } from "@nexcite/service/log-service";
-import LogTable from "@nexcite/widgets/table/log-table";
+import LogTable from "@nexcite/widgets/table/LogTable";
 import React from "react";
 
 export default async function page(props: {

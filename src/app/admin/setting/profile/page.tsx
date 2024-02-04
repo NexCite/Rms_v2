@@ -1,6 +1,6 @@
 import { Card } from "@mui/joy";
-import NexCiteButton from "@nexcite/components/button/nexcite-button";
-import Authorized from "@nexcite/components/other/authorized";
+import NexCiteButton from "@nexcite/components/button/NexCiteButton";
+import Authorized from "@nexcite/components/other/Authorized";
 import prisma from "@nexcite/prisma/prisma";
 import getAuth from "@nexcite/service/user-service";
 import Image from "next/image";

@@ -17,7 +17,7 @@ import {
   Input,
   Typography,
 } from "@mui/joy";
-import NexCiteButton from "@nexcite/components/button/nexcite-button";
+import NexCiteButton from "@nexcite/components/button/NexCiteButton";
 import { useToast } from "@nexcite/hooks/toast-hook";
 import { useRouter } from "next/navigation";
 const formSchema = z.object({

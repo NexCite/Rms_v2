@@ -4,7 +4,7 @@ import IChartOfAccount, {
   ChartOfAccountIncludeWithDateFilter,
   IChartOfAccountGrouped,
 } from "@nexcite/Interfaces/IChartOfAccount";
-import ResponseModel from "@nexcite/Interfaces/Response";
+import IResponse from "@nexcite/Interfaces/IResponse";
 import HandleResponse from "@nexcite/decorators/HandleResponse";
 import { groupChartOfAccount, searchParamsMapper } from "@nexcite/lib/global";
 import prisma from "@nexcite/prisma/prisma";
@@ -16,7 +16,7 @@ class CharOfAccountService {
   static async findChartOfAccountsV1(
     config_id: number,
     node?: $Enums.AccountType
-  ): Promise<ResponseModel<IChartOfAccount[]>> {
+  ): Promise<IResponse<IChartOfAccount[]>> {
     return {
       body: await prisma.chartOfAccount.findMany({
         where: {
@@ -36,7 +36,7 @@ class CharOfAccountService {
     config_id: number,
     digit: number
   ): Promise<
-    ResponseModel<
+    IResponse<
       (IChartOfAccount & {
         totalDebit?: number;
         totalCredit?: number;
@@ -97,7 +97,7 @@ class CharOfAccountService {
   static async findChartOfAccountByIdV1(
     config_id: number,
     id: string
-  ): Promise<ResponseModel<IChartOfAccount>> {
+  ): Promise<IResponse<IChartOfAccount>> {
     "use server";
 
     return {
@@ -116,7 +116,7 @@ class CharOfAccountService {
   static async findGroupedChartOfAccountVouchersV1(
     props: { from: Date; to: Date },
     config_id?: number
-  ): Promise<ResponseModel<IChartOfAccountGrouped[]>> {
+  ): Promise<IResponse<IChartOfAccountGrouped[]>> {
     const result = await prisma.chartOfAccount.findMany({
       orderBy: { id: "asc" },
       where: {

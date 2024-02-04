@@ -1,4 +1,4 @@
-type ResponseModel<T extends any = any> =
+type IResponse<T extends any = any> =
   | (
       | {
           status: 400;
@@ -7,9 +7,10 @@ type ResponseModel<T extends any = any> =
         }
       | {
           status: 200;
+          message?: string;
         }
       | {
           status: 401;
         }
-    ) & { body: T };
-export default ResponseModel;
+    ) & { body?: T };
+export default IResponse;

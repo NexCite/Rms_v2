@@ -242,7 +242,8 @@ var route: RouteModel[] = [
       },
       {
         index: 7,
-        title: "Configuration",
+        routeKey: "configuration",
+        title: "Project Configuration",
         path: "/admin/setting/configuration",
         permission: "View_Config",
       },

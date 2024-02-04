@@ -1,18 +1,15 @@
 "use server";
-import { VoucherItem } from "@prisma/client";
 import { ChartOfAccountInclude } from "@nexcite/Interfaces/IChartOfAccount";
 import {
-  VoucherSchema,
   groupChartOfAccount,
   groupChartOfAccountByParentId,
 } from "@nexcite/lib/global";
 import { handlerServiceAction } from "@nexcite/lib/handler";
-import ChartOfAccountGrouped from "@nexcite/models/ChartOfAccountModel";
 import prisma from "@nexcite/prisma/prisma";
 import {
   ChartOfAccountInputSchema,
   ChartOfAccountSearchSchema,
-} from "@nexcite/schema/chart-of-account-schema";
+} from "@nexcite/schema/ChartOfAccountSchema";
 
 /**
  * Find all chart of accounts based on the provided configuration ID.

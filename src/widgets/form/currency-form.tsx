@@ -18,8 +18,8 @@ import {
   Input,
   Typography,
 } from "@mui/joy";
-import NexCiteButton from "@nexcite/components/button/nexcite-button";
-import NumericFormatCustom from "@nexcite/components/input/text-field-number";
+import NexCiteButton from "@nexcite/components/button/NexCiteButton";
+import NumericFormatCustom from "@nexcite/components/input/TextFieldNumber";
 import { useToast } from "@nexcite/hooks/toast-hook";
 import {
   createCurrency,

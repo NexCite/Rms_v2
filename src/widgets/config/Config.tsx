@@ -3,10 +3,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Check from "@mui/icons-material/Check";
 import UploadFile from "@mui/icons-material/UploadFile";
 import {
+  Box,
   Button,
   Card,
   Divider,
   FormControl,
+  FormHelperText,
   FormLabel,
   IconButton,
   Input,
@@ -17,45 +19,27 @@ import {
   Typography,
 } from "@mui/joy";
 import LoadingButton from "@mui/lab/LoadingButton";
-import { CardContent } from "@mui/material";
-import { Prisma } from "@prisma/client";
-import NexCiteButton from "@nexcite/components/button/nexcite-button";
+import IConfig from "@nexcite/Interfaces/IConfig";
+import NexCiteButton from "@nexcite/components/button/NexCiteButton";
 import { useToast } from "@nexcite/hooks/toast-hook";
-import { fileZod } from "@nexcite/lib/common";
+import {
+  ConfigInputSchema,
+  ConfigInputUpdateSchema,
+} from "@nexcite/schema/ConfigSchema";
+import { updateConfig } from "@nexcite/service/ConfigService";
 import { editConfig, initConfig } from "@nexcite/service/config-service";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useRef, useState, useTransition } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { MdArrowBack, MdDelete } from "react-icons/md";
+import { MdArrowBack } from "react-icons/md";
 import z from "zod";
 const validImageExtensions = /\.(gif|jpe?g|tiff?|png|webp|bmp|ico)$/i;
 const steps = ["Project", "Company Information", "User Information"];
 
 export function InitConfig() {
   const fileRef = useRef<HTMLInputElement>();
-  const formSchema = z.object({
-    config: z.object({
-      name: z.string().min(3),
-      first_name: z.string().min(3),
-      last_name: z.string().min(3),
-      phone_number: z
-        .string()
-        .regex(
-          new RegExp(
-            /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/
-          ),
-          {
-            message: "Invalid phone number",
-          }
-        ),
-      email: z.string().email(),
-      username: z.string().min(4),
-      password: z.string().min(4),
-    }),
-
-    file: fileZod,
-  });
+  const formSchema = ConfigInputSchema;
 
   const [activeStep, setActiveStep] = useState(0);
 
@@ -389,39 +373,11 @@ export function InitConfig() {
 }
 
 type Props = {
-  config: Prisma.ConfigGetPayload<{
-    select: {
-      id: true;
-      name: true;
-      logo: true;
-      email: true;
-      phone_number: true;
-      media: true;
-    };
-  }>;
+  config: IConfig;
 };
 export function UpdateConfig(props: Props) {
-  const formSchema = z.object({
-    config: z.object({
-      name: z.string().min(3),
-
-      phone_number: z
-        .string()
-        .regex(
-          new RegExp(
-            /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/
-          ),
-          {
-            message: "Invalid phone number",
-          }
-        ),
-
-      logo: z.string().optional().nullable(),
-      email: z.string().email(),
-    }),
-
-    file: fileZod.optional().nullable(),
-  });
+  const fileRef = useRef<HTMLInputElement>();
+  const formSchema = ConfigInputUpdateSchema;
 
   const [isPadding, setTransition] = useTransition();
   const toast = useToast();
@@ -455,110 +411,147 @@ export function UpdateConfig(props: Props) {
       } else {
         dataForm = undefined;
       }
+      delete values.file;
       setTransition(async () => {
-        const res = await editConfig({
-          config: values.config,
+        const res = await updateConfig(props.config.id, {
+          data: values,
           file: dataForm,
-          id: props.config.id,
         });
         toast.OpenAlert({ ...res });
-
-        Object.keys(res.errors ?? []).map((e) => {
-          form.setError(e as any, res[e]);
-        });
+        if (res.status === 400) {
+          Object.keys(res.error).map((e) => {
+            form.setError(e as any, res[e]);
+          });
+        }
       });
     },
     [form, toast, props.config.id]
   );
   return (
-    <div className="flex justify-center items-center">
-      <Card className="w-[350px] overflow-y-auto mt-3  max-h-[100vh] ">
-        <Typography>Update Project</Typography>
+    <Box sx={{ maxWidth: 350, margin: "auto" }}>
+      <Card>
+        <Typography>Project Form</Typography>
 
-        <CardContent>
-          <form
-            autoComplete="off"
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-3"
-          >
-            <Controller
-              control={form.control}
-              name="config.name"
-              render={({ field, fieldState }) => (
-                <Input placeholder="app name" fullWidth />
-              )}
-            />
+        <form
+          autoComplete="off"
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-3"
+        >
+          <Controller
+            control={form.control}
+            name="config.name"
+            render={({ field, fieldState }) => (
+              <FormControl error={Boolean(fieldState.error)}>
+                <FormLabel>Project Name</FormLabel>
+                <Input
+                  fullWidth
+                  value={field.value}
+                  onChange={(e) => field.onChange}
+                />
+                <FormHelperText>{fieldState.error?.message}</FormHelperText>
+              </FormControl>
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="config.email"
+            render={({ field, fieldState }) => (
+              <FormControl error={Boolean(fieldState.error)}>
+                <FormLabel>Email</FormLabel>
+                <Input
+                  fullWidth
+                  value={field.value}
+                  onChange={(e) => field.onChange}
+                />
+                <FormHelperText>{fieldState.error?.message}</FormHelperText>
+              </FormControl>
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="config.phone_number"
+            render={({ field, fieldState }) => (
+              <FormControl error={Boolean(fieldState.error)}>
+                <FormLabel> Phone Number</FormLabel>
+                <Input
+                  fullWidth
+                  value={field.value}
+                  onChange={(e) => field.onChange}
+                />
+                <FormHelperText>{fieldState.error?.message}</FormHelperText>
+              </FormControl>
+            )}
+          />
 
-            <Controller
-              control={form.control}
-              name="config.email"
-              render={({ field, fieldState }) => (
-                <Input placeholder="email" fullWidth />
-              )}
-            />
-            <Controller
-              control={form.control}
-              name="config.phone_number"
-              render={({ field, fieldState }) => (
-                <Input placeholder="phone number" fullWidth />
-              )}
-            />
-            <Controller
-              control={form.control}
-              name="file"
-              render={({ field, fieldState }) => (
-                <>
-                  <Input type="file" />
+          <Controller
+            control={form.control}
+            name="file"
+            render={({ field, fieldState }) => (
+              <FormControl error={Boolean(fieldState.error)}>
+                <FormLabel required>Logo</FormLabel>
 
-                  <div className="mt-3">
-                    {defaultImage && typeof defaultImage === "string" ? (
-                      <div>
-                        <LoadingButton
-                          color="error"
-                          loading={isPadding}
-                          onClick={() => {
-                            setTransition(async () => {
-                              field.onChange();
-                              form.setValue("config.logo", undefined);
-                            });
-                          }}
-                          startIcon={<MdDelete />}
-                        ></LoadingButton>
-                        <Image
-                          width={100}
-                          height={100}
-                          quality={100}
-                          alt="logo"
-                          src={defaultImage}
-                          className="rounded-md object-contain   border w-full h-full "
-                        />
-                      </div>
-                    ) : (
-                      <></>
-                    )}
-                  </div>
-                </>
-              )}
-            />
-            <div className="flex justify-end">
-              <LoadingButton
-                variant="contained"
-                fullWidth
-                className={
-                  isPadding
-                    ? ""
-                    : "hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white "
-                }
-                disableElevation
-                type="submit"
-                loading={isPadding}
-              >
-                Save
-              </LoadingButton>
-            </div>
-          </form>
-        </CardContent>
+                <input
+                  type="file"
+                  ref={fileRef}
+                  name="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (validImageExtensions.test(file.name)) {
+                      field.onChange(file);
+                    } else {
+                      field.onChange(undefined);
+                    }
+                  }}
+                />
+                <label htmlFor="file" className="w-full">
+                  <Button
+                    className="w-full"
+                    variant="outlined"
+                    color={fieldState.error ? "danger" : "neutral"}
+                    onClick={(e) => {
+                      fileRef.current.click();
+                    }}
+                    startDecorator={watch.file?.name ? <></> : <UploadFile />}
+                  >
+                    {watch.file?.name ?? "Upload File"}
+                  </Button>
+                </label>
+
+                <div>
+                  {defaultImage && (
+                    <Image
+                      src={defaultImage}
+                      alt={watch.config.name}
+                      width={100}
+                      height={100}
+                      className="max-w-[300px] w-full rounded-md border m-auto mt-5"
+                    />
+                  )}
+                </div>
+              </FormControl>
+            )}
+          />
+
+          <div className="flex justify-end">
+            <LoadingButton
+              variant="contained"
+              fullWidth
+              className={
+                isPadding
+                  ? ""
+                  : "hover:bg-blue-gray-900  hover:text-brown-50 capitalize bg-black text-white "
+              }
+              disableElevation
+              type="submit"
+              loading={isPadding}
+            >
+              Save
+            </LoadingButton>
+          </div>
+        </form>
       </Card>
-    </div>
+    </Box>
   );
 }

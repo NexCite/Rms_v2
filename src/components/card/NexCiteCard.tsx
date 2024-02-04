@@ -1,7 +1,7 @@
 "use client";
 import { Card, Typography } from "@mui/joy";
 import React from "react";
-import Loading from "../other/loading";
+import Loading from "../other/LoadingUi";
 
 export default function NexCiteCard(props: {
   title?: string;

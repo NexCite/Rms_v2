@@ -1,12 +1,7 @@
-import { cleanUpGroupChartOfAccount } from "@nexcite/lib/global";
-import {
-  findChartOfAccountsByDigit,
-  findGroupedChartOfAccountVouchersV1,
-} from "@nexcite/service/ChartOfAccountService";
+import { findChartOfAccountsByDigit } from "@nexcite/service/ChartOfAccountService";
 import { findCurrencies } from "@nexcite/service/CurrencyService";
 import { userAuth } from "@nexcite/service/auth-service";
 import TrialBalanceTable from "@nexcite/widgets/table/TrialBalanceTable";
-import dayjs from "dayjs";
 
 export default async function page(props: {
   searchParams: { id: any; from: any; to: any };
@@ -22,7 +17,7 @@ export default async function page(props: {
 
   return (
     <TrialBalanceTable
-      currencies={currencies}
+      currencies={currencies.body}
       data={findChartOfAccountsByDigitResult.body}
     />
   );
