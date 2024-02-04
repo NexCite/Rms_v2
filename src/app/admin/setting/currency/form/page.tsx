@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
-import { getConfigId } from "@rms/lib/config";
-import prisma from "@rms/prisma/prisma";
-import CurrencyForm from "@rms/widgets/form/currency-form";
+import { getConfigId } from "@nexcite/lib/config";
+import prisma from "@nexcite/prisma/prisma";
+import CurrencyForm from "@nexcite/widgets/form/currency-form";
 
 export default async function page(props: {
   params: {};

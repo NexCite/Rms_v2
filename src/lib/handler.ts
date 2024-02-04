@@ -1,10 +1,10 @@
 "use server";
 
-import HttpStatusCode from "@rms/models/HttpStatusCode";
+import HttpStatusCode from "@nexcite/models/HttpStatusCode";
 
 import { $Enums, Prisma } from "@prisma/client";
-import { createLog } from "@rms/service/log-service";
-import getAuth, { UserFullInfoType } from "@rms/service/user-service";
+import { createLog } from "@nexcite/service/log-service";
+import getAuth, { UserFullInfoType } from "@nexcite/service/user-service";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 

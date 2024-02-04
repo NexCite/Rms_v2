@@ -3,14 +3,14 @@
 import { useMemo, useTransition } from "react";
 
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
-import Authorized from "@rms/components/other/authorized";
-import ExportData from "@rms/components/other/export-data";
-import LoadingClient from "@rms/components/other/loading-client";
-import useHistoryStore from "@rms/hooks/history-hook";
-import { useToast } from "@rms/hooks/toast-hook";
-import { FormatNumberWithFixed } from "@rms/lib/global";
-import { Activity, ActivityStatus } from "@rms/models/CommonModel";
-import { confirmActivity } from "@rms/service/activity-service";
+import Authorized from "@nexcite/components/other/authorized";
+import ExportData from "@nexcite/components/other/export-data";
+import LoadingClient from "@nexcite/components/other/loading-client";
+import useHistoryStore from "@nexcite/hooks/history-hook";
+import { useToast } from "@nexcite/hooks/toast-hook";
+import { FormatNumberWithFixed } from "@nexcite/lib/global";
+import { Activity, ActivityStatus } from "@nexcite/models/CommonModel";
+import { confirmActivity } from "@nexcite/service/activity-service";
 import {
   MRT_ColumnFiltersState,
   MRT_PaginationState,

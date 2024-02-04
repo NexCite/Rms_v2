@@ -1,11 +1,11 @@
 "use server";
 
 import { $Enums, Prisma } from "@prisma/client";
-import { handlerServiceAction } from "@rms/lib/handler";
-import ServiceActionModel from "@rms/models/ServiceActionModel";
-import prisma from "@rms/prisma/prisma";
+import { handlerServiceAction } from "@nexcite/lib/handler";
+import ServiceActionModel from "@nexcite/models/ServiceActionModel";
+import prisma from "@nexcite/prisma/prisma";
 import { deleteMedia } from "./media-service";
-import { FileMapper } from "@rms/lib/common";
+import { FileMapper } from "@nexcite/lib/common";
 
 export async function createVacation(
   props: {

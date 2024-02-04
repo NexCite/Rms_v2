@@ -2,12 +2,12 @@
 
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
 import { Prisma } from "@prisma/client";
-import Authorized from "@rms/components/other/authorized";
-import { useToast } from "@rms/hooks/toast-hook";
+import Authorized from "@nexcite/components/other/authorized";
+import { useToast } from "@nexcite/hooks/toast-hook";
 import {
   deleteEmployeeById,
   resetEmployee,
-} from "@rms/service/employee-service";
+} from "@nexcite/service/employee-service";
 import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
 import Link from "next/link";
 import { usePathname } from "next/navigation";

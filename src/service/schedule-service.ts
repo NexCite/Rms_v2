@@ -1,9 +1,9 @@
 "use server";
 import { Prisma } from "@prisma/client";
-import { FileMapper } from "@rms/lib/common";
-import { handlerServiceAction } from "@rms/lib/handler";
-import ServiceActionModel from "@rms/models/ServiceActionModel";
-import prisma from "@rms/prisma/prisma";
+import { FileMapper } from "@nexcite/lib/common";
+import { handlerServiceAction } from "@nexcite/lib/handler";
+import ServiceActionModel from "@nexcite/models/ServiceActionModel";
+import prisma from "@nexcite/prisma/prisma";
 import dayjs from "dayjs";
 
 export async function createSchedule(params: {

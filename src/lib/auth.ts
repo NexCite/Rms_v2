@@ -1,8 +1,8 @@
 import { $Enums, Prisma } from "@prisma/client";
-import { UserSelectCommon } from "@rms/models/CommonModel";
-import HttpStatusCode from "@rms/models/HttpStatusCode";
-import prisma from "@rms/prisma/prisma";
-import getAuth, { type UserFullInfoType } from "@rms/service/user-service";
+import { UserSelectCommon } from "@nexcite/models/CommonModel";
+import HttpStatusCode from "@nexcite/models/HttpStatusCode";
+import prisma from "@nexcite/prisma/prisma";
+import getAuth, { type UserFullInfoType } from "@nexcite/service/user-service";
 import { sign, verify } from "jsonwebtoken";
 import { cookies } from "next/headers";
 

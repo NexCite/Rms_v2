@@ -1,13 +1,13 @@
 "use server";
 
 import { Prisma } from "@prisma/client";
-import { FileMapper } from "@rms/lib/common";
-import { handlerServiceAction } from "@rms/lib/handler";
-import prisma from "@rms/prisma/prisma";
+import { FileMapper } from "@nexcite/lib/common";
+import { handlerServiceAction } from "@nexcite/lib/handler";
+import prisma from "@nexcite/prisma/prisma";
 import {
   JournalVoucherInputSchema,
   VoucherSearchSchema,
-} from "@rms/schema/journal-voucher-schema";
+} from "@nexcite/schema/journal-voucher-schema";
 import dayjs from "dayjs";
 
 export async function findVoucherItemsService(props: { id: number }) {
@@ -40,7 +40,7 @@ export async function findVoucherItemsService(props: { id: number }) {
       voucher_items: result.voucher_items.map((res) => ({
         amount: res.amount,
         chart_of_account: res.chart_of_account,
-        reffrence_chart_of_account: res.reference_chart_of_account,
+        reference_chart_of_account: res.reference_chart_of_account,
         debit_credit: res.debit_credit,
         rate: res.rate,
       })),
@@ -148,9 +148,9 @@ export async function createVoucherService(props: {
       });
 
       voucher.voucher_items = voucher.voucher_items.map((res) => {
-        if (res.reffrence_chart_of_account?.currency) {
-          res.rate = res.reffrence_chart_of_account.currency.rate;
-          res.currency = res.reffrence_chart_of_account.currency;
+        if (res.reference_chart_of_account?.currency) {
+          res.rate = res.reference_chart_of_account.currency.rate;
+          res.currency = res.reference_chart_of_account.currency;
         } else if (res.chart_of_account.currency) {
           res.rate = res.chart_of_account.currency.rate;
           res.currency = res.chart_of_account.currency;
@@ -187,8 +187,8 @@ export async function createVoucherService(props: {
                 debit_credit: res.debit_credit,
                 currency_id: res.currency?.id ?? currency.id,
                 chart_of_account_id: res.chart_of_account.id,
-                reffrence_chart_of_account_id:
-                  res.reffrence_chart_of_account?.id,
+                reference_chart_of_account_id:
+                  res.reference_chart_of_account?.id,
                 rate: res.rate,
               })),
             },
@@ -236,9 +236,9 @@ export async function updateVoucherService(props: {
       });
 
       voucher.voucher_items = voucher.voucher_items.map((res) => {
-        if (res.reffrence_chart_of_account?.currency) {
-          res.rate = res.reffrence_chart_of_account.currency.rate;
-          res.currency = res.reffrence_chart_of_account.currency;
+        if (res.reference_chart_of_account?.currency) {
+          res.rate = res.reference_chart_of_account.currency.rate;
+          res.currency = res.reference_chart_of_account.currency;
         } else if (res.chart_of_account.currency) {
           res.rate = res.chart_of_account.currency.rate;
           res.currency = res.chart_of_account.currency;
@@ -267,8 +267,8 @@ export async function updateVoucherService(props: {
                   debit_credit: res.debit_credit,
                   currency_id: res.currency?.id ?? currency.id,
                   chart_of_account_id: res.chart_of_account.id,
-                  reffrence_chart_of_account_id:
-                    res.reffrence_chart_of_account?.id,
+                  reference_chart_of_account_id:
+                    res.reference_chart_of_account?.id,
                   rate: res.rate,
                 })),
               },

@@ -20,11 +20,14 @@ import {
 } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Prisma } from "@prisma/client";
-import NexCiteButton from "@rms/components/button/nexcite-button";
-import Loading from "@rms/components/other/loading";
-import { useToast } from "@rms/hooks/toast-hook";
-import { fileZod, mediaZod } from "@rms/lib/common";
-import { createSchedule, updateSchedule } from "@rms/service/schedule-service";
+import NexCiteButton from "@nexcite/components/button/nexcite-button";
+import Loading from "@nexcite/components/other/loading";
+import { useToast } from "@nexcite/hooks/toast-hook";
+import { fileZod, mediaZod } from "@nexcite/lib/common";
+import {
+  createSchedule,
+  updateSchedule,
+} from "@nexcite/service/schedule-service";
 import dayjs from "dayjs";
 import { MuiFileInput } from "mui-file-input";
 import { useRouter } from "next/navigation";

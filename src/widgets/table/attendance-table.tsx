@@ -2,7 +2,7 @@
 
 import { Card, CardHeader, Typography } from "@mui/material";
 import { Prisma } from "@prisma/client";
-import { useToast } from "@rms/hooks/toast-hook";
+import { useToast } from "@nexcite/hooks/toast-hook";
 import dayjs from "dayjs";
 import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
 import { useMemo } from "react";

@@ -1,4 +1,4 @@
-import HttpStatusCode from "@rms/models/HttpStatusCode";
+import HttpStatusCode from "@nexcite/models/HttpStatusCode";
 
 export default interface ServiceActionModel<I> {
   status: HttpStatusCode;

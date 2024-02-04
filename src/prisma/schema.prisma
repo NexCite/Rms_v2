@@ -580,8 +580,8 @@ model VoucherItem {
   currency                      Currency        @relation(fields: [currency_id], references: [id])
   chart_of_account_id           String
   chart_of_account              ChartOfAccount  @relation(fields: [chart_of_account_id], references: [id])
-  reffrence_chart_of_account_id String?
-  reference_chart_of_account    ChartOfAccount? @relation("reference", fields: [reffrence_chart_of_account_id], references: [id])
+  reference_chart_of_account_id String?
+  reference_chart_of_account    ChartOfAccount? @relation("reference", fields: [reference_chart_of_account_id], references: [id])
 }
 
 model ChartOfAccount {
@@ -609,7 +609,7 @@ model ChartOfAccount {
   create_date             DateTime            @default(now())
   modified_date           DateTime            @default(now()) @updatedAt
   voucher_items           VoucherItem[]
-  reffrence_voucher_items VoucherItem[]       @relation("reference")
+  reference_voucher_items VoucherItem[]       @relation("reference")
 
   @@unique([config_id, id], name: "unique_id")
   @@unique([config_id, business_id], name: "unique_business_id")

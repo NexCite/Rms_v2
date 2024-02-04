@@ -1,12 +1,11 @@
-import prisma from "@rms/prisma/prisma";
-import getAuth from "@rms/service/user-service";
-import JournalVoucherForm from "@rms/widgets/form/journal-voucher-form";
-import { JournalVoucherInputSchema } from "@rms/schema/journal-voucher-schema";
+import prisma from "@nexcite/prisma/prisma";
+import getAuth from "@nexcite/service/user-service";
+import JournalVoucherForm from "@nexcite/widgets/form/journal-voucher-form";
+import { JournalVoucherInputSchema } from "@nexcite/schema/journal-voucher-schema";
 import React from "react";
 import { z } from "zod";
 
 export default async function page(props: { searchParams: { id: string } }) {
-  console.log(props.searchParams.id);
   var voucher: JournalVoucherInputSchema;
   const info = await getAuth();
 
@@ -46,7 +45,7 @@ export default async function page(props: { searchParams: { id: string } }) {
           voucher_items: res.voucher_items.map((res) => ({
             amount: res.amount,
             chart_of_account: res.chart_of_account,
-            reffrence_chart_of_account: res.reference_chart_of_account,
+            reference_chart_of_account: res.reference_chart_of_account,
             debit_credit: res.debit_credit,
             rate: res.rate,
             currency: res.currency,

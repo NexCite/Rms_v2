@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
-import prisma from "@rms/prisma/prisma";
-import getAuth from "@rms/service/user-service";
-import RoleForm from "@rms/widgets/form/role-form";
+import prisma from "@nexcite/prisma/prisma";
+import getAuth from "@nexcite/service/user-service";
+import RoleForm from "@nexcite/widgets/form/role-form";
 
 export default async function page(props: {
   params: {};

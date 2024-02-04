@@ -1,8 +1,8 @@
 "use server";
 import { Prisma } from "@prisma/client";
-import { getConfigId } from "@rms/lib/config";
-import { handlerServiceAction } from "@rms/lib/handler";
-import prisma from "@rms/prisma/prisma";
+import { getConfigId } from "@nexcite/lib/config";
+import { handlerServiceAction } from "@nexcite/lib/handler";
+import prisma from "@nexcite/prisma/prisma";
 import dayjs from "dayjs";
 /**
  *

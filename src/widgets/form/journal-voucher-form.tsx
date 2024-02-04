@@ -14,16 +14,16 @@ import TextArea from "@mui/joy/Textarea";
 import Typography from "@mui/joy/Typography";
 
 import Alert from "@mui/joy/Alert";
-import NexCiteButton from "@rms/components/button/nexcite-button";
+import NexCiteButton from "@nexcite/components/button/nexcite-button";
 
 import { Card, CardContent } from "@mui/joy";
-import NumericFormatCustom from "@rms/components/input/text-field-number";
-import { useToast } from "@rms/hooks/toast-hook";
-import { FormatNumber, FormatNumberWithFixed } from "@rms/lib/global";
+import NumericFormatCustom from "@nexcite/components/input/text-field-number";
+import { useToast } from "@nexcite/hooks/toast-hook";
+import { FormatNumber, FormatNumberWithFixed } from "@nexcite/lib/global";
 import {
   createVoucherService,
   updateVoucherService,
-} from "@rms/service/voucher-service";
+} from "@nexcite/service/voucher-service";
 import dayjs from "dayjs";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useMemo, useTransition } from "react";
@@ -77,9 +77,9 @@ export default function JournalVoucherForm(props: Props) {
     (values: JournalVoucherInputSchema) => {
       setTransition(() => {
         values.voucher_items = values.voucher_items.map((res) => {
-          if (res.reffrence_chart_of_account?.currency) {
-            res.rate = res.reffrence_chart_of_account.currency.rate;
-            res.currency = res.reffrence_chart_of_account.currency;
+          if (res.reference_chart_of_account?.currency) {
+            res.rate = res.reference_chart_of_account.currency.rate;
+            res.currency = res.reference_chart_of_account.currency;
           } else if (res.chart_of_account.currency) {
             res.rate = res.chart_of_account.currency.rate;
             res.currency = res.chart_of_account.currency;
@@ -277,7 +277,7 @@ export default function JournalVoucherForm(props: Props) {
                         amount: 0,
                         debit_credit: null,
                         chart_of_account: null,
-                        reffrence_chart_of_account: null,
+                        reference_chart_of_account: null,
                       },
                     ]);
                   }}
@@ -321,11 +321,11 @@ export default function JournalVoucherForm(props: Props) {
                           <MdDelete />
                         </IconButton>
                         Rate:{" "}
-                        {value.reffrence_chart_of_account?.currency?.symbol ??
+                        {value.reference_chart_of_account?.currency?.symbol ??
                           value.chart_of_account?.currency?.symbol ??
                           watch.currency?.symbol}
                         {FormatNumberWithFixed(
-                          value.reffrence_chart_of_account?.currency?.rate ??
+                          value.reference_chart_of_account?.currency?.rate ??
                             value.chart_of_account?.currency?.rate ??
                             watch.currency?.rate,
                           2
@@ -339,7 +339,7 @@ export default function JournalVoucherForm(props: Props) {
                             <FormControl error={Boolean(fieldState.error)}>
                               <Input
                                 startDecorator={
-                                  value.reffrence_chart_of_account?.currency
+                                  value.reference_chart_of_account?.currency
                                     ?.symbol ??
                                   value.chart_of_account?.currency?.symbol ??
                                   watch.currency?.symbol
@@ -427,12 +427,12 @@ export default function JournalVoucherForm(props: Props) {
                       {/* <td>
                         <Controller
                           control={form.control}
-                          name={`voucher_items.${index}.reffrence_chart_of_account`}
+                          name={`voucher_items.${index}.reference_chart_of_account`}
                           render={({ fieldState, field }) => {
                             return (
                               <Autocomplete
                                 startDecorator={
-                                  value.reffrence_chart_of_account?.currency
+                                  value.reference_chart_of_account?.currency
                                     ?.symbol ?? ""
                                 }
                                 options={chartOfAccountClients}
@@ -446,9 +446,9 @@ export default function JournalVoucherForm(props: Props) {
                                 }}
                                 isOptionEqualToValue={(e) =>
                                   e?.id ===
-                                  value?.reffrence_chart_of_account?.id
+                                  value?.reference_chart_of_account?.id
                                 }
-                                value={value.reffrence_chart_of_account}
+                                value={value.reference_chart_of_account}
                                 getOptionKey={(e) => {
                                   if (typeof e === "object") {
                                     return parseInt(e.id);

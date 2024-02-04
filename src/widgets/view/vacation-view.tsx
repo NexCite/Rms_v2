@@ -8,7 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Prisma } from "@prisma/client";
-import Authorized from "@rms/components/other/authorized";
+import Authorized from "@nexcite/components/other/authorized";
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";

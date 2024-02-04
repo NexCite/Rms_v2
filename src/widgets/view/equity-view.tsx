@@ -3,12 +3,12 @@
 import { Card, CardContent, Divider, Table, Typography } from "@mui/joy";
 
 import { Prisma } from "@prisma/client";
-import NexCiteButton from "@rms/components/button/nexcite-button";
-import NexCiteCard from "@rms/components/card/nexcite-card";
-import Authorized from "@rms/components/other/authorized";
-import { useToast } from "@rms/hooks/toast-hook";
-import { FormatNumberWithFixed } from "@rms/lib/global";
-import { deleteEquityById } from "@rms/service/equity-service";
+import NexCiteButton from "@nexcite/components/button/nexcite-button";
+import NexCiteCard from "@nexcite/components/card/nexcite-card";
+import Authorized from "@nexcite/components/other/authorized";
+import { useToast } from "@nexcite/hooks/toast-hook";
+import { FormatNumberWithFixed } from "@nexcite/lib/global";
+import { deleteEquityById } from "@nexcite/service/equity-service";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useTransition } from "react";

@@ -1,6 +1,6 @@
 "use client";
 import { $Enums, Prisma } from "@prisma/client";
-import Countries from "@rms/lib/country";
+import Countries from "@nexcite/lib/country";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Autocomplete from "@mui/joy/Autocomplete";
@@ -16,13 +16,13 @@ import Tab from "@mui/joy/Tab";
 import TabList from "@mui/joy/TabList";
 import TabPanel from "@mui/joy/TabPanel";
 import Tabs from "@mui/joy/Tabs";
-import NexCiteButton from "@rms/components/button/nexcite-button";
-import NumericFormatCustom from "@rms/components/input/text-field-number";
-import { useToast } from "@rms/hooks/toast-hook";
+import NexCiteButton from "@nexcite/components/button/nexcite-button";
+import NumericFormatCustom from "@nexcite/components/input/text-field-number";
+import { useToast } from "@nexcite/hooks/toast-hook";
 import {
   createChartOfAccountService,
   updateChartOfAccountService,
-} from "@rms/service/chart-of-account-service";
+} from "@nexcite/service/chart-of-account-service";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useTransition } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";

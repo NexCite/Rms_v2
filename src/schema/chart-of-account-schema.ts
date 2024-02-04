@@ -69,7 +69,7 @@ const ChartOfAccountSearchSchema = z.object({
   accountId: z.string().optional().nullable(),
   classes: z.string().array().optional().nullable(),
   level: z.number().optional().nullable(),
-  include_reffrence: z.boolean().optional().nullable(),
+  include_reference: z.boolean().optional().nullable(),
   id: z.string().optional().nullable(),
   chartOfAccountIds: z.string().array().optional().nullable(),
   to: z.date(),

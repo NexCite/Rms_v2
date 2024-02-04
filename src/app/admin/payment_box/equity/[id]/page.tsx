@@ -1,6 +1,6 @@
-import { getConfigId } from "@rms/lib/config";
-import prisma from "@rms/prisma/prisma";
-import EquityView from "@rms/widgets/view/equity-view";
+import { getConfigId } from "@nexcite/lib/config";
+import prisma from "@nexcite/prisma/prisma";
+import EquityView from "@nexcite/widgets/view/equity-view";
 import React from "react";
 
 export default async function page(props: {

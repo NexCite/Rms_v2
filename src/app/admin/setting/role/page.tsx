@@ -1,6 +1,6 @@
-import prisma from "@rms/prisma/prisma";
-import getAuth from "@rms/service/user-service";
-import RoleTable from "@rms/widgets/table/role-table";
+import prisma from "@nexcite/prisma/prisma";
+import getAuth from "@nexcite/service/user-service";
+import RoleTable from "@nexcite/widgets/table/role-table";
 
 export default async function page() {
   const user = await getAuth();

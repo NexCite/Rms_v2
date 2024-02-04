@@ -1,4 +1,4 @@
-import { InitConfig } from "@rms/widgets/config/config-widget";
+import { InitConfig } from "@nexcite/widgets/config/config-widget";
 import { env } from "process";
 import React from "react";
 

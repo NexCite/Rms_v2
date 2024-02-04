@@ -1,8 +1,8 @@
 "use server";
 import { Prisma } from "@prisma/client";
-import { handlerServiceAction } from "@rms/lib/handler";
-import ServiceActionModel from "@rms/models/ServiceActionModel";
-import prisma from "@rms/prisma/prisma";
+import { handlerServiceAction } from "@nexcite/lib/handler";
+import ServiceActionModel from "@nexcite/models/ServiceActionModel";
+import prisma from "@nexcite/prisma/prisma";
 
 export async function createPayment(
   props: Prisma.PaymentUncheckedCreateInput

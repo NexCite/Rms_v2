@@ -1,7 +1,7 @@
 "use client";
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { VocuherStoreModel } from "@rms/models/AppStoreMoodel";
+import { VocuherStoreModel } from "@nexcite/models/AppStoreMoodel";
 import dayjs from "dayjs";
 import { MRT_PaginationState, MRT_TableState } from "material-react-table";
 

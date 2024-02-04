@@ -2,10 +2,8 @@ import { Prisma } from "@prisma/client";
 
 export default interface IChartOfAccount
   extends Prisma.ChartOfAccountGetPayload<{
-    include: typeof ChartOfAccountInclude;
-  }> {
-  total?: number;
-}
+    include: ChartOfAccountInclude;
+  }> {}
 export const ChartOfAccountInclude = {
   currency: true,
   voucher_items: {
@@ -15,7 +13,7 @@ export const ChartOfAccountInclude = {
       currency: true,
     },
   },
-  reffrence_voucher_items: {
+  reference_voucher_items: {
     include: {
       voucher: { include: { currency: true } },
 
@@ -23,6 +21,32 @@ export const ChartOfAccountInclude = {
     },
   },
 };
+export const ChartOfAccountIncludeWithDateFilter = (from: Date, to: Date) => ({
+  currency: true,
+  voucher_items: {
+    where: {
+      voucher: {
+        to_date: {
+          gte: from,
+          lte: to,
+        },
+      },
+    },
+    include: {
+      voucher: { include: { currency: true } },
+
+      currency: true,
+    },
+  },
+  reference_voucher_items: {
+    include: {
+      voucher: { include: { currency: true } },
+
+      currency: true,
+    },
+  },
+});
+export type ChartOfAccountInclude = typeof ChartOfAccountInclude;
 export interface IChartOfAccountGrouped extends IChartOfAccount {
   subRows?: IChartOfAccountGrouped[];
 }

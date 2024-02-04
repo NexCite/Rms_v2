@@ -2,7 +2,7 @@ import fs, { promises as fsPromises } from "fs";
 import os from "os";
 import path, { resolve } from "path";
 import UploadType from "../types/upload-type";
-import { getMediaType } from "@rms/lib/media";
+import { getMediaType } from "@nexcite/lib/media";
 
 export default class NextCiteUpload {
   folderName: string;

@@ -1,7 +1,7 @@
-import IVoucher, { IVoucherInclude } from "@rms/models/VoucherModel";
-import prisma from "@rms/prisma/prisma";
-import { userAuth } from "@rms/service/auth-service";
-import JournalVoucherTable from "@rms/widgets/table/journal-voucher-table";
+import IVoucher, { IVoucherInclude } from "@nexcite/models/VoucherModel";
+import prisma from "@nexcite/prisma/prisma";
+import { userAuth } from "@nexcite/service/auth-service";
+import JournalVoucherTable from "@nexcite/widgets/table/journal-voucher-table";
 import dayjs from "dayjs";
 
 export default async function page(props: {
@@ -29,7 +29,6 @@ export default async function page(props: {
       id: "desc",
     },
   })) as unknown as IVoucher[];
-  console.log(Date.now());
 
   return (
     <div>

@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
-import prisma from "@rms/prisma/prisma";
-import getAuth from "@rms/service/user-service";
-import { UpdateConfig } from "@rms/widgets/config/config-widget";
+import prisma from "@nexcite/prisma/prisma";
+import getAuth from "@nexcite/service/user-service";
+import { UpdateConfig } from "@nexcite/widgets/config/config-widget";
 
 export default async function page() {
   const info = await getAuth({ withRedirect: true, withMedia: true });

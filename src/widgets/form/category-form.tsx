@@ -1,7 +1,10 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Prisma } from "@prisma/client";
-import { createCategory, updateCategory } from "@rms/service/category-service";
+import {
+  createCategory,
+  updateCategory,
+} from "@nexcite/service/category-service";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -10,7 +13,7 @@ import { z } from "zod";
 import {
   createSubCategory,
   updateSubCategory,
-} from "@rms/service/sub-category-service";
+} from "@nexcite/service/sub-category-service";
 
 import {
   Autocomplete,
@@ -19,8 +22,8 @@ import {
   Divider,
   TextField,
 } from "@mui/material";
-import NexCiteButton from "@rms/components/button/nexcite-button";
-import { useToast } from "@rms/hooks/toast-hook";
+import NexCiteButton from "@nexcite/components/button/nexcite-button";
+import { useToast } from "@nexcite/hooks/toast-hook";
 
 type Props =
   | {

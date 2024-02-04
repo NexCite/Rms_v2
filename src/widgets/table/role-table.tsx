@@ -5,10 +5,10 @@ import { usePathname } from "next/navigation";
 import { useMemo, useTransition } from "react";
 
 import { MenuItem } from "@mui/material";
-import NexCiteCard from "@rms/components/card/nexcite-card";
-import Authorized from "@rms/components/other/authorized";
-import { useToast } from "@rms/hooks/toast-hook";
-import { deleteRoleById } from "@rms/service/role-service";
+import NexCiteCard from "@nexcite/components/card/nexcite-card";
+import Authorized from "@nexcite/components/other/authorized";
+import { useToast } from "@nexcite/hooks/toast-hook";
+import { deleteRoleById } from "@nexcite/service/role-service";
 import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
 import Link from "next/link";
 

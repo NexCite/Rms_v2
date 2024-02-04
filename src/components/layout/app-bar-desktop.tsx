@@ -1,10 +1,10 @@
 "use client";
-import { UserAuth } from "@rms/service/user-service";
+import { UserAuth } from "@nexcite/service/user-service";
 import Link from "next/link";
 import { useMemo } from "react";
 import Authorized from "../other/authorized";
 
-import route from "@rms/routes";
+import route from "@nexcite/routes";
 import { usePathname, useSelectedLayoutSegments } from "next/navigation";
 import BackButton from "../button/back-button";
 import NexCiteButton from "../button/nexcite-button";
@@ -41,12 +41,7 @@ export default function AppBarDesktop(props: UserAuth) {
         {!segments.includes("form") && !isRouteEndNumber && (
           <Authorized permission={currentRoute?.addKey}>
             <Link href={path + "/form"}>
-              <NexCiteButton
-                // onClick={(e) => {
-                //   open(path + "/form", "Form", "width=560,height=340");
-                // }}
-                className="px-2  border w-[140px]  rounded-md "
-              >
+              <NexCiteButton className="px-2  border w-[140px]  rounded-md ">
                 Create
               </NexCiteButton>
             </Link>

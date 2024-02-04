@@ -1,5 +1,5 @@
 import { CommonKeys, CommonRouteKeys } from "./CommonModel";
-import ServiceActionModel from "@rms/models/ServiceActionModel";
+import ServiceActionModel from "@nexcite/models/ServiceActionModel";
 export interface FromModalModel {
   args?: any;
   onAction?: () => void;

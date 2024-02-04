@@ -1,4 +1,4 @@
-import LoginWidget from "@rms/widgets/login/login-widget";
+import LoginWidget from "@nexcite/widgets/login/login-widget";
 
 export default async function Login() {
   return (

@@ -3,10 +3,11 @@
 import { UserAuth } from "./user-service";
 import { cookies, headers } from "next/headers";
 import { RedirectType, redirect } from "next/navigation";
-import prisma from "@rms/prisma/prisma";
-import RouteModel from "@rms/models/RouteModel";
-import route from "@rms/routes";
+import prisma from "@nexcite/prisma/prisma";
+import RouteModel from "@nexcite/models/RouteModel";
+import route from "@nexcite/routes";
 import { $Enums } from "@prisma/client";
+import IAuth, { AuthInclude } from "@nexcite/Interfaces/IAuth";
 
 /**
  * Check if the user has the required permission and redirect if not.
@@ -15,10 +16,10 @@ import { $Enums } from "@prisma/client";
  * @param permission - The required permission.
  */
 async function checkPermissions(
-  user: UserAuth,
+  auth: IAuth,
   permission: $Enums.UserPermission
 ): Promise<void> {
-  if (!user.role.permissions.includes(permission)) {
+  if (!auth?.user?.role?.permissions.includes(permission)) {
     await redirect("/login", RedirectType.replace);
   }
 }
@@ -44,7 +45,7 @@ async function findRouteByPath(
 async function findSubRouteByUrlPath(
   urlPath: string
 ): Promise<RouteModel | undefined> {
-  const findSubRouter = route.reduce((a, b) => a.concat(b.children), []);
+  const findSubRouter = route.reduce((a, b) => a.concat(b.children as any), []);
   return findSubRouter.find((res) => {
     if (urlPath.endsWith("form")) {
       return urlPath.replace("/form", "").startsWith(res.path);
@@ -59,55 +60,42 @@ async function findSubRouteByUrlPath(
  *
  * @returns The authenticated user.
  */
-export async function userAuth(): Promise<UserAuth> {
+export async function userAuth(): Promise<IAuth> {
   const token = cookies().get("rms-auth");
 
   if (!token?.value) {
-    await redirect("/login", RedirectType.replace);
+    redirect("/login", RedirectType.replace);
   }
 
   const auth = await prisma.auth.findFirst({
     where: { token: token.value },
-    include: {
-      user: {
-        include: {
-          role: true,
-          config: true,
-        },
-      },
-    },
+    include: AuthInclude,
   });
 
   if (!auth) {
-    await redirect("/login", RedirectType.replace);
-  }
-
-  const user = auth.user;
-
-  if (!user) {
-    await redirect("/login", RedirectType.replace);
+    redirect("/login", RedirectType.replace);
   }
 
   const url = new URL(headers().get("url"));
 
   if (url.pathname === "/admin") {
-    return user;
+    return auth;
   }
 
   const findRoute = await findRouteByPath(url.pathname);
   const findSubRoute = await findSubRouteByUrlPath(url.pathname);
 
   if (findRoute) {
-    await checkPermissions(user, findRoute.permission);
+    await checkPermissions(auth, findRoute.permission);
   } else if (findSubRoute) {
     if (url.pathname.endsWith("form")) {
-      await checkPermissions(user, findSubRoute.addKey);
+      await checkPermissions(auth, findSubRoute.addKey);
     } else {
-      await checkPermissions(user, findSubRoute.permission);
+      await checkPermissions(auth, findSubRoute.permission);
     }
   } else {
-    await redirect("/login", RedirectType.replace);
+    redirect("/login", RedirectType.replace);
   }
 
-  return user;
+  return auth;
 }

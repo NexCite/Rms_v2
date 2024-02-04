@@ -1,17 +1,18 @@
 import "./globals.css";
 
-import { AlertProvider } from "@rms/hooks/toast-hook";
+import { AlertProvider } from "@nexcite/hooks/toast-hook";
 import { Metadata } from "next";
 import { headers } from "next/headers";
 
-import PageLoader from "@rms/components/other/page-loader";
-import { initCache } from "@rms/service/cache-service";
+import PageLoader from "@nexcite/components/other/page-loader";
+import { initCache } from "@nexcite/service/cache-service";
 import procces from "process";
 export async function generateMetadata({ params }): Promise<Metadata> {
   var reqUrl = headers().get("url") || headers().get("host");
 
   const url = new URL(isIpAddress(reqUrl) ? "http://" + reqUrl : reqUrl);
   url.pathname = `/logo.png`;
+
   return {
     title: "RMS Systeam",
     icons: [url],

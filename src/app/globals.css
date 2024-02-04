@@ -51,7 +51,7 @@ button {
 }
 
 * {
-  /* font-family: "Montserrat", sans-serif !important; */
+  font-family: "Montserrat", sans-serif !important;
   font-weight: 500 !important;
 }
 body {
@@ -76,4 +76,13 @@ body {
       var(--joy-palette-neutral-300, #cdd7e1)
     )
   );
+}
+
+tr,
+td,
+th,
+thead,
+tbody,
+table {
+  border-radius: 0 !important;
 }

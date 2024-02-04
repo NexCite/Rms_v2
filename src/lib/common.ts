@@ -1,6 +1,6 @@
 import { $Enums } from "@prisma/client";
-import prisma from "@rms/prisma/prisma";
-import { saveFile, uploadMediaTemp } from "@rms/service/media-service";
+import prisma from "@nexcite/prisma/prisma";
+import { saveFile, uploadMediaTemp } from "@nexcite/service/media-service";
 import { z } from "zod";
 
 const phoneRegex = new RegExp(

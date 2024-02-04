@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@mui/joy";
 import { IconButton } from "@mui/material";
 
 import { useRouter } from "next/navigation";
@@ -7,13 +8,20 @@ type Props = {};
 export default function BackButton(props: Props) {
   const { back } = useRouter();
   return (
-    <IconButton
-      size="large"
+    <Button
+      sx={{
+        color: "black",
+        fontSize: 20,
+        borderColor: "transparent",
+        ":hover": {
+          bgcolor: "transparent",
+        },
+      }}
+      variant="outlined"
+      startDecorator={<MdArrowBack />}
       onClick={() => {
         back();
       }}
-    >
-      <MdArrowBack className="h-4 w-4 text-xl" color="black" fontSize={30} />
-    </IconButton>
+    ></Button>
   );
 }

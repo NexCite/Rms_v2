@@ -1,18 +1,18 @@
 "use server";
 import { VoucherItem } from "@prisma/client";
-import { ChartOfAccountInclude } from "@rms/Interfaces/IChartOfAccount";
+import { ChartOfAccountInclude } from "@nexcite/Interfaces/IChartOfAccount";
 import {
   VoucherSchema,
   groupChartOfAccount,
   groupChartOfAccountByParentId,
-} from "@rms/lib/global";
-import { handlerServiceAction } from "@rms/lib/handler";
-import ChartOfAccountGrouped from "@rms/models/ChartOfAccountModel";
-import prisma from "@rms/prisma/prisma";
+} from "@nexcite/lib/global";
+import { handlerServiceAction } from "@nexcite/lib/handler";
+import ChartOfAccountGrouped from "@nexcite/models/ChartOfAccountModel";
+import prisma from "@nexcite/prisma/prisma";
 import {
   ChartOfAccountInputSchema,
   ChartOfAccountSearchSchema,
-} from "@rms/schema/chart-of-account-schema";
+} from "@nexcite/schema/chart-of-account-schema";
 
 /**
  * Find all chart of accounts based on the provided configuration ID.
@@ -39,7 +39,7 @@ export async function findChartOfAccountService() {
  */
 export async function findChartOfAccounts(props: ChartOfAccountSearchSchema) {
   return handlerServiceAction(async (user, config_id) => {
-    const { id, from, to, include_reffrence, type } = props;
+    const { id, from, to, include_reference, type } = props;
     return prisma.chartOfAccount.findMany({
       where: {
         config_id,
@@ -63,7 +63,7 @@ export async function findChartOfAccounts(props: ChartOfAccountSearchSchema) {
             voucher: { include: { currency: true } },
           },
         },
-        reffrence_voucher_items: !include_reffrence
+        reference_voucher_items: !include_reference
           ? {
               where: {
                 voucher: {
@@ -95,7 +95,7 @@ export async function findChartOfAccountByClientId(
   props: ChartOfAccountSearchSchema
 ) {
   return handlerServiceAction(async (user, config_id) => {
-    const { id, from, to, include_reffrence, type } = props;
+    const { id, from, to, include_reference, type } = props;
     const chartOfAccount = await prisma.chartOfAccount.findUnique({
       where: { id: id, config_id: config_id },
       include: { currency: true },
@@ -117,7 +117,7 @@ export async function findChartOfAccountByClientId(
                         chart_of_account_id: id,
                       },
                       {
-                        reffrence_chart_of_account_id: id,
+                        reference_chart_of_account_id: id,
                       },
                     ],
                   },
@@ -278,7 +278,7 @@ export async function findBalanceSheet(params: ChartOfAccountSearchSchema) {
       },
       include: {
         currency: true,
-        reffrence_voucher_items: {
+        reference_voucher_items: {
           include: {
             currency: true,
           },

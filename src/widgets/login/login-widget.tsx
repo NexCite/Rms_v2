@@ -5,7 +5,7 @@ import { useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 
-import { createLogin } from "@rms/service/login-service";
+import { createLogin } from "@nexcite/service/login-service";
 
 import {
   Card,
@@ -17,8 +17,8 @@ import {
   Input,
   Typography,
 } from "@mui/joy";
-import NexCiteButton from "@rms/components/button/nexcite-button";
-import { useToast } from "@rms/hooks/toast-hook";
+import NexCiteButton from "@nexcite/components/button/nexcite-button";
+import { useToast } from "@nexcite/hooks/toast-hook";
 import { useRouter } from "next/navigation";
 const formSchema = z.object({
   username: z.string().min(3),

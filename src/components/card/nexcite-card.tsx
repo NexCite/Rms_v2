@@ -4,7 +4,7 @@ import React from "react";
 import Loading from "../other/loading";
 
 export default function NexCiteCard(props: {
-  title: string;
+  title?: string;
   children?: React.ReactNode;
   className?: string;
 }) {

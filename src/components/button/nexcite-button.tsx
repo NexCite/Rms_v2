@@ -14,9 +14,8 @@ export default function NexCiteButton(props: {
 }) {
   return (
     <Button
-      fullWidth
       style={{ textTransform: "capitalize" }}
-      className={`nexcite-btn w-[100px]  ${props.className ?? ""}`}
+      className={`nexcite-btn ${props.className ?? ""}`}
       onClick={props.onClick}
       variant="solid"
       disabled={props.isPadding || props.disabled}

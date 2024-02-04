@@ -1,10 +1,10 @@
 "use server";
 
-import { generateToken } from "@rms/lib/auth";
-import { checkPassword } from "@rms/lib/hash";
-import HttpStatusCode from "@rms/models/HttpStatusCode";
-import ServiceActionModel from "@rms/models/ServiceActionModel";
-import prisma from "@rms/prisma/prisma";
+import { generateToken } from "@nexcite/lib/auth";
+import { checkPassword } from "@nexcite/lib/hash";
+import HttpStatusCode from "@nexcite/models/HttpStatusCode";
+import ServiceActionModel from "@nexcite/models/ServiceActionModel";
+import prisma from "@nexcite/prisma/prisma";
 import { cookies } from "next/headers";
 
 export async function createLogin(params: {
@@ -28,7 +28,12 @@ export async function createLogin(params: {
         data: { status: "Disable" },
       });
       await prisma.auth.create({
-        data: { token: token, user_id: user.id, status: "Enable" },
+        data: {
+          token: token,
+          user_id: user.id,
+          status: "Enable",
+          config_id: user.config_id,
+        },
       });
       return {
         status: HttpStatusCode.OK,

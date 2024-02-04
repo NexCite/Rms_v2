@@ -1,26 +1,34 @@
-import prisma from "@rms/prisma/prisma";
-import getAuth from "@rms/service/user-service";
-import BalanceSheetTable from "@rms/widgets/table/balance-sheet-table";
-import BalanceSheetTableTest from "@rms/widgets/table/test-table";
+import { cleanUpGroupChartOfAccount } from "@nexcite/lib/global";
+import { findGroupedChartOfAccountVouchersV1 } from "@nexcite/service/ChartOfAccountService";
+import { findCurrencies } from "@nexcite/service/CurrencyService";
+import { userAuth } from "@nexcite/service/auth-service";
+import BalanceSheetTableTest from "@nexcite/widgets/table/BalanceSheetTable";
+import dayjs from "dayjs";
 
-export default async function page() {
-  // Array.from({ length: 10 }).map((res, index) => {
-  //   result.forEach((res) => {
-  //     delete res.id;
-  //     m.push(res);
-  //   });
-  //   return res;
-  // });
-
-  // await prisma.voucher.createMany({ data: m });
-  // console.log("done");
-  const info = await getAuth();
+export default async function page(props: {
+  searchParams: { id: any; from: any; to: any };
+}) {
+  const auth = await userAuth();
+  let { from, to } = props.searchParams;
+  from = dayjs(from ?? dayjs().startOf("month"))
+    .startOf("D")
+    .toDate();
+  to = dayjs(to ?? dayjs().endOf("month"))
+    .endOf("D")
+    .toDate();
+  const currencies = await findCurrencies(auth.config.id);
+  const chartOfAccounts = await findGroupedChartOfAccountVouchersV1({
+    from,
+    to,
+  });
+  if (chartOfAccounts.status !== 200) {
+    return;
+  }
 
   return (
     <BalanceSheetTableTest
-      currenices={await prisma.currency.findMany({
-        where: { config_id: info.config.id },
-      })}
+      currencies={currencies}
+      data={cleanUpGroupChartOfAccount(chartOfAccounts.body)}
     />
   );
 }

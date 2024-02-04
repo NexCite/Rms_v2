@@ -1,24 +1,26 @@
 "use client";
 import { MenuItem } from "@mui/material";
 import { $Enums, Prisma } from "@prisma/client";
-import Authorized from "@rms/components/other/authorized";
-import { useToast } from "@rms/hooks/toast-hook";
+import Authorized from "@nexcite/components/other/authorized";
+import { useToast } from "@nexcite/hooks/toast-hook";
 
 import { Stack } from "@mui/joy";
 import Button from "@mui/joy/Button";
 import Card from "@mui/joy/Card";
 import CardContent from "@mui/joy/CardContent";
 import Typography from "@mui/joy/Typography";
-import IChartOfAccount from "@rms/Interfaces/IChartOfAccount";
-import { FormatNumberWithFixed, exportToExcel } from "@rms/lib/global";
-import { deleteChartOfAccountService } from "@rms/service/chart-of-account-service";
+import IChartOfAccount from "@nexcite/Interfaces/IChartOfAccount";
+import { FormatNumberWithFixed, exportToExcel } from "@nexcite/lib/global";
+import { deleteChartOfAccountService } from "@nexcite/service/chart-of-account-service";
 import {
+  MRT_ColumnFiltersState,
   MaterialReactTable,
   createMRTColumnHelper,
   useMaterialReactTable,
 } from "material-react-table";
 import Link from "next/link";
-import { useMemo, useTransition } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { AiFillFileExcel } from "react-icons/ai";
 
 type Props = {
@@ -31,6 +33,14 @@ type Props = {
 export default function ChartOfAccountTable(props: Props) {
   const toast = useToast();
   const [isPadding, setTransition] = useTransition();
+  const searchParams = useSearchParams();
+  const columnFilter = useMemo(() => {
+    const filter = searchParams.get("filter");
+    if (filter) {
+      return JSON.parse(filter) as MRT_ColumnFiltersState;
+    }
+    return [];
+  }, [searchParams]);
 
   const columns = useMemo(
     () =>
@@ -108,7 +118,7 @@ export default function ChartOfAccountTable(props: Props) {
                       total -= res.amount / res.rate;
                     }
                   });
-                  row.reffrence_voucher_items?.map((res) => {
+                  row.reference_voucher_items?.map((res) => {
                     if (res.debit_credit === "Debit") {
                       total += res.amount / res.rate;
                     } else {
@@ -167,11 +177,11 @@ export default function ChartOfAccountTable(props: Props) {
       ),
     [props.currencies, props.node]
   );
-  // const data = useMemo(
-  //   () => cleanUpGroupChartOfAccount(groupChartOfAccount(props.data)),
-  //   [props.data]
-  // );
 
+  const [filter, setFilter] = useState<MRT_ColumnFiltersState>(columnFilter);
+  useEffect(() => {
+    window.history.replaceState(null, "", `?filter=${JSON.stringify(filter)}`);
+  }, [filter]);
   const table = useMaterialReactTable({
     columns,
     data: props.data,
@@ -181,7 +191,6 @@ export default function ChartOfAccountTable(props: Props) {
 
     muiTableProps: { id: "chart-of-account-table-" + props.node },
     enableStickyHeader: true,
-    enableClickToCopy: true,
 
     enableRowActions: true,
 
@@ -224,6 +233,7 @@ export default function ChartOfAccountTable(props: Props) {
         </Authorized>,
       ];
     },
+    onColumnFiltersChange: setFilter,
 
     muiTableBodyCellProps: {
       align: "left",
@@ -231,9 +241,9 @@ export default function ChartOfAccountTable(props: Props) {
 
     enablePagination: false,
     muiTableContainerProps: { sx: { maxHeight: "auto" } },
-
+    initialState: { showColumnFilters: true },
     state: {
-      showColumnFilters: true,
+      columnFilters: filter,
       showLoadingOverlay: isPadding,
     },
   });
@@ -259,6 +269,7 @@ export default function ChartOfAccountTable(props: Props) {
               setTransition(() => {
                 exportToExcel({
                   sheet: "chart of account " + props.node,
+                  fileName: "Chart Of Account " + props.node,
                   id: "chart-of-account-table-" + props.node,
                 });
               });

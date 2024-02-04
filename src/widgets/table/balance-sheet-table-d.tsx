@@ -1,7 +1,7 @@
 "use client";
 import { MenuItem } from "@mui/material";
-import Authorized from "@rms/components/other/authorized";
-import CacheStateModel from "@rms/models/CacheStateModel";
+import Authorized from "@nexcite/components/other/authorized";
+import CacheStateModel from "@nexcite/models/CacheStateModel";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Button from "@mui/joy/Button";
@@ -17,8 +17,8 @@ import {
   FormatNumberWithFixed,
   exportToExcel,
   totalChartOfAccountVouchers,
-} from "@rms/lib/global";
-import { findBalanceSheet } from "@rms/service/chart-of-account-service";
+} from "@nexcite/lib/global";
+import { findBalanceSheet } from "@nexcite/service/chart-of-account-service";
 import dayjs from "dayjs";
 import {
   MRT_ColumnFiltersState,
@@ -74,7 +74,7 @@ export default function BalanceSheetTable(props: Props) {
   const form = useForm<ChartOfAccountSearchSchema>({
     resolver: zodResolver(ChartOfAccountSearchSchema),
     defaultValues: {
-      include_reffrence: false,
+      include_reference: false,
       from: dayjs(filter.fromDate).startOf("d").toDate(),
       to: dayjs(filter.toDate).endOf("d").toDate(),
       classes: ["1"],

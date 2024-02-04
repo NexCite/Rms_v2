@@ -8,19 +8,20 @@ import {
   MaterialReactTable,
   createMRTColumnHelper,
   useMaterialReactTable,
+  MRT_ColumnFiltersState,
 } from "material-react-table";
 import { useEffect, useMemo, useState, useTransition } from "react";
 
 import FormControl from "@mui/joy/FormControl";
 import FormLabel from "@mui/joy/FormLabel";
-import Authorized from "@rms/components/other/authorized";
+import Authorized from "@nexcite/components/other/authorized";
 import {
   FormatNumber,
   FormatNumberWithFixed,
   exportToExcel,
-} from "@rms/lib/global";
+} from "@nexcite/lib/global";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import Input from "@mui/joy/Input";
 
@@ -37,15 +38,15 @@ import {
   Tabs,
 } from "@mui/joy";
 import { MenuItem } from "@mui/material";
-import NexCiteButton from "@rms/components/button/nexcite-button";
-import NexCiteCard from "@rms/components/card/nexcite-card";
-import { useToast } from "@rms/hooks/toast-hook";
-import { deleteVoucherService } from "@rms/service/voucher-service";
+import NexCiteButton from "@nexcite/components/button/nexcite-button";
+import NexCiteCard from "@nexcite/components/card/nexcite-card";
+import { useToast } from "@nexcite/hooks/toast-hook";
+import { deleteVoucherService } from "@nexcite/service/voucher-service";
 
-import IVoucher from "@rms/models/VoucherModel";
+import IVoucher from "@nexcite/models/VoucherModel";
 import Image from "next/image";
 import { MdSearch } from "react-icons/md";
-import ExportVoucher from "@rms/components/other/export-voucher";
+import ExportVoucher from "@nexcite/components/other/export-voucher";
 
 const columnHelper = createMRTColumnHelper<IVoucher>();
 
@@ -63,6 +64,24 @@ export default function JournalVoucherTable(props: {
   const [isPadding, setTransition] = useTransition();
   const toast = useToast();
   const [showExport, setExport] = useState<React.ReactNode>();
+  const searchParams = useSearchParams();
+  const columnFilter = useMemo(() => {
+    const filter = searchParams.get("filter");
+    if (filter) {
+      return JSON.parse(filter) as MRT_ColumnFiltersState;
+    }
+    return [];
+  }, [searchParams]);
+
+  const [filter, setFilter] = useState<MRT_ColumnFiltersState>(columnFilter);
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    query.set("filter", JSON.stringify(filter));
+    window.history.replaceState(null, "", `?${query}`);
+  }, [filter]);
+  // useEffect(() => {
+  //
+  // }, [date]);
 
   const table = useMaterialReactTable({
     columns,
@@ -72,6 +91,7 @@ export default function JournalVoucherTable(props: {
 
     enablePagination: false,
     layoutMode: "semantic",
+    onColumnFiltersChange: setFilter,
 
     renderRowActionMenuItems: ({ row: { original } }) => [
       <Authorized key={1} permission="Update_Chart_Of_Account">
@@ -123,6 +143,9 @@ export default function JournalVoucherTable(props: {
     ],
     initialState: {
       showColumnFilters: true,
+    },
+    state: {
+      columnFilters: filter,
     },
     data: props.data,
     renderDetailPanel: ({ row }) => (
@@ -184,8 +207,12 @@ export default function JournalVoucherTable(props: {
             const id = formData.get("id");
             const from = formData.get("from");
             const to = formData.get("to");
-            const location =
-              window.location.pathname + `?id=${id}&from=${from}&to=${to}`;
+            const query = new URLSearchParams(window.location.search);
+            query.set("id", id as string);
+            query.set("from", from as string);
+            query.set("to", to as string);
+
+            const location = window.location.pathname + `?${query.toString()}`;
             setTransition(() => {
               replace(location);
             });

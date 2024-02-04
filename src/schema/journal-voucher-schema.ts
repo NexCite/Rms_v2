@@ -42,7 +42,7 @@ const JournalVoucherInputSchema = z.object({
       currency: CurrencySchema.nullable().optional(),
       type: z.string().nullable().optional(),
       chart_of_account: ChartOfAccountSchema,
-      reffrence_chart_of_account: ChartOfAccountSchema.optional().nullable(),
+      reference_chart_of_account: ChartOfAccountSchema.optional().nullable(),
       rate: z.number().optional().nullable(),
       debit_credit: z.nativeEnum($Enums.DebitCreditType, {
         errorMap: (issue, ctx) => {
@@ -60,17 +60,17 @@ const JournalVoucherInputSchema = z.object({
 //     values.voucher_items.map((res) => {
 //       res.chart_of_account.currency =
 //         res.chart_of_account?.currency ?? values.currency;
-//       if (res.reffrence_chart_of_account) {
-//         res.reffrence_chart_of_account.currency =
-//           res.reffrence_chart_of_account?.currency ?? values.currency;
+//       if (res.reference_chart_of_account) {
+//         res.reference_chart_of_account.currency =
+//           res.reference_chart_of_account?.currency ?? values.currency;
 //       }
 
 //       switch (res.debit_credit) {
 //         case "Credit":
-//           // if (res.reffrence_chart_of_account) {
-//           //   if (res.reffrence_chart_of_account?.currency?.rate) {
+//           // if (res.reference_chart_of_account) {
+//           //   if (res.reference_chart_of_account?.currency?.rate) {
 //           //     total -=
-//           //       res.amount / res.reffrence_chart_of_account.currency.rate;
+//           //       res.amount / res.reference_chart_of_account.currency.rate;
 //           //   } else {
 //           //     total -= res.amount;
 //           //   }
@@ -84,10 +84,10 @@ const JournalVoucherInputSchema = z.object({
 
 //           break;
 //         case "Debit":
-//           // if (res.reffrence_chart_of_account) {
-//           //   if (res.reffrence_chart_of_account?.currency?.rate) {
+//           // if (res.reference_chart_of_account) {
+//           //   if (res.reference_chart_of_account?.currency?.rate) {
 //           //     total +=
-//           //       res.amount / res.reffrence_chart_of_account.currency.rate;
+//           //       res.amount / res.reference_chart_of_account.currency.rate;
 //           //   } else {
 //           //     total += res.amount;
 //           //   }
@@ -170,7 +170,7 @@ const VoucherSearchSchema = z.object({
   pageSize: z.number().optional().nullable(),
   from: z.date().optional().nullable(),
   to: z.date().optional().nullable(),
-  include_reffrence: z.boolean().optional().nullable(),
+  include_reference: z.boolean().optional().nullable(),
 });
 
 type VoucherSearchSchema = z.infer<typeof VoucherSearchSchema>;

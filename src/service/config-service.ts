@@ -1,9 +1,9 @@
 "use server";
 import { $Enums, Prisma } from "@prisma/client";
-import { handlerServiceAction } from "@rms/lib/handler";
-import { hashPassword } from "@rms/lib/hash";
-import { CommonRouteKeys } from "@rms/models/CommonModel";
-import prisma from "@rms/prisma/prisma";
+import { handlerServiceAction } from "@nexcite/lib/handler";
+import { hashPassword } from "@nexcite/lib/hash";
+import { CommonRouteKeys } from "@nexcite/models/CommonModel";
+import prisma from "@nexcite/prisma/prisma";
 import { saveFile, uploadMediaTemp } from "./media-service";
 
 /**

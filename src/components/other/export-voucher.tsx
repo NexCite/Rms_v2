@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 
 import FormControl from "@mui/joy/FormControl";
 import FormLabel from "@mui/joy/FormLabel";
-import { FormatNumberWithFixed, exportToExcel } from "@rms/lib/global";
+import { FormatNumberWithFixed, exportToExcel } from "@nexcite/lib/global";
 
 import {
   Autocomplete,
@@ -15,9 +15,9 @@ import {
   Table,
   Tabs,
 } from "@mui/joy";
-import NexCiteButton from "@rms/components/button/nexcite-button";
+import NexCiteButton from "@nexcite/components/button/nexcite-button";
 
-import IVoucher from "@rms/models/VoucherModel";
+import IVoucher from "@nexcite/models/VoucherModel";
 import dayjs from "dayjs";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";

@@ -1,4 +1,4 @@
-import RouteModel from "@rms/models/RouteModel";
+import RouteModel from "@nexcite/models/RouteModel";
 
 var route: RouteModel[] = [
   {
@@ -58,9 +58,15 @@ var route: RouteModel[] = [
         permission: "View_Chart_Of_Accounts",
         routeKey: "balance_sheet",
       },
-
       {
         index: 7,
+        title: "Trial Balance",
+        path: "/admin/accounting/trial_balance",
+        permission: "View_Chart_Of_Accounts",
+        routeKey: "trial_balance",
+      },
+      {
+        index: 8,
         title: "Activities",
         path: "/admin/accounting/activity",
         permission: "View_Activities",

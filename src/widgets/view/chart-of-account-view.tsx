@@ -3,7 +3,7 @@
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import {
   Autocomplete,
-  Button,
+  Box,
   Card,
   CardContent,
   Dropdown,
@@ -20,43 +20,30 @@ import {
   Table,
   Typography,
 } from "@mui/joy";
-import { ModalBackdrop } from "@mui/joy/Modal/Modal";
-import { Prisma } from "@prisma/client";
-import NexCiteButton from "@rms/components/button/nexcite-button";
-import Authorized from "@rms/components/other/authorized";
-import Loading from "@rms/components/other/loading";
+import IChartOfAccount from "@nexcite/Interfaces/IChartOfAccount";
+import ICurrency from "@nexcite/Interfaces/ICurrency";
+import NexCiteButton from "@nexcite/components/button/nexcite-button";
+import NexCiteCard from "@nexcite/components/card/nexcite-card";
+import Authorized from "@nexcite/components/other/authorized";
 import {
   FormatNumberWithFixed,
   VoucherSchema,
   exportToExcel,
-} from "@rms/lib/global";
+} from "@nexcite/lib/global";
+import { Prisma } from "@prisma/client";
 import dayjs from "dayjs";
-import {
-  MaterialReactTable,
-  createMRTColumnHelper,
-  useMaterialReactTable,
-} from "material-react-table";
+import { createMRTColumnHelper } from "material-react-table";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { AiFillFileExcel } from "react-icons/ai";
+
 type Props = {
   id: string;
-  chartOfAccount: Prisma.ChartOfAccountGetPayload<{
-    include: {
-      currency: true;
-      voucher_items: {
-        include: {
-          currency: true;
-          chart_of_account: true;
-          reference_chart_of_account: true;
-        };
-      };
-    };
-  }>;
-  currencies: Prisma.CurrencyGetPayload<{}>[];
+  chartOfAccount: IChartOfAccount;
+  currencies: ICurrency[];
 
-  chartOfAccounts: Prisma.ChartOfAccountGetPayload<{}>[];
+  chartOfAccounts: IChartOfAccount[];
   vouchers: Prisma.VoucherGetPayload<{
     include: {
       currency: true;
@@ -73,14 +60,14 @@ type Props = {
 
 export default function ChartOfAccountView(props: Props) {
   const [selectedCurrency, setSelectedCurrency] = useState<
-    Prisma.CurrencyGetPayload<{}>
+    ICurrency | undefined
   >(props.chartOfAccount?.currency);
 
   const [selectedChartOfAccounts, setSelectedChartOfAccounts] = useState<
     typeof props.chartOfAccounts
   >([]);
 
-  const filtedVoucher = useMemo(() => {
+  const filteredVoucher = useMemo(() => {
     if (selectedChartOfAccounts.length == 0) return props.vouchers;
     return props.vouchers.filter((res) => {
       let isFound = false;
@@ -94,7 +81,7 @@ export default function ChartOfAccountView(props: Props) {
         }
         if (
           selectedChartOfAccounts.find((res2) =>
-            res.reffrence_chart_of_account_id?.startsWith(res2.id)
+            res.reference_chart_of_account_id?.startsWith(res2.id)
           )
         ) {
           isFound = true;
@@ -107,11 +94,11 @@ export default function ChartOfAccountView(props: Props) {
   const { credit, debit } = useMemo(() => {
     let debit: number = 0,
       credit: number = 0;
-    filtedVoucher?.forEach((res) => {
+    filteredVoucher?.forEach((res) => {
       res.voucher_items.forEach((res) => {
         if (
           res.chart_of_account_id.startsWith(props.id) ||
-          res.reffrence_chart_of_account_id?.startsWith(props.id)
+          res.reference_chart_of_account_id?.startsWith(props.id)
         ) {
           if (res.debit_credit == "Debit") {
             debit += res.amount / res.currency.rate;
@@ -122,7 +109,7 @@ export default function ChartOfAccountView(props: Props) {
       });
     });
     return { debit, credit };
-  }, [props.id, filtedVoucher]);
+  }, [props.id, filteredVoucher]);
   const [selectData, setSelectData] = useState({
     from: dayjs().startOf("month").toDate(),
     to: dayjs().endOf("month").toDate(),
@@ -175,7 +162,7 @@ export default function ChartOfAccountView(props: Props) {
             <FormLabel>Currency</FormLabel>
             <Select
               sx={{ minWidth: 120 }}
-              disabled={props.chartOfAccount.currency ? true : false}
+              disabled={!!props.chartOfAccount.currency}
               defaultValue={selectedCurrency?.id}
             >
               {props.currencies.map((res) => {
@@ -214,7 +201,7 @@ export default function ChartOfAccountView(props: Props) {
               }}
             />
           </FormControl>
-          <FormControl sx={{}}>
+          <FormControl>
             <FormLabel>To</FormLabel>
             <Input
               fullWidth
@@ -288,76 +275,68 @@ export default function ChartOfAccountView(props: Props) {
           </Card>
         </div>
       </Grid>
-      <Grid>
-        <Card>
-          <CardContent>
-            <Typography level="h2">Account Details</Typography>
-            <div className="overflow-x-auto w-full">
-              <Table size="lg" stickyHeader className="w-screen">
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>Account ID</th>
-                    <th>Account Name</th>
-                    <th>Type</th>
-                    <th>Debit/Credit</th>
-                    <th>Currency</th> <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Email</th>
-                    <th>Phone Number</th>
-                    <th>Account Type</th>
-                    <th>Business ID</th>
-                    <th>Limit Amount</th>
-                    <th>Country</th>
-                    <th>Address</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td align="center">
-                      <Dropdown>
-                        <MenuButton>
-                          <MoreHoriz />
-                        </MenuButton>
-                        <Menu>
-                          <Authorized permission="Update_Chart_Of_Account">
-                            <MenuItem>
-                              <Link
-                                href={
-                                  "/admin/accounting/chart_of_account/form?id=" +
-                                  props.id
-                                }
-                              >
-                                Edit
-                              </Link>
-                            </MenuItem>
-                          </Authorized>
-                        </Menu>
-                      </Dropdown>
-                    </td>
-                    <td align="center">{props.chartOfAccount.id}</td>
-                    <td align="center">{props.chartOfAccount.name}</td>
-                    <td align="center">
-                      {props.chartOfAccount.chart_of_account_type}
-                    </td>
-                    <td align="center">{props.chartOfAccount.debit_credit}</td>
-                    <td align="center">{selectedCurrency?.name}</td>
-                    <td align="center">{props.chartOfAccount.first_name}</td>
-                    <td align="center">{props.chartOfAccount.last_name}</td>
+      <Grid xs={12}>
+        <NexCiteCard title="Account Details">
+          <Box sx={{ maxWidth: "100%", overflow: "auto" }}>
+            <Table
+              size="lg"
+              sx={{
+                maxWidth: "100%",
+                overflow: "auto",
+                "& th": {
+                  width: 200,
+                  alignItems: "center",
+                  textAlign: "center",
+                },
+                "& td": {
+                  width: 200,
+                  alignItems: "center",
+                  textAlign: "center",
+                },
+              }}
+            >
+              <thead>
+                <tr>
+                  <th>Account ID</th>
+                  <th>Account Name</th>
+                  <th>Type</th>
+                  <th>Debit/Credit</th>
+                  <th>Currency</th>
+                  <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>Email</th>
+                  <th>Phone Number</th>
+                  <th>Account Type</th>
+                  <th>Business ID</th>
+                  <th>Limit Amount</th>
+                  <th>Country</th>
+                  <th>Address</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td align="center">{props.chartOfAccount.id}</td>
+                  <td align="center">{props.chartOfAccount.name}</td>
+                  <td align="center">
+                    {props.chartOfAccount.chart_of_account_type}
+                  </td>
+                  <td align="center">{props.chartOfAccount.debit_credit}</td>
+                  <td align="center">{selectedCurrency?.name}</td>
+                  <td align="center">{props.chartOfAccount.first_name}</td>
+                  <td align="center">{props.chartOfAccount.last_name}</td>
 
-                    <td align="center">{props.chartOfAccount.email}</td>
-                    <td align="center">{props.chartOfAccount.phone_number}</td>
-                    <td align="center">{props.chartOfAccount.account_type}</td>
-                    <td align="center">{props.chartOfAccount.business_id}</td>
-                    <td align="center">{props.chartOfAccount.limit_amount}</td>
-                    <td align="center">{props.chartOfAccount.country}</td>
-                    <td align="center">{props.chartOfAccount.address}</td>
-                  </tr>
-                </tbody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                  <td align="center">{props.chartOfAccount.email}</td>
+                  <td align="center">{props.chartOfAccount.phone_number}</td>
+                  <td align="center">{props.chartOfAccount.account_type}</td>
+                  <td align="center">{props.chartOfAccount.business_id}</td>
+                  <td align="center">{props.chartOfAccount.limit_amount}</td>
+                  <td align="center">{props.chartOfAccount.country}</td>
+                  <td align="center">{props.chartOfAccount.address}</td>
+                </tr>
+              </tbody>
+            </Table>
+          </Box>
+        </NexCiteCard>
       </Grid>
       <Grid xs={12}>
         {" "}
@@ -365,9 +344,9 @@ export default function ChartOfAccountView(props: Props) {
           <CardContent>
             <div className="flex gap-5   flex-col justify-between w-full">
               <div className="flex justify-between">
-                <Button
+                <NexCiteButton
                   className="nexcite-btn sm:w-full md:w-fit"
-                  startDecorator={<AiFillFileExcel />}
+                  icon={<AiFillFileExcel />}
                   onClick={(e) => {
                     exportToExcel({
                       sheet: "chart of account",
@@ -376,7 +355,7 @@ export default function ChartOfAccountView(props: Props) {
                   }}
                 >
                   Export Excel
-                </Button>
+                </NexCiteButton>
               </div>
             </div>
             <Table
@@ -400,7 +379,7 @@ export default function ChartOfAccountView(props: Props) {
                 </tr>
               </thead>
               <tbody>
-                {filtedVoucher.map((item) => {
+                {filteredVoucher.map((item) => {
                   const data = item.voucher_items.filter(
                     (res) =>
                       !res.chart_of_account_id.startsWith(
@@ -430,14 +409,11 @@ export default function ChartOfAccountView(props: Props) {
                             },
                           }}
                         >
-                          {" "}
                           <Typography>
-                            {" "}
                             {res.currency?.symbol}
                             {FormatNumberWithFixed(res.amount, 2)}
                           </Typography>
                           <Typography>
-                            {" "}
                             {res.chart_of_account.name}{" "}
                             {res.chart_of_account_id}
                           </Typography>
@@ -454,7 +430,7 @@ export default function ChartOfAccountView(props: Props) {
               </tbody>
               <tfoot>
                 <tr>
-                  <td> </td>
+                  <td></td>
                   <td align="center" colSpan={3}>
                     {" "}
                     {selectedCurrency?.symbol ?? "$"}
@@ -473,14 +449,14 @@ export default function ChartOfAccountView(props: Props) {
                 </tr>
                 <tr>
                   {" "}
-                  <td> </td>
+                  <td></td>
                   <td align="center" colSpan={6}>
                     {" "}
                     Total
                   </td>
                 </tr>
                 <tr>
-                  <td> </td>
+                  <td></td>
                   <td align="center" colSpan={6}>
                     {debit - credit > 0 ? "Debit" : "Credit"}{" "}
                     {selectedCurrency?.symbol ?? "$"}

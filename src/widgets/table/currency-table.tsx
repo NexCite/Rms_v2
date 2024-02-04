@@ -5,10 +5,10 @@ import { usePathname } from "next/navigation";
 import { useTransition } from "react";
 
 import { MenuItem } from "@mui/material";
-import Authorized from "@rms/components/other/authorized";
-import { useToast } from "@rms/hooks/toast-hook";
-import { FormatNumberWithFixed } from "@rms/lib/global";
-import { deleteCurrency } from "@rms/service/currency-service";
+import Authorized from "@nexcite/components/other/authorized";
+import { useToast } from "@nexcite/hooks/toast-hook";
+import { FormatNumberWithFixed } from "@nexcite/lib/global";
+import { deleteCurrency } from "@nexcite/service/currency-service";
 import {
   MRT_ColumnFiltersState,
   MRT_ExpandedState,
@@ -21,8 +21,8 @@ import {
 } from "material-react-table";
 import Link from "next/link";
 
-import NexCiteCard from "@rms/components/card/nexcite-card";
-import CacheStateModel from "@rms/models/CacheStateModel";
+import NexCiteCard from "@nexcite/components/card/nexcite-card";
+import CacheStateModel from "@nexcite/models/CacheStateModel";
 import dayjs from "dayjs";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";

@@ -1,6 +1,6 @@
 "use client";
 import { Box, Button } from "@mui/material";
-import NexCiteExportToCsv from "@rms/lib/nexcite_lib/lib/export-to-csv";
+import NexCiteExportToCsv from "@nexcite/lib/nexcite_lib/lib/export-to-csv";
 import React from "react";
 import { MdFileDownload } from "react-icons/md";
 

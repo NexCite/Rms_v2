@@ -13,13 +13,16 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormControl, FormLabel, Input } from "@mui/joy";
 import { MenuItem } from "@mui/material";
-import NexCiteButton from "@rms/components/button/nexcite-button";
-import NexCiteCard from "@rms/components/card/nexcite-card";
-import Authorized from "@rms/components/other/authorized";
-import { useToast } from "@rms/hooks/toast-hook";
-import { FormatNumberWithFixed, exportToExcel } from "@rms/lib/global";
-import { Search } from "@rms/schema/search-schema";
-import { deleteEquityById, findEquities } from "@rms/service/equity-service";
+import NexCiteButton from "@nexcite/components/button/nexcite-button";
+import NexCiteCard from "@nexcite/components/card/nexcite-card";
+import Authorized from "@nexcite/components/other/authorized";
+import { useToast } from "@nexcite/hooks/toast-hook";
+import { FormatNumberWithFixed, exportToExcel } from "@nexcite/lib/global";
+import { Search } from "@nexcite/schema/search-schema";
+import {
+  deleteEquityById,
+  findEquities,
+} from "@nexcite/service/equity-service";
 import dayjs from "dayjs";
 import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
 import Link from "next/link";

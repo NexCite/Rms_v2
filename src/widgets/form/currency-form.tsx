@@ -18,10 +18,13 @@ import {
   Input,
   Typography,
 } from "@mui/joy";
-import NexCiteButton from "@rms/components/button/nexcite-button";
-import NumericFormatCustom from "@rms/components/input/text-field-number";
-import { useToast } from "@rms/hooks/toast-hook";
-import { createCurrency, updateCurrency } from "@rms/service/currency-service";
+import NexCiteButton from "@nexcite/components/button/nexcite-button";
+import NumericFormatCustom from "@nexcite/components/input/text-field-number";
+import { useToast } from "@nexcite/hooks/toast-hook";
+import {
+  createCurrency,
+  updateCurrency,
+} from "@nexcite/service/currency-service";
 type Props = { value: Prisma.CurrencyGetPayload<{}> };
 export default function CurrencyForm(props: Props) {
   const [isPadding, setTransition] = useTransition();

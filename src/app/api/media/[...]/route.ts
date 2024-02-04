@@ -1,4 +1,4 @@
-import { readMedia } from "@rms/service/media-service";
+import { readMedia } from "@nexcite/service/media-service";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(

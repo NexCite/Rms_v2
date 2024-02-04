@@ -3,7 +3,7 @@
 "use client";
 import { Alert } from "@mui/joy";
 import Snackbar from "@mui/material/Snackbar";
-import HttpStatusCode from "@rms/models/HttpStatusCode";
+import HttpStatusCode from "@nexcite/models/HttpStatusCode";
 import React from "react";
 import { create } from "zustand";
 import InfoIcon from "@mui/icons-material/Info";

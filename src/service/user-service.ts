@@ -1,13 +1,13 @@
 "use server";
 
 import { $Enums, Prisma } from "@prisma/client";
-import { handlerServiceAction } from "@rms/lib/handler";
-import { hashPassword } from "@rms/lib/hash";
-import RouteModel from "@rms/models/RouteModel";
-import prisma from "@rms/prisma/prisma";
-import route from "@rms/route.json";
+import { handlerServiceAction } from "@nexcite/lib/handler";
+import { hashPassword } from "@nexcite/lib/hash";
+import RouteModel from "@nexcite/models/RouteModel";
+import prisma from "@nexcite/prisma/prisma";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import route from "@nexcite/routes";
 export async function createUser(props: Prisma.UserUncheckedCreateInput) {
   return handlerServiceAction(
     async (info, config_id) => {

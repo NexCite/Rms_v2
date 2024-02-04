@@ -1,4 +1,4 @@
-import Loading from "@rms/components/other/loading";
+import Loading from "@nexcite/components/other/loading";
 
 export default function loading() {
   return <Loading />;

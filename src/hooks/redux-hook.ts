@@ -1,4 +1,4 @@
-import { AppDispatch, RootState } from "@rms/store/store";
+import { AppDispatch, RootState } from "@nexcite/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import type { TypedUseSelectorHook } from "react-redux";
 

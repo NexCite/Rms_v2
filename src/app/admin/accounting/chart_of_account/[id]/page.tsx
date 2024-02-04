@@ -1,8 +1,12 @@
 import { $Enums } from "@prisma/client";
-import prisma from "@rms/prisma/prisma";
-import getAuth from "@rms/service/user-service";
-import ChartOfAccountView from "@rms/widgets/view/chart-of-account-view";
+import prisma from "@nexcite/prisma/prisma";
+import getAuth from "@nexcite/service/user-service";
+import ChartOfAccountView from "@nexcite/widgets/view/chart-of-account-view";
 import dayjs from "dayjs";
+import {
+  findChartOfAccountByIdV1,
+  findChartOfAccountsV1,
+} from "@nexcite/service/ChartOfAccountService";
 
 export default async function page(props: {
   params: { node: $Enums.AccountType; id: string };
@@ -19,29 +23,12 @@ export default async function page(props: {
         ? new Date(parseFloat(props.searchParams.to))
         : dayjs().endOf("month")
     ).endOf("d");
-  const chartOfAccount = await prisma.chartOfAccount.findUnique({
-    where: { id: props.params.id },
-    include: {
-      currency: true,
-      voucher_items: {
-        include: {
-          currency: true,
-          chart_of_account: true,
-          reference_chart_of_account: true,
-        },
-      },
-    },
-  });
-  const chartOfAccounts = await prisma.chartOfAccount.findMany({
-    where: {
-      id: { not: props.params.id },
-      account_type: chartOfAccount.account_type ? null : undefined,
-    },
+  const chartOfAccountsResult = await findChartOfAccountsV1(auth.config.id);
+  const chartOfAccountResult = await findChartOfAccountByIdV1(
+    auth.config.id,
+    props.params.id
+  );
 
-    include: {
-      currency: true,
-    },
-  });
   const vouchers = await prisma.voucher.findMany({
     orderBy: {
       to_date: "desc",
@@ -62,7 +49,7 @@ export default async function page(props: {
               },
             },
             {
-              reffrence_chart_of_account_id: {
+              reference_chart_of_account_id: {
                 startsWith: props.params.id,
               },
             },
@@ -84,18 +71,15 @@ export default async function page(props: {
   const currencies = await prisma.currency.findMany({
     where: { config_id: auth.config.id },
   });
-  if (!chartOfAccount) {
-    return <div>Not Found</div>;
-  }
-  return (
-    <div>
+  if (chartOfAccountResult.status === 200) {
+    return (
       <ChartOfAccountView
         currencies={currencies}
-        chartOfAccount={chartOfAccount}
+        chartOfAccount={chartOfAccountResult.body}
         vouchers={vouchers}
-        chartOfAccounts={chartOfAccounts}
+        chartOfAccounts={chartOfAccountsResult.body}
         id={props.params.id}
       />
-    </div>
-  );
+    );
+  }
 }

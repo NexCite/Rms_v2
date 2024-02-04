@@ -4,7 +4,7 @@ import PaymentsIcon from "@mui/icons-material/PaymentsRounded";
 import PersonIcon from "@mui/icons-material/PersonRounded";
 import ReceiptIcon from "@mui/icons-material/ReceiptRounded";
 import SettingsIcon from "@mui/icons-material/SettingsRounded";
-import { UserAuth } from "@rms/service/user-service";
+import { UserAuth } from "@nexcite/service/user-service";
 import Image from "next/image";
 import React, { useMemo } from "react";
 
@@ -15,7 +15,7 @@ import Tab from "@mui/joy/Tab";
 import TabList from "@mui/joy/TabList";
 import Tabs from "@mui/joy/Tabs";
 import Typography from "@mui/joy/Typography";
-import route from "@rms/routes";
+import route from "@nexcite/routes";
 import Link from "next/link";
 import { useSelectedLayoutSegments } from "next/navigation";
 

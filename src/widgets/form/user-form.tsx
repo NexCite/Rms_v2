@@ -1,7 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { $Enums, Prisma } from "@prisma/client";
-import { createUser, updateUser } from "@rms/service/user-service";
+import { createUser, updateUser } from "@nexcite/service/user-service";
 
 import { usePathname, useRouter } from "next/navigation";
 
@@ -16,8 +16,8 @@ import {
   Select,
   Typography,
 } from "@mui/joy";
-import NexCiteButton from "@rms/components/button/nexcite-button";
-import { useToast } from "@rms/hooks/toast-hook";
+import NexCiteButton from "@nexcite/components/button/nexcite-button";
+import { useToast } from "@nexcite/hooks/toast-hook";
 import { useCallback, useMemo, useTransition } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";

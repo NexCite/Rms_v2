@@ -1,6 +1,6 @@
-import prisma from "@rms/prisma/prisma";
-import getAuth from "@rms/service/user-service";
-import ChartOfAccountForm from "@rms/widgets/form/chart-of-account-from";
+import prisma from "@nexcite/prisma/prisma";
+import getAuth from "@nexcite/service/user-service";
+import ChartOfAccountForm from "@nexcite/widgets/form/chart-of-account-from";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { z } from "zod";

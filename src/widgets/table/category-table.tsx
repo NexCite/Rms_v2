@@ -5,13 +5,13 @@ import { usePathname } from "next/navigation";
 import { useMemo, useTransition } from "react";
 
 import { Card, CardHeader, MenuItem, Typography } from "@mui/material";
-import Authorized from "@rms/components/other/authorized";
-import { useToast } from "@rms/hooks/toast-hook";
+import Authorized from "@nexcite/components/other/authorized";
+import { useToast } from "@nexcite/hooks/toast-hook";
 import {
   deleteCategoryById,
   resetCategory,
-} from "@rms/service/category-service";
-import { deleteSubCategoryById } from "@rms/service/sub-category-service";
+} from "@nexcite/service/category-service";
+import { deleteSubCategoryById } from "@nexcite/service/sub-category-service";
 import { MRT_ColumnDef, MaterialReactTable } from "material-react-table";
 import Link from "next/link";
 

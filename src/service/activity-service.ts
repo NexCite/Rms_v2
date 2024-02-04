@@ -1,7 +1,7 @@
 "use server";
 
-import { handlerServiceAction } from "@rms/lib/handler";
-import { ActivityStatus } from "@rms/models/CommonModel";
+import { handlerServiceAction } from "@nexcite/lib/handler";
+import { ActivityStatus } from "@nexcite/models/CommonModel";
 /**
  * Perform confirmation of an activity by updating its status.
  *

@@ -19,10 +19,10 @@ import {
 import LoadingButton from "@mui/lab/LoadingButton";
 import { CardContent } from "@mui/material";
 import { Prisma } from "@prisma/client";
-import NexCiteButton from "@rms/components/button/nexcite-button";
-import { useToast } from "@rms/hooks/toast-hook";
-import { fileZod } from "@rms/lib/common";
-import { editConfig, initConfig } from "@rms/service/config-service";
+import NexCiteButton from "@nexcite/components/button/nexcite-button";
+import { useToast } from "@nexcite/hooks/toast-hook";
+import { fileZod } from "@nexcite/lib/common";
+import { editConfig, initConfig } from "@nexcite/service/config-service";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useRef, useState, useTransition } from "react";

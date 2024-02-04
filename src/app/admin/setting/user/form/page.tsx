@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
-import prisma from "@rms/prisma/prisma";
-import getAuth, { getUserStatus } from "@rms/service/user-service";
-import UserFormComponent from "@rms/widgets/form/user-form";
+import prisma from "@nexcite/prisma/prisma";
+import getAuth, { getUserStatus } from "@nexcite/service/user-service";
+import UserFormComponent from "@nexcite/widgets/form/user-form";
 
 export default async function page(props: {
   params: { node: "user" };

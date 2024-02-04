@@ -1,9 +1,9 @@
 "use client";
 import { MenuItem } from "@mui/material";
 import { $Enums, Prisma } from "@prisma/client";
-import Authorized from "@rms/components/other/authorized";
-import { useToast } from "@rms/hooks/toast-hook";
-import CacheStateModel from "@rms/models/CacheStateModel";
+import Authorized from "@nexcite/components/other/authorized";
+import { useToast } from "@nexcite/hooks/toast-hook";
+import CacheStateModel from "@nexcite/models/CacheStateModel";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Button from "@mui/joy/Button";
@@ -14,8 +14,8 @@ import FormLabel from "@mui/joy/FormLabel";
 import Input from "@mui/joy/Input";
 import Table from "@mui/joy/Table";
 import Typography from "@mui/joy/Typography";
-import { FormatNumberWithFixed, exportToExcel } from "@rms/lib/global";
-import { findChartOfAccounts } from "@rms/service/chart-of-account-service";
+import { FormatNumberWithFixed, exportToExcel } from "@nexcite/lib/global";
+import { findChartOfAccounts } from "@nexcite/service/chart-of-account-service";
 import dayjs from "dayjs";
 import {
   MRT_ColumnFiltersState,
@@ -59,7 +59,7 @@ type ChartOfAccounts = Prisma.ChartOfAccountGetPayload<{
         currency: true;
       };
     };
-    reffrence_voucher_items: {
+    reference_voucher_items: {
       include: {
         voucher: { include: { currency: true } };
 
@@ -77,7 +77,7 @@ export default function ChartOfAccountAccountsTable(props: Props) {
   const form = useForm<ChartOfAccountSearchSchema>({
     resolver: zodResolver(ChartOfAccountSearchSchema),
     defaultValues: {
-      include_reffrence: false,
+      include_reference: false,
       from: dayjs(filter.fromDate).startOf("d").toDate(),
       to: dayjs(filter.toDate).endOf("d").toDate(),
       id: undefined,
@@ -151,7 +151,7 @@ export default function ChartOfAccountAccountsTable(props: Props) {
               total -= res.amount / res.rate;
             }
           });
-          row.reffrence_voucher_items?.map((res) => {
+          row.reference_voucher_items?.map((res) => {
             if (res.debit_credit === "Debit") {
               total += res.amount / res.rate;
             } else {
@@ -342,7 +342,7 @@ export default function ChartOfAccountAccountsTable(props: Props) {
         from: values.from,
         to: values.to,
         id: values.id,
-        include_reffrence: values.include_reffrence,
+        include_reference: values.include_reference,
         type: values.type,
       }).then((res) => {
         setData(res.result);
@@ -577,7 +577,7 @@ const useFilter = create<CacheStateModel>()(
 {
   /* <tbody>
 {original.voucher_items
-  .concat(original.reffrence_voucher_items)
+  .concat(original.reference_voucher_items)
   .map((res) => (
     <tr>
       <td>

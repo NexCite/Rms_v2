@@ -1,9 +1,9 @@
 "use server";
 
-import NexCite from "@rms/lib/nexcite_lib";
-import prisma from "@rms/prisma/prisma";
+import NexCite from "@nexcite/lib/nexcite_lib";
+import prisma from "@nexcite/prisma/prisma";
 
-import { handlerServiceAction } from "@rms/lib/handler";
+import { handlerServiceAction } from "@nexcite/lib/handler";
 
 export async function getAllMedia() {
   return handlerServiceAction((info, config_id) => {
@@ -46,10 +46,14 @@ export async function uploadFileTemp(file: File) {
   }
 }
 export async function readMedia(filePath: string) {
-  return new NexCite.MediaService({
-    folderName: "NexCite/RMS/",
-    type: "local",
-  }).readFile(filePath);
+  try {
+    return new NexCite.MediaService({
+      folderName: "NexCite/RMS/",
+      type: "local",
+    }).readFile(filePath);
+  } catch (e) {
+    return undefined;
+  }
 }
 
 export async function saveFile(tempFilePath: string) {

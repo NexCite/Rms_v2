@@ -6,10 +6,10 @@ import { useTransition } from "react";
 import { Card, Typography } from "@mui/joy";
 import { MenuItem } from "@mui/material";
 import { Prisma } from "@prisma/client";
-import Authorized from "@rms/components/other/authorized";
-import { useToast } from "@rms/hooks/toast-hook";
-import CacheStateModel from "@rms/models/CacheStateModel";
-import { deleteUserById } from "@rms/service/user-service";
+import Authorized from "@nexcite/components/other/authorized";
+import { useToast } from "@nexcite/hooks/toast-hook";
+import CacheStateModel from "@nexcite/models/CacheStateModel";
+import { deleteUserById } from "@nexcite/service/user-service";
 import dayjs from "dayjs";
 import {
   MRT_ColumnFiltersState,

@@ -1,6 +1,6 @@
-import { getConfigId } from "@rms/lib/config";
-import prisma from "@rms/prisma/prisma";
-import CurrencyTable from "@rms/widgets/table/currency-table";
+import { getConfigId } from "@nexcite/lib/config";
+import prisma from "@nexcite/prisma/prisma";
+import CurrencyTable from "@nexcite/widgets/table/currency-table";
 import React from "react";
 
 export default async function page() {

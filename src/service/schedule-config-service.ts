@@ -1,8 +1,8 @@
 "use server";
 
 import { Prisma } from "@prisma/client";
-import { handlerServiceAction } from "@rms/lib/handler";
-import prisma from "@rms/prisma/prisma";
+import { handlerServiceAction } from "@nexcite/lib/handler";
+import prisma from "@nexcite/prisma/prisma";
 import dayjs from "dayjs";
 
 export async function createScheuleConfig(config_id: number) {
