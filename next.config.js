@@ -4,6 +4,9 @@ const nextConfig = {
     emotion: true,
     styledComponents: true,
   },
+  eslint: {
+    ignoreDuringBuilds: false,
+  },
 
   reactStrictMode: false,
   experimental: {
