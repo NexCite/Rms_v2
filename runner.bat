@@ -1,2 +1,3 @@
-@echo off
-node  cli.js
+cd "C:\rms\Rms_v2"
+bun  start
+pause
