@@ -1,3 +1,3 @@
 cd "C:\rms\Rms_v2"
-bun  start
+bun run  start
 pause
