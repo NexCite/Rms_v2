@@ -46,7 +46,7 @@ function HandleResponse(props?: {
         const result = await originalMethod.apply(this, args);
         if (props?.paths) {
           props?.paths.forEach((path) => {
-            revalidatePath(path);
+            revalidatePath(path, "page");
           });
         }
 

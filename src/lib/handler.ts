@@ -52,7 +52,7 @@ export async function handlerServiceAction<T>(
       }
     }
   } else {
-    const urlHeader = headers().get("url") || headers().get("next-url");
+    const urlHeader = headers().get("next-url") || headers().get("next-url");
 
     if (!urlHeader) {
       return;

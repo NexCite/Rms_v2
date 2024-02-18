@@ -3,7 +3,7 @@
 import { FileMapper } from "@nexcite/lib/common";
 import { handlerServiceAction } from "@nexcite/lib/handler";
 import prisma from "@nexcite/prisma/prisma";
-import { JournalVoucherInputSchema } from "@nexcite/schema/JournalVoucherSchema";
+import { JournalInputSchema } from "@nexcite/schema/JournalVoucherSchema";
 import { Prisma } from "@prisma/client";
 import dayjs from "dayjs";
 
@@ -22,7 +22,7 @@ export async function findVoucherItemsService(props: { id: number }) {
       },
     });
 
-    var voucher: JournalVoucherInputSchema = {
+    var voucher: JournalInputSchema = {
       currency: {
         id: result.currency.id,
         name: result.currency.name,
@@ -131,7 +131,7 @@ export async function findVouchersService(props: { from: Date; to: Date }) {
 }
 
 export async function createVoucherService(props: {
-  voucher: JournalVoucherInputSchema;
+  voucher: JournalInputSchema;
   file?: FormData;
 }) {
   return handlerServiceAction(
@@ -203,7 +203,7 @@ export async function createVoucherService(props: {
   );
 }
 export async function updateVoucherService(props: {
-  voucher: JournalVoucherInputSchema;
+  voucher: JournalInputSchema;
 
   id: number;
   media?: Prisma.MediaGetPayload<{}>;

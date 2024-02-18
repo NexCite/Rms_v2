@@ -6,28 +6,16 @@ import {
   AccordionSummary,
   Card,
   IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemContent,
-  ListItemDecorator,
   Stack,
   Typography,
 } from "@mui/joy";
 import IAuth from "@nexcite/Interfaces/IAuth";
 import route from "@nexcite/routes";
 import Image from "next/image";
-import { useMemo } from "react";
-import CalculateIcon from "@mui/icons-material/CalculateRounded";
-import PaymentsIcon from "@mui/icons-material/PaymentsRounded";
-import PersonIcon from "@mui/icons-material/PersonRounded";
-import ReceiptIcon from "@mui/icons-material/ReceiptRounded";
-import SettingsIcon from "@mui/icons-material/SettingsRounded";
-import LogOutIcon from "@mui/icons-material/Logout";
 import Link from "next/link";
-import { IoMdLogOut } from "react-icons/io";
 import { usePathname } from "next/navigation";
-import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
+import { useMemo } from "react";
+import { IoMdLogOut } from "react-icons/io";
 export default function SideBar(props: IAuth) {
   const { config, user } = props;
   const pathName = usePathname();
@@ -101,7 +89,7 @@ export default function SideBar(props: IAuth) {
 
       <Stack
         direction={"column"}
-        spacing={3}
+        spacing={1}
         sx={{
           width: "100%",
 
@@ -146,22 +134,49 @@ export default function SideBar(props: IAuth) {
             >
               <AccordionSummary sx={{ padding: 0, paddingBottom: 1 }}>
                 <Stack direction={"row"} spacing={1}>
-                  <Typography level="h4">{res.title}</Typography>
+                  <Typography level="body-lg">{res.title}</Typography>
                 </Stack>
               </AccordionSummary>
               <AccordionDetails>
-                <Stack direction={"column"} spacing={2} alignItems={"start"}>
-                  {res.children.map((res) => (
-                    <Link
-                      key={res.title}
-                      href={res.path}
-                      className={
-                        pathName.includes(res.routeKey) ? "active" : ""
-                      }
-                    >
-                      <Typography level="h4">{res.title}</Typography>
-                    </Link>
-                  ))}
+                <Stack direction={"column"} spacing={1} alignItems={"start"}>
+                  {res.children
+                    .filter((res) => res.parent === undefined)
+                    .map((item) => (
+                      <Stack key={item.title} direction={"column"} spacing={1}>
+                        <Link
+                          href={item.path + "?filter=[]"}
+                          className={
+                            pathName.includes(item.routeKey) ? "active" : ""
+                          }
+                        >
+                          <Typography level="body-md">{item.title}</Typography>
+                        </Link>
+                        <Stack
+                          direction={"column"}
+                          spacing={1}
+                          sx={{ paddingLeft: 5 }}
+                        >
+                          {res.children
+                            .filter((res) => res.parent === item.index)
+                            .map((item) => (
+                              <Link
+                                key={item.title}
+                                href={item.path + "?filter=[]"}
+                                className={
+                                  pathName.includes(item.routeKey)
+                                    ? "active"
+                                    : ""
+                                }
+                              >
+                                <Typography level="body-md">
+                                  - {item.title}
+                                </Typography>
+                              </Link>
+                            ))}
+                        </Stack>
+                      </Stack>
+                    ))}
+                  {}
                 </Stack>
               </AccordionDetails>
             </Accordion>
@@ -170,33 +185,4 @@ export default function SideBar(props: IAuth) {
       </Stack>
     </Card>
   );
-}
-function SwitchIcon(props: {
-  icon: string;
-  className?: string;
-  color?:
-    | "primary"
-    | "success"
-    | "warning"
-    | "disabled"
-    | "action"
-    | "inherit"
-    | "secondary"
-    | "error"
-    | "info";
-}) {
-  switch (props.icon) {
-    case "Calculate":
-      return <CalculateIcon color={props.color} className={props.className} />;
-    case "Receipt":
-      return <ReceiptIcon color={props.color} className={props.className} />;
-    case "Payments":
-      return <PaymentsIcon color={props.color} className={props.className} />;
-    case "Person":
-      return <PersonIcon color={props.color} className={props.className} />;
-    case "Settings":
-      return <SettingsIcon color={props.color} className={props.className} />;
-    default:
-      return <></>;
-  }
 }

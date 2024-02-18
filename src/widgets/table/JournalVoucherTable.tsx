@@ -26,8 +26,8 @@ import NexCiteCard from "@nexcite/components/card/NexCiteCard";
 import { useToast } from "@nexcite/hooks/toast-hook";
 import { deleteVoucherService } from "@nexcite/service/voucher-service";
 
+import IVoucher from "@nexcite/Interfaces/IVoucher";
 import ExportVoucher from "@nexcite/components/other/ExportVoucher";
-import IVoucher from "@nexcite/models/VoucherModel";
 import { MdSearch } from "react-icons/md";
 
 const columnHelper = createMRTColumnHelper<IVoucher>();
@@ -61,9 +61,6 @@ export default function JournalVoucherTable(props: {
     query.set("filter", JSON.stringify(filter));
     window.history.replaceState(null, "", `?${query}`);
   }, [filter]);
-  // useEffect(() => {
-  //
-  // }, [date]);
 
   const table = useMaterialReactTable({
     columns,
@@ -164,20 +161,20 @@ export default function JournalVoucherTable(props: {
   });
   const { replace } = useRouter();
 
-  useEffect(() => {
-    const channel = new BroadcastChannel("voucher");
+  // useEffect(() => {
+  //   const channel = new BroadcastChannel("voucher");
 
-    channel.addEventListener("message", () => {
-      setTransition(() => {
-        replace(pathName);
-      });
-    });
-    return () => {
-      channel.removeEventListener("message", () => {
-        channel.close();
-      });
-    };
-  }, [pathName, replace]);
+  //   channel.addEventListener("message", () => {
+  //     setTransition(() => {
+  //       replace(pathName);
+  //     });
+  //   });
+  //   return () => {
+  //     channel.removeEventListener("message", () => {
+  //       channel.close();
+  //     });
+  //   };
+  // }, [pathName, replace]);
 
   return (
     <NexCiteCard title="Vouchers">
@@ -193,7 +190,6 @@ export default function JournalVoucherTable(props: {
             query.set("id", id as string);
             query.set("from", from as string);
             query.set("to", to as string);
-
             const location = window.location.pathname + `?${query.toString()}`;
             setTransition(() => {
               replace(location);

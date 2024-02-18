@@ -1,5 +1,6 @@
 import IVoucher, { IVoucherInclude } from "@nexcite/models/VoucherModel";
 import prisma from "@nexcite/prisma/prisma";
+import { findVouchers } from "@nexcite/service/VoucherService";
 import { userAuth } from "@nexcite/service/auth-service";
 import JournalVoucherTable from "@nexcite/widgets/table/JournalVoucherTable";
 import dayjs from "dayjs";
@@ -13,28 +14,13 @@ export default async function page(props: {
   to = dayjs(to).endOf("D").toDate();
   id = id ? parseInt(id) : undefined;
 
-  const data = (await prisma.voucher.findMany({
-    where: {
-      config_id: auth.config.id,
-      to_date: id
-        ? undefined
-        : {
-            gte: from,
-            lte: to,
-          },
-      id: id ? parseInt(id) : undefined,
-    },
-    include: IVoucherInclude,
-    orderBy: {
-      id: "desc",
-    },
-  })) as unknown as IVoucher[];
+  const data = await findVouchers(auth.config.id);
 
   return (
     <div>
       <JournalVoucherTable
         config={{ logo: auth.config.logo, name: "" }}
-        data={data}
+        data={data.body}
         search={{
           from,
           to,

@@ -7,28 +7,24 @@ import {
   findChartOfAccountByIdV1,
   findChartOfAccountsV1,
 } from "@nexcite/service/ChartOfAccountService";
+import { searchParamsMapper } from "@nexcite/lib/global";
+import { headers } from "next/headers";
 
 export default async function page(props: {
   params: { node: $Enums.AccountType; id: string };
   searchParams: { from?: string; to?: string };
 }) {
   const auth = await getAuth();
-  const from = dayjs(
-      props.searchParams.from
-        ? new Date(parseFloat(props.searchParams.from))
-        : dayjs().startOf("month")
-    ).startOf("d"),
-    to = dayjs(
-      props.searchParams.to
-        ? new Date(parseFloat(props.searchParams.to))
-        : dayjs().endOf("month")
-    ).endOf("d");
+  const url = new URL(headers().get("next-url"));
+
+  const searchParams = searchParamsMapper(url.searchParams);
+
   const chartOfAccountsResult = await findChartOfAccountsV1(auth.config.id);
   const chartOfAccountResult = await findChartOfAccountByIdV1(
     auth.config.id,
     props.params.id
   );
-
+  console.log(searchParams.from);
   const vouchers = await prisma.voucher.findMany({
     orderBy: {
       to_date: "desc",
@@ -36,8 +32,8 @@ export default async function page(props: {
     where: {
       config_id: auth.config.id,
       to_date: {
-        gte: from.toDate(),
-        lte: to.toDate(),
+        gte: searchParams.from,
+        lte: searchParams.to,
       },
 
       voucher_items: {

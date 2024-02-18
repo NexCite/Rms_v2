@@ -29,6 +29,7 @@ var route: RouteModel[] = [
         routeKey: "Client",
         path: "/admin/accounting/account/Client",
         permission: "View_Chart_Of_Accounts",
+        parent: 1,
       },
       {
         index: 3,
@@ -36,6 +37,7 @@ var route: RouteModel[] = [
         routeKey: "IB",
         path: "/admin/accounting/account/IB",
         permission: "View_Chart_Of_Accounts",
+        parent: 1,
       },
       {
         index: 4,
@@ -43,6 +45,7 @@ var route: RouteModel[] = [
         title: "Suppliers",
         path: "/admin/accounting/account/Supplier",
         permission: "View_Chart_Of_Accounts",
+        parent: 1,
       },
       {
         index: 5,
@@ -50,6 +53,7 @@ var route: RouteModel[] = [
         title: "Employee",
         path: "/admin/accounting/account/Employee",
         permission: "View_Chart_Of_Accounts",
+        parent: 1,
       },
       {
         index: 6,
@@ -82,7 +86,7 @@ var route: RouteModel[] = [
     title: "Trading",
     icon: "Receipt",
     routeKey: "trading",
-
+    deactivate: true,
     children: [
       {
         index: 0,
@@ -155,6 +159,8 @@ var route: RouteModel[] = [
     title: "Human Resources",
     icon: "Person",
     routeKey: "human_resources",
+    deactivate: true,
+
     children: [
       {
         index: 0,
@@ -183,7 +189,6 @@ var route: RouteModel[] = [
   },
   {
     routeKey: "setting",
-
     index: 4,
     title: "Settings",
     end: true,
@@ -260,5 +265,5 @@ var route: RouteModel[] = [
     icon: "Settings",
     path: "/admin/setting",
   },
-];
+].filter((res) => !res.deactivate) as RouteModel[];
 export default route;

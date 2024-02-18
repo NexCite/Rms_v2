@@ -17,11 +17,11 @@ import {
 } from "@mui/joy";
 import NexCiteButton from "@nexcite/components/button/NexCiteButton";
 
-import IVoucher from "@nexcite/models/VoucherModel";
 import dayjs from "dayjs";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import Image from "next/image";
+import IVoucher from "@nexcite/Interfaces/IVoucher";
 const doc = new jsPDF();
 doc.setFont("Arial");
 

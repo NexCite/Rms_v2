@@ -1,21 +1,26 @@
 import { IChartOfAccountGrouped } from "@nexcite/Interfaces/IChartOfAccount";
 import ChartOfAccountGrouped from "@nexcite/models/ChartOfAccountModel";
 import { Prisma } from "@prisma/client";
+import dayjs from "dayjs";
 import { utils, writeFileXLSX } from "xlsx";
 
 export function FormatNumber(data: number, digit?: number) {
   return data ? data?.toFixed(digit).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "";
 }
-export function FormatNumberWithFixed(data: number, digit?: number) {
+export function FormatNumberWithFixed(
+  data: number,
+  digit?: number,
+  abs: boolean = false
+) {
   digit = digit ?? 2;
   if (data === 0) {
     return "0";
   }
 
   if (data?.toFixed)
-    return Math.max(data)
-      ?.toFixed(digit)
-      .replace(/\d(?=(\d{3})+\.)/g, "$&,");
+    return (abs ? Math.abs(data) : data)
+      .toFixed(digit)
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 interface ChartOfAccount
@@ -221,14 +226,20 @@ export function searchParamsMapper(
   const fromParam = searchParams.get("from"),
     toParam = searchParams.get("to"),
     idParam = searchParams.get("id"),
+    classes = searchParams.get("class"),
     filterParam = searchParams.get("filter"),
     digit = searchParams.get("digit");
 
   return {
-    from: fromParam ? new Date(fromParam) : undefined,
-    to: toParam ? new Date(toParam) : undefined,
+    from: fromParam
+      ? dayjs(fromParam).startOf("D").toDate()
+      : dayjs().startOf("D").toDate(),
+    to: toParam
+      ? dayjs(toParam).endOf("D").toDate()
+      : dayjs().endOf("D").toDate(),
     id: idParam ? (isIdNumber ? parseInt(idParam) : idParam) : undefined,
     filter: filterParam,
     digit: digit ? digit : undefined,
+    classes: classes ? JSON.parse(classes) : [],
   };
 }

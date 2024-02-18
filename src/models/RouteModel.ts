@@ -21,6 +21,9 @@ export default interface RouteModel {
     | "AssignmentReturned"
     | "AssignmentRe";
   routeKey?: string;
+  query?: string;
+  deactivate?: boolean;
+  parent?: number;
   index: number;
   permission: $Enums.UserPermission;
   hide?: boolean;

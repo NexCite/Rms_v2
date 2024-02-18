@@ -569,9 +569,9 @@ model Voucher {
 }
 
 model VoucherItem {
-  id     Int   @id @default(autoincrement())
-  amount Float
-
+  id                            Int             @id @default(autoincrement())
+  amount                        Float
+  groupBy                       Int?            @default(1)
   rate                          Float
   debit_credit                  DebitCreditType
   voucher                       Voucher?        @relation(fields: [voucher_id], references: [id])

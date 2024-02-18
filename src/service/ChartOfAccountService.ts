@@ -32,10 +32,7 @@ class CharOfAccountService {
     };
   }
   @HandleResponse({ permission: "View_Chart_Of_Accounts" })
-  static async findChartOfAccountsByDigit(
-    config_id: number,
-    digit: number
-  ): Promise<
+  static async findChartOfAccountsByDigit(config_id: number): Promise<
     IResponse<
       (IChartOfAccount & {
         totalDebit?: number;
@@ -44,21 +41,37 @@ class CharOfAccountService {
     >
   > {
     "use server";
-    const url = new URL(headers().get("url"));
+    const url = new URL(headers().get("next-url"));
     const searchParams = searchParamsMapper(url.searchParams);
-
-    let chartOfAccounts =
-      (await prisma.$queryRaw`Select * from "public"."ChartOfAccount" where LENGTH(id)=${parseInt(
-        searchParams.digit ?? "0"
-      )}`) as (IChartOfAccount & {
-        totalDebit: number;
-        totalCredit: number;
-      })[];
+    const query = `SELECT * FROM "public"."ChartOfAccount" where LENGTH(id)=${parseInt(
+      searchParams.digit ?? "0"
+    )}  ${
+      searchParams.classes.length > 0
+        ? searchParams.classes
+          ? `and  (${searchParams.classes
+              .map((c) => `class = '${c}'`)
+              .join(" OR ")})`
+          : ""
+        : ""
+    }`;
+    let chartOfAccounts = (await prisma.$queryRawUnsafe(
+      query
+    )) as (IChartOfAccount & {
+      totalDebit: number;
+      totalCredit: number;
+    })[];
     chartOfAccounts = chartOfAccounts.map((res) => ({
       ...res,
       totalDebit: 0,
       totalCredit: 0,
     }));
+    console.log(
+      searchParams.from.toLocaleString(),
+      searchParams.from.toLocaleTimeString(),
+      searchParams.to.toLocaleString(),
+      searchParams.to.toLocaleTimeString()
+    );
+
     const voucherItems = await prisma.voucherItem.findMany({
       where: {
         voucher: {

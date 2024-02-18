@@ -1,23 +1,22 @@
+import prisma from "@nexcite/prisma/prisma";
 import { findChartOfAccountsByDigit } from "@nexcite/service/ChartOfAccountService";
-import { findCurrencies } from "@nexcite/service/CurrencyService";
 import { userAuth } from "@nexcite/service/auth-service";
 import TrialBalanceTable from "@nexcite/widgets/table/TrialBalanceTable";
 
-export default async function page(props: {
-  searchParams: { id: any; from: any; to: any };
-}) {
+export default async function page(props: { searchParams: { id: any } }) {
   const auth = await userAuth();
 
-  const currencies = await findCurrencies(auth.config.id);
+  const currencies = await prisma.currency.findMany({
+    where: { config_id: auth.config_id },
+  });
 
   const findChartOfAccountsByDigitResult = await findChartOfAccountsByDigit(
-    auth.config_id,
-    2
+    auth.config_id
   );
 
   return (
     <TrialBalanceTable
-      currencies={currencies.body}
+      currencies={currencies}
       data={findChartOfAccountsByDigitResult.body}
     />
   );

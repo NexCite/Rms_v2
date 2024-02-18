@@ -75,7 +75,7 @@ export async function userAuth(): Promise<IAuth> {
     redirect("/login", RedirectType.replace);
   }
 
-  const url = new URL(headers().get("url"));
+  const url = new URL(headers().get("next-url"));
 
   if (url.pathname === "/admin") {
     return auth;

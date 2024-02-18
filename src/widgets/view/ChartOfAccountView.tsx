@@ -19,16 +19,11 @@ import IChartOfAccount from "@nexcite/Interfaces/IChartOfAccount";
 import ICurrency from "@nexcite/Interfaces/ICurrency";
 import NexCiteButton from "@nexcite/components/button/NexCiteButton";
 import NexCiteCard from "@nexcite/components/card/NexCiteCard";
-import {
-  FormatNumberWithFixed,
-  VoucherSchema,
-  exportToExcel,
-} from "@nexcite/lib/global";
+import { FormatNumberWithFixed, exportToExcel } from "@nexcite/lib/global";
 import { Prisma } from "@prisma/client";
 import dayjs from "dayjs";
-import { createMRTColumnHelper } from "material-react-table";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useMemo, useState, useTransition } from "react";
 import { AiFillFileExcel } from "react-icons/ai";
 
 type Props = {
@@ -52,6 +47,8 @@ type Props = {
 };
 
 export default function ChartOfAccountView(props: Props) {
+  console.log("hello");
+
   const [selectedCurrency, setSelectedCurrency] = useState<
     ICurrency | undefined
   >(props.chartOfAccount?.currency);
@@ -61,9 +58,25 @@ export default function ChartOfAccountView(props: Props) {
   >([]);
 
   const filteredVoucher = useMemo(() => {
-    if (selectedChartOfAccounts.length == 0) return props.vouchers;
+    if (selectedChartOfAccounts.length === 0)
+      return props.vouchers.map((res) => {
+        const group: number[] = [];
+        res.voucher_items = res.voucher_items
+          .map((res) => {
+            if (res.chart_of_account_id === props.id) {
+              group.push(res.groupBy);
+            }
+            return res;
+          })
+          .filter((res) => group.includes(res.groupBy));
+
+        return res;
+      });
+
     return props.vouchers.filter((res) => {
       let isFound = false;
+      const group: number[] = [];
+
       res.voucher_items.forEach((res) => {
         if (
           selectedChartOfAccounts.find((res2) =>
@@ -72,27 +85,23 @@ export default function ChartOfAccountView(props: Props) {
         ) {
           isFound = true;
         }
-        if (
-          selectedChartOfAccounts.find((res2) =>
-            res.reference_chart_of_account_id?.startsWith(res2.id)
-          )
-        ) {
-          isFound = true;
+        if (res.chart_of_account_id === props.id) {
+          group.push(res.groupBy);
         }
       });
+      res.voucher_items = res.voucher_items.filter((res) =>
+        group.includes(res.groupBy)
+      );
       return isFound;
     });
-  }, [selectedChartOfAccounts, props.vouchers]);
+  }, [selectedChartOfAccounts, props.vouchers, props.id]);
 
   const { credit, debit } = useMemo(() => {
     let debit: number = 0,
       credit: number = 0;
     filteredVoucher?.forEach((res) => {
       res.voucher_items.forEach((res) => {
-        if (
-          res.chart_of_account_id.startsWith(props.id) ||
-          res.reference_chart_of_account_id?.startsWith(props.id)
-        ) {
+        if (res.chart_of_account_id.startsWith(props.id)) {
           if (res.debit_credit == "Debit") {
             debit += res.amount / res.currency.rate;
           } else {
@@ -103,27 +112,14 @@ export default function ChartOfAccountView(props: Props) {
     });
     return { debit, credit };
   }, [props.id, filteredVoucher]);
+  const searchParams = useSearchParams();
   const [selectData, setSelectData] = useState({
-    from: dayjs().startOf("month").toDate(),
-    to: dayjs().endOf("month").toDate(),
+    from: dayjs(new Date(searchParams.get("from") ?? new Date())).toDate(),
+    to: dayjs(new Date(searchParams.get("to") ?? new Date())).toDate(),
   });
   const { replace } = useRouter();
-  const pathName = usePathname();
   const [isPadding, setTransition] = useTransition();
-  useEffect(() => {
-    const channel = new BroadcastChannel("voucher");
 
-    channel.addEventListener("message", () => {
-      setTransition(() => {
-        replace(pathName);
-      });
-    });
-    return () => {
-      channel.removeEventListener("message", () => {
-        channel.close();
-      });
-    };
-  }, [pathName, replace]);
   return (
     <Grid container spacing={2} sx={{ flexGrow: 1 }}>
       <Grid xs={12}>
@@ -211,10 +207,12 @@ export default function ChartOfAccountView(props: Props) {
           <NexCiteButton
             isPadding={isPadding}
             onClick={(e) => {
-              replace(
-                window.location.pathname +
-                  `?from=${selectData.from.getTime()}&to=${selectData.to.getTime()}`
-              );
+              setTransition(() => {
+                replace(
+                  window.location.pathname +
+                    `?from=${selectData.from.toLocaleDateString()}&to=${selectData.to.toLocaleDateString()}`
+                );
+              });
             }}
           >
             Search
@@ -256,11 +254,16 @@ export default function ChartOfAccountView(props: Props) {
               <CardContent>
                 <Typography level="body-md">Total</Typography>
                 <Typography level="h2">
-                  {debit - credit > 0 ? "Debit" : "Credit"}{" "}
+                  {debit - credit > 0
+                    ? "Debit"
+                    : debit - credit === 0
+                    ? ""
+                    : "Credit"}{" "}
                   {selectedCurrency?.symbol ?? "$"}
                   {FormatNumberWithFixed(
                     (debit - credit) * (selectedCurrency?.rate ?? 1),
-                    2
+                    2,
+                    true
                   )}
                 </Typography>
               </CardContent>
@@ -362,16 +365,17 @@ export default function ChartOfAccountView(props: Props) {
             >
               <thead>
                 <tr>
+                  {" "}
                   <th>Date</th>
                   <th align="center" colSpan={3}>
                     <Typography order={1} textAlign={"center"}>
-                      Debit
+                      Credit
                     </Typography>
                   </th>
                   <th align="center" colSpan={3}>
                     {" "}
-                    <Typography textAlign={"center"}>Credit</Typography>
-                  </th>
+                    <Typography textAlign={"center"}> Debit</Typography>
+                  </th>{" "}
                 </tr>
               </thead>
               <tbody>
@@ -409,10 +413,14 @@ export default function ChartOfAccountView(props: Props) {
                             {res.currency?.symbol}
                             {FormatNumberWithFixed(res.amount, 2)}
                           </Typography>
-                          <Typography>
+                          <Typography dir="rtl">
+                            {res.debit_credit === "Debit"
+                              ? "الى حساب "
+                              : "من حساب "}
+                            {res.chart_of_account_id}{" "}
                             {res.chart_of_account.name}{" "}
-                            {res.chart_of_account_id}
-                          </Typography>
+                            {res.currency?.symbol ?? ""}
+                          </Typography>{" "}
                         </Stack>
                       </td>
                       {res.debit_credit === "Debit" && (
@@ -432,14 +440,16 @@ export default function ChartOfAccountView(props: Props) {
                     {selectedCurrency?.symbol ?? "$"}
                     {FormatNumberWithFixed(
                       credit * (selectedCurrency?.rate ?? 1),
-                      2
+                      2,
+                      true
                     )}
                   </td>
                   <td align="center" colSpan={3}>
                     {selectedCurrency?.symbol ?? "$"}
                     {FormatNumberWithFixed(
                       debit * (selectedCurrency?.rate ?? 1),
-                      2
+                      2,
+                      true
                     )}
                   </td>
                 </tr>
@@ -454,11 +464,16 @@ export default function ChartOfAccountView(props: Props) {
                 <tr>
                   <td></td>
                   <td align="center" colSpan={6}>
-                    {debit - credit > 0 ? "Debit" : "Credit"}{" "}
+                    {debit - credit > 0
+                      ? "Debit"
+                      : debit - credit === 0
+                      ? ""
+                      : "Credit"}{" "}
                     {selectedCurrency?.symbol ?? "$"}
                     {FormatNumberWithFixed(
                       (debit - credit) * (selectedCurrency?.rate ?? 1),
-                      2
+                      2,
+                      true
                     )}
                   </td>
                 </tr>
@@ -470,15 +485,3 @@ export default function ChartOfAccountView(props: Props) {
     </Grid>
   );
 }
-const columnGroupedDataHelper = createMRTColumnHelper<VoucherSchema>();
-const columns = [
-  columnGroupedDataHelper.accessor("id", { header: "ID" }),
-  columnGroupedDataHelper.accessor("title", { header: "Title" }),
-  columnGroupedDataHelper.accessor("currency.symbol", {
-    header: "Currency",
-  }),
-  columnGroupedDataHelper.accessor((row) => row.to_date.toLocaleDateString(), {
-    header: "Date",
-    id: "date",
-  }),
-];

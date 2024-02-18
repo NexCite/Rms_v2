@@ -6,18 +6,36 @@ import { headers } from "next/headers";
 
 import PageLoader from "@nexcite/components/other/PageLoader";
 import procces from "process";
-export async function generateMetadata({ params }): Promise<Metadata> {
-  var reqUrl = headers().get("url") || headers().get("host");
+import { Cairo, Montserrat } from "next/font/google";
 
-  const url = new URL(isIpAddress(reqUrl) ? "http://" + reqUrl : reqUrl);
+export async function generateMetadata(): Promise<Metadata> {
+  const host = headers().get("x-forwarded-host");
+  const proto = headers().get("x-forwarded-proto");
+  const url = new URL(`${proto}://${host}`);
+
   url.pathname = `/logo.png`;
 
   return {
-    title: "RMS Systeam",
-    icons: [url],
+    title: "Nexcite",
+    description: "Nexcite",
+    icons: [
+      {
+        rel: "icon",
+        url: "/logo.png",
+      },
+    ],
   };
 }
-
+const cairo = Cairo({
+  weight: "500",
+  subsets: ["latin"],
+  variable: "--font-cairo",
+});
+const montserrat = Montserrat({
+  weight: "500",
+  subsets: ["latin"],
+  variable: "--font-montserrat",
+});
 export default async function RootLayout({
   children,
 }: {
@@ -34,7 +52,7 @@ export default async function RootLayout({
       <head>
         <meta charSet="UTF-8" />
       </head>
-      <body>
+      <body className={cairo.variable + " " + montserrat.variable}>
         <div className="absolute bottom-1 right-10 z-20    text-black">
           <h1 className="text-black">version {v}</h1>
         </div>
@@ -51,3 +69,4 @@ function isIpAddress(input: string) {
 
   return ipWithPortRegex.test(input);
 }
+export const dynamic = "force-dynamic";

@@ -26,14 +26,14 @@ export const ChartOfAccountSchema = z.object({
 });
 export type CurrencySchema = z.infer<typeof CurrencySchema>;
 export type ChartOfAccountSchema = z.infer<typeof ChartOfAccountSchema>;
-const JournalVoucherInputSchema = z.object({
+const JournalInputSchema = z.object({
   title: z.string(),
   description: z.string(),
   note: z.string().nullable().optional(),
   rate: z.number().nullable().optional(),
   to_date: z.date(),
   media: z.any(),
-  config_id: z.number().nullable().optional(),
+
   currency: CurrencySchema,
   voucher_items: z
     .object({
@@ -42,7 +42,6 @@ const JournalVoucherInputSchema = z.object({
       currency: CurrencySchema.nullable().optional(),
       type: z.string().nullable().optional(),
       chart_of_account: ChartOfAccountSchema,
-      reference_chart_of_account: ChartOfAccountSchema.optional().nullable(),
       rate: z.number().optional().nullable(),
       debit_credit: z.nativeEnum($Enums.DebitCreditType, {
         errorMap: (issue, ctx) => {
@@ -54,68 +53,9 @@ const JournalVoucherInputSchema = z.object({
     .array()
     .min(2, { message: "Voucher items must contain at least 2 rows " }),
 });
-// .refine(
-//   (values) => {
-//     var total = 0;
-//     values.voucher_items.map((res) => {
-//       res.chart_of_account.currency =
-//         res.chart_of_account?.currency ?? values.currency;
-//       if (res.reference_chart_of_account) {
-//         res.reference_chart_of_account.currency =
-//           res.reference_chart_of_account?.currency ?? values.currency;
-//       }
 
-//       switch (res.debit_credit) {
-//         case "Credit":
-//           // if (res.reference_chart_of_account) {
-//           //   if (res.reference_chart_of_account?.currency?.rate) {
-//           //     total -=
-//           //       res.amount / res.reference_chart_of_account.currency.rate;
-//           //   } else {
-//           //     total -= res.amount;
-//           //   }
-//           // } else {
-//           if (res.chart_of_account?.currency?.rate) {
-//             total -= res.amount / res.chart_of_account.currency.rate;
-//           } else {
-//             total -= res.amount;
-//           }
-//           // }
-
-//           break;
-//         case "Debit":
-//           // if (res.reference_chart_of_account) {
-//           //   if (res.reference_chart_of_account?.currency?.rate) {
-//           //     total +=
-//           //       res.amount / res.reference_chart_of_account.currency.rate;
-//           //   } else {
-//           //     total += res.amount;
-//           //   }
-//           // } else {
-//           if (res.chart_of_account?.currency?.rate) {
-//             total += res.amount / res.chart_of_account.currency.rate;
-//           } else {
-//             total += res.amount;
-//           }
-
-//           break;
-
-//         case "Debit_Credit":
-//           break;
-//       }
-
-//       return res;
-//     });
-//     return total === 0;
-//   },
-//   {
-//     message: "Total of voucher must be equal to 0",
-//     path: ["voucher_items"],
-//   }
-// );
-
-type JournalVoucherInputSchema = z.infer<typeof JournalVoucherInputSchema>;
-export { JournalVoucherInputSchema };
+type JournalInputSchema = z.infer<typeof JournalInputSchema>;
+export { JournalInputSchema };
 
 type JournalVouchers = Prisma.VoucherGetPayload<{
   include: {

@@ -40,14 +40,23 @@ export default function TrialBalanceTable(props: Props) {
       };
     } else {
       return {
-        from: dayjs().startOf("month").toDate(),
-        to: dayjs().endOf("month").toDate(),
+        from: dayjs().startOf("d").toDate(),
+        to: dayjs().endOf("d").toDate(),
       };
+    }
+  }, [serachParams]);
+  const classSearchParams = useMemo(() => {
+    const classes = serachParams.get("class");
+    if (classes) {
+      return JSON.parse(classes) as string[];
+    } else {
+      return [];
     }
   }, [serachParams]);
 
   const [selectData, setSelectData] = useState(dateSearchParams);
   const [digit, setDigit] = useState(serachParams.get("digit") ?? "");
+  const [classes, setClasses] = useState(classSearchParams);
 
   const [isPadding, setTransition] = useTransition();
 
@@ -56,23 +65,44 @@ export default function TrialBalanceTable(props: Props) {
   const [total, setTotal] = useState({
     totalDebit: 0,
     totalCredit: 0,
+    totalDebitBalance: 0,
+    totalCreditBalance: 0,
     totalBalance: 0,
   });
+  const tableData = useMemo(() => {
+    const rate = selectedCurrency.rate ?? 1;
+    return props.data.map((item) => {
+      const total = item.totalDebit * rate - item.totalCredit * rate;
 
+      return {
+        name: `${item.id} ${item.name}`,
+        debit: item.totalDebit * rate,
+        credit: item.totalCredit * rate,
+        debitBalance: total > 0 ? total : 0,
+        creditBalance: total < 0 ? total : 0,
+      };
+    });
+  }, [props.data, selectedCurrency]);
   useEffect(() => {
-    let totalDebit = 0;
-    let totalCredit = 0;
-    props.data.forEach((item) => {
-      totalDebit += item.totalDebit;
-      totalCredit += item.totalCredit;
+    let totalDebit = 0,
+      totalCredit = 0,
+      totalDebitBalance = 0,
+      totalCreditBalance = 0;
+    tableData.forEach((item) => {
+      totalDebit += item.debit;
+      totalCredit += item.credit;
+      totalDebitBalance += item.debitBalance;
+      totalCreditBalance += item.creditBalance;
     });
     setTotal((prev) => ({
       ...prev,
       totalDebit,
       totalCredit,
-      totalBalance: totalDebit - totalCredit,
+      totalDebitBalance,
+      totalCreditBalance,
     }));
-  }, [props.data]);
+  }, [tableData]);
+
   return (
     <NexCiteCard>
       <Stack
@@ -131,6 +161,22 @@ export default function TrialBalanceTable(props: Props) {
             />
           </FormControl>
           <FormControl>
+            <FormLabel>Class</FormLabel>
+            <Select
+              multiple
+              value={classes}
+              onChange={(n, v) => {
+                setClasses(v);
+              }}
+            >
+              {new Array(9).fill("").map((res, index) => (
+                <Option key={index + 1} value={(index + 1).toString()}>
+                  {index + 1}
+                </Option>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl>
             <FormLabel>Currency</FormLabel>
             <Select sx={{ minWidth: 120 }} defaultValue={selectedCurrency?.id}>
               {props.currencies.map((res) => {
@@ -154,7 +200,9 @@ export default function TrialBalanceTable(props: Props) {
               setTransition(() => {
                 replace(
                   window.location.pathname +
-                    `?from=${selectData.from.toLocaleDateString()}&to=${selectData.to.toLocaleDateString()}&digit=${digit}`
+                    `?from=${selectData.from.toLocaleDateString()}&to=${selectData.to.toLocaleDateString()}&digit=${digit}&class=${JSON.stringify(
+                      classes
+                    )}`
                 );
               });
             }}
@@ -199,27 +247,19 @@ export default function TrialBalanceTable(props: Props) {
             <td>Debit</td>
             <td>Credit</td>
           </tr>
-          {props.data.map((item) => (
-            <tr key={item.id}>
+          {tableData.map((item) => (
+            <tr key={item.name}>
+              <td>{item.name}</td>
               <td>
-                {item.id} {item.name}
+                {selectedCurrency?.symbol ?? "$"}
+                {FormatNumberWithFixed(item.debit, 3, true)}
               </td>
               <td>
                 {selectedCurrency?.symbol ?? "$"}
-                {FormatNumberWithFixed(
-                  item.totalDebit * (selectedCurrency?.rate ?? 1),
-                  2
-                )}
-              </td>
-              <td>
-                {selectedCurrency?.symbol ?? "$"}
-                {FormatNumberWithFixed(
-                  item.totalCredit * (selectedCurrency?.rate ?? 1),
-                  2
-                )}
+                {FormatNumberWithFixed(item.credit, 3, true)}
               </td>
               {(() => {
-                const total = item.totalDebit - item.totalCredit;
+                const total = item.debit - item.credit;
 
                 if (total > 0) {
                   return (
@@ -228,7 +268,8 @@ export default function TrialBalanceTable(props: Props) {
                         {selectedCurrency?.symbol ?? "$"}
                         {FormatNumberWithFixed(
                           total * (selectedCurrency?.rate ?? 1),
-                          2
+                          3,
+                          true
                         )}
                       </td>
                       <td>-</td>
@@ -242,7 +283,8 @@ export default function TrialBalanceTable(props: Props) {
                         {selectedCurrency?.symbol ?? "$"}
                         {FormatNumberWithFixed(
                           total * (selectedCurrency?.rate ?? 1),
-                          2
+                          3,
+                          true
                         )}
                       </td>
                     </>
@@ -266,28 +308,32 @@ export default function TrialBalanceTable(props: Props) {
               {selectedCurrency?.symbol ?? "$"}
               {FormatNumberWithFixed(
                 total.totalDebit * (selectedCurrency?.rate ?? 1),
-                2
+                3,
+                true
               )}
             </td>
             <td>
               {selectedCurrency?.symbol ?? "$"}
               {FormatNumberWithFixed(
                 total.totalCredit * (selectedCurrency?.rate ?? 1),
-                2
+                3,
+                true
               )}
             </td>
             <td>
               {selectedCurrency?.symbol ?? "$"}
               {FormatNumberWithFixed(
-                total.totalBalance * (selectedCurrency?.rate ?? 1),
-                2
+                total.totalDebitBalance * (selectedCurrency?.rate ?? 1),
+                2,
+                true
               )}
             </td>{" "}
             <td>
               {selectedCurrency?.symbol ?? "$"}
               {FormatNumberWithFixed(
-                total.totalBalance * (selectedCurrency?.rate ?? 1),
-                2
+                total.totalCreditBalance * (selectedCurrency?.rate ?? 1),
+                2,
+                true
               )}
             </td>
           </tr>

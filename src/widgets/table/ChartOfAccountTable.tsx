@@ -32,6 +32,7 @@ type Props = {
 
 export default function ChartOfAccountTable(props: Props) {
   const toast = useToast();
+
   const [isPadding, setTransition] = useTransition();
   const searchParams = useSearchParams();
   const columnFilter = useMemo(() => {
@@ -134,7 +135,6 @@ export default function ChartOfAccountTable(props: Props) {
                   filterVariant: "range",
                   filterFn: (row, name, range: string[]) => {
                     const total = row.getAllCells()[9].getValue() as string;
-                    //
 
                     const minNumber = range[0];
                     const maxNumber = range[1];
@@ -160,13 +160,10 @@ export default function ChartOfAccountTable(props: Props) {
                     const total = cell.renderValue() as number;
 
                     return (
-                      <span
-                        className={`${
-                          total >= 0 ? "bg-green-400" : "bg-red-400"
-                        }  rounded-lg px-3 text-white`}
-                      >
+                      <span>
+                        {total > 0 ? "Debit" : total < 0 ? "Credit" : ""}{" "}
                         {currency?.symbol ?? "$"}
-                        {FormatNumberWithFixed(total, 2)}
+                        {FormatNumberWithFixed(total, 2, true)}
                       </span>
                     );
                   },

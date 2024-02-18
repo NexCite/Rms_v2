@@ -25,7 +25,7 @@ export default async function page(props: {
     props.params.node
   );
   if (chartOfAccountResult.status !== 200) {
-    redirect(headers().get("url") + "/404", RedirectType.replace);
+    redirect(headers().get("next-url") + "/404", RedirectType.replace);
   }
   return (
     <Suspense fallback={<Loading />}>

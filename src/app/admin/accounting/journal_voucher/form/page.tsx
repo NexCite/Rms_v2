@@ -1,74 +1,60 @@
+import IChartOfAccount from "@nexcite/Interfaces/IChartOfAccount";
+import ICurrency from "@nexcite/Interfaces/ICurrency";
 import prisma from "@nexcite/prisma/prisma";
+import { JournalInputSchema } from "@nexcite/schema/JournalVoucherSchema";
+import { VoucherInputSchema } from "@nexcite/schema/VoucherSchema";
+import { findVoucherById } from "@nexcite/service/VoucherService";
 import getAuth from "@nexcite/service/user-service";
-import JournalVoucherForm from "@nexcite/widgets/form/journal-voucher-form";
-import { JournalVoucherInputSchema } from "@nexcite/schema/JournalVoucherSchema";
-import React from "react";
+import VoucherForm from "@nexcite/widgets/form/VoucherForm";
 import { z } from "zod";
 
 export default async function page(props: { searchParams: { id: string } }) {
-  var voucher: JournalVoucherInputSchema;
-  const info = await getAuth();
+  var voucher: VoucherInputSchema,
+    voucherItems: JournalInputSchema[] = [],
+    chartOfAccounts: IChartOfAccount[] = [],
+    currencies: ICurrency[] = [];
+
+  const auth = await getAuth();
 
   var id = parseInt(props.searchParams.id);
-  var idSchema = z.number().safeParse(id);
+  var idSchema = props.searchParams.id
+    ? z.number().safeParse(id)
+    : { success: true };
 
-  if (idSchema.success) {
-    await prisma.voucher
-      .findUnique({
-        where: { id, config_id: info.config.id },
-        include: {
-          currency: true,
-          voucher_items: {
-            include: {
-              chart_of_account: {
-                include: { currency: true },
-              },
-              reference_chart_of_account: { include: { currency: true } },
-              currency: true,
-            },
-          },
-        },
-      })
-      .then((res) => {
-        voucher = {
-          currency: {
-            id: res.currency.id,
-            name: res.currency.name,
-            rate: res.currency.rate,
-            symbol: res.currency.symbol,
-          },
-          description: res.description,
-          note: res.note,
-          title: res.title,
-          rate: res.rate,
-          to_date: res.to_date,
-          voucher_items: res.voucher_items.map((res) => ({
-            amount: res.amount,
-            chart_of_account: res.chart_of_account,
-            reference_chart_of_account: res.reference_chart_of_account,
-            debit_credit: res.debit_credit,
-            rate: res.rate,
-            currency: res.currency,
-          })),
-        };
-      });
+  if (!idSchema.success) {
+    return <div>Invalid ID</div>;
+  }
+  if (props.searchParams.id) {
+    await findVoucherById(auth.config.id).then((result) => {
+      voucher = {
+        currency_id: result.body.currency_id,
+        description: result.body.description,
+        note: result.body.note,
+        title: result.body.title,
+        rate: result.body.rate,
+        to_date: result.body.to_date,
+      };
+      voucherItems = result.body.voucher_items;
+    });
   }
 
-  const chartOfAccounts = await prisma.chartOfAccount.findMany({
-    orderBy: { id: "asc" },
-    where: { config_id: info.config.id },
-    include: { currency: true },
-  });
-  const currenies = await prisma.currency.findMany({
-    where: { config_id: info.config.id },
+  chartOfAccounts = (await prisma.chartOfAccount.findMany({
+    where: { config_id: auth.config.id },
+    include: {
+      currency: true,
+    },
+  })) as IChartOfAccount[];
+  currencies = await prisma.currency.findMany({
+    where: { config_id: auth.config.id },
   });
 
   return (
-    <JournalVoucherForm
+    <VoucherForm
       voucher={voucher}
+      voucherItems={voucherItems}
       id={id}
       chartOfAccounts={chartOfAccounts}
-      currencies={currenies}
+      currencies={currencies}
     />
   );
 }
