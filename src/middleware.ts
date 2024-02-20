@@ -27,7 +27,6 @@ export async function middleware(request: NextRequest) {
     });
   if (!isLogged) {
     url.pathname = url.pathname.split("/")[0] + "/login";
-
     return NextResponse.redirect(url);
   }
   return NextResponse.next({

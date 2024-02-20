@@ -10,14 +10,21 @@ import {
   Typography,
 } from "@mui/joy";
 import IAuth from "@nexcite/Interfaces/IAuth";
+import { getUserInfo } from "@nexcite/lib/auth";
 import route from "@nexcite/routes";
+import { useUserStore } from "@nexcite/store/UserStore";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { IoMdLogOut } from "react-icons/io";
 export default function SideBar(props: IAuth) {
   const { config, user } = props;
+  const userStore = useUserStore();
+  useEffect(() => {
+    userStore?.addUserStore(user as any);
+  }, [user, userStore]);
+
   const pathName = usePathname();
   const userRoutes = useMemo(
     () =>
@@ -144,7 +151,7 @@ export default function SideBar(props: IAuth) {
                     .map((item) => (
                       <Stack key={item.title} direction={"column"} spacing={1}>
                         <Link
-                          href={item.path + "?filter=[]"}
+                          href={item.path + `?${item.query ?? ""}`}
                           className={
                             pathName.includes(item.routeKey) ? "active" : ""
                           }

@@ -24,11 +24,11 @@ import { MenuItem } from "@mui/material";
 import NexCiteButton from "@nexcite/components/button/NexCiteButton";
 import NexCiteCard from "@nexcite/components/card/NexCiteCard";
 import { useToast } from "@nexcite/hooks/toast-hook";
-import { deleteVoucherService } from "@nexcite/service/voucher-service";
 
 import IVoucher from "@nexcite/Interfaces/IVoucher";
 import ExportVoucher from "@nexcite/components/other/ExportVoucher";
 import { MdSearch } from "react-icons/md";
+import { deleteVoucherService } from "@nexcite/service/voucher-service";
 
 const columnHelper = createMRTColumnHelper<IVoucher>();
 
@@ -128,7 +128,13 @@ export default function JournalVoucherTable(props: {
     },
     data: props.data,
     renderDetailPanel: ({ row }) => (
-      <Table>
+      <Table
+        sx={{
+          "td , th": {
+            textAlign: "center",
+          },
+        }}
+      >
         <thead>
           <tr>
             <th>D/C</th>

@@ -1,7 +1,7 @@
 import prisma from "@nexcite/prisma/prisma";
 import { findChartOfAccountsByDigit } from "@nexcite/service/ChartOfAccountService";
 import { userAuth } from "@nexcite/service/auth-service";
-import BalanceSheetTable from "@nexcite/widgets/table/BalanceSheetTable";
+import IncomeStatementTable from "@nexcite/widgets/table/IncomeStatementTable";
 
 export default async function page(props: { searchParams: { id: any } }) {
   const auth = await userAuth();
@@ -15,7 +15,7 @@ export default async function page(props: { searchParams: { id: any } }) {
   );
 
   return (
-    <BalanceSheetTable
+    <IncomeStatementTable
       currencies={currencies}
       data={findChartOfAccountsByDigitResult.body}
     />

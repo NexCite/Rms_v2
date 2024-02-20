@@ -7,6 +7,7 @@ import { headers } from "next/headers";
 import PageLoader from "@nexcite/components/other/PageLoader";
 import procces from "process";
 import { Cairo, Montserrat } from "next/font/google";
+import UserStoreProvider from "@nexcite/store/UserStore";
 
 export async function generateMetadata(): Promise<Metadata> {
   const host = headers().get("x-forwarded-host");
@@ -57,8 +58,7 @@ export default async function RootLayout({
           <h1 className="text-black">version {v}</h1>
         </div>
         <PageLoader />
-
-        {children}
+        <UserStoreProvider>{children}</UserStoreProvider>
         <AlertProvider />
       </body>
     </html>

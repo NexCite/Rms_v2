@@ -1,4 +1,5 @@
 "use client";
+import { useUserStore } from "@nexcite/store/UserStore";
 import { $Enums } from "@prisma/client";
 import React, { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
@@ -8,13 +9,17 @@ type Props = {
   children?: React.ReactNode;
   className?: string;
 };
-var init = false;
+
 export default function Authorized(props: Props) {
-  const [cookies] = useCookies(["rms-permissions"]);
+  const userStore = useUserStore();
   const [show, setShow] = useState(false);
   useEffect(() => {
-    setShow(cookies["rms-permissions"]?.includes(props.permission));
-  }, [cookies, props.permission]);
+    setShow(
+      userStore
+        .getUserStore()
+        ?.role?.permissions.includes(props.permission as any)
+    );
+  }, [props.permission, userStore]);
 
   return show ? <div className={props.className}>{props.children}</div> : <></>;
 }

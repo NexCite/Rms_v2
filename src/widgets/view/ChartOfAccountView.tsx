@@ -47,8 +47,6 @@ type Props = {
 };
 
 export default function ChartOfAccountView(props: Props) {
-  console.log("hello");
-
   const [selectedCurrency, setSelectedCurrency] = useState<
     ICurrency | undefined
   >(props.chartOfAccount?.currency);
@@ -63,7 +61,10 @@ export default function ChartOfAccountView(props: Props) {
         const group: number[] = [];
         res.voucher_items = res.voucher_items
           .map((res) => {
-            if (res.chart_of_account_id === props.id) {
+            if (
+              res.chart_of_account_id === props.id ||
+              res.chart_of_account.id.startsWith(props.id)
+            ) {
               group.push(res.groupBy);
             }
             return res;

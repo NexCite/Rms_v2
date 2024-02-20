@@ -28,7 +28,14 @@ type Props = {
   }[];
 };
 
-export default function TrialBalanceTable(props: Props) {
+type CommonType = {
+  name: string;
+  debit: number;
+  credit: number;
+  debitBalance: number;
+  creditBalance: number;
+};
+export default function IncomeStatementTable(props: Props) {
   const serachParams = useSearchParams();
   const dateSearchParams = useMemo(() => {
     const from = serachParams.get("from");
@@ -45,61 +52,69 @@ export default function TrialBalanceTable(props: Props) {
       };
     }
   }, [serachParams]);
-  const classSearchParams = useMemo(() => {
-    const classes = serachParams.get("class");
-    if (classes) {
-      return JSON.parse(classes) as string[];
-    } else {
-      return [];
-    }
-  }, [serachParams]);
 
   const [selectData, setSelectData] = useState(dateSearchParams);
   const [digit, setDigit] = useState(serachParams.get("digit") ?? "");
-  const [classes, setClasses] = useState(classSearchParams);
 
   const [isPadding, setTransition] = useTransition();
 
   const { replace } = useRouter();
   const [selectedCurrency, setSelectedCurrency] = useState(props.currencies[0]);
   const [total, setTotal] = useState({
-    totalDebit: 0,
-    totalCredit: 0,
-    totalDebitBalance: 0,
-    totalCreditBalance: 0,
-    totalBalance: 0,
+    totalDebit6: 0,
+    totalCredit6: 0,
+    totalDebit7: 0,
+    totalCredit7: 0,
   });
   const tableData = useMemo(() => {
     const rate = selectedCurrency.rate ?? 1;
-    return props.data.map((item) => {
+    const class6: CommonType[] = [];
+    const class7: CommonType[] = [];
+    props.data.map((item) => {
       const total = item.totalDebit * rate - item.totalCredit * rate;
 
-      return {
-        name: `${item.id} ${item.name}`,
-        debit: item.totalDebit * rate,
-        credit: item.totalCredit * rate,
-        debitBalance: total > 0 ? total : 0,
-        creditBalance: total < 0 ? total : 0,
-      };
+      if (item.id.startsWith("6")) {
+        class6.push({
+          name: `${item.id} ${item.name}`,
+          debit: item.totalDebit * rate,
+          credit: item.totalCredit * rate,
+          debitBalance: total,
+          creditBalance: 0,
+        });
+      } else {
+        class7.push({
+          name: `${item.id} ${item.name}`,
+          debit: item.totalDebit * rate,
+          credit: item.totalCredit * rate,
+          debitBalance: total,
+          creditBalance: 0,
+        });
+      }
     });
+    return {
+      class6,
+      class7,
+    };
   }, [props.data, selectedCurrency]);
   useEffect(() => {
-    let totalDebit = 0,
-      totalCredit = 0,
-      totalDebitBalance = 0,
-      totalCreditBalance = 0;
-    tableData.forEach((item) => {
-      totalDebit += item.debit;
-      totalCredit += item.credit;
-      totalDebitBalance += item.debitBalance;
-      totalCreditBalance += item.creditBalance;
+    let totalDebit6 = 0,
+      totalCredit6 = 0,
+      totalDebit7 = 0,
+      totalCredit7 = 0;
+    tableData.class7.forEach((item) => {
+      totalDebit7 += item.debit;
+      totalCredit7 += item.credit;
     });
+    tableData.class6.forEach((item) => {
+      totalDebit6 += item.debit;
+      totalCredit6 += item.credit;
+    });
+
     setTotal((prev) => ({
-      ...prev,
-      totalDebit,
-      totalCredit,
-      totalDebitBalance,
-      totalCreditBalance,
+      totalDebit7,
+      totalDebit6,
+      totalCredit6,
+      totalCredit7,
     }));
   }, [tableData]);
 
@@ -160,22 +175,7 @@ export default function TrialBalanceTable(props: Props) {
               }}
             />
           </FormControl>
-          <FormControl>
-            <FormLabel>Class</FormLabel>
-            <Select
-              multiple
-              value={classes}
-              onChange={(n, v) => {
-                setClasses(v);
-              }}
-            >
-              {new Array(9).fill("").map((res, index) => (
-                <Option key={index + 1} value={(index + 1).toString()}>
-                  {index + 1}
-                </Option>
-              ))}
-            </Select>
-          </FormControl>
+
           <FormControl>
             <FormLabel>Currency</FormLabel>
             <Select sx={{ minWidth: 120 }} defaultValue={selectedCurrency?.id}>
@@ -201,7 +201,7 @@ export default function TrialBalanceTable(props: Props) {
                 replace(
                   window.location.pathname +
                     `?from=${selectData.from.toLocaleDateString()}&to=${selectData.to.toLocaleDateString()}&digit=${digit}&class=${JSON.stringify(
-                      classes
+                      ["6", "7"]
                     )}`
                 );
               });
@@ -230,120 +230,114 @@ export default function TrialBalanceTable(props: Props) {
       </Stack>
 
       <Table
+        borderAxis="both"
+        stickyFooter
+        id="TrialTable"
         sx={{
           "td , th": {
             textAlign: "center",
           },
         }}
-        borderAxis="both"
-        stickyFooter
-        id="TrialTable"
       >
         <thead>
           <tr>
-            <th> </th>
-            <th align="center">Totals Debit</th>
-            <th align="center">Totals Credit</th>
-            <th align="center">Balances Debit</th>
-            <th align="center">Balances Credit</th>
+            <th colSpan={2}>Class 6</th>
+            <th colSpan={2}>Class 7</th>
+          </tr>
+          <tr>
+            <th>Amount</th>
+            <th>Revenues</th>
+            <th>Amount</th>
+            <th>Expenses</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Account</td>
-            <td>Debit</td>
-            <td>Credit</td>
-            <td>Debit</td>
-            <td>Credit</td>
-          </tr>
-          {tableData.map((item) => (
-            <tr key={item.name}>
-              <td>{item.name}</td>
-              <td>
-                {selectedCurrency?.symbol ?? "$"}
-                {FormatNumberWithFixed(item.debit, 3, true)}
-              </td>
-              <td>
-                {selectedCurrency?.symbol ?? "$"}
-                {FormatNumberWithFixed(item.credit, 3, true)}
-              </td>
-              {(() => {
-                const total = item.debit - item.credit;
-
-                if (total > 0) {
-                  return (
+          {tableData.class6.length > tableData.class7.length
+            ? tableData.class6.map((item, index) => (
+                <tr key={item.name}>
+                  <td>
+                    {selectedCurrency?.symbol ?? "$"}
+                    {FormatNumberWithFixed(item.debit - item.credit, 3, true)}
+                  </td>
+                  <td>{item.name}</td>
+                  {tableData.class7[index] ? (
                     <>
                       <td>
                         {selectedCurrency?.symbol ?? "$"}
                         {FormatNumberWithFixed(
-                          total * (selectedCurrency?.rate ?? 1),
+                          tableData.class7[index].debit -
+                            tableData.class7[index].credit,
                           3,
                           true
-                        )}
+                        )}{" "}
                       </td>
-                      <td>-</td>
+                      <td>{tableData.class7[index].name}</td>
                     </>
-                  );
-                } else if (total < 0) {
-                  return (
+                  ) : (
                     <>
-                      <td>-</td>
-                      <td>
-                        {selectedCurrency?.symbol ?? "$"}
-                        {FormatNumberWithFixed(
-                          total * (selectedCurrency?.rate ?? 1),
-                          3,
-                          true
-                        )}
-                      </td>
+                      <td></td>
+                      <td></td>
                     </>
-                  );
-                }
-                return (
-                  <>
-                    <td>-</td>
-                    <td>-</td>
-                  </>
-                );
-              })()}
-            </tr>
-          ))}
+                  )}
+                </tr>
+              ))
+            : tableData.class7.map((item, index) => (
+                <tr key={item.name}>
+                  <td>
+                    {selectedCurrency?.symbol ?? "$"}
+                    {FormatNumberWithFixed(item.debit - item.credit, 3, true)}
+                  </td>
+                  <td>{item.name}</td>
+                </tr>
+              ))}
         </tbody>
 
         <tfoot>
           <tr>
+            <td>
+              {selectedCurrency?.symbol ?? "$"}
+              {FormatNumberWithFixed(
+                total.totalDebit6 * (selectedCurrency?.rate ?? 1) -
+                  total.totalCredit6 * (selectedCurrency?.rate ?? 1),
+                3,
+                true
+              )}
+            </td>{" "}
             <td>Total</td>
             <td>
               {selectedCurrency?.symbol ?? "$"}
               {FormatNumberWithFixed(
-                total.totalDebit * (selectedCurrency?.rate ?? 1),
+                total.totalDebit7 * (selectedCurrency?.rate ?? 1) -
+                  total.totalCredit7 * (selectedCurrency?.rate ?? 1),
                 3,
-                true
-              )}
-            </td>
-            <td>
-              {selectedCurrency?.symbol ?? "$"}
-              {FormatNumberWithFixed(
-                total.totalCredit * (selectedCurrency?.rate ?? 1),
-                3,
-                true
-              )}
-            </td>
-            <td>
-              {selectedCurrency?.symbol ?? "$"}
-              {FormatNumberWithFixed(
-                total.totalDebitBalance * (selectedCurrency?.rate ?? 1),
-                2,
                 true
               )}
             </td>{" "}
-            <td>
-              {selectedCurrency?.symbol ?? "$"}
-              {FormatNumberWithFixed(
-                total.totalCreditBalance * (selectedCurrency?.rate ?? 1),
-                2,
-                true
-              )}
+            <td>Total</td>
+          </tr>
+          <tr>
+            <td colSpan={4}>
+              {(() => {
+                const total7 =
+                  total.totalDebit7 * (selectedCurrency?.rate ?? 1) -
+                  total.totalCredit7 * (selectedCurrency?.rate ?? 1);
+                const total6 =
+                  total.totalDebit6 * (selectedCurrency?.rate ?? 1) -
+                  total.totalCredit6 * (selectedCurrency?.rate ?? 1);
+                1;
+
+                return total7 > total6 ? (
+                  <>
+                    Credit: {selectedCurrency?.symbol ?? "$"}
+                    {FormatNumberWithFixed(total7 - total6, 3, true)}
+                  </>
+                ) : (
+                  <>
+                    Debit: {selectedCurrency?.symbol ?? "$"}
+                    {FormatNumberWithFixed(total6 - total7, 3, true)}
+                  </>
+                );
+              })()}
             </td>
           </tr>
         </tfoot>

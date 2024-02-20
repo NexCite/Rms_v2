@@ -24,7 +24,6 @@ export default async function page(props: {
     auth.config.id,
     props.params.id
   );
-  console.log(searchParams.from);
   const vouchers = await prisma.voucher.findMany({
     orderBy: {
       to_date: "desc",
@@ -67,6 +66,7 @@ export default async function page(props: {
   const currencies = await prisma.currency.findMany({
     where: { config_id: auth.config.id },
   });
+
   if (chartOfAccountResult.status === 200) {
     return (
       <ChartOfAccountView

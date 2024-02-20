@@ -241,7 +241,15 @@ export default function EquityView(props: Props) {
           <Typography fontSize={20}>Coverage</Typography>
           <Divider className="mt-5" />
           <div className="overflow-auto">
-            <Table className="overflow-x-auto w-full ">
+            <Table
+              sx={{
+                width: "100%",
+                overflowX: "auto",
+                "& td,th": {
+                  textAlign: "center",
+                },
+              }}
+            >
               <thead>
                 <tr>
                   <th>Accounts</th>
